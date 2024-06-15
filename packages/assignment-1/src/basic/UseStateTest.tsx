@@ -5,10 +5,16 @@ export default function UseStateTest() {
   const [state, setState] = useState({ bar: { count: 1 } });
 
   const increment = () => {
-    state.bar.count += 1;
-    setState(state);
+    setState((prevState) => {
+      return {
+        bar: {
+          count: prevState.bar.count + 1,
+        },
+      };
+
+      // 객체 깊은 복사
+    });
   };
-  //
   return (
     <div>
       count: {state.bar.count}
