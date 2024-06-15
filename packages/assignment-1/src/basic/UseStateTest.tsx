@@ -6,7 +6,7 @@ export default function UseStateTest() {
   const [state, setState] = useState({ bar: { count: 1 } });
 
   const increment = () => {
-    state.bar.count += 1;
+    state.bar.count += 10;
     setState(state);
   }
 
