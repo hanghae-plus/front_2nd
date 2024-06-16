@@ -13,14 +13,18 @@ const PureComponent = memo(({ children, countRendering, ...props }: PropsWithChi
 let outerCount = 1
 
 // useMemo, useCallback 등을 사용하지 않고 이 컴포넌트를 개선해보세요.
-export default function RequireRefactoring({ countRendering }: Props) {
-  return (
-    <PureComponent
-      style={{ width: '100px', height: '100px' }}
-      onClick={() => {outerCount += 1;}}
-      countRendering={countRendering}
-    >
-      test component
-    </PureComponent>
-  );
-}
+const RequireRefactoring = memo(
+  ({ countRendering }: Props)  => {
+    return (
+      <PureComponent
+        style={{ width: '100px', height: '100px' }}
+        onClick={() => {outerCount += 1;}}
+        countRendering={countRendering}
+      >
+        test component
+      </PureComponent>
+    );
+  }
+);
+
+export default RequireRefactoring;
