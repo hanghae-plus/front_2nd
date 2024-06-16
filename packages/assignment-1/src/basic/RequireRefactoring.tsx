@@ -19,7 +19,7 @@ const PureComponent = memo(
 let outerCount = 1;
 
 // useMemo, useCallback 등을 사용하지 않고 이 컴포넌트를 개선해보세요.
-export default function RequireRefactoring({ countRendering }: Props) {
+const RequireRefactoring = ({ countRendering }: Props) => {
   return (
     <PureComponent
       style={{ width: "100px", height: "100px" }}
@@ -31,4 +31,6 @@ export default function RequireRefactoring({ countRendering }: Props) {
       test component
     </PureComponent>
   );
-}
+};
+
+export default memo(RequireRefactoring);
