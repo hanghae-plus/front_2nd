@@ -5,9 +5,6 @@ export default function UseMemoTest() {
   const [meowCount, setMeowCount] = useState(1);
   const [barkedCount, setBarkedCount] = useState(1);
 
-  // const meow = repeatMeow(meowCount);
-  // const bark = repeatBarked(barkedCount);
-
   const meow = useMemo(() => repeatMeow(meowCount), [meowCount]);
   const bark = useMemo(() => repeatBarked(barkedCount), [barkedCount]);
 
