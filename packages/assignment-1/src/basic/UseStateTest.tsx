@@ -4,14 +4,12 @@ import { useState } from "react";
 export default function UseStateTest() {
   const [state, setState] = useState({ bar: { count: 1 } });
 
-  // const increment = () => {
-  //   state.bar.count += 1;
-  //   setState(state);
-  // }
-
   const increment = () => {
     setState((prev) => {
-      /**Object 복사 */
+      /**Object 복사
+       * React에서는 얕은 비교를 하기 때문에 object같은 뎁스의 깊이가 있는 경우 감지를 못하기 때문에
+       * object를 복사해 아예 새로운 값을 참조하여 얕은 비교가 되도록 유도하여 재랜더링 trigger
+       */
       const newValue = {
         ...prev,
       };
