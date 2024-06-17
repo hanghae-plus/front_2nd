@@ -6,8 +6,14 @@ export default function UseStateTest() {
   const [state, setState] = useState({ bar: { count: 1 } });
 
   const increment = () => {
-    state.bar.count += 1;
-    setState(state);
+
+      //리액트의 불변성을 지키며 상태값 업데이트
+    setState((state) => ({
+        ...state,
+        bar: {
+            count: state.bar.count + 1
+        }
+    }));
   }
 
   return (
