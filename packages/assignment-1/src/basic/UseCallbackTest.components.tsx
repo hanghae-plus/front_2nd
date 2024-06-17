@@ -1,16 +1,30 @@
 import { ComponentProps, memo } from "react";
-import { callMeow, callBark } from "./UseCallbackTest.utils.tsx";
 
-export const BarkButton = memo(({ onClick }: ComponentProps<'button'>) => {
-  callBark();
+
+
+type CryingBtnProps = {
+  cryingType: string;
+  callbackFunc: Function;
+}
+interface CombinedCryingBtnProps extends CryingBtnProps, ComponentProps<'button'> {}
+
+export const CryingButton = memo(({cryingType, callbackFunc, onClick }: CombinedCryingBtnProps) => {
+  callbackFunc();
   return (
-    <button data-testid="bark" onClick={onClick}>멍멍</button>
+      <button data-testid={cryingType} onClick={onClick}>{cryingType === "meow" ? "야옹" : "멍멍"}</button>
   );
 })
 
-export const MeowButton = memo(({ onClick }: ComponentProps<'button'>) => {
-  callMeow();
+
+
+type CryingProps = {
+  cryingType: string;
+  count: number;
+  text: string;
+}
+
+export const CryingCount = memo(({ cryingType, count, text  }: CryingProps) => {
   return (
-    <button data-testid="meow" onClick={onClick}>야옹</button>
+      <p data-testid={cryingType}>{`${text}Count`} {count}</p>
   );
 })

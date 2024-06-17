@@ -1,9 +1,11 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 
 export default function UseEffectTest({ callback }: { callback: () => void }) {
   const [count, setCount] = useState(0);
 
-  callback();
+    useEffect(() => {
+        callback();
+    }, [count]);
 
   return (
     <div>
