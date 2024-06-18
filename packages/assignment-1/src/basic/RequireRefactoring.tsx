@@ -2,6 +2,8 @@ import { ComponentProps, memo, PropsWithChildren } from "react";
 
 type Props = {
   countRendering?: () => void;
+  style: React.CSSProperties; // React에서 제공하는 CSSProperties 타입 사용
+  onClick: () => void;
 }
 
 const PureComponent = memo(({ children, countRendering, ...props }: PropsWithChildren<ComponentProps<'div'> & Props>) => {
