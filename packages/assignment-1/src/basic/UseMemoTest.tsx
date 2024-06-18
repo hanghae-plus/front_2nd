@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { repeatBarked, repeatMeow } from "./UseMemoTest.utils.ts";
 
 export default function UseMemoTest() {
   const [meowCount, setMeowCount] = useState(1);
   const [barkedCount, setBarkedCount] = useState(1);
 
-  const meow = repeatMeow(meowCount);
-  const bark = repeatBarked(barkedCount);
+  const meow = useMemo(() => repeatMeow(meowCount), [meowCount]);
+  const bark = useMemo(() => repeatBarked(barkedCount), [barkedCount]);
+  //useMemo는 특정값이 바뀌었을 때만 연산을 실행하고, 원하는 값이 바뀌지 않았으면 이전에 연상했떤 결과를 다시 사용하는 방식
 
   return (
     <div>
