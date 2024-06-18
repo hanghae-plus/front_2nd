@@ -7,7 +7,7 @@ export default function UseStateTest() {
 
   const increment = () => {
     state.bar.count += 1;
-    setState(state);
+    setState({...state}); //다음 state가 이전 state와 같으면 업데이트를 무시하므로 새로운 객체를 생성해야함(spread 연산자 사용)
   }
 
   return (
