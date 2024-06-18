@@ -1,4 +1,14 @@
 /*
+  useRef는 리액트 훅의 한 종류로, Ref는 reference(참조)의 줄임말이다.
+  useRef를 이용하면 특정한 DOM요소에 접근이 가능하면, 불필요한 재렌더링을 하지 않는다는 장점이 있다.
+
+  .current 프로퍼티로 전달된 인자(initialValue)로 초기화된 변경 가능한 ref 객체를 반환합니다.
+  반환된 객체는 컴포넌트의 전 생애주기를 통해 유지될 것입니다.
+
+  반환된 useRef 객체는 컴포넌트의 전생애주기를 통해 유지가 된다.
+  (= 컴포넌트가 계속해서 렌더링이 되어도 컴포넌트가 언마운드되기 전까지는 값을 그대로 유지할 수 있다)
+  (= current 속성은 값을 변경해도 상태를 변경할 때 처럼 React 컴포넌트가 재렌더링 되지 않는다. )
+
   { current: initValue } 객채가 요소 EL의 참조객체
 */
 
@@ -26,7 +36,12 @@ const getUniqueId = () => {
 }
 
 export function useMyRef<T>(initValue: T | null) {
-  // useMemo 통해 고유한 ID를 생성합니다.
+  /*
+  *   useMemo 통해 고유한 ID를 생성합니다.
+  * - useMemo와 콜백함수를 이용해 난수를 생성하는 이유는 컴포넌트가 리렌더링될 때 동일한 refId를 사용할 수 있도록 보장하기 위함입니다.
+  * - 컴포넌트가 리렌더링되더라도 동일한 참조 객체를 유지할 수 있음.
+  * - 그렇지 않으면, 매 렌더링 시마다 새로운 refId가 생성되어, "참조 객체"가 일관되게 유지되지 않을 수 있음.
+  * */
   const refId = useMemo(() => getUniqueId(), []);
 
   // refStore에 고유한ID값을 할당후 ref참조
