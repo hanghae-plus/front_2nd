@@ -16,21 +16,27 @@ const PureComponent = memo(
 );
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+// 고정된 스타일 객체
+const fixedStyle = { width: "100px", height: "100px" };
+
+// 고정된 핸들 클릭 함수
 let outerCount = 1;
+const fixedHandleClick = () => {
+  outerCount += 1;
+};
 
 // useMemo, useCallback 등을 사용하지 않고 이 컴포넌트를 개선해보세요.
-const RequireRefactoring = memo(({ countRendering }: Props) => {
+const RequireRefactoring = ({ countRendering }: Props) => {
   return (
     <PureComponent
-      style={{ width: "100px", height: "100px" }}
-      onClick={() => {
-        outerCount += 1;
-      }}
+      style={fixedStyle}
+      onClick={fixedHandleClick}
       countRendering={countRendering}
     >
       test component
     </PureComponent>
   );
-});
+};
 
 export default RequireRefactoring;
