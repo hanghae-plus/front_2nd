@@ -24,39 +24,51 @@
 
 
 
-/* [방법2: useMemo, useEffect를 활용한 ref 상태 유지 ====================================================] */
-import {useMemo, useEffect} from "react";
+/* [방법2-1: useMemo 활용해 객체로 ref 상태 유지 ====================================================] */
+// import {useMemo} from "react";
+//
+// // { current: initValue } 를 저장할 변수 생성 => ex.) { '5w2x6cvqz': { current: 'initValue' } }
+// const refStore: { [key: string]: any } = {};
+//
+// // { current: initValue } 를 저장할, 36진수의 난수화된 고유 키값을 생성
+// const getUniqueId = () => {
+//   return Math.random().toString().substr(2, 9);
+// }
+//
+// export function useMyRef<T>(initValue: T | null) {
+//   /*
+//   *   useMemo 통해 고유한 ID를 생성합니다.
+//   * - useMemo와 콜백함수를 이용해 난수를 생성하는 이유는 컴포넌트가 리렌더링될 때 동일한 refId를 사용할 수 있도록 보장하기 위함입니다.
+//   * - useMemo를 사용하면 이전 계산 결과를 메모이제이션하여, 동일한 입력값이 주어질 때 다시 계산하지 않고 이전 값을 반환합니다.
+//   * - 컴포넌트가 리렌더링되더라도 동일한 참조 객체를 유지할 수 있음.
+//   * - 그렇지 않으면, 매 렌더링 시마다 새로운 refId가 생성되어, "참조 객체"가 일관되게 유지되지 않을 수 있음.
+//   * */
+//   const refId = useMemo(() => getUniqueId(), []);
+//
+//
+//   // refStore에 고유한ID값을 할당후 ref참조
+//   if (!refStore[refId]) {
+//     refStore[refId] = { current: initValue };
+//   }
+//
+//   const ref = refStore[refId];
+//   return ref;
+// }
 
-// { current: initValue } 를 저장할 변수 생성 => ex.) { '5w2x6cvqz': { current: 'initValue' } }
-const refStore: { [key: string]: any } = {};
+/* [방법2-2: useMemo 활용해 배열로 ref 상태 유지 ====================================================] */
+import {useMemo} from "react";
 
-// { current: initValue } 를 저장할, 36진수의 난수화된 고유 키값을 생성
-const getUniqueId = () => {
-  return Math.random().toString().substr(2, 9);
-}
+const refArray: object[] = [];
 
 export function useMyRef<T>(initValue: T | null) {
-  /*
-  *   useMemo 통해 고유한 ID를 생성합니다.
-  * - useMemo와 콜백함수를 이용해 난수를 생성하는 이유는 컴포넌트가 리렌더링될 때 동일한 refId를 사용할 수 있도록 보장하기 위함입니다.
-  * - 컴포넌트가 리렌더링되더라도 동일한 참조 객체를 유지할 수 있음.
-  * - 그렇지 않으면, 매 렌더링 시마다 새로운 refId가 생성되어, "참조 객체"가 일관되게 유지되지 않을 수 있음.
-  * */
-  const refId = useMemo(() => getUniqueId(), []);
+  // 고유한 인덱스를 생성 및 유지
+  const refIndex = useMemo(() => refArray.length, []);
 
-  // refStore에 고유한ID값을 할당후 ref참조
-  if (!refStore[refId]) {
-    refStore[refId] = { current: initValue };
+  // refArray에 고유한 인덱스를 사용하여 참조 객체를 할당
+  if (!refArray[refIndex]) {
+    refArray[refIndex] = { current: initValue };
   }
 
-  const ref = refStore[refId];
-
-  // 컴포넌트가 언마운트될 때 refStore에서 해당 ref참조를 삭제합니다.
-  useEffect(() => {
-    return () => {
-      delete refStore[refId];
-    };
-  }, [refId]);
-
+  const ref = refArray[refIndex];
   return ref;
 }
