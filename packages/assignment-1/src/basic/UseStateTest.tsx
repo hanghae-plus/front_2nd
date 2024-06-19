@@ -5,7 +5,11 @@ export default function UseStateTest() {
   const [state, setState] = useState({ bar: { count: 1 } });
 
   const increment = () => {
-    setState((prev) => ({ ...prev, bar: { count: prev.bar.count + 1 } }));
+    setState((prev) => {
+      const nextState = structuredClone(prev);
+      nextState.bar.count += 1;
+      return nextState;
+    });
   };
 
   return (
