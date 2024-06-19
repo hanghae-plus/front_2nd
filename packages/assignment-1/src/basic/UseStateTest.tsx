@@ -6,13 +6,17 @@ export default function UseStateTest() {
 
   const increment = () => {
     setState((prevState) => {
-      return {
-        bar: {
-          count: prevState.bar.count + 1,
-        },
-      };
+      // return {
+      //   bar: {
+      //     count: prevState.bar.count + 1,
+      //   },
+      // };
 
-      // 객체 깊은 복사
+      const result = {...prevState};
+
+      result.bar.count = prevState.bar.count + 1;
+
+      return result;
     });
   };
   return (
