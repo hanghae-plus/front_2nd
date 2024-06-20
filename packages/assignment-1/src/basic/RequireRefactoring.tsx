@@ -1,4 +1,4 @@
-import { ComponentProps, memo, PropsWithChildren, useRef } from 'react';
+import { ComponentProps, memo, PropsWithChildren } from 'react';
 
 type Props = {
   countRendering?: () => void;
@@ -17,18 +17,17 @@ const PureComponent = memo(
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let outerCount = 1;
+const style = { width: '100px', height: '100px' };
+const onClick = () => {
+  outerCount += 1;
+};
 
 // useMemo, useCallback 등을 사용하지 않고 이 컴포넌트를 개선해보세요.
 export default function RequireRefactoring({ countRendering }: Props) {
-  const styleRef = useRef({ width: '100px', height: '100px' });
-  const onClickRef = useRef(() => {
-    outerCount += 1;
-  });
-
   return (
     <PureComponent
-      style={styleRef.current}
-      onClick={onClickRef.current}
+      style={style}
+      onClick={onClick}
       countRendering={countRendering}
     >
       test component
