@@ -1,0 +1,44 @@
+name: CI Assignment 2
+
+on:
+  pull_request:
+    types:
+      - synchronize
+      - opened
+      - reopened
+    paths:
+      - 'packages/assignment-2/**'
+
+  workflow_dispatch:
+
+jobs:
+  basic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: assignment-2-basic
+        run: |
+          pnpm install
+          pnpm -F assignment-2 test:basic
+  advacned:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: assignment-2-advanced
+        run: |
+          pnpm install
+          pnpm -F assignment-2 test:advanced
