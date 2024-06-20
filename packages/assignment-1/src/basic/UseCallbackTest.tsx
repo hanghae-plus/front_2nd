@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { BarkButton, MeowButton } from "./UseCallbackTest.components.tsx";
 
 export default function UseCallbackTest() {
@@ -9,8 +9,10 @@ export default function UseCallbackTest() {
     <div>
       <p data-testid="cat">meowCount {meowCount}</p>
       <p data-testid="dog">barkedCount {barkedCount}</p>
-      <MeowButton onClick={() => setMeowCount(n => n + 1)}/>
-      <BarkButton onClick={() => setBarkedCount(n => n + 1)}/>
+      <MeowButton onClick={useCallback(() => setMeowCount((n) => n + 1), [])} />
+      <BarkButton
+        onClick={useCallback(() => setBarkedCount((n) => n + 1), [])}
+      />
     </div>
   );
 }
