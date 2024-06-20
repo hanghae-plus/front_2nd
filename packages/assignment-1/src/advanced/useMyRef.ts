@@ -1,3 +1,11 @@
+import { useState, useEffect } from "react";
+
 export function useMyRef<T>(initValue: T | null) {
-  return { current: initValue }
+  const [ref, setRef] = useState<{ current: T | null }>({ current: initValue });
+
+  useEffect(() => {
+    setRef({ current: initValue });
+  }, []);
+
+  return ref;
 }
