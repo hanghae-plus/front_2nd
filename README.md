@@ -1,5 +1,5 @@
 ## 🏆 목표
-> _~ 06/18 (화)_
+> _~ 06/20(목)_
 
 ```
 💡 다음 파일의 일부 내용을 수정하여 테스트 코드가 통과하도록 만들어주세요
@@ -51,6 +51,20 @@
 - ✔️ useEffect hook 사용
 - toHaveBeenCalledTimes >> 정확한 횟수만큼 호출되었는지 확인.
 
+
+### 📒 useRef
+> useRef와 똑같이 동작하는 useMyRef를 만들어서 사용할 수 있다.
+- ❌ 원인:
+  - useRef는 컴포넌트가 unmount가 되기 전까지 유지된다. + 리랜더를 일으키지 않음.
+  - 요소가 모두 랜더링 되기 전에 ref값을 참조할 경우 null 값이 나오게 된다. >> 총 4개의 배열이 들어가게 됨
+
+
+- ✔️ 해결: useEffect 내에서 ref를 참조한다.
+  - useEffect는 컴포넌트가 mount된 후 실행된다. (컴포넌트가 랜더린 된 후)
+  - 동일한 참조 객체를 유지하도록 ..
+  - ⚠️ null 체크를 하지 않을 시 디버깅 시 {current: null} 이 담기게 됨.
+
+
 ## 📜 NOTE
 
 > 📖 **useState**
@@ -74,3 +88,12 @@
  
 > 📖 **useEffect**
 > 1. 의존성을 선택할 수 없음 (함수 내 모든 반응형 값이 의존성)
+
+
+> 📖 **useRef**
+> 참고
+> - [useRef()가 순수 자바스크립트 객체라는 의미를 곱씹어보기](https://dev.to/dylanju/useref-3j37?fbclid=IwAR0fl7xMjn_Hp6sImCU-EQt4gJ0ob_YY6hS3cwn4ARyClTUYD2KN0R6X-O0&source=post_page-----f0359ad23f3b--------------------------------)
+> - [[React 코드 까보기] useRef는 DOM에 접근할 때 뿐만 아니라 다양하게 응용할 수 있어요.](https://flyingsquirrel.medium.com/react-코드-까보기-useref는-dom에-접근할-때-뿐만-아니라-다양하게-응용할-수-있어요-f0359ad23f3b)
+> - react의 내부 코드에 있는 함수인데, 사실 이 함수는 react-dom에서 만든 함수이다.
+> - 컴포넌트가 마운트될 때, 초기값을 저장. unmount 전 라이프사이클 동안 같은 값 유지된다.
+> - react-dom의 전역변수로 접근하는 방식
