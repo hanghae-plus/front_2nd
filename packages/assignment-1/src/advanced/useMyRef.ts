@@ -1,3 +1,8 @@
+import { useState } from "react";
+
 export function useMyRef<T>(initValue: T | null) {
-  return { current: initValue }
+  const [refObj] = useState<{ current: T | null }>(() => ({
+    current: initValue,
+  }));
+  return refObj;
 }
