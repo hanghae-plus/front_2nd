@@ -5,9 +5,10 @@ import { useState } from "react";
 export default function UseStateTest() {
   const [state, setState] = useState({ bar: { count: 1 } });
 
+  // 기존 코드 => 상태객체를 직접 수정 : 객체의 참조가 바뀌지 않으므로 리렌더링 되지 않음
+  // 수정 코드 => 이전 상태를 복사-변경하여 새로운 객체 생성 : 객체의 참조가 바뀌어서 리랜더링
   const increment = () => {
-    state.bar.count += 1;
-    setState(state);
+    setState((prev)=>  {return {...prev, bar : {count : prev.bar.count + 1}}})
   }
 
   return (
