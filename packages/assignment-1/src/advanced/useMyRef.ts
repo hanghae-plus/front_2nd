@@ -1,11 +1,8 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 
 export function useMyRef<T>(initValue: T | null) {
-  const [ref, setRef] = useState<{ current: T | null }>({ current: initValue });
-
-  useEffect(() => {
-    setRef({ current: initValue });
+  const ref = useMemo(() => {
+    return { current: initValue };
   }, []);
-
   return ref;
 }
