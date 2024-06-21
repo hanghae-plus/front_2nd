@@ -4,9 +4,12 @@ type Props = {
   countRendering?: () => void;
 }
 
-const PureComponent = memo(({ children, countRendering, ...props }: PropsWithChildren<ComponentProps<'div'> & Props>) => {
+const PureComponent = memo(({ countRendering }: PropsWithChildren<ComponentProps<'div'> & Props>) => {
   countRendering?.();
-  return <div {...props}>{children}</div>
+  return <div 
+      style={{ width: '100px', height: '100px' }}
+      onClick={() => {outerCount += 1;}}
+      >{outerCount}</div>
 })
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -16,8 +19,6 @@ let outerCount = 1
 export default function RequireRefactoring({ countRendering }: Props) {
   return (
     <PureComponent
-      style={{ width: '100px', height: '100px' }}
-      onClick={() => {outerCount += 1;}}
       countRendering={countRendering}
     >
       test component

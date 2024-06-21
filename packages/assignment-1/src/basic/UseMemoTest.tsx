@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { repeatBarked, repeatMeow } from "./UseMemoTest.utils.ts";
 
 export default function UseMemoTest() {
   const [meowCount, setMeowCount] = useState(1);
   const [barkedCount, setBarkedCount] = useState(1);
 
-  const meow = repeatMeow(meowCount);
-  const bark = repeatBarked(barkedCount);
+  const meow = useMemo(() => {
+    return repeatMeow(meowCount);
+  }, [meowCount])
+  const bark = useMemo(()=>{
+    return repeatBarked(barkedCount);
+  }, [barkedCount])
 
   return (
     <div>

@@ -13,14 +13,14 @@ describe('useRef > ', () => {
     const refs = new Set();
 
     const UseMyRefTest = ({ label }: { label: string }) => {
-      const [, rerender] = useState({});
+      const [rerenderObj, rerender] = useState({});
       // useRef로 변경해서 테스트하면 통과됩니다. useMyRef를 useRef와 똑같이 동작하도록 구현해보세요.
       const ref = useMyRef<HTMLDivElement>(null);
       refs.add(ref);
 
       return (
         <div ref={ref}>
-          <button onClick={() => rerender({})}>{label}</button>
+          <button onClick={() => rerender(rerenderObj)}>{label}</button>
         </div>
       )
     }
