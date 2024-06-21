@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:basic": "pnpm -F assignment-1 test:basic",
+    "test:advanced": "pnpm -F assignment-1 test:advanced"
   },
   "keywords": [],
   "author": "",
