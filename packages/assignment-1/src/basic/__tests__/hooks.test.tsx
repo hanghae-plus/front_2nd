@@ -70,6 +70,8 @@ describe('다양한 hook을 이용하여 테스트코드를 통과할 수 있도
       const $dog = await findByTestId('dog');
       const $meowHandler = await findByTestId('meow');
       const $barkHandler = await findByTestId('bark');
+
+
       expect($cat.innerHTML).toBe('고양이 "냥"');
       expect($dog.innerHTML).toBe('강아지 "멍"');
 
