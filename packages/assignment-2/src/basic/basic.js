@@ -74,7 +74,21 @@ export function createNumber2(n) {
 }
 
 export function createNumber3(n) {
-  return n;
+  return {
+    value:n,
+    valueOf() {
+      return this.value;
+    },
+    toJSON() {
+      return `this is createNumber3 => ${this.value}`;
+    },
+    toString(){
+      return this.value
+    },
+    get() {
+      return this.value;
+    }
+  };
 }
 
 export class CustomNumber {
