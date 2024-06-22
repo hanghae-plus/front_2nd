@@ -3,12 +3,13 @@ export function shallowEquals(target1, target2) {
     return true;
   }
 
-  if (typeof target1 !== 'object' || typeof target2 !== 'object') {
+  if (typeof target1 !== 'object' || typeof target2 !== 'object' || 
+      target1 === null || target2 === null) {
     return false;
   }
 
-  if (target1 instanceof Number && target2 instanceof Number ||
-     target1 instanceof String && target2 instanceof String) {
+  if ((target1 instanceof Number && target2 instanceof Number) ||
+      (target1 instanceof String && target2 instanceof String)) {
     return false;
   }
 
@@ -16,7 +17,7 @@ export function shallowEquals(target1, target2) {
     return target1.length === target2.length && target1.every((value, index) => value === target2[index]);
   }
 
-  if (target1.constructor !== Object && target2.constructor !== Object) {
+  if (target1.constructor !== Object || target2.constructor !== Object) {
     return target1.constructor === target2.constructor;
   }
 
@@ -27,13 +28,7 @@ export function shallowEquals(target1, target2) {
     return false;
   }
 
-  for (let i = 0; i < target1Keys.length; i++) {
-    if (target1[target1Keys[i]] !== target2[target2Keys[i]]) {
-      return false;
-    }
-  }
-
-  return true;
+  return target1Keys.every(key => target1[key] === target2[key]);
 }
 
 export function deepEquals(target1, target2) {
