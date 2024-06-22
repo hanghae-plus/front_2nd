@@ -1,7 +1,16 @@
+// [ 얕은 비교 ]
 export function shallowEquals(target1, target2) {
+  if(typeof target1 === 'object' && typeof target2 === 'object' && target1.length === target2.length){
+    let result = []
+
+    for(let i in target1) {
+      result.push( target1[i] === target2[i])
+    }
+  }
   return target1 === target2;
 }
 
+// [ 깊은 비교 ]
 export function deepEquals(target1, target2) {
   return target1 === target2;
 }
