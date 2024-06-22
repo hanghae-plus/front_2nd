@@ -20,10 +20,6 @@ export default function PureComponentTest() {
   );
 }
 
-const MemoizedCat = memo(function _MemoizedCat({ crying }: { crying: number }) {
-  return <Cat crying={crying} />;
-});
+const MemoizedCat = memo(Cat);
 
-const MemoizedDog = memo(function _MemoizedDog({ crying }: { crying: number }) {
-  return <Dog crying={crying} />;
-});
+const MemoizedDog = memo(Dog);
