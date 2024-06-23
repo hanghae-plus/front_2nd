@@ -10,7 +10,7 @@ export const memo1 = (fn) => {
 };
 
 export const memo2 = (fn, dependencies = []) => {
-  const key = fn + dependencies.join(',');
+  const key = JSON.stringify({ fn: fn.toString(), dependencies });
   if (cache.has(key)) {
     return cache.get(key);
   }
