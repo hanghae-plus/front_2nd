@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { deepEquals } from '../basic/basic';
 
 const cache = new Map();
@@ -86,15 +86,11 @@ const useTestContext = () => {
 
 export const useUser = () => {
   const { get, set, subscribe } = useTestContext();
-  const [state, setState] = useState(() => get().user);
+  const state = useSyncExternalStore(subscribe, () => get().user, get);
 
   const setUser = useCallback((user) => {
-    set({user});
+    set({ user });
   }, [set]);
-
-  useEffect(() => {
-    return subscribe(() => setState(get().user));
-  }, [setState, subscribe, get]);
 
   return [
     state,
@@ -104,15 +100,11 @@ export const useUser = () => {
 
 export const useCounter = () => {
   const { get, set, subscribe } = useTestContext();
-  const [state, setState] = useState(() => get().count);
+  const state = useSyncExternalStore(subscribe, () => get().count, get);
 
   const setCount = useCallback((count) => {
     set({ count });
   }, [set]);
-
-  useEffect(() => {
-    return subscribe(() => setState(get().count));
-  }, [setState, subscribe, get]);
 
   return [
     state,
@@ -122,15 +114,11 @@ export const useCounter = () => {
 
 export const useTodoItems = () => {
   const { get, set, subscribe } = useTestContext();
-  const [state, setState] = useState(() => get().todoItems);
+  const state = useSyncExternalStore(subscribe, () => get().todoItems, get);
 
   const setTodoItems = useCallback((todoItems) => {
     set({ todoItems });
   }, [set]);
-
-  useEffect(() => {
-    return subscribe(() => setState(get().todoItems));
-  }, [setState, subscribe, get]);
 
   return [
     state,
