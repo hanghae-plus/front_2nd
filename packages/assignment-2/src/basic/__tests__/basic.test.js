@@ -291,17 +291,17 @@ describe("assignment 2 > basic : 값을 다루기", () => {
       expect(spansResult).toStrictEqual(["1", "2"]);
     });
 
-    // it("filter > ", () => {
-    //   const objectResult = filter(obj, (value) => value > 1);
-    //   expect(objectResult).toStrictEqual({ b: 2 });
+    it("filter > ", () => {
+      const objectResult = filter(obj, (value) => value > 1);
+      expect(objectResult).toStrictEqual({ b: 2 });
 
-    //   const arrayResult = filter(["a", "b"], (value) => value === "b");
-    //   expect(arrayResult).toStrictEqual(["b"]);
+      const arrayResult = filter(["a", "b"], (value) => value === "b");
+      expect(arrayResult).toStrictEqual(["b"]);
 
-    //   const spans = document.querySelectorAll("#test span");
-    //   const spansResult = filter(spans, (value) => value.textContent === "2");
-    //   expect(spansResult).toStrictEqual([spans[1]]);
-    // });
+      const spans = document.querySelectorAll("#test span");
+      const spansResult = filter(spans, (value) => value.textContent === "2");
+      expect(spansResult).toStrictEqual([spans[1]]);
+    });
 
     // it("every > ", () => {
     //   const objectResult = every(obj, (value) => value > 0);
