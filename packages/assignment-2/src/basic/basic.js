@@ -142,6 +142,15 @@ export function createUnenumerableObject(target) {
   return result
 }
 
+function isArrayLike(target){
+  return (
+    target !== null &&
+    typeof(target[Symbol.iterator]) === 'function' &&
+    typeof(target.length) === 'number' &&
+    typeof(target) !== 'string'
+  );
+}
+
 export function forEach(target, callback) {
   if (Array.isArray(target)) {
     for (let i = 0; i < target.length; i++) {
@@ -150,7 +159,7 @@ export function forEach(target, callback) {
     return;
   } 
 
-  if (target[Symbol.iterator]) {
+  if (isArrayLike(target)) {
     const iterator = Array.from(target);
     for (let i = 0; i < iterator.length; i++) {
       callback(iterator[i], i);
@@ -177,7 +186,7 @@ export function map(target, callback) {
     }
   } 
 
-  if (target[Symbol.iterator]) {
+  if (isArrayLike(target)) {
     result = [];
     const iterator = Array.from(target);
     for (const item of iterator) {
@@ -210,7 +219,7 @@ export function filter(target, callback) {
     return result;
   } 
 
-  if (target[Symbol.iterator]) {
+  if (isArrayLike(target)) {
     result = [];
     const iterator = Array.from(target);
     for (const item of iterator) {
@@ -246,7 +255,7 @@ export function every(target, callback) {
     return true;
   }
 
-  if (target[Symbol.iterator]) {
+  if (isArrayLike(target)) {
     const iterator = Array.from(target);
     for (const item of iterator) {
       if (!callback(item)) {
@@ -280,7 +289,7 @@ export function some(target, callback) {
     return false;
   } 
 
-  if (target[Symbol.iterator]) {
+  if (isArrayLike(target)) {
     const iterator = Array.from(target);
     for (const item of iterator) {
       if (callback(item)) {
