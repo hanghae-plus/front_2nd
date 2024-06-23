@@ -1,26 +1,31 @@
 export function shallowEquals(target1, target2) {
+  // 원시값 비교
   if (target1 === target2) {
     return true;
   }
 
-  if (typeof target1 !== 'object' || typeof target2 !== 'object' || 
-      target1 === null || target2 === null) {
+  // null 처리
+  if (target1 === null || target2 === null) {
     return false;
   }
 
+  // 생성자로 만들어진 객체 처리
   if ((target1 instanceof Number && target2 instanceof Number) ||
       (target1 instanceof String && target2 instanceof String)) {
     return false;
   }
 
+  // 배열 비교
   if (Array.isArray(target1) && Array.isArray(target2)) {
     return target1.length === target2.length && target1.every((value, index) => value === target2[index]);
   }
 
+  // 클래스 비교
   if (target1.constructor !== Object || target2.constructor !== Object) {
     return target1.constructor === target2.constructor;
   }
 
+  // 객체 비교
   const target1Keys = Object.keys(target1);
   const target2Keys = Object.keys(target2);
 
@@ -32,28 +37,33 @@ export function shallowEquals(target1, target2) {
 }
 
 export function deepEquals(target1, target2) {
+  // 원시값 비교
   if (target1 === target2) {
     return true;
   }
 
-  if (typeof target1 !== 'object' || typeof target2 !== 'object' || 
-      target1 === null || target2 === null) {
+  // null 처리
+  if (target1 === null || target2 === null) {
     return false;
   }
 
+  // 생성자로 만들어진 객체 처리
   if ((target1 instanceof Number && target2 instanceof Number) ||
       (target1 instanceof String && target2 instanceof String)) {
     return false;
   }
 
+  // 배열 비교, 배열 내부 값 비교
   if (Array.isArray(target1) && Array.isArray(target2)) {
     return target1.length === target2.length && target1.every((value, index) => deepEquals(value, target2[index]));
   }
 
+  // 클래스 비교
   if (target1.constructor !== Object || target2.constructor !== Object) {
     return target1.constructor === target2.constructor;
   }
 
+  // 객체 비교
   const target1Keys = Object.keys(target1);
   const target2Keys = Object.keys(target2);
 
@@ -101,19 +111,15 @@ export class CustomNumber {
     this.value = n;
     cache.set(n, this);
   }
-
   valueOf() {
     return this.value;
   }
-
   toJSON(){
     return String(this.value);
   }
-
   toString(){
     return String(this.value);
   }
-
   get() {
     return this.value;
   }
