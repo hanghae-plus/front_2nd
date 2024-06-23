@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { deepEquals } from '../basic/basic';
 
 const cache = new Map();
@@ -27,14 +27,14 @@ export const useCustomState = (initValue) => {
   const [value, originalSetValue] = useState(initValue);
 
   const setValue = useCallback((newValue) => {
+    const computedValue = typeof newValue === 'function' ? newValue(value) : newValue;
+    if (deepEquals(value, computedValue)) {
+      return;
+    }
     originalSetValue(prevValue => {
-      if (deepEquals(prevValue, newValue)) {
-        return prevValue;
-      }
-      
-      return typeof newValue === 'function' ? newValue(newValue) : newValue
+      return typeof newValue === 'function' ? newValue(prevValue) : newValue;
     });
-  }, [originalSetValue])
+  }, [originalSetValue, value]); 
 
   return [value, setValue];
 }
@@ -46,15 +46,35 @@ const textContextDefaultValue = {
 };
 
 export const TestContext = createContext({
-  value: textContextDefaultValue,
-  setValue: () => null,
+  get: () => null,
+  set: () => null,
+  subscribe: () => null,
 });
 
 export const TestContextProvider = ({ children }) => {
-  const [value, setValue] = useState(textContextDefaultValue);
+  const valueRef = useRef(textContextDefaultValue);
+  const subscribersRef = useRef(new Set());
+
+  const set = useCallback((newValue) => {
+    valueRef.current = { ...valueRef.current, ...newValue };
+    subscribersRef.current.forEach((fn) => fn());
+  }, []);
+
+  const get = useCallback(() => {
+    return valueRef.current;
+  }, []);
+
+  const subscribe = useCallback((fn) => {
+    subscribersRef.current.add(fn);
+    return () => {
+      subscribersRef.current.delete(fn);
+    };
+  }, []);
+
+  const value = useMemo(() => ({ get, set, subscribe }), [get, set, subscribe]);
 
   return (
-    <TestContext.Provider value={{ value, setValue }}>
+    <TestContext.Provider value={value}>
       {children}
     </TestContext.Provider>
   )
@@ -65,28 +85,55 @@ const useTestContext = () => {
 }
 
 export const useUser = () => {
-  const { value, setValue } = useTestContext();
+  const { get, set, subscribe } = useTestContext();
+  const [state, setState] = useState(() => get().user);
+
+  const setUser = useCallback((user) => {
+    set({user});
+  }, [set]);
+
+  useEffect(() => {
+    return subscribe(() => setState(get().user));
+  }, [setState, subscribe, get]);
 
   return [
-    value.user,
-    (user) => setValue({ ...value, user })
+    state,
+    setUser
   ];
 }
 
 export const useCounter = () => {
-  const { value, setValue } = useTestContext();
+  const { get, set, subscribe } = useTestContext();
+  const [state, setState] = useState(() => get().count);
+
+  const setCount = useCallback((count) => {
+    set({ count });
+  }, [set]);
+
+  useEffect(() => {
+    return subscribe(() => setState(get().count));
+  }, [setState, subscribe, get]);
 
   return [
-    value.count,
-    (count) => setValue({ ...value, count })
+    state,
+    setCount
   ];
 }
 
 export const useTodoItems = () => {
-  const { value, setValue } = useTestContext();
+  const { get, set, subscribe } = useTestContext();
+  const [state, setState] = useState(() => get().todoItems);
+
+  const setTodoItems = useCallback((todoItems) => {
+    set({ todoItems });
+  }, [set]);
+
+  useEffect(() => {
+    return subscribe(() => setState(get().todoItems));
+  }, [setState, subscribe, get]);
 
   return [
-    value.todoItems,
-    (todoItems) => setValue({ ...value, todoItems })
+    state,
+    setTodoItems
   ];
 }
