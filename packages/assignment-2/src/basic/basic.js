@@ -5,7 +5,8 @@ export function shallowEquals(target1, target2) {
   }
 
   // null 처리
-  if (target1 === null || target2 === null) {
+  if (typeof target1 !== 'object' || typeof target2 !== 'object' || 
+      target1 === null || target2 === null) {
     return false;
   }
 
@@ -43,7 +44,8 @@ export function deepEquals(target1, target2) {
   }
 
   // null 처리
-  if (target1 === null || target2 === null) {
+  if (typeof target1 !== 'object' || typeof target2 !== 'object' || 
+      target1 === null || target2 === null) {
     return false;
   }
 
