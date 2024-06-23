@@ -31,9 +31,7 @@ export const useCustomState = (initValue) => {
     if (deepEquals(value, computedValue)) {
       return;
     }
-    originalSetValue(prevValue => {
-      return typeof newValue === 'function' ? newValue(prevValue) : newValue;
-    });
+    originalSetValue(computedValue);
   }, [originalSetValue, value]); 
 
   return [value, setValue];
