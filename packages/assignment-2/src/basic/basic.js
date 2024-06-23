@@ -145,4 +145,31 @@ export function every(target, callback) {
   return true;
 }
 
-export function some(target, callback) {}
+export function some(target, callback) {
+  let copyTarget;
+
+  /**해당 데이터가 어떤 타입의 데이터인지 판별하는 함수 */
+  const checkDataType = (data) => {
+    if (Array.isArray(data)) {
+      return [...data];
+    } else {
+      return { ...data };
+    }
+  };
+
+  /**외부 부수효과가 나지 않도록 복사 */
+  copyTarget = checkDataType(target);
+
+  /**object key,value 뽑기 */
+  const objArr = Object.entries(copyTarget);
+
+  for (let ele of objArr) {
+    const [key, value] = ele;
+    /**요소가 하나라도 callback조건을 통과 못하면 return false */
+    if (callback(value)) {
+      return true;
+    }
+  }
+
+  return false;
+}

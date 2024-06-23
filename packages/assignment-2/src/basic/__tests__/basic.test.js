@@ -318,16 +318,16 @@ describe("assignment 2 > basic : 값을 다루기", () => {
       expect(spansResult).toBe(true);
     });
 
-    // it("some > ", () => {
-    //   const objectResult = some(obj, (value) => value > 1);
-    //   expect(objectResult).toBe(true);
+    it("some > ", () => {
+      const objectResult = some(obj, (value) => value > 1);
+      expect(objectResult).toBe(true);
 
-    //   const arrayResult = some(["a", "b"], (value) => value === "a");
-    //   expect(arrayResult).toBe(true);
+      const arrayResult = some(["a", "b"], (value) => value === "a");
+      expect(arrayResult).toBe(true);
 
-    //   const spans = document.querySelectorAll("#test span");
-    //   const spansResult = some(spans, (value) => value.textContent === "1");
-    //   expect(spansResult).toBe(true);
-    // });
+      const spans = document.querySelectorAll("#test span");
+      const spansResult = some(spans, (value) => value.textContent === "1");
+      expect(spansResult).toBe(true);
+    });
   });
 });
