@@ -1,12 +1,42 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
+import { deepEquals } from '../basic/basic';
 
-export const memo1 = (fn) => fn();
+const cache = new Map();
 
-export const memo2 = (fn) => fn();
+export const memo1 = (fn) => {
+  if (cache.has(fn)) {
+    return cache.get(fn);
+  }
+  const result = fn();
+  cache.set(fn, result);
+  return result;
+};
+
+export const memo2 = (fn, dependencies = []) => {
+  const key = JSON.stringify({ fn: fn.toString(), dependencies });
+  if (cache.has(key)) {
+    return cache.get(key);
+  }
+  const result = fn();
+  cache.set(key, result);
+  return result;
+};
 
 
 export const useCustomState = (initValue) => {
-  return useState(initValue);
+  const [value, originalSetValue] = useState(initValue);
+
+  const setValue = useCallback((newValue) => {
+    originalSetValue(prevValue => {
+      if (deepEquals(prevValue, newValue)) {
+        return prevValue;
+      }
+      
+      return typeof newValue === 'function' ? newValue(newValue) : newValue
+    });
+  }, [originalSetValue])
+
+  return [value, setValue];
 }
 
 const textContextDefaultValue = {
