@@ -84,9 +84,15 @@ const useTestContext = () => {
   return useContext(TestContext);
 }
 
-export const useUser = () => {
+const useStore = (selector) => {
   const { get, set, subscribe } = useTestContext();
-  const state = useSyncExternalStore(subscribe, () => get().user, get);
+  const state = useSyncExternalStore(subscribe, () => selector(get()), get);
+
+  return [state, set];
+}
+
+export const useUser = () => {
+  const [state, set] = useStore(state => state.user);
 
   const setUser = useCallback((user) => {
     set({ user });
@@ -99,8 +105,7 @@ export const useUser = () => {
 }
 
 export const useCounter = () => {
-  const { get, set, subscribe } = useTestContext();
-  const state = useSyncExternalStore(subscribe, () => get().count, get);
+  const [state, set] = useStore(state => state.count);
 
   const setCount = useCallback((count) => {
     set({ count });
@@ -113,8 +118,7 @@ export const useCounter = () => {
 }
 
 export const useTodoItems = () => {
-  const { get, set, subscribe } = useTestContext();
-  const state = useSyncExternalStore(subscribe, () => get().todoItems, get);
+  const [state, set] = useStore(state => state.todoItems);
 
   const setTodoItems = useCallback((todoItems) => {
     set({ todoItems });
