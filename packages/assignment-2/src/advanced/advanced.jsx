@@ -4,11 +4,12 @@ import { deepEquals } from '../basic/basic';
 const cache = new Map();
 
 export const memo1 = (fn) => {
-  if (cache.has(fn)) {
-    return cache.get(fn);
+  const key = fn.toString();
+  if (cache.has(key)) {
+    return cache.get(key);
   }
   const result = fn();
-  cache.set(fn, result);
+  cache.set(key, result);
   return result;
 };
 
