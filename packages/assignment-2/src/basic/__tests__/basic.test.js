@@ -303,20 +303,20 @@ describe("assignment 2 > basic : 값을 다루기", () => {
       expect(spansResult).toStrictEqual([spans[1]]);
     });
 
-    // it("every > ", () => {
-    //   const objectResult = every(obj, (value) => value > 0);
-    //   expect(objectResult).toBe(true);
+    it("every > ", () => {
+      const objectResult = every(obj, (value) => value > 0);
+      expect(objectResult).toBe(true);
 
-    //   const arrayResult = every(
-    //     ["a", "b"],
-    //     (value) => typeof value === "string"
-    //   );
-    //   expect(arrayResult).toBe(true);
+      const arrayResult = every(
+        ["a", "b"],
+        (value) => typeof value === "string"
+      );
+      expect(arrayResult).toBe(true);
 
-    //   const spans = document.querySelectorAll("#test span");
-    //   const spansResult = every(spans, (value) => value.tagName === "SPAN");
-    //   expect(spansResult).toBe(true);
-    // });
+      const spans = document.querySelectorAll("#test span");
+      const spansResult = every(spans, (value) => value.tagName === "SPAN");
+      expect(spansResult).toBe(true);
+    });
 
     // it("some > ", () => {
     //   const objectResult = some(obj, (value) => value > 1);
