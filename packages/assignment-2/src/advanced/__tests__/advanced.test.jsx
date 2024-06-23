@@ -37,7 +37,7 @@ describe('assignment 2 > advanced', () => {
   })
 
   describe('실제로 값이 달라졌을 때 렌더링하기', () => {
-    it.skip('object > ', async () => {
+    it('object > ', async () => {
       let changedValue = 1;
       const mockFn = vi.fn();
 
