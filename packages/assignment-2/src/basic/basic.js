@@ -145,8 +145,26 @@ export function createUnenumerableObject(target) {
   return unenumerableObject;
 }
 
+// below 5 functions will take target - object or array, callback - function
 export function forEach(target, callback) {
-
+  if (Array.isArray(target)) {
+    for (let i = 0; i < target.length; i++) {
+      callback(target[i], i, target);
+    }
+  } else if (target !== null && typeof target === "object") {
+    // unenumberalbe이기 때문에, length 프로퍼티를 제외한 key값을 추출
+    const keys = Object.getOwnPropertyNames(target).filter(
+      (key) => key !== "length"
+    );
+    for (let i = 0; i < keys.length; i++) {
+      // key값이 숫자로 변환이 가능한 경우, 해당 key값을 숫자로 변환하여 callback 호출
+      if (Number.isInteger(Number(keys[i]))) {
+        callback(target[keys[i]], Number(keys[i]), target);
+      } else {
+        callback(target[keys[i]], keys[i]);
+      }
+    }
+  }
 }
 
 export function map(target, callback) {
