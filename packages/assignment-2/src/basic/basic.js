@@ -130,8 +130,19 @@ export class CustomNumber {
   }
 }
 
+/**
+ *
+ * @param {*} target {key: value}
+ * @return {} target의 key, value를 그대로 가지되, 열거되지 않는 프로퍼티를 가진 객체를 반환
+ */
 export function createUnenumerableObject(target) {
-  return target;
+  const unenumerableObject = structuredClone(target);
+  for (const key in target) {
+    Object.defineProperty(unenumerableObject, key, {
+      enumerable: false,
+    });
+  }
+  return unenumerableObject;
 }
 
 export function forEach(target, callback) {
