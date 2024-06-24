@@ -206,14 +206,42 @@ export function filter(target, callback) {
   return result;
 }
 
-
 export function every(target, callback) {
-
+  if (Array.isArray(target) || target instanceof NodeList) {
+    for (let i = 0; i < target.length; i++) {
+      if (!callback(target[i], i, target)) {
+        return false;
+      }
+    }
+  } else {
+    const keys = Object.getOwnPropertyNames(target).filter(
+      (key) => key !== "length"
+    );
+    for (const key of keys) {
+      if (!callback(target[key], key, target)) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 export function some(target, callback) {
-
+  if (Array.isArray(target) || target instanceof NodeList) {
+    for (let i = 0; i < target.length; i++) {
+      if (callback(target[i], i, target)) {
+        return true;
+      }
+    }
+  } else {
+    const keys = Object.getOwnPropertyNames(target).filter(
+      (key) => key !== "length"
+    );
+    for (const key of keys) {
+      if (callback(target[key], key, target)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
-
-
-
