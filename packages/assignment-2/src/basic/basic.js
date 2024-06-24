@@ -1,6 +1,6 @@
-function isPrimitive(value) {
-  return (value === null || (typeof value !== 'object' && typeof value !== 'function'));
-}
+// function isPrimitive(value) {
+//   return (value === null || (typeof value !== 'object' && typeof value !== 'function'));
+// }
 
 function getDimensions(test) {
   let maxDepth = 0;
@@ -30,6 +30,32 @@ function getDimensions(test) {
   return maxDepth + 1; // 현재 차원에 +1
 }
 
+function hasConstructor(test){
+  // 생성자로 만든 객체인 경우 내용 비교
+  if(test instanceof Number || test instanceof String || test instanceof Boolean) {
+    return true
+  }
+  if(Array.isArray(test)){
+    for (let i = 0; i < test.length; i++) {
+      if (Array.isArray(test[i]) || test[i].constructor.name === 'Object') {
+        if(hasConstructor(test[i])){
+          return true
+        }
+      } 
+    }
+  }
+  else if(typeof test === 'object'){
+    for (var key in test){
+      if(typeof test[key] === 'object' || Array.isArray(test[key])){
+        if(hasConstructor(test[key])){
+          return true
+        }
+      }
+    }
+  }
+  return false
+}
+
 
 export function shallowEquals(target1, target2) {
   // 테스트 코드를 보니 생성자로 생성된 객체들은 초기화 값이 같아도 false이다.
@@ -41,7 +67,6 @@ export function shallowEquals(target1, target2) {
   // 그러나 내용이 같은지 보고 비교하여 같으면 true가 되도록 해야하기 때문에 string화 했을때 동일하지만 다차원일 경우에는 false가 되도록 test code가 되어 있다.
   if((Array.isArray(target1) && Array.isArray(target2)) 
     || (target1.constructor.name === 'Object' && target2.constructor.name === 'Object')){
-      // 1차원 일때와 다차원일 때 다르게 가야한다.
       if(getDimensions(target1) === 1 && getDimensions(target2) === 1){
         return JSON.stringify(target1) === JSON.stringify(target2)
       }
@@ -59,8 +84,12 @@ export function deepEquals(target1, target2) {
   if((Array.isArray(target1) && Array.isArray(target2)) 
     || (target1.constructor.name === 'Object' && target2.constructor.name === 'Object')){
    
-      return JSON.stringify(target1) === JSON.stringify(target2)
+    // 생성자로 만든 요소가 있는지 확인
+    if(hasConstructor(target1 || hasConstructor(target2))){
+      return false
     }
+    return JSON.stringify(target1) === JSON.stringify(target2)
+  }
     return false
 }
 
