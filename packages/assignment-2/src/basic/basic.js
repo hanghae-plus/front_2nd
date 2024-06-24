@@ -51,6 +51,12 @@ export function shallowEquals(target1, target2) {
 }
 
 export function deepEquals(target1, target2) {
+  if (target1 === null || target2 === null) {
+    return target1 === target2;
+  }
+  if (typeof target1 !== "object") {
+    return target1 === target2;
+  }
   if (isClassInstance(target1) || isClassInstance(target2)) {
     return target1 === target2;
   }
@@ -75,7 +81,6 @@ export function deepEquals(target1, target2) {
 
     return true;
   }
-  return target1 === target2;
 }
 
 export function createNumber1(n) {
