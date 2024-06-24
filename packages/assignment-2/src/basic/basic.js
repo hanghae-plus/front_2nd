@@ -103,8 +103,31 @@ export function createNumber3(n) {
   };
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toPrimitive
 export class CustomNumber {
+  static instances = new Map();
 
+  constructor(value) {
+    if (CustomNumber.instances.has(value)) {
+      return CustomNumber.instances.get(value);
+    }
+    this.value = value;
+    CustomNumber.instances.set(value, this);
+  }
+
+  toJSON() {
+    return String(this.value);
+  }
+
+  [Symbol.toPrimitive](hint) {
+    if (hint === "number") {
+      return this.value;
+    }
+    if (hint === "string") {
+      return String(this.value);
+    }
+    return this.value;
+  }
 }
 
 export function createUnenumerableObject(target) {
