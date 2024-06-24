@@ -1,15 +1,4 @@
-// 두 Object가 같은지 판별(shallow)
-const checkShallowObj = (data1, data2) => {
-  //value값 뽑아내기
-  const arr1 = Object.values(data1);
-  const arr2 = Object.values(data2);
-
-  //value arr길이 가 같고, 요소들이 빠짐없이 같은지 판별
-  const isEqual =
-    arr1.length === arr2.length && arr1.every((ele, idx) => ele === arr2[idx]);
-
-  return isEqual;
-};
+import { checkDataType, checkDeepObj, checkShallowObj } from "./utils";
 
 //얕은 비교를 수행하는 함수
 export function shallowEquals(target1, target2) {
@@ -29,12 +18,6 @@ export function shallowEquals(target1, target2) {
 
   return checkShallowObj(target1, target2);
 }
-
-// 두 Object가 같은지 판별(deep)
-const checkDeepObj = (data1, data2) => {
-  const isDeepEqual = JSON.stringify(data1) === JSON.stringify(data2);
-  return isDeepEqual;
-};
 
 //깊은 비교를 수행하는 함수
 export function deepEquals(target1, target2) {
@@ -56,7 +39,7 @@ export function deepEquals(target1, target2) {
 }
 
 export function createNumber1(n) {
-  return Number(n);
+  return new Number(n);
 }
 
 // string instance로 만드는 함수
@@ -65,7 +48,7 @@ export function createNumber2(n) {
 }
 
 export function createNumber3(n) {
-  return n;
+  return +new String(n);
 }
 
 export class CustomNumber {}
@@ -77,15 +60,6 @@ export function createUnenumerableObject(target) {
 export function forEach(target, callback) {
   let copyTarget;
 
-  //해당 데이터가 어떤 타입의 데이터인지 판별하는 함수
-  const checkDataType = (data) => {
-    if (Array.isArray(data)) {
-      return [...data];
-    } else {
-      return { ...data };
-    }
-  };
-
   //외부 부수효과가 나지 않도록 복사
   copyTarget = checkDataType(target);
 
@@ -95,7 +69,7 @@ export function forEach(target, callback) {
   for (let ele of objArr) {
     const [key, value] = ele;
 
-    //
+    //key나 value가 원본 number type이 키가 되면서 string이 될 수 있으므로 원본 값 부여
     const newKey = !isNaN(Number(key)) ? Number(key) : key;
     const newValue = !isNaN(Number(value)) ? Number(value) : value;
 
@@ -105,15 +79,6 @@ export function forEach(target, callback) {
 
 export function map(target, callback) {
   let copyTarget;
-
-  //해당 데이터가 어떤 타입의 데이터인지 판별하는 함수
-  const checkDataType = (data) => {
-    if (Array.isArray(data)) {
-      return [...data];
-    } else {
-      return { ...data };
-    }
-  };
 
   //외부 부수효과가 나지 않도록 복사
   copyTarget = checkDataType(target);
@@ -144,15 +109,6 @@ export function map(target, callback) {
 
 export function filter(target, callback) {
   let copyTarget;
-
-  //해당 데이터가 어떤 타입의 데이터인지 판별하는 함수
-  const checkDataType = (data) => {
-    if (Array.isArray(data)) {
-      return [...data];
-    } else {
-      return { ...data };
-    }
-  };
 
   //외부 부수효과가 나지 않도록 복사
   copyTarget = checkDataType(target);
@@ -193,15 +149,6 @@ export function filter(target, callback) {
 export function every(target, callback) {
   let copyTarget;
 
-  //해당 데이터가 어떤 타입의 데이터인지 판별하는 함수
-  const checkDataType = (data) => {
-    if (Array.isArray(data)) {
-      return [...data];
-    } else {
-      return { ...data };
-    }
-  };
-
   //외부 부수효과가 나지 않도록 복사
   copyTarget = checkDataType(target);
 
@@ -222,16 +169,6 @@ export function every(target, callback) {
 export function some(target, callback) {
   let copyTarget;
 
-  //해당 데이터가 어떤 타입의 데이터인지 판별하는 함수
-  const checkDataType = (data) => {
-    if (Array.isArray(data)) {
-      return [...data];
-    } else {
-      return { ...data };
-    }
-  };
-
-  //외부 부수효과가 나지 않도록 복사
   copyTarget = checkDataType(target);
 
   //object key,value 뽑기
