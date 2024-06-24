@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { deepEquals } from "../basic/basic";
 
 /**
  * 의존성배열 없이, 실행 결과값만을 메모이제이션하는 함수
@@ -48,8 +49,17 @@ export const memo2 = (fn, dependencies = []) => {
 };
 
 export const useCustomState = (initValue) => {
-  return useState(initValue);
-}
+  const [state, setState] = useState(initValue);
+
+  const customSetState = (newState) => {
+    // basic에서 작성한 deepEquals 함수 재사용
+    if (!deepEquals(state, newState)) {
+      setState(newState);
+    }
+  };
+
+  return [state, customSetState];
+};
 
 const textContextDefaultValue = {
   user: null,
