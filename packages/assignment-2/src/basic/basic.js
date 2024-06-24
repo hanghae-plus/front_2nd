@@ -1,11 +1,58 @@
-export function shallowEquals(target1, target2) {
-  console.log(typeof target1, target1, target2);
+// 두 Object가 같은지 판별(shallow)
+const checkShallowObj = (data1, data2) => {
+  //value값 뽑아내기
+  const arr1 = Object.values(data1);
+  const arr2 = Object.values(data2);
 
-  return target1 === target2;
+  //value arr길이 가 같고, 요소들이 빠짐없이 같은지 판별
+  const isEqual =
+    arr1.length === arr2.length && arr1.every((ele, idx) => ele === arr2[idx]);
+
+  return isEqual;
+};
+
+//얕은 비교를 수행하는 함수
+export function shallowEquals(target1, target2) {
+  if (target1 === target2) {
+    return target1 === target2;
+  }
+
+  // Array일 때
+  if ((Array.isArray(target1), Array.isArray(target2))) {
+    return checkShallowObj(target1, target2);
+  }
+
+  // constructor가 Object인지 판별
+  if (target1.constructor !== Object && target2.constructor !== Object) {
+    return false;
+  }
+
+  return checkShallowObj(target1, target2);
 }
 
+// 두 Object가 같은지 판별(deep)
+const checkDeepObj = (data1, data2) => {
+  const isDeepEqual = JSON.stringify(data1) === JSON.stringify(data2);
+  return isDeepEqual;
+};
+
+//깊은 비교를 수행하는 함수
 export function deepEquals(target1, target2) {
-  return target1 === target2;
+  if (target1 === target2) {
+    return target1 === target2;
+  }
+
+  // Array일 때
+  if ((Array.isArray(target1), Array.isArray(target2))) {
+    return checkDeepObj(target1, target2);
+  }
+
+  // constructor가 Object인지 판별
+  if (target1.constructor !== Object && target2.constructor !== Object) {
+    return false;
+  }
+
+  return checkDeepObj(target1, target2);
 }
 
 export function createNumber1(n) {

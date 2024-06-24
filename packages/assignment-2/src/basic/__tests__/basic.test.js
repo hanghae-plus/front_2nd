@@ -38,109 +38,109 @@ describe("assignment 2 > basic : 값을 다루기", () => {
       expect(false === undefined).toBe(false);
     });
 
-    // it("객체/배열/함수 비교", () => {
-    //   expect({} === {}).toBe(false);
-    //   expect([] === []).toBe(false);
+    it("객체/배열/함수 비교", () => {
+      expect({} === {}).toBe(false);
+      expect([] === []).toBe(false);
 
-    //   const a = {};
-    //   const b = a;
-    //   expect(a === b).toBe(true);
+      const a = {};
+      const b = a;
+      expect(a === b).toBe(true);
 
-    //   const foo = { a, b: [], c: 1 };
-    //   const bar = { a, b: [], c: 1, foo };
-    //   const fn = () => null;
-    //   const fn2 = () => null;
-    //   const fn3 = fn;
-    //   expect(foo === bar).toBe(false);
-    //   expect(foo.a === bar.a).toBe(true);
-    //   expect(foo.b === bar.b).toBe(false);
-    //   expect(foo.c === bar.c).toBe(true);
-    //   expect(foo === bar.foo).toBe(true);
-    //   expect(fn === (() => null)).toBe(false);
-    //   expect(fn2 === (() => null)).toBe(false);
-    //   expect(fn === fn2).toBe(false);
-    //   expect(fn === fn3).toBe(true);
-    //   expect(fn.toString() === fn2.toString()).toBe(true);
-    //   expect(fn.toString() === (() => null).toString()).toBe(true);
-    //   expect((() => null).toString() === (() => null).toString()).toBe(true);
-    // });
+      const foo = { a, b: [], c: 1 };
+      const bar = { a, b: [], c: 1, foo };
+      const fn = () => null;
+      const fn2 = () => null;
+      const fn3 = fn;
+      expect(foo === bar).toBe(false);
+      expect(foo.a === bar.a).toBe(true);
+      expect(foo.b === bar.b).toBe(false);
+      expect(foo.c === bar.c).toBe(true);
+      expect(foo === bar.foo).toBe(true);
+      expect(fn === (() => null)).toBe(false);
+      expect(fn2 === (() => null)).toBe(false);
+      expect(fn === fn2).toBe(false);
+      expect(fn === fn3).toBe(true);
+      expect(fn.toString() === fn2.toString()).toBe(true);
+      expect(fn.toString() === (() => null).toString()).toBe(true);
+      expect((() => null).toString() === (() => null).toString()).toBe(true);
+    });
 
-    // it.each([
-    //   { target1: new Number(1), target2: new Number(1), expected: false },
-    //   { target1: new String(1), target2: new String(1), expected: false },
-    //   {
-    //     target1: new (class {})(),
-    //     target2: new (class {})(),
-    //     expected: false,
-    //   },
-    //   { target1: {}, target2: {}, expected: true },
-    //   { target1: 1, target2: 1, expected: true },
-    //   { target1: [], target2: [], expected: true },
-    //   { target1: "abc", target2: "abc", expected: true },
-    //   { target1: null, target2: null, expected: true },
-    //   { target1: undefined, target2: undefined, expected: true },
-    //   { target1: [1, 2, 3], target2: [1, 2, 3], expected: true },
-    //   { target1: [1, 2, 3, [4]], target2: [1, 2, 3, [4]], expected: false },
-    //   {
-    //     target1: [1, 2, 3, { foo: 1 }],
-    //     target2: [1, 2, 3, { foo: 1 }],
-    //     expected: false,
-    //   },
-    //   { target1: [1, 2], target2: [1, 2, 3], expected: false },
-    //   { target1: { a: 1 }, target2: { a: 1 }, expected: true },
-    //   { target1: { a: 1 }, target2: { a: 2 }, expected: false },
-    //   {
-    //     target1: { a: 1, b: { c: 2 } },
-    //     target2: { a: 1, b: { c: 2 } },
-    //     expected: false,
-    //   },
-    // ])(
-    //   "shallowEquals($target1, $target2) === $expected",
-    //   ({ target1, target2, expected }) => {
-    //     expect(shallowEquals(target1, target2)).toBe(expected);
-    //   }
-    // );
+    it.each([
+      { target1: new Number(1), target2: new Number(1), expected: false },
+      { target1: new String(1), target2: new String(1), expected: false },
+      {
+        target1: new (class {})(),
+        target2: new (class {})(),
+        expected: false,
+      },
+      { target1: {}, target2: {}, expected: true },
+      { target1: 1, target2: 1, expected: true },
+      { target1: [], target2: [], expected: true },
+      { target1: "abc", target2: "abc", expected: true },
+      { target1: null, target2: null, expected: true },
+      { target1: undefined, target2: undefined, expected: true },
+      { target1: [1, 2, 3], target2: [1, 2, 3], expected: true },
+      { target1: [1, 2, 3, [4]], target2: [1, 2, 3, [4]], expected: false },
+      {
+        target1: [1, 2, 3, { foo: 1 }],
+        target2: [1, 2, 3, { foo: 1 }],
+        expected: false,
+      },
+      { target1: [1, 2], target2: [1, 2, 3], expected: false },
+      { target1: { a: 1 }, target2: { a: 1 }, expected: true },
+      { target1: { a: 1 }, target2: { a: 2 }, expected: false },
+      {
+        target1: { a: 1, b: { c: 2 } },
+        target2: { a: 1, b: { c: 2 } },
+        expected: false,
+      },
+    ])(
+      "shallowEquals($target1, $target2) === $expected",
+      ({ target1, target2, expected }) => {
+        expect(shallowEquals(target1, target2)).toBe(expected);
+      }
+    );
 
-    // it.each([
-    //   { target1: new Number(1), target2: new Number(1), expected: false },
-    //   { target1: new String(1), target2: new String(1), expected: false },
-    //   {
-    //     target1: new (class {})(),
-    //     target2: new (class {})(),
-    //     expected: false,
-    //   },
-    //   { target1: {}, target2: {}, expected: true },
-    //   { target1: 1, target2: 1, expected: true },
-    //   { target1: [], target2: [], expected: true },
-    //   { target1: "abc", target2: "abc", expected: true },
-    //   { target1: null, target2: null, expected: true },
-    //   { target1: undefined, target2: undefined, expected: true },
-    //   { target1: [1, 2, 3], target2: [1, 2, 3], expected: true },
-    //   { target1: [1, 2, 3, [4]], target2: [1, 2, 3, [4]], expected: true },
-    //   {
-    //     target1: [1, 2, 3, { foo: 1 }],
-    //     target2: [1, 2, 3, { foo: 1 }],
-    //     expected: true,
-    //   },
-    //   { target1: [1, 2], target2: [1, 2, 3], expected: false },
-    //   { target1: { a: 1 }, target2: { a: 1 }, expected: true },
-    //   { target1: { a: 1 }, target2: { a: 2 }, expected: false },
-    //   {
-    //     target1: { a: 1, b: { c: 2, d: [], e: [1, 2, 3] } },
-    //     target2: { a: 1, b: { c: 2, d: [], e: [1, 2, 3] } },
-    //     expected: true,
-    //   },
-    //   {
-    //     target1: { a: 1, b: { c: 2, d: [], e: [1, 2, 3], f: new Number(1) } },
-    //     target2: { a: 1, b: { c: 2, d: [], e: [1, 2, 3], f: new Number(1) } },
-    //     expected: false,
-    //   },
-    // ])(
-    //   "deepEquals($target1, $target2) === $expected",
-    //   ({ target1, target2, expected }) => {
-    //     expect(deepEquals(target1, target2)).toBe(expected);
-    //   }
-    // );
+    it.each([
+      { target1: new Number(1), target2: new Number(1), expected: false },
+      { target1: new String(1), target2: new String(1), expected: false },
+      {
+        target1: new (class {})(),
+        target2: new (class {})(),
+        expected: false,
+      },
+      { target1: {}, target2: {}, expected: true },
+      { target1: 1, target2: 1, expected: true },
+      { target1: [], target2: [], expected: true },
+      { target1: "abc", target2: "abc", expected: true },
+      { target1: null, target2: null, expected: true },
+      { target1: undefined, target2: undefined, expected: true },
+      { target1: [1, 2, 3], target2: [1, 2, 3], expected: true },
+      { target1: [1, 2, 3, [4]], target2: [1, 2, 3, [4]], expected: true },
+      {
+        target1: [1, 2, 3, { foo: 1 }],
+        target2: [1, 2, 3, { foo: 1 }],
+        expected: true,
+      },
+      { target1: [1, 2], target2: [1, 2, 3], expected: false },
+      { target1: { a: 1 }, target2: { a: 1 }, expected: true },
+      { target1: { a: 1 }, target2: { a: 2 }, expected: false },
+      {
+        target1: { a: 1, b: { c: 2, d: [], e: [1, 2, 3] } },
+        target2: { a: 1, b: { c: 2, d: [], e: [1, 2, 3] } },
+        expected: true,
+      },
+      {
+        target1: { a: 1, b: { c: 2, d: [], e: [1, 2, 3], f: new Number(1) } },
+        target2: { a: 1, b: { c: 2, d: [], e: [1, 2, 3], f: new Number(1) } },
+        expected: false,
+      },
+    ])(
+      "deepEquals($target1, $target2) === $expected",
+      ({ target1, target2, expected }) => {
+        expect(deepEquals(target1, target2)).toBe(expected);
+      }
+    );
   });
 
   // describe('number를 다뤄봅시다.', () => {
