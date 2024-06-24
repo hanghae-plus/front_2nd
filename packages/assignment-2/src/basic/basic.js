@@ -27,12 +27,10 @@ export function createUnenumerableObject(target) {
   return target;
 }
 
-export function forEach(target, callback) {}
-
-export function map(target, callback) {
+export function forEach(target, callback) {
   let copyTarget;
 
-  /**해당 데이터가 어떤 타입의 데이터인지 판별하는 함수 */
+  //해당 데이터가 어떤 타입의 데이터인지 판별하는 함수
   const checkDataType = (data) => {
     if (Array.isArray(data)) {
       return [...data];
@@ -41,13 +39,42 @@ export function map(target, callback) {
     }
   };
 
-  /**외부 부수효과가 나지 않도록 복사 */
+  //외부 부수효과가 나지 않도록 복사
   copyTarget = checkDataType(target);
 
-  /**object key,value 뽑기 */
+  //object key,value 뽑기
   const objArr = Object.entries(copyTarget);
 
-  /**NodeList라면 array형태로 콜백 값 넣어주기 */
+  for (let ele of objArr) {
+    const [key, value] = ele;
+
+    //
+    const newKey = !isNaN(Number(key)) ? Number(key) : key;
+    const newValue = !isNaN(Number(value)) ? Number(value) : value;
+
+    callback(newValue, newKey);
+  }
+}
+
+export function map(target, callback) {
+  let copyTarget;
+
+  //해당 데이터가 어떤 타입의 데이터인지 판별하는 함수
+  const checkDataType = (data) => {
+    if (Array.isArray(data)) {
+      return [...data];
+    } else {
+      return { ...data };
+    }
+  };
+
+  //외부 부수효과가 나지 않도록 복사
+  copyTarget = checkDataType(target);
+
+  //object key,value 뽑기
+  const objArr = Object.entries(copyTarget);
+
+  //NodeList라면 array형태로 콜백 값 넣어주기
   if (target instanceof NodeList) {
     const newData = [];
     for (let ele of objArr) {
@@ -57,7 +84,7 @@ export function map(target, callback) {
     }
     return newData;
   } else {
-    /**array, object라면 key값 그대로 사용하고 value는 콜백 넣어주기 */
+    //array, object라면 key값 그대로 사용하고 value는 콜백 넣어주기
     for (let ele of objArr) {
       const [key, value] = ele;
       const newValue = callback(value);
@@ -71,7 +98,7 @@ export function map(target, callback) {
 export function filter(target, callback) {
   let copyTarget;
 
-  /**해당 데이터가 어떤 타입의 데이터인지 판별하는 함수 */
+  //해당 데이터가 어떤 타입의 데이터인지 판별하는 함수
   const checkDataType = (data) => {
     if (Array.isArray(data)) {
       return [...data];
@@ -80,13 +107,13 @@ export function filter(target, callback) {
     }
   };
 
-  /**외부 부수효과가 나지 않도록 복사 */
+  //외부 부수효과가 나지 않도록 복사
   copyTarget = checkDataType(target);
 
-  /**object key,value 뽑기 */
+  //object key,value 뽑기
   const objArr = Object.entries(copyTarget);
 
-  /**NodeList라면 array형태로 콜백 값 넣어주기 */
+  //NodeList라면 array형태로 콜백 값 넣어주기
   if (target instanceof NodeList) {
     const newData = [];
     for (let ele of objArr) {
@@ -98,12 +125,12 @@ export function filter(target, callback) {
     }
     return newData;
   } else {
-    /**array, object라면 key값 그대로 사용하고 value는 콜백 넣어주기 */
+    //array, object라면 key값 그대로 사용하고 value는 콜백 넣어주기
     const newData = {};
     for (let ele of objArr) {
       const [key, value] = ele;
 
-      /**callback filter조건을 통과하지 못하면 conrinue */
+      //callback filter조건을 통과하지 못하면 conrinue
       if (!callback(value)) {
         continue;
       }
@@ -111,7 +138,7 @@ export function filter(target, callback) {
       newData[key] = value;
     }
 
-    /**array일 경우 value만 뽑아서 return */
+    //array일 경우 value만 뽑아서 return
     return Array.isArray(target) ? Object.values(newData) : newData;
   }
 }
@@ -119,7 +146,7 @@ export function filter(target, callback) {
 export function every(target, callback) {
   let copyTarget;
 
-  /**해당 데이터가 어떤 타입의 데이터인지 판별하는 함수 */
+  //해당 데이터가 어떤 타입의 데이터인지 판별하는 함수
   const checkDataType = (data) => {
     if (Array.isArray(data)) {
       return [...data];
@@ -128,15 +155,15 @@ export function every(target, callback) {
     }
   };
 
-  /**외부 부수효과가 나지 않도록 복사 */
+  //외부 부수효과가 나지 않도록 복사
   copyTarget = checkDataType(target);
 
-  /**object key,value 뽑기 */
+  //object key,value 뽑기
   const objArr = Object.entries(copyTarget);
 
   for (let ele of objArr) {
-    const [key, value] = ele;
-    /**요소가 하나라도 callback조건을 통과 못하면 return false */
+    const [, value] = ele;
+    //요소가 하나라도 callback조건을 통과 못하면 return false
     if (!callback(value)) {
       return false;
     }
@@ -148,7 +175,7 @@ export function every(target, callback) {
 export function some(target, callback) {
   let copyTarget;
 
-  /**해당 데이터가 어떤 타입의 데이터인지 판별하는 함수 */
+  //해당 데이터가 어떤 타입의 데이터인지 판별하는 함수
   const checkDataType = (data) => {
     if (Array.isArray(data)) {
       return [...data];
@@ -157,15 +184,15 @@ export function some(target, callback) {
     }
   };
 
-  /**외부 부수효과가 나지 않도록 복사 */
+  //외부 부수효과가 나지 않도록 복사
   copyTarget = checkDataType(target);
 
-  /**object key,value 뽑기 */
+  //object key,value 뽑기
   const objArr = Object.entries(copyTarget);
 
   for (let ele of objArr) {
-    const [key, value] = ele;
-    /**요소가 하나라도 callback조건을 통과 못하면 return false */
+    const [, value] = ele;
+    //요소가 하나라도 callback조건을 통과 못하면 return false
     if (callback(value)) {
       return true;
     }

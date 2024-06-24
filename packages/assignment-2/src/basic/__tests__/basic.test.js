@@ -255,29 +255,29 @@ describe("assignment 2 > basic : 값을 다루기", () => {
     //   expect({ ...obj }).toEqual({});
     // });
 
-    // it("forEach > ", () => {
-    //   const results = [];
-    //   forEach(obj, (value, key) => results.push({ value, key }));
-    //   expect(results).toStrictEqual([
-    //     { value: 1, key: "a" },
-    //     { value: 2, key: "b" },
-    //   ]);
-    //   results.length = 0;
+    it("forEach > ", () => {
+      const results = [];
+      forEach(obj, (value, key) => results.push({ value, key }));
+      expect(results).toStrictEqual([
+        { value: 1, key: "a" },
+        { value: 2, key: "b" },
+      ]);
+      results.length = 0;
 
-    //   forEach(["a", "b"], (value, key) => results.push({ value, key }));
-    //   expect(results).toStrictEqual([
-    //     { value: "a", key: 0 },
-    //     { value: "b", key: 1 },
-    //   ]);
-    //   results.length = 0;
+      forEach(["a", "b"], (value, key) => results.push({ value, key }));
+      expect(results).toStrictEqual([
+        { value: "a", key: 0 },
+        { value: "b", key: 1 },
+      ]);
+      results.length = 0;
 
-    //   const spans = document.querySelectorAll("#test span");
-    //   forEach(spans, (value, key) => results.push({ value, key }));
-    //   expect(results).toStrictEqual([
-    //     { value: spans[0], key: 0 },
-    //     { value: spans[1], key: 1 },
-    //   ]);
-    // });
+      const spans = document.querySelectorAll("#test span");
+      forEach(spans, (value, key) => results.push({ value, key }));
+      expect(results).toStrictEqual([
+        { value: spans[0], key: 0 },
+        { value: spans[1], key: 1 },
+      ]);
+    });
 
     it("map > ", () => {
       const objectResult = map(obj, (value) => value * 2);
