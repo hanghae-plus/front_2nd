@@ -168,7 +168,21 @@ export function forEach(target, callback) {
 }
 
 export function map(target, callback) {
+  const result = Array.isArray(target) || target instanceof NodeList ? [] : {};
+  if (Array.isArray(result)) {
+    for (let i = 0; i < target.length; i++) {
+      result.push(callback(target[i], i, target));
+    }
+  } else {
+    const keys = Object.getOwnPropertyNames(target).filter(
+      (key) => key !== "length"
+    );
+    for (const key of keys) {
+      result[key] = callback(target[key], key, target);
+    }
+  }
 
+  return result;
 }
 
 export function filter(target, callback) {
