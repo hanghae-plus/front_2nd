@@ -1,55 +1,57 @@
 // Static method는 클래스 레벨에서 동작하고, prototype method는 인스턴스 레벨에서 동작함.
 
 export function shallowEquals(target1, target2) {
- // target1,2의 type의 구분이 필요, ex) class로 만든 인스턴스, object, arr, primitive type;
- // 출제의도: 어떤 방법으로 만들어진 자료형인지 아는 것과, 내용을 비교하는 방식을 아는지.
- if (target1 === target2) return true;
- // 원시 자료형은 값과 타입이 모두 같은지 비교.
- // 참조 자료형은 같은 주소를 참조 하는지 비교.
+  // target1,2의 type의 구분이 필요, ex) class로 만든 인스턴스, object, arr, primitive type;
+  // 출제의도: 어떤 방법으로 만들어진 자료형인지 아는 것과, 내용을 비교하는 방식을 아는지.
+  if (target1 === target2) return true;
+  // 원시 자료형은 값과 타입이 모두 같은지 비교.
+  // 참조 자료형은 같은 주소를 참조 하는지 비교.
 
-if (typeof target1 !== 'object' || typeof target2 !== 'object') return false;
+  if (typeof target1 !== "object" || typeof target2 !== "object") return false;
 
-// new Number 나 new String에 의해 만들어진 값인지 확인하는 방법.
-// ex) const a = new Number(1), const b = 1;
-// a instanceOf Number ==> true; b instanceOf Number ==> false;
-if (target1 instanceof Number && target2 instanceof Number || target1 instanceof String && target2 instanceof String) return false;
+  // new Number 나 new String에 의해 만들어진 값인지 확인하는 방법.
+  // ex) const a = new Number(1), const b = 1;
+  // a instanceOf Number ==> true; b instanceOf Number ==> false;
+  if (
+    (target1 instanceof Number && target2 instanceof Number) ||
+    (target1 instanceof String && target2 instanceof String)
+  )
+    return false;
 
-// 배열일때 비교하는 방법
-// 1. 길이 비교
-// 2. 순회하여 각 인덱스의 값들이 같은지 비교.
-if (Array.isArray(target1) && Array.isArray(target2)) {
-  if (target1.length !== target2.length) return false; 
-  for (let i = 0; i < target1.length; i++) {
-    if (target1[i] !== target2[i]) return false;
+  // 배열일때 비교하는 방법
+  // 1. 길이 비교
+  // 2. 순회하여 각 인덱스의 값들이 같은지 비교.
+  if (Array.isArray(target1) && Array.isArray(target2)) {
+    if (target1.length !== target2.length) return false;
+    for (let i = 0; i < target1.length; i++) {
+      if (target1[i] !== target2[i]) return false;
+    }
+    return true;
   }
+  // object일때 비교하는 방법
+
+  // __proto__.constructor === Object 는 Object 생성자 함수에서 생성되었는지 확인하는 방법.
+  if (
+    target1.__proto__.constructor !== Object &&
+    target2.__proto__.constructor !== Object
+  ) {
+    return target1.__proto__.constructor === target2.__proto__.constructor;
+  }
+
+  // 모든 키 순회 할 수 있게 배열로 만들어 값 비교.
+  const target1Keys = Object.keys(target1);
+  const target2Keys = Object.keys(target2);
+
+  if (target1Keys.length !== target2Keys.length) return false;
+
+  for (let i = 0; i < target1Keys.length; i++) {
+    if (target1[target1Keys[i]] !== target2[target2Keys[i]]) {
+      return false;
+    }
+  }
+
   return true;
 }
-// object일때 비교하는 방법
-
-// __proto__.constructor === Object 는 Object 생성자 함수에서 생성되었는지 확인하는 방법.
-if (target1.__proto__.constructor !== Object && target2.__proto__.constructor !== Object) {
-  return target1.__proto__.constructor === target2.__proto__.constructor
-}
-
-
-// 모든 키 순회 할 수 있게 배열로 만들어 값 비교.
-const target1Keys = Object.keys(target1);
-const target2Keys = Object.keys(target2);
-
-if (target1Keys.length !== target2Keys.length) {
-  return false;
-}
-
-for (let i = 0; i < target1Keys.length; i++) {
-  if (target1[target1Keys[i]] !== target2[target2Keys[i]]) {
-    return false;
-  }
-}
-
-return true;
-}
-
-
 
 export function deepEquals(target1, target2) {
   // 출제의도: 제귀함수를 만들 수 있는지, depth의 마지막을 찾을 수 있는지.
@@ -57,54 +59,70 @@ export function deepEquals(target1, target2) {
   // 깊이를 파악하기 전까지 shallowEqual함수를 return.
   // 마지막 깊이에 도달하면 return을 반환.
   // ex) 팩토리얼 함수.
-  // 5! = 
+  // 5! =
   // const factorial = (n) =>{
   //   if (n > 0) {
   //     return n * factorial(n-1);
   //   } else return 1;
   // }
-  
-// 원시 값이면 true, 객체나 배열이면 false 반환
+
+  // 원시 값이면 true, 객체나 배열이면 false 반환
   if (target1 === target2) return true;
-  
+  function toCheckPrim(value) {
+    return value !== Object(value);
+  }
+
   // 타입이 다르면 false 반환
-  if (typeof target1 !== 'object' || typeof target2 !== 'object' || target1 === null || target2 === null) {
+  if (
+    typeof target1 !== "object" ||
+    typeof target2 !== "object" ||
+    target1 === null ||
+    target2 === null
+  ) {
     return false;
   }
-  function isPrimitive(value) {
-    return value !== Object(value); 
-  }
-  
+
+  if (
+    (target1 instanceof Number && target2 instanceof Number) ||
+    (target1 instanceof String && target2 instanceof String)
+  )
+    return false;
+
+  if (typeof target1 !== "object" || typeof target2 !== "object") return false;
+
   // 배열 비교
   if (Array.isArray(target1) && Array.isArray(target2)) {
     if (target1.length !== target2.length) return false;
     for (let i = 0; i < target1.length; i++) {
-      if (!isPrimitive(target1[i] && !isPrimitive(target2[i]))){
+      if (!toCheckPrim(target1[i] && !toCheckPrim(target2[i]))) {
         if (!deepEquals(target1[i], target2[i])) return false;
-      }      
+      }
     }
     return true;
   }
-  
+
   // 객체 비교
 
-  
-
-  const keys1 = Object.keys(target1);
-  const keys2 = Object.keys(target2);
-  
-  if (keys1.length !== keys2.length) return false;
-  
- 
-  for (let key of keys1) {
-    if (!isPrimitive(keys2[key])|| !deepEquals(target1[key], target2[key])) return false;
+  if (
+    target1.__proto__.constructor !== Object &&
+    target2.__proto__.constructor !== Object
+  ) {
+    return target1.__proto__.constructor === target2.__proto__.constructor;
   }
-  
+
+  const toArray1 = Object.keys(target1);
+  const toArray2 = Object.keys(target2);
+  console.log(target1, toArray1);
+  if (toArray1.length !== toArray2.length) return false;
+
+  for (let key of toArray1) {
+    if (!toArray2.includes(key) || !deepEquals(target1[key], target2[key])) {
+      return false;
+    }
+  }
+
   return true;
-
 }
-
-
 
 export function createNumber1(n) {
   // 출제의도: js는 객체에 산술 연산을 할때 valueOf 매서드나 toString 매서드를 호출하여 객체를 원시 값으로 변환한다.
@@ -129,8 +147,8 @@ export function createNumber3(n) {
     valueOf() {
       return this.value;
     }
-    toString(){
-      return this.value
+    toString() {
+      return this.value;
     }
     toJSON() {
       return `this is createNumber3 => ${this.value}`;
@@ -140,12 +158,11 @@ export function createNumber3(n) {
     }
   }
   const createNum3 = new CreateNum3(n);
-  return createNum3
-  
+  return createNum3;
 }
 const cache = {};
 
-export class CustomNumber {  
+export class CustomNumber {
   //출제의도: class를 생성하여 만들어낸 인스턴스 값 캐싱.
   constructor(n) {
     if (cache[n]) {
