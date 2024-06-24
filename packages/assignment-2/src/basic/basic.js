@@ -1,6 +1,6 @@
-import { checkDataType, checkDeepObj, checkShallowObj } from "./utils";
+import { cloneData, checkShallowObj } from "./utils";
 
-//얕은 비교를 수행하는 함수
+/**얕은 비교를 수행하는 함수*/
 export function shallowEquals(target1, target2) {
   if (target1 === target2) {
     return target1 === target2;
@@ -19,7 +19,7 @@ export function shallowEquals(target1, target2) {
   return checkShallowObj(target1, target2);
 }
 
-//깊은 비교를 수행하는 함수
+/**깊은 비교를 수행하는 함수*/
 export function deepEquals(target1, target2) {
   if (target1 === target2) {
     return target1 === target2;
@@ -27,7 +27,12 @@ export function deepEquals(target1, target2) {
 
   // Array일 때
   if ((Array.isArray(target1), Array.isArray(target2))) {
-    return checkDeepObj(target1, target2);
+    return (
+      target1.length === target2.length &&
+      target1.every((value, index) => {
+        return deepEquals(value, target2[index]);
+      })
+    );
   }
 
   // constructor가 Object인지 판별
@@ -35,33 +40,44 @@ export function deepEquals(target1, target2) {
     return false;
   }
 
-  return checkDeepObj(target1, target2);
+  return checkShallowObj(target1, target2);
 }
 
+/**number instance로 만드는 함수 */
 export function createNumber1(n) {
   return new Number(n);
 }
 
-// string instance로 만드는 함수
+/**string instance로 만드는 함수*/
 export function createNumber2(n) {
   return new String(n);
 }
 
+/** */
 export function createNumber3(n) {
   return +new String(n);
 }
 
 export class CustomNumber {}
 
+/**enumerable false처리한 Object를 만드는 함수 */
 export function createUnenumerableObject(target) {
-  return target;
+  const copyTarget = cloneData(target);
+
+  const objKey = Object.keys(copyTarget);
+
+  objKey.forEach((key) => {
+    Object.defineProperty(copyTarget, key, {
+      enumerable: false,
+    });
+  });
+
+  return copyTarget;
 }
 
+/**forEach함수 구현 */
 export function forEach(target, callback) {
-  let copyTarget;
-
-  //외부 부수효과가 나지 않도록 복사
-  copyTarget = checkDataType(target);
+  const copyTarget = cloneData(target);
 
   //object key,value 뽑기
   const objArr = Object.entries(copyTarget);
@@ -77,11 +93,9 @@ export function forEach(target, callback) {
   }
 }
 
+/**map함수 구현 */
 export function map(target, callback) {
-  let copyTarget;
-
-  //외부 부수효과가 나지 않도록 복사
-  copyTarget = checkDataType(target);
+  const copyTarget = cloneData(target);
 
   //object key,value 뽑기
   const objArr = Object.entries(copyTarget);
@@ -107,11 +121,9 @@ export function map(target, callback) {
   }
 }
 
+/**filter함수 구현 */
 export function filter(target, callback) {
-  let copyTarget;
-
-  //외부 부수효과가 나지 않도록 복사
-  copyTarget = checkDataType(target);
+  const copyTarget = cloneData(target);
 
   //object key,value 뽑기
   const objArr = Object.entries(copyTarget);
@@ -146,11 +158,9 @@ export function filter(target, callback) {
   }
 }
 
+/**every함수 구현 */
 export function every(target, callback) {
-  let copyTarget;
-
-  //외부 부수효과가 나지 않도록 복사
-  copyTarget = checkDataType(target);
+  const copyTarget = cloneData(target);
 
   //object key,value 뽑기
   const objArr = Object.entries(copyTarget);
@@ -166,10 +176,9 @@ export function every(target, callback) {
   return true;
 }
 
+/**some함수 구현 */
 export function some(target, callback) {
-  let copyTarget;
-
-  copyTarget = checkDataType(target);
+  const copyTarget = cloneData(target);
 
   //object key,value 뽑기
   const objArr = Object.entries(copyTarget);

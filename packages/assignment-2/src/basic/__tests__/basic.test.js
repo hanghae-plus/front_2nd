@@ -173,70 +173,53 @@ describe("assignment 2 > basic : 값을 다루기", () => {
       expect(num1 instanceof Number).toBe(false);
       expect(num2 instanceof Number).toBe(false);
     });
-    // it("createNumber3 > ", () => {
-    //   const num1 = createNumber3(1);
-    //   const num2 = createNumber3(2);
-    //   expect(1 + num2).toBe(3);
-    //   expect(num1 + 2).toBe(3);
-    //   expect(num1 === 1).toBe(false);
-    //   expect(num1 === 2).toBe(false);
-    //   expect(num1 == 1).toBe(true);
-    //   expect(num2 == 2).toBe(true);
-    //   expect(JSON.stringify(num1)).toBe('"this is createNumber3 => 1"');
-    //   expect(JSON.stringify(num2)).toBe('"this is createNumber3 => 2"');
-    //   expect(JSON.stringify(num1 + num2)).toBe("3");
-    //   expect(JSON.stringify(`${num1}${num2}`)).toBe('"12"');
-    //   expect(typeof num1 === "number").toBe(false);
-    //   expect(typeof num1 === "object").toBe(true);
-    //   expect(num1 instanceof Number).toBe(false);
-    //   expect(num2 instanceof Number).toBe(false);
-    // });
-    //   it('createNumber3 > ', () => {
-    //     const num1 = createNumber3(1);
-    //     const num2 = createNumber3(2);
-    //     expect(1 + num2).toBe(3);
-    //     expect(num1 + 2).toBe(3);
-    //     expect(num1 === 1).toBe(false);
-    //     expect(num1 === 2).toBe(false);
-    //     expect(num1 == 1).toBe(true);
-    //     expect(num2 == 2).toBe(true);
-    //     expect(JSON.stringify(num1)).toBe('"this is createNumber3 => 1"');
-    //     expect(JSON.stringify(num2)).toBe('"this is createNumber3 => 2"');
-    //     expect(JSON.stringify(num1 + num2)).toBe('3');
-    //     expect(JSON.stringify(`${num1}${num2}`)).toBe('"12"');
-    //     expect(typeof num1 === 'number').toBe(false);
-    //     expect(typeof num1 === 'object').toBe(true);
-    //     expect(num1 instanceof Number).toBe(false);
-    //     expect(num2 instanceof Number).toBe(false);
-    //   })
-    it("CustomNumber > ", () => {
-      const num1 = new CustomNumber(1);
-      const num2 = new CustomNumber(2);
-      const num3 = new CustomNumber(1);
-      const num4 = new CustomNumber(2);
+    it("createNumber3 > ", () => {
+      const num1 = createNumber3(1);
+      const num2 = createNumber3(2);
+      expect(1 + num2).toBe(3);
+      expect(num1 + 2).toBe(3);
       expect(num1 === 1).toBe(false);
-      expect(num2 === 2).toBe(false);
-      expect(num3 === 1).toBe(false);
-      expect(num4 === 2).toBe(false);
+      expect(num1 === 2).toBe(false);
       expect(num1 == 1).toBe(true);
       expect(num2 == 2).toBe(true);
-      expect(num3 == 1).toBe(true);
-      expect(num4 == 2).toBe(true);
-      expect(num1).toBe(num3);
-      expect(num2).toBe(num4);
-      expect(num1 + num2).toBe(3);
-      expect(num3 + num4).toBe(3);
-      expect(num1 + num3).toBe(2);
-      expect(num2 + num4).toBe(4);
-      expect(num3 + `${num4}`).toBe("12");
-      expect(num1 + `${num2}`).toBe("12");
-      expect(num1 + `${num3}`).toBe("11");
-      expect(num2 + `${num4}`).toBe("22");
-      expect(JSON.stringify(num3) + `${num4}`).toBe('"1"2');
-      expect(JSON.stringify(num1) + `${num2}`).toBe('"1"2');
-      expect(JSON.stringify(num1) + `${num3}`).toBe('"1"1');
-      expect(JSON.stringify(num2) + `${num4}`).toBe('"2"2');
+      expect(JSON.stringify(num1)).toBe('"this is createNumber3 => 1"');
+      expect(JSON.stringify(num2)).toBe('"this is createNumber3 => 2"');
+      expect(JSON.stringify(num1 + num2)).toBe("3");
+      expect(JSON.stringify(`${num1}${num2}`)).toBe('"12"');
+      expect(typeof num1 === "number").toBe(false);
+      expect(typeof num1 === "object").toBe(true);
+      expect(num1 instanceof Number).toBe(false);
+      expect(num2 instanceof Number).toBe(false);
     });
+
+    //   it("CustomNumber > ", () => {
+    //     const num1 = new CustomNumber(1);
+    //     const num2 = new CustomNumber(2);
+    //     const num3 = new CustomNumber(1);
+    //     const num4 = new CustomNumber(2);
+    //     expect(num1 === 1).toBe(false);
+    //     expect(num2 === 2).toBe(false);
+    //     expect(num3 === 1).toBe(false);
+    //     expect(num4 === 2).toBe(false);
+    //     expect(num1 == 1).toBe(true);
+    //     expect(num2 == 2).toBe(true);
+    //     expect(num3 == 1).toBe(true);
+    //     expect(num4 == 2).toBe(true);
+    //     expect(num1).toBe(num3);
+    //     expect(num2).toBe(num4);
+    //     expect(num1 + num2).toBe(3);
+    //     expect(num3 + num4).toBe(3);
+    //     expect(num1 + num3).toBe(2);
+    //     expect(num2 + num4).toBe(4);
+    //     expect(num3 + `${num4}`).toBe("12");
+    //     expect(num1 + `${num2}`).toBe("12");
+    //     expect(num1 + `${num3}`).toBe("11");
+    //     expect(num2 + `${num4}`).toBe("22");
+    //     expect(JSON.stringify(num3) + `${num4}`).toBe('"1"2');
+    //     expect(JSON.stringify(num1) + `${num2}`).toBe('"1"2');
+    //     expect(JSON.stringify(num1) + `${num3}`).toBe('"1"1');
+    //     expect(JSON.stringify(num2) + `${num4}`).toBe('"2"2');
+    //   });
   });
 
   describe("Array와 Object를 동시에 다룰 수 있는 함수를 만들어봅시다.", () => {
@@ -246,11 +229,11 @@ describe("assignment 2 > basic : 값을 다루기", () => {
 
     const obj = createUnenumerableObject({ a: 1, b: 2 });
 
-    // it("createUnenumerableObject > ", () => {
-    //   expect(obj.a).toEqual(1);
-    //   expect(obj.b).toEqual(2);
-    //   expect({ ...obj }).toEqual({});
-    // });
+    it("createUnenumerableObject > ", () => {
+      expect(obj.a).toEqual(1);
+      expect(obj.b).toEqual(2);
+      expect({ ...obj }).toEqual({});
+    });
 
     it("forEach > ", () => {
       const results = [];
