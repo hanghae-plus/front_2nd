@@ -140,7 +140,7 @@ export function createUnenumerableObject(target) {
   }
 
   // 이터레이터를 정의하여 객체 내부의 값들을 순회할 수 있게 함
-  result[Symbol.iterator] = function *() {
+  result[Symbol.iterator] = function* () {
     const properties = Object.getOwnPropertyNames(this);
     for (let i = 0; i < properties.length; i++) {
       yield [properties[i], this[properties[i]]];
