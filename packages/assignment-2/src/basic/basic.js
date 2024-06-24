@@ -59,9 +59,9 @@ export function createNumber1(n) {
   return Number(n);
 }
 
+// string instance로 만드는 함수
 export function createNumber2(n) {
-  return Number(n);
-  // return n;
+  return new String(n);
 }
 
 export function createNumber3(n) {
