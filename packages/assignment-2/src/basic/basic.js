@@ -186,7 +186,24 @@ export function map(target, callback) {
 }
 
 export function filter(target, callback) {
-
+  const result = Array.isArray(target) || target instanceof NodeList ? [] : {};
+  if (Array.isArray(result)) {
+    for (let i = 0; i < target.length; i++) {
+      if (callback(target[i], i, target)) {
+        result.push(target[i]);
+      }
+    }
+  } else {
+    const keys = Object.getOwnPropertyNames(target).filter(
+      (key) => key !== "length"
+    );
+    for (const key of keys) {
+      if (callback(target[key], key, target)) {
+        result[key] = target[key];
+      }
+    }
+  }
+  return result;
 }
 
 
