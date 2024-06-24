@@ -86,8 +86,21 @@ export function createNumber2(n) {
   return new String(n);
 }
 
+// https://ko.javascript.info/object-toprimitive
 export function createNumber3(n) {
-  return n;
+  return {
+    valueOf() {
+      return n;
+    },
+    toJSON() {
+      return `this is createNumber3 => ${n}`;
+    },
+    [Symbol.toPrimitive](hint) {
+      if (hint === "number") return n;
+      if (hint === "string") return String(n);
+      return n;
+    },
+  };
 }
 
 export class CustomNumber {
