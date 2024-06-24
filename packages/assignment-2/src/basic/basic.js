@@ -139,6 +139,20 @@ export function createUnenumerableObject(target) {
     });
   }
 
+  // 이터레이터를 정의하여 객체 내부의 값들을 순회할 수 있게 함
+  result[Symbol.iterator] = function *() {
+    const properties = Object.getOwnPropertyNames(this);
+    for (let i = 0; i < properties.length; i++) {
+      yield [properties[i], this[properties[i]]];
+    }
+  };
+
+  Object.defineProperty(result, Symbol.iterator, {
+    enumerable: false,
+    writable: false,
+    configurable: false
+  });
+
   return result
 }
 
@@ -152,14 +166,7 @@ function isArrayLike(target){
 }
 
 export function forEach(target, callback) {
-  if (Array.isArray(target)) {
-    for (let i = 0; i < target.length; i++) {
-      callback(target[i], i, target);
-    }
-    return;
-  } 
-
-  if (isArrayLike(target)) {
+  if (Array.isArray(target) || isArrayLike(target)) {
     const iterator = Array.from(target);
     for (let i = 0; i < iterator.length; i++) {
       callback(iterator[i], i);
@@ -168,25 +175,16 @@ export function forEach(target, callback) {
   }
   
   if (typeof target === 'object') {
-    const properties = Object.getOwnPropertyNames(target);
-
-    for (let i = 0; i < properties.length; i++) {
-      callback(target[properties[i]], properties[i]);
+    for (const [key, value] of target) {
+      callback(value, key);
     }
   }
 }
 
 export function map(target, callback) {
-  let result;
+  let result = [];
 
-  if (Array.isArray(target)) {
-    result = [];
-    for (let i = 0; i < target.length; i++) {
-      result.push(callback(target[i], i, target));
-    }
-  } 
-
-  if (isArrayLike(target)) {
+  if (Array.isArray(target) || isArrayLike(target)) {
     result = [];
     const iterator = Array.from(target);
     for (const item of iterator) {
@@ -197,9 +195,8 @@ export function map(target, callback) {
   
   if (typeof target === 'object') {
     result = {};
-    const properties = Object.getOwnPropertyNames(target);
-    for (let i = 0; i < properties.length; i++) {
-      result[properties[i]] = callback(target[properties[i]]);
+    for (const [key, value] of target) {
+      result[key] = callback(value);
     }
   }
 
@@ -207,19 +204,9 @@ export function map(target, callback) {
 }
 
 export function filter(target, callback) {
-  let result;
+  let result = [];
 
-  if (Array.isArray(target)) {
-    result = [];
-    for (let i = 0; i < target.length; i++){
-      if (callback(target[i], i, target)) {
-        result.push(target[i]);
-      }
-    }
-    return result;
-  } 
-
-  if (isArrayLike(target)) {
+  if (Array.isArray(target) || isArrayLike(target)) {
     result = [];
     const iterator = Array.from(target);
     for (const item of iterator) {
@@ -232,11 +219,10 @@ export function filter(target, callback) {
 
   if (typeof target === 'object') {
     result = {};
-    const properties = Object.getOwnPropertyNames(target);
 
-    for (let i = 0; i < properties.length; i++){
-      if (callback(target[properties[i]])) {
-        result[properties[i]] = target[properties[i]];
+    for (const [key, value] of target) {
+      if (callback(value)) {
+        result[key] = value;
       }
     }
   }
@@ -246,16 +232,7 @@ export function filter(target, callback) {
 
 
 export function every(target, callback) {
-  if (Array.isArray(target)) {
-    for (let i = 0; i < target.length; i++) {
-      if (!callback(target[i], i, target)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  if (isArrayLike(target)) {
+  if (Array.isArray(target) || isArrayLike(target)) {
     const iterator = Array.from(target);
     for (const item of iterator) {
       if (!callback(item)) {
@@ -266,10 +243,8 @@ export function every(target, callback) {
   }
   
   if (typeof target === 'object') {
-    const properties = Object.getOwnPropertyNames(target);
-
-    for (let i = 0; i < properties.length; i++) {
-      if (!callback(target[properties[i]])) {
+    for (const [, value] of target) {
+      if (!callback(value)) {
         return false;
       }
     }
@@ -280,16 +255,7 @@ export function every(target, callback) {
 }
 
 export function some(target, callback) {
-  if (Array.isArray(target)) {
-    for (let i = 0; i < target.length; i++) {
-      if (callback(target[i])) {
-        return true;
-      }
-    }
-    return false;
-  } 
-
-  if (isArrayLike(target)) {
+  if (Array.isArray(target) || isArrayLike(target)) {
     const iterator = Array.from(target);
     for (const item of iterator) {
       if (callback(item)) {
@@ -297,16 +263,15 @@ export function some(target, callback) {
       }
     }
     return false;
-  }
+  } 
   
   if (typeof target === 'object') {
-    const properties = Object.getOwnPropertyNames(target);
-
-    for (let i = 0; i < properties.length; i++) {
-      if (callback(target[properties[i]])) {
+    for (const [, value] of target) {
+      if (callback(value)) {
         return true;
       }
     }
+    return false;
   }
 
   return false;
