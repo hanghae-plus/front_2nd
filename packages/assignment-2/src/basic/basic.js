@@ -44,8 +44,10 @@ export function shallowEquals(target1, target2) {
 
   // object와 array
   if (
-    Object.prototype.toString.call(target1).split(" ")[1].includes("Object") ||
-    Object.prototype.toString.call(target1).split(" ")[1].includes("Array")
+    target1.toString() === "[object Object]" ||
+    target2.toString() === "[object Object]" ||
+    Array.isArray(target1) ||
+    Array.isArray(target2)
   ) {
     const keys1 = Object.keys(target1);
     const keys2 = Object.keys(target2);
