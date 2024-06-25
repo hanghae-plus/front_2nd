@@ -101,46 +101,46 @@ describe("assignment 2 > basic : 값을 다루기", () => {
       }
     );
 
-    // it.each([
-    //   { target1: new Number(1), target2: new Number(1), expected: false },
-    //   { target1: new String(1), target2: new String(1), expected: false },
-    //   {
-    //     target1: new (class {})(),
-    //     target2: new (class {})(),
-    //     expected: false,
-    //   },
-    //   { target1: {}, target2: {}, expected: true },
-    //   { target1: 1, target2: 1, expected: true },
-    //   { target1: [], target2: [], expected: true },
-    //   { target1: "abc", target2: "abc", expected: true },
-    //   { target1: null, target2: null, expected: true },
-    //   { target1: undefined, target2: undefined, expected: true },
-    //   { target1: [1, 2, 3], target2: [1, 2, 3], expected: true },
-    //   { target1: [1, 2, 3, [4]], target2: [1, 2, 3, [4]], expected: true },
-    //   {
-    //     target1: [1, 2, 3, { foo: 1 }],
-    //     target2: [1, 2, 3, { foo: 1 }],
-    //     expected: true,
-    //   },
-    //   { target1: [1, 2], target2: [1, 2, 3], expected: false },
-    //   { target1: { a: 1 }, target2: { a: 1 }, expected: true },
-    //   { target1: { a: 1 }, target2: { a: 2 }, expected: false },
-    //   {
-    //     target1: { a: 1, b: { c: 2, d: [], e: [1, 2, 3] } },
-    //     target2: { a: 1, b: { c: 2, d: [], e: [1, 2, 3] } },
-    //     expected: true,
-    //   },
-    //   {
-    //     target1: { a: 1, b: { c: 2, d: [], e: [1, 2, 3], f: new Number(1) } },
-    //     target2: { a: 1, b: { c: 2, d: [], e: [1, 2, 3], f: new Number(1) } },
-    //     expected: false,
-    //   },
-    // ])(
-    //   "deepEquals($target1, $target2) === $expected",
-    //   ({ target1, target2, expected }) => {
-    //     expect(deepEquals(target1, target2)).toBe(expected);
-    //   }
-    // );
+    it.each([
+      { target1: new Number(1), target2: new Number(1), expected: false },
+      { target1: new String(1), target2: new String(1), expected: false },
+      {
+        target1: new (class {})(),
+        target2: new (class {})(),
+        expected: false,
+      },
+      { target1: {}, target2: {}, expected: true },
+      { target1: 1, target2: 1, expected: true },
+      { target1: [], target2: [], expected: true },
+      { target1: "abc", target2: "abc", expected: true },
+      { target1: null, target2: null, expected: true },
+      { target1: undefined, target2: undefined, expected: true },
+      { target1: [1, 2, 3], target2: [1, 2, 3], expected: true },
+      { target1: [1, 2, 3, [4]], target2: [1, 2, 3, [4]], expected: true },
+      {
+        target1: [1, 2, 3, { foo: 1 }],
+        target2: [1, 2, 3, { foo: 1 }],
+        expected: true,
+      },
+      { target1: [1, 2], target2: [1, 2, 3], expected: false },
+      { target1: { a: 1 }, target2: { a: 1 }, expected: true },
+      { target1: { a: 1 }, target2: { a: 2 }, expected: false },
+      {
+        target1: { a: 1, b: { c: 2, d: [], e: [1, 2, 3] } },
+        target2: { a: 1, b: { c: 2, d: [], e: [1, 2, 3] } },
+        expected: true,
+      },
+      {
+        target1: { a: 1, b: { c: 2, d: [], e: [1, 2, 3], f: new Number(1) } },
+        target2: { a: 1, b: { c: 2, d: [], e: [1, 2, 3], f: new Number(1) } },
+        expected: false,
+      },
+    ])(
+      "deepEquals($target1, $target2) === $expected",
+      ({ target1, target2, expected }) => {
+        expect(deepEquals(target1, target2)).toBe(expected);
+      }
+    );
   });
 
   describe("number를 다뤄봅시다.", () => {

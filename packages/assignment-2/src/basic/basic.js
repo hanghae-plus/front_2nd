@@ -25,13 +25,14 @@ export function deepEquals(target1, target2) {
     return target1 === target2;
   }
 
+  const key1 = Object.keys(target1);
+  const key2 = Object.keys(target2);
+
   // Array일 때
   if ((Array.isArray(target1), Array.isArray(target2))) {
     return (
-      target1.length === target2.length &&
-      target1.every((value, index) => {
-        return deepEquals(value, target2[index]);
-      })
+      checkShallowObj(key1, key2) &&
+      key1.every((key) => deepEquals(target1[key], target2[key]))
     );
   }
 
@@ -40,7 +41,11 @@ export function deepEquals(target1, target2) {
     return false;
   }
 
-  return checkShallowObj(target1, target2);
+  // Object일 때
+  return (
+    checkShallowObj(key1, key2) &&
+    key1.every((key) => deepEquals(target1[key], target2[key]))
+  );
 }
 
 /**number instance로 만드는 함수 */
