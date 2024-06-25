@@ -11,7 +11,7 @@ export function shallowEquals(target1, target2) {
     return checkShallowObj(target1, target2);
   }
 
-  // constructor가 Object인지 판별
+  // Object 생성자인지 확인
   if (target1.constructor !== Object && target2.constructor !== Object) {
     return false;
   }
@@ -36,7 +36,7 @@ export function deepEquals(target1, target2) {
     );
   }
 
-  // constructor가 Object인지 판별
+  // Object 생성자인지 확인
   if (target1.constructor !== Object && target2.constructor !== Object) {
     return false;
   }
@@ -58,14 +58,48 @@ export function createNumber2(n) {
   return new String(n);
 }
 
-/** */
+/**형 변환을 통해 hint에 따라 값을 반환하는 함수*/
 export function createNumber3(n) {
-  return +new String(n);
+  /**
+   * 기본적으로 객체의 Symbol.toPrimitive()를 통해 원시값에 접근합니다. (하지만 Symbol객체와 Date객체만 보유하고 있음.)
+   * Symbol.toPrimitive() 속서을 가지지 않는다면,
+   * 내부적으로 객체의 기본적인 hint type은 number로 추론합니다. (default type = number)
+   * hint가 number라면, valueOf -> toString 메서드 순으로 호출하고 호출이 가능하면 그 메서드를 호출하고 끝냅니다.
+   * hint가 string이라면, toString -> valueOf 메서드 순서를 가지게 됩니다.
+   * 메서드를 호출했지만, Object를 반환한다면 다음 메서드로 넘어가게 됩니다.
+   */
+  const obj = {
+    valueOf: () => n,
+    toJSON: () => `this is createNumber3 => ${n}`,
+    toString: () => n,
+  };
+
+  return obj;
 }
 
-export class CustomNumber {}
+export class CustomNumber {
+  /**정적 메서드로 Memo */
+  static map = new Map();
+  constructor(value) {
+    if (CustomNumber.map.has(value)) {
+      return CustomNumber.map.get(value);
+    }
 
-/**enumerable false처리한 Object를 만드는 함수 */
+    CustomNumber.map.set(value, this);
+    this.value = value;
+  }
+  valueOf() {
+    return this.value;
+  }
+  toString() {
+    return this.value;
+  }
+  toJSON() {
+    return `${this.value}`;
+  }
+}
+
+/**열거 할 수 없게 만드는 함수 */
 export function createUnenumerableObject(target) {
   const copyTarget = cloneData(target);
 
