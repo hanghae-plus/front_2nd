@@ -81,6 +81,7 @@ export function deepEquals(target1, target2) {
 
     return true;
   }
+  return target1 === target2;
 }
 
 export function createNumber1(n) {
