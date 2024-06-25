@@ -9,19 +9,11 @@ function isClassInstance(target) {
     return false;
   }
 
-  let proto = Object.getPrototypeOf(target);
+  const proto = Object.getPrototypeOf(target);
+  const constructorString = proto.constructor;
 
-  while (proto) {
-    const constructor = proto.constructor;
-
-    if (constructor && typeof constructor === "function") {
-      const constructorString = constructor.toString();
-      if (/^class/.test(constructorString)) {
-        return true;
-      }
-    }
-
-    proto = Object.getPrototypeOf(proto);
+  if (/^class\s/.test(constructorString)) {
+    return true;
   }
 
   return false;
