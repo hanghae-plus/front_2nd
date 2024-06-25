@@ -1,6 +1,6 @@
 //얖은 복사 지원,
 
-export function shallowEquals(target1, target2) {
+const equals = (target1, target2, type = 'shallow') => {
   if (target1 === target2) return true;
   if (typeof target1 !== typeof target2) return false;
   if (target1 === null || target2 === null) return false;
@@ -17,12 +17,21 @@ export function shallowEquals(target1, target2) {
     if (key1.length !== key2.length) return false;
 
     for (let key in target1) {
-      if (target1[key] !== target2[key]) return false;
+      if (type === 'shallow' && target1[key] !== target2[key]) return false;
+      if (type === 'deep' && !equals(target1[key], target2[key], 'deep')) return false;
     }
     return true;
   }
 
   return false;
+};
+
+export function shallowEquals(target1, target2) {
+  return equals(target1, target2, 'shallow');
+}
+
+export function deepEquals(target1, target2) {
+  return equals(target1, target2, 'deep');
 }
 
 export function createNumber1(n) {
