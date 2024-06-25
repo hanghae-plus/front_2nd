@@ -168,63 +168,73 @@ export class CustomNumber {
 export function createUnenumerableObject(target) {
   // object 객체를 생성하는데 spread로 풀면 풀어지지 않는 객체를 만들어야한다.
   // 대상 객체의 모든 속성들을 열거 불가능하게 만든다
-  const unenumerableObj = {};
   for (const key in target) {
-    if (Object.prototype.hasOwnProperty.call(target, key)) {
-      unenumerableObj[key] = target[key];
-      Object.defineProperty(unenumerableObj, key, {
-        enumerable: false,
-        writable: true,
-        configurable: true
-      });
-    }
+    Object.defineProperty(target, key, {
+      enumerable: false,
+      writable: true,
+      configurable: true
+    });
   }
-  return unenumerableObj;
+  return target
 }
 
 export function forEach(target, callback) {
-  if(Array.isArray(target)){
+  // element들은 NodeList 객체이다.
+  if(Array.isArray(target) || target instanceof NodeList){
     for(let i = 0; i < target.length; i++){
       callback(target[i], i);
     }
-    return;
   }
-  if (typeof target === 'object') {
-    for (const key in target) {
-      if (target.hasOwnProperty(key)) {
+  else if (typeof target === 'object') {
+    // 아무리 해도 obj 부분이 테스트가 통과가 안되고 있었다.
+    // 비 열거형 객체는 키가 조회가 안되서 그렇다!
+    const descriptors = Object.getOwnPropertyDescriptors(target);
+    for (const key in descriptors) {
         callback(target[key], key);
-      }
     }
   }
+
 }
-// const obj = createUnenumerableObject({ a: 1, b: 2 });
-// const results = [];
-// forEach(obj, (value, key) => results.push({ value, key }));
-// console.log(results)
 
 export function map(target, callback) {
-  const mappedObj = {};
-  Object.keys(target).forEach(key => {
-    if (Object.prototype.hasOwnProperty.call(target, key)) {
-      mappedObj[key] = callback(target[key]);
+  if(Array.isArray(target) || target instanceof NodeList){
+    const result =[];
+    for(let i = 0; i < target.length; i++){
+      result.push(callback(target[i], i));
     }
-  });
-  return mappedObj;
+    return result;
+  }
+  else if (typeof target === 'object') {
+    const result ={}
+    const descriptors = Object.getOwnPropertyDescriptors(target);
+    for (const key in descriptors) {
+      result[key]=callback(target[key], key);
+    }
+    return result;
+  }
+  
 }
 
-const obj = createUnenumerableObject({ a: 1, b: 2 });
-const objectResult = map(obj, (value) => value * 2);
-
-console.log(objectResult); // { a: 2, b: 4 }
-
 export function filter(target, callback) {
-  const filteredObj = {};
-  Object.keys(target).forEach(key => {
-    if (Object.prototype.hasOwnProperty.call(target, key) && callback(target[key], key)) {
-      filteredObj[key] = target[key];
+  if(Array.isArray(target) || target instanceof NodeList){
+    const result =[];
+    for(let i = 0; i < target.length; i++){
+      if(callback(target[i], i)){
+        result.push(target[i]);
+      }
     }
-  });
-  return filteredObj;
+    return result;
+  }
+  else if (typeof target === 'object') {
+    const result ={}
+    const descriptors = Object.getOwnPropertyDescriptors(target);
+    for (const key in descriptors) {
+      if(callback(target[key], key)){
+        result[key] = target[key]
+      }
+    }
+    return result;
+  }
 }
 
 
@@ -240,14 +250,25 @@ export function every(target, callback) {
 }
 
 export function some(target, callback) {
-  for (const key in target) {
-    if (Object.prototype.hasOwnProperty.call(target, key)) {
-      if (callback(target[key], key)) {
+  if(Array.isArray(target) || target instanceof NodeList){
+    const result =[];
+    for(let i = 0; i < target.length; i++){
+      if(callback(target[i], i)){
         return true;
       }
     }
+    return false;
   }
-  return false;
+  else if (typeof target === 'object') {
+    const result ={}
+    const descriptors = Object.getOwnPropertyDescriptors(target);
+    for (const key in descriptors) {
+      if(callback(target[key], key)){
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 
