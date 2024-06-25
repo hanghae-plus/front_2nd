@@ -9,10 +9,6 @@ function isClassInstance(target) {
     return false;
   }
 
-  if (typeof target !== "object" || target === null) {
-    return false;
-  }
-
   let proto = Object.getPrototypeOf(target);
 
   while (proto) {
