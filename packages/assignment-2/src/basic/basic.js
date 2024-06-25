@@ -1,5 +1,14 @@
+function isPrimitive(target) {
+  // null, undefined, string, number, boolean, symbol, bigint
+  return target !== Object(target);
+}
+
 // 생성자가 class로 시작하는 지 확인하여 클래스 인스턴스를 object와 구분하기 위함
 function isClassInstance(target) {
+  if (isPrimitive(target)) {
+    return false;
+  }
+
   if (typeof target !== "object" || target === null) {
     return false;
   }
@@ -23,10 +32,26 @@ function isClassInstance(target) {
 }
 
 export function shallowEquals(target1, target2) {
-  // 클래스 인스턴스의 경우 typeof, instanceof로 구분할 수 없어 별도 확인 필요
+  // Primitive type은 === 사용
+  if (isPrimitive(target1) || isPrimitive(target2)) {
+    return target1 === target2;
+  }
+
+  // 내장 래퍼 객체 (String, Number, Boolean, Symbol, BigInt)
+  if (
+    [String, Number, Boolean, Symbol, BigInt].some(
+      (type) => target1 instanceof type || target2 instanceof type
+    )
+  ) {
+    return target1 === target2;
+  }
+
+  // 클래스 인스턴스의 경우 typeof, instanceof로 구분할 수 없어 별도 확인
   if (isClassInstance(target1) || isClassInstance(target2)) {
     return target1 === target2;
   }
+
+  // object와 array
   if (
     Object.prototype.toString.call(target1).split(" ")[1].includes("Object") ||
     Object.prototype.toString.call(target1).split(" ")[1].includes("Array")
@@ -47,30 +72,44 @@ export function shallowEquals(target1, target2) {
 
     return true;
   }
-  return target1 === target2;
 }
 
 export function deepEquals(target1, target2) {
-  if (target1 === null || target2 === null) {
+  // Primitive type은 === 사용
+  if (isPrimitive(target1) || isPrimitive(target2)) {
     return target1 === target2;
   }
-  if (typeof target1 !== "object") {
+
+  // 내장 래퍼 객체 (String, Number, Boolean, Symbol, BigInt)
+  if (
+    [String, Number, Boolean, Symbol, BigInt].some(
+      (type) => target1 instanceof type || target2 instanceof type
+    )
+  ) {
     return target1 === target2;
   }
+
+  // 클래스 인스턴스의 경우 typeof, instanceof로 구분할 수 없어 별도 확인
   if (isClassInstance(target1) || isClassInstance(target2)) {
     return target1 === target2;
   }
+
+  // object와 array
   if (
-    Object.prototype.toString.call(target1).split(" ")[1].includes("Object") ||
-    Object.prototype.toString.call(target1).split(" ")[1].includes("Array")
+    target1.toString() === "[object Object]" ||
+    target2.toString() === "[object Object]" ||
+    Array.isArray(target1) ||
+    Array.isArray(target2)
   ) {
     const keys1 = Object.keys(target1);
     const keys2 = Object.keys(target2);
 
+    // 동일 depth에서 key의 개수가 다른 경우 false
     if (keys1.length !== keys2.length) {
       return false;
     }
 
+    // 동일 depth에서 key의 개수가 같은 경우, 각 key에 대해 재귀 호출
     for (let i = 0; i < keys1.length; i++) {
       const currentKey = keys1[i];
       // object / array 내에 다시 object, array가 존재하는 경우 해당 object, array를 다시 비교하기 위해 재귀 호출
@@ -81,7 +120,6 @@ export function deepEquals(target1, target2) {
 
     return true;
   }
-  return target1 === target2;
 }
 
 export function createNumber1(n) {
