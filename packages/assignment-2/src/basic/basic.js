@@ -162,6 +162,7 @@ export function deepEquals(target1, target2) {
 
 export function createNumber1(n) {
   return new Number(n); //Number 객체로 형변환
+  return new Number(n); //Number 객체로 형변환
 }
 
 export function createNumber2(n) {
