@@ -35,18 +35,49 @@ export function deepEquals(target1, target2) {
 }
 
 export function createNumber1(n) {
-  return n;
+  return new Number(n);
 }
 
 export function createNumber2(n) {
-  return n;
+  return new String(n);
 }
 
 export function createNumber3(n) {
-  return n;
+  const obj = {
+    value: n,
+    valueOf: function () {
+      return this.value;
+    },
+    toString: function () {
+      return `${this.value}`;
+    },
+    toJSON: function () {
+      return `this is createNumber3 => ${this.value}`;
+    },
+  };
+
+  return obj;
 }
 
-export class CustomNumber {}
+export class CustomNumber {
+  static #instancePool = new Map();
+  constructor(n) {
+    if (CustomNumber.#instancePool.has(n)) {
+      return CustomNumber.#instancePool.get(n);
+    }
+    this.n = n;
+    CustomNumber.#instancePool.set(n, this);
+  }
+  valueOf() {
+    return this.n;
+  }
+  toString() {
+    return `${this.n}`;
+  }
+  toJSON() {
+    return this.toString();
+  }
+}
 
 export function createUnenumerableObject(target) {
   return target;
