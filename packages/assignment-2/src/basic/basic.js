@@ -129,18 +129,72 @@ export function deepEquals(target1, target2) {
 }
 
 export function createNumber1(n) {
-  return n;
+  /** 아래 조건을 만족하기 위해서는 래퍼 객체여야 함
+   *
+   * expect(num1 === 1).toBe(false);
+   * expect(num1 == 1).toBe(true);
+   * expect(typeof num1 === 'number').toBe(false);
+   * expect(typeof num1 === 'object').toBe(true);
+   */
+  return new Number(n);
 }
 
 export function createNumber2(n) {
-  return n;
+  /** 아래 조건을 만족하기 위해서는 래퍼 객체여야 함
+   *
+   * expect(num1 === "1").toBe(false);
+   * expect(num1 == "1").toBe(true);
+   * expect(typeof num1 === 'string').toBe(false);
+   * expect(typeof num1 === 'object').toBe(true);
+   * expect(num1 instanceof Number).toBe(false);
+   */
+  return new String(n);
 }
 
 export function createNumber3(n) {
-  return n;
+  /** 객체에 커스텀 메소드를 정의, 기존 메소드에 오버라이드 함 */
+  return {
+    valueOf() {
+      return n;
+    },
+    toString() {
+      return String(n);
+    },
+    toJSON() {
+      return `this is createNumber3 => ${n}`;
+    },
+  };
 }
 
-export class CustomNumber {}
+export class CustomNumber {
+  /** 아래 조건을 만족시키기 위해 생성자를 싱글톤 패턴으로 사용하도록 함
+   *
+   * expect(num1).toBe(num3);
+   * expect(num2).toBe(num4);
+   */
+  constructor(n) {
+    // 만약 n에 대한 생성자가 있다면 같은 참조 값을 가지도록 함
+    if (CustomNumber.instanceMap.has(n)) {
+      return CustomNumber.instanceMap.get(n);
+    }
+    this.n = n;
+    CustomNumber.instanceMap.set(n, this);
+  }
+
+  valueOf() {
+    return this.n;
+  }
+
+  toString() {
+    return String(this.n);
+  }
+
+  toJSON() {
+    return `${this.n}`;
+  }
+
+  static instanceMap = new Map();
+}
 
 export function createUnenumerableObject(target) {
   return target;
