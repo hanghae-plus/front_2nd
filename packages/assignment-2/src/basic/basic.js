@@ -196,16 +196,103 @@ export class CustomNumber {
   static instanceMap = new Map();
 }
 
+/** 불변 객체로 만드는 함수
+ *
+ * @link https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty
+ */
 export function createUnenumerableObject(target) {
-  return target;
+  const result = {};
+
+  for (const key in target) {
+    Object.defineProperty(result, key, {
+      value: target[key],
+      enumerable: false,
+      configurable: true,
+      writable: true,
+    });
+  }
+
+  return result;
 }
 
-export function forEach(target, callback) {}
+/** 유사배열 확인 함수 */
+function isArrayLike(obj) {
+  if (obj == null) return false; // null 또는 undefined 인지 확인
+  if (typeof obj !== 'object' && typeof obj !== 'function') return false; // 객체나 함수인지 확인
+  if (isNaN(obj.length)) return false; // length 속성이 숫자인지 확인
+  if (obj.length < 0) return false; // length 속성이 0 이상인지 확인
+  if (!Number.isInteger(obj.length)) return false; // length 속성이 정수인지 확인
 
-export function map(target, callback) {}
+  return true;
+}
 
-export function filter(target, callback) {}
+export function forEach(target, callback) {
+  // 1) 진짜 배열이거나 유사배열이면
+  if (Array.isArray(target) || isArrayLike(target)) {
+    for (let i = 0; i < target.length; i++) {
+      callback(target[i], i);
+    }
+  } else {
+    // 2) 객체일 경우, 불변의 객체의 키를 가져오기 위해 getOwnPropertyNames 사용
+    const keys = Object.getOwnPropertyNames(target);
+    keys.forEach((key) => callback(target[key], key));
+  }
+}
 
-export function every(target, callback) {}
+export function map(target, callback) {
+  // 1) 진짜 배열이거나 유사배열이면
+  if (Array.isArray(target) || isArrayLike(target)) {
+    const arr = Array.from(target);
+    return arr.map((v) => callback(v));
+  } else {
+    // 2) 객체일 경우, 불변의 객체의 키를 가져오기 위해 getOwnPropertyNames 사용
+    const keys = Object.getOwnPropertyNames(target);
+    const result = {};
+    keys.forEach((key) => {
+      result[key] = callback(target[key]);
+    });
+    return result;
+  }
+}
 
-export function some(target, callback) {}
+export function filter(target, callback) {
+  // 1) 진짜 배열이거나 유사배열이면
+  if (Array.isArray(target) || isArrayLike(target)) {
+    const arr = Array.from(target);
+    return arr.filter((v) => callback(v));
+  } else {
+    // 2) 객체일 경우, 불변의 객체의 키를 가져오기 위해 getOwnPropertyNames 사용
+    const keys = Object.getOwnPropertyNames(target);
+    const result = {};
+    keys.forEach((key) => {
+      if (callback(target[key])) {
+        result[key] = target[key];
+      }
+    });
+    return result;
+  }
+}
+
+export function every(target, callback) {
+  // 1) 진짜 배열이거나 유사배열이면
+  if (Array.isArray(target) || isArrayLike(target)) {
+    const arr = Array.from(target);
+    return arr.every((v) => callback(v));
+  } else {
+    // 2) 객체일 경우, 불변의 객체의 키를 가져오기 위해 getOwnPropertyNames 사용
+    const keys = Object.getOwnPropertyNames(target);
+    return keys.every((key) => callback(target[key]));
+  }
+}
+
+export function some(target, callback) {
+  // 1) 진짜 배열이거나 유사배열이면
+  if (Array.isArray(target) || isArrayLike(target)) {
+    const arr = Array.from(target);
+    return arr.some((v) => callback(v));
+  } else {
+    // 2) 객체일 경우, 불변의 객체의 키를 가져오기 위해 getOwnPropertyNames 사용
+    const keys = Object.getOwnPropertyNames(target);
+    return keys.some((key) => callback(target[key]));
+  }
+}
