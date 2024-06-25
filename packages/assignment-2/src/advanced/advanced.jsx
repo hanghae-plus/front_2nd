@@ -1,36 +1,26 @@
 import { createContext, useContext, useState } from "react";
+import {deepEquals} from "../basic/basic.js";
 
 
-// 데이터를 캐싱하기위한 저장공간
+/* [ 데이터 캐싱 ] */
 const cache = new Map();
-
-export const memo1 = (fn) => {
-  // 넘어온 함수로 키값생성
-  const key = fn.toString();
-
+const checkCache = (key, func) => {
   if (!cache.has(key)) {
-    const result = fn();
+    const result = func();
     cache.set(key, result);
   }
 
   return cache.get(key);
-};
-
-export const memo2 = (fn, arr) => {
-  // 넘어온 함수와 배열로 고유한 키값 생성
-  const key = `${fn.toString()}_${JSON.stringify(arr)}`;
-
-  if (!cache.has(key)) {
-    const result = fn();
-    cache.set(key, result);
-  }
-
-  return cache.get(key);
-};
+}
+export const memo1 = (fn) => checkCache(fn, fn);
+export const memo2 = (fn, arr) => checkCache(`${fn.toString()}_${JSON.stringify(arr)}`, fn);
 
 
+/* [useState를 이용한 캐싱] */
 export const useCustomState = (initValue) => {
-  return useState(initValue);
+  const [state, setState] = useState(initValue);
+  const setCustomState = (val) => setState(prev => deepEquals(prev, val) ? prev : val);
+  return [state, setCustomState];
 }
 
 const textContextDefaultValue = {

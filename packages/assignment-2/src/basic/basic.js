@@ -1,32 +1,31 @@
+// 배열 순환 비교
 const checkArray = (target1, target2, func) => {
-  if (target1.length !== target2.length) {
-    return false;
-  }
+  if (target1.length !== target2.length)  return false;
 
   for (let i = 0; i < target1.length; i++) {
-    if (func ? !func(target1[i], target2[i]) : target1[i] !== target2[i]) {
-      return false;
-    }
+    if (func ? !func(target1[i], target2[i]) : target1[i] !== target2[i]) return false;
   }
 
   return true;
 }
-
+// 객체 순환 비교
 const checkObject = (target1, target2, func) => {
   const keys1 = Object.keys(target1);
   const keys2 = Object.keys(target2);
 
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
+  if (keys1.length !== keys2.length)  return false;
 
   for (let key of keys1) {
-    if (func ? !func(target1[key], target2[key]) : target1[key] !== target2[key]) {
-      return false;
-    }
+    if (func ? !func(target1[key], target2[key]) : target1[key] !== target2[key]) return false;
   }
 
   return true;
+}
+// 객체 강력한 타입검사
+function isPlainObject(obj) {
+  if (obj === null || typeof obj !== 'object') return false;
+  const proto = Object.getPrototypeOf(obj);
+  return proto === Object.prototype || proto === null;
 }
 
 
@@ -34,7 +33,7 @@ const checkObject = (target1, target2, func) => {
 export function shallowEquals(target1, target2) {
   if (target1 === target2) return true;   // 두 값이 동일한 경우 true 반환
   if (Array.isArray(target1) && Array.isArray(target2))  return checkArray(target1, target2); // 배열 비교
-  if ( target1.constructor === Object &&  target2.constructor === Object) return checkObject(target1, target2);  // 객체 비교
+  if (isPlainObject(target1) && isPlainObject(target2)) return checkObject(target1, target2);  // 객체 비교
 
   return false;
 }
@@ -43,7 +42,7 @@ export function shallowEquals(target1, target2) {
 export function deepEquals(target1, target2) {
   if (target1 === target2) return true;  // 두 값이 동일한 경우 true 반환
   if (Array.isArray(target1) && Array.isArray(target2))  return checkArray(target1, target2, deepEquals); // 배열 재귀적 비교
-  if ( target1.constructor === Object &&  target2.constructor === Object) return checkObject(target1, target2, deepEquals);  // 객체 재귀적 비교
+  if (isPlainObject(target1) &&  isPlainObject(target2)) return checkObject(target1, target2, deepEquals);  // 객체 재귀적 비교
 
 
   return false;
