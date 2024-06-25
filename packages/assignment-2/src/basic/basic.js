@@ -1,14 +1,21 @@
 //얖은 복사 지원,
 
-const equals = (target1, target2, type = 'shallow') => {
+const equals = (target1, target2, type = "shallow") => {
   if (target1 === target2) return true;
   if (typeof target1 !== typeof target2) return false;
   if (target1 === null || target2 === null) return false;
 
   const wrapperTypes = [Number, String, Boolean, Symbol, BigInt];
-  if (wrapperTypes.some(type => target1 instanceof type && target2 instanceof type)) return false;
+  if (
+    wrapperTypes.some(
+      (type) => target1 instanceof type && target2 instanceof type
+    )
+  )
+    return false;
 
-  const isObjectType = [typeof target1, typeof target2].every(type => type === 'object');
+  const isObjectType = [typeof target1, typeof target2].every(
+    (type) => type === "object"
+  );
   if (isObjectType) {
     if (target1.constructor !== target2.constructor) return false;
     const key1 = Object.keys(target1);
@@ -17,8 +24,9 @@ const equals = (target1, target2, type = 'shallow') => {
     if (key1.length !== key2.length) return false;
 
     for (let key in target1) {
-      if (type === 'shallow' && target1[key] !== target2[key]) return false;
-      if (type === 'deep' && !equals(target1[key], target2[key], 'deep')) return false;
+      if (type === "shallow" && target1[key] !== target2[key]) return false;
+      if (type === "deep" && !equals(target1[key], target2[key], "deep"))
+        return false;
     }
     return true;
   }
@@ -27,11 +35,11 @@ const equals = (target1, target2, type = 'shallow') => {
 };
 
 export function shallowEquals(target1, target2) {
-  return equals(target1, target2, 'shallow');
+  return equals(target1, target2, "shallow");
 }
 
 export function deepEquals(target1, target2) {
-  return equals(target1, target2, 'deep');
+  return equals(target1, target2, "deep");
 }
 
 export function createNumber1(n) {
@@ -80,10 +88,30 @@ export class CustomNumber {
 }
 
 export function createUnenumerableObject(target) {
-  return target;
+  const obj = structuredClone(target);
+
+  for (let key in obj) {
+    const descriptor = Object.getOwnPropertyDescriptor(obj, key);
+    Object.defineProperty(obj, key, {
+      ...descriptor,
+      enumerable: false,
+    });
+  }
+
+  return obj;
 }
 
-export function forEach(target, callback) {}
+export function forEach(target, callback) {
+  const keys = Object.getOwnPropertyNames(target);
+  keys.forEach((key) => {
+    if (key === "length") return;
+    console.log(key, Number.isInteger(key));
+    callback(
+      Number.isInteger(+target[key]) ? +target[key] : target[key],
+      Number.isInteger(+key) ? +key : key
+    );
+  });
+}
 
 export function map(target, callback) {}
 
