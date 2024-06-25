@@ -105,7 +105,6 @@ export function forEach(target, callback) {
   const keys = Object.getOwnPropertyNames(target);
   keys.forEach((key) => {
     if (key === "length") return;
-    console.log(key, Number.isInteger(key));
     callback(
       Number.isInteger(+target[key]) ? +target[key] : target[key],
       Number.isInteger(+key) ? +key : key
@@ -113,10 +112,61 @@ export function forEach(target, callback) {
   });
 }
 
-export function map(target, callback) {}
+export function map(target, callback) {
+  const keys = Object.getOwnPropertyNames(target);
+  const result = [];
+  keys.forEach((key) => {
+    if (key === "length") return;
+    result.push(
+      callback(Number.isInteger(+target[key]) ? +target[key] : target[key])
+    );
+  });
 
-export function filter(target, callback) {}
+  if (Array.isArray(target) || target instanceof NodeList) return result;
 
-export function every(target, callback) {}
+  return keys.reduce((acc, cur, index) => {
+    return {
+      ...acc,
+      [cur]: result[index],
+    };
+  }, {});
+}
 
-export function some(target, callback) {}
+export function filter(target, callback) {
+  const result = Array.isArray(target) || target instanceof NodeList ? [] : {};
+
+  forEach(target, (value, key) => {
+    if (callback(value, key)) {
+      if (Array.isArray(target) || target instanceof NodeList) {
+        result.push(value);
+      } else {
+        result[key] = value;
+      }
+    }
+  });
+
+  return result;
+}
+
+export function every(target, callback) {
+  let result = true;
+
+  forEach(target, (value, key) => {
+    if (!callback(value, key)) {
+      result = false;
+    }
+  });
+
+  return result;
+}
+export function some(target, callback) {
+  let result = false;
+
+  forEach(target, (value, key) => {
+    if (callback(value, key)) {
+      result = true;
+    }
+  });
+
+  return result;
+}
