@@ -19,6 +19,13 @@ function isClassInstance(target) {
   return false;
 }
 
+// 내장 래퍼 객체 (String, Number, Boolean, Symbol, BigInt)인지 확인
+function isWrapperObject(target) {
+  return [String, Number, Boolean, Symbol, BigInt].some(
+    (type) => target instanceof type
+  );
+}
+
 export function shallowEquals(target1, target2) {
   // Primitive type은 === 사용
   if (isPrimitive(target1) || isPrimitive(target2)) {
@@ -26,11 +33,7 @@ export function shallowEquals(target1, target2) {
   }
 
   // 내장 래퍼 객체 (String, Number, Boolean, Symbol, BigInt)
-  if (
-    [String, Number, Boolean, Symbol, BigInt].some(
-      (type) => target1 instanceof type || target2 instanceof type
-    )
-  ) {
+  if (isWrapperObject(target1) || isWrapperObject(target2)) {
     return target1 === target2;
   }
 
@@ -69,11 +72,7 @@ export function deepEquals(target1, target2) {
   }
 
   // 내장 래퍼 객체 (String, Number, Boolean, Symbol, BigInt)
-  if (
-    [String, Number, Boolean, Symbol, BigInt].some(
-      (type) => target1 instanceof type || target2 instanceof type
-    )
-  ) {
+  if (isWrapperObject(target1) || isWrapperObject(target2)) {
     return target1 === target2;
   }
 
