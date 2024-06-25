@@ -171,7 +171,7 @@ export function createNumber2(n) {
 }
 
 export function createNumber3(n) {
-  const obj = Object.create(null);
+  const obj = Object.create(null); //Number 인스턴스가 아니어야 하고, object 타입이어야하므로 Object.create로 만듬
 
   obj.value = n;
 
@@ -190,7 +190,29 @@ export function createNumber3(n) {
   return obj;
 }
 
-export class CustomNumber {}
+const cache = new Map();
+
+export class CustomNumber {
+  constructor(value) {
+    if (cache.has(value)) {
+      return cache.get(value);
+    }
+    this.value = value;
+    cache.set(value, this);
+  }
+
+  valueOf() {
+    return this.value;
+  }
+
+  toString() {
+    return String(this.value);
+  }
+
+  toJSON() {
+    return String(this.value);
+  }
+}
 
 export function createUnenumerableObject(target) {
   return target;
