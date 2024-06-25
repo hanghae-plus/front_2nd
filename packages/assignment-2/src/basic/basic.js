@@ -163,11 +163,11 @@ export function deepEquals(target1, target2) {
 }
 
 export function createNumber1(n) {
-  return new Number(n);
+  return new Number(n); //Number 객체로 형변환
 }
 
 export function createNumber2(n) {
-  return new String(n);
+  return new String(n); //String 객체로 형변환
 }
 
 export function createNumber3(n) {
@@ -176,15 +176,15 @@ export function createNumber3(n) {
   obj.value = n;
 
   obj.toString = function () {
-    return String(this.value);
+    return String(this.value); //문자열화 되었을 때 value String화 된 거 반환
   };
 
   obj.valueOf = function () {
-    return this.value;
+    return this.value; //그냥 value 반환
   };
 
   obj.toJSON = function () {
-    return `this is createNumber3 => ${this.value}`;
+    return `this is createNumber3 => ${this.value}`; //JSON화 시켰을 때 이 문구로 반환
   };
 
   return obj;
@@ -215,10 +215,31 @@ export class CustomNumber {
 }
 
 export function createUnenumerableObject(target) {
-  return target;
+  const object = {};
+
+  for (const key in target) {
+    //hasOwnProperty: 특정 객체(target)의 고유 속성(key)을 안전하게 확인하는 방법
+    //call:call 메서드는 모든 함수에서 사용할 수 있는 JavaScript 내장 메서드로, 특정 this 값과 인수로 함수를 호출할 수 있게 함
+    if (Object.hasOwnProperty.call(target, key)) {
+      //defineProperty(): 하나의 속성을 정의
+      Object.defineProperty(object, key, {
+        //객체 내에 존재해야할 프로퍼티와 값들
+        value: target[key],
+        enumerable: false,
+        writable: true,
+        configurable: true,
+      });
+    }
+  }
+
+  return object;
 }
 
-export function forEach(target, callback) {}
+export function forEach(target, callback) {
+  //forEach 사용 가능 타입 -  array, 객체, nodeList, Map, Set
+  //array, nodeList
+  //객체
+}
 
 export function map(target, callback) {}
 
