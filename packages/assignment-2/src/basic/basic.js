@@ -8,10 +8,15 @@
  * @returns
  */
 export function shallowEquals(target1, target2) {
+<<<<<<< HEAD
+=======
+  //1. 타입+값이 같을 경우(null 포함)
+>>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
   if (target1 === target2) {
     return true;
   }
 
+<<<<<<< HEAD
   if (Array.isArray(target1) && Array.isArray(target2) && target1.length === target2.length) {
     return target1.every((value, idx) => value === target2[idx]);
   }
@@ -27,6 +32,37 @@ export function shallowEquals(target1, target2) {
   }
 
   return false;
+=======
+  //2. Wrapper class
+  // 객체 타입 비교는 instanceof 원시형은 typeof로 비교한다.
+  if (
+    target1 instanceof Number ||
+    target1 instanceof String ||
+    target1 instanceof Boolean ||
+    target2 instanceof Number ||
+    target2 instanceof String ||
+    target2 instanceof Boolean
+  ) {
+    return target1 == target2;
+  }
+
+  //3. 익명함수 비교
+  if (target1.constructor.name === "" || target2.constructor.name === "") {
+    return target1 == target2;
+  }
+
+  //4. 객체 비교
+  if (typeof target1 === "object" && typeof target2 === "object") {
+    const keys1 = Object.keys(target1);
+    const keys2 = Object.keys(target2);
+
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+    return keys1.every((key) => target1[key] == target2[key]);
+  }
+  return target1 == target2;
+>>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
 }
 
 /**
@@ -40,6 +76,7 @@ export function deepEquals(target1, target2) {
     return true;
   }
 
+<<<<<<< HEAD
   if (Array.isArray(target1) && Array.isArray(target2) && target1.length === target2.length) {
     return target1.every((value, idx) => deepEquals(value, target2[idx]));
   }
@@ -61,6 +98,37 @@ export function deepEquals(target1, target2) {
  * @NOTE 객체의 연산 순서 => toPrimitive => valueOf => toString
  * @param {*} n
  * @returns
+=======
+  if (
+    target1 instanceof Number ||
+    target1 instanceof String ||
+    target1 instanceof Boolean ||
+    target2 instanceof Number ||
+    target2 instanceof String ||
+    target2 instanceof Boolean
+  ) {
+    return target1 == target2;
+  }
+
+  if (target1.constructor.name === "" || target2.constructor.name === "") {
+    return target1 == target2;
+  }
+
+  if (typeof target1 === "object" && typeof target2 === "object") {
+    const keys1 = Object.keys(target1);
+    const keys2 = Object.keys(target2);
+
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+    //재귀호출
+    return keys1.every((key) => deepEquals(target1[key], target2[key]));
+  }
+}
+
+/**
+ * 객체의 연산 순서 => toPrimitive => valueOf => toString
+>>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
  */
 export function createNumber1(n) {
   const numberObj = {
@@ -95,10 +163,17 @@ export function createNumber2(n) {
   const numberObj = {
     value: n,
     valueOf() {
+<<<<<<< HEAD
       return `${this.value}`;
     },
     toString() {
       return `${this.value}`;
+=======
+      return "" + this.value;
+    },
+    toString() {
+      return "" + this.value;
+>>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
     },
   };
 
@@ -117,7 +192,11 @@ export function createNumber3(n) {
       return this.value;
     },
     toString() {
+<<<<<<< HEAD
       return `${this.value}`;
+=======
+      return "" + this.value;
+>>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
     },
     toJSON() {
       return `this is createNumber3 => ${this.value}`;
@@ -128,6 +207,7 @@ export function createNumber3(n) {
 }
 
 export class CustomNumber {
+<<<<<<< HEAD
   static #dataMap = new Map();
   number;
 
@@ -137,6 +217,17 @@ export class CustomNumber {
     }
     this.number = n;
     CustomNumber.#dataMap.set(n, this);
+=======
+  static dataMap = new Map();
+  number;
+
+  constructor(n) {
+    if (CustomNumber.dataMap.has(n)) {
+      return CustomNumber.dataMap.get(n);
+    }
+    this.number = n;
+    CustomNumber.dataMap.set(n, this);
+>>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
     return this;
   }
 
@@ -144,19 +235,32 @@ export class CustomNumber {
     return this.number;
   }
   toString() {
+<<<<<<< HEAD
     return `${this.number}`;
   }
   toJSON() {
     return `${this.number}`;
+=======
+    return "" + this.number;
+  }
+  toJSON() {
+    return "" + this.number;
+>>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
   }
 }
 
 /**
+<<<<<<< HEAD
  * @NOTE
  * Object.getOwnPropertyNames vs Object.keys차이점
  * getOwnPropertyNames : 열거 가능 + 불가능한 모든 속성 이름
  * keys : 열거 가능한 모든 속성 이름
  * @param {*} target
+=======
+ * Object.getOwnPropertyNames vs Object.keys차이점
+ * getOwnPropertyNames : 열거 가능 + 불가능한 모든 속성 이름
+ * keys : 열거 가능한 모든 속성 이름
+>>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
  * @returns
  */
 export function createUnenumerableObject(target) {
@@ -165,7 +269,10 @@ export function createUnenumerableObject(target) {
   const propertyNames = Object.getOwnPropertyNames(target);
 
   /**
+<<<<<<< HEAD
    * @NOTE
+=======
+>>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
    * 프로퍼티 플래그 3개 속성
    * configurable => 속성 삭제, 플래그 수정 가능 여부.
    * enumeralbe => 속성 열거 가능 여부
