@@ -51,18 +51,47 @@ export function deepEquals(target1, target2) {
 }
 
 export function createNumber1(n) {
-  return n;
+  return new Number(n);
 }
 
 export function createNumber2(n) {
-  return n;
+  return new String(n);
 }
 
 export function createNumber3(n) {
-  return n;
+  const createObject = Object.create(Object.prototype);
+
+  createObject.valueOf = () => n;
+  createObject.toJSON = () => `this is createNumber3 => ${n}`;
+  createObject.toString = () => String(n);
+
+  return createObject;
 }
 
-export class CustomNumber {}
+export class CustomNumber {
+  static instanceMap = new Map();
+
+  constructor(value) {
+    if (CustomNumber.instanceMap.has(value)) {
+      return CustomNumber.instanceMap.get(value);
+    }
+
+    this.value = value;
+    CustomNumber.instanceMap.set(value, this);
+  }
+
+  valueOf() {
+    return this.value;
+  }
+
+  toJSON() {
+    return `${this.value}`;
+  }
+
+  toString() {
+    return String(this.value);
+  }
+}
 
 export function createUnenumerableObject(target) {
   return target;
