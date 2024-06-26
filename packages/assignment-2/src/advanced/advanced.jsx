@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useRef, useState } from 'react';
 
 /** 함수 객체를 키로 하여 함수 실행 결과를 저장하는 맵
  *
@@ -44,7 +44,24 @@ export const memo2 = (fn, dependencies) => {
 };
 
 export const useCustomState = (initValue) => {
-  return useState(initValue);
+  const [state, setState] = useState(initValue);
+  const cacheRef = useRef(JSON.stringify(initValue));
+
+  /** 커스텀 상태 변경 함수 */
+  const setCustomState = (newState) => {
+    const newStateStr = JSON.stringify(newState);
+
+    // 캐싱 되어 있는 상태와 새로운 상태가 같다면
+    if (cacheRef.current === newStateStr) {
+      return;
+    }
+
+    // 상태가 다르다면
+    cacheRef.current = newStateStr;
+    setState(newState);
+  };
+
+  return [state, setCustomState];
 };
 
 const textContextDefaultValue = {
