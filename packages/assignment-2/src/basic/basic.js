@@ -1,26 +1,34 @@
 // 배열 순환 비교
 const checkArray = (target1, target2, func) => {
-  if (target1.length !== target2.length)  return false;
+  const map1 = new Map(target1.map((item, index) => [index, item]));
+  const map2 = new Map(target2.map((item, index) => [index, item]));
 
-  for (let i = 0; i < target1.length; i++) {
-    if (func ? !func(target1[i], target2[i]) : target1[i] !== target2[i]) return false;
+  if (map1.size !== map2.size) return false;
+
+  for (let [key, value] of map1) {
+    if (func ? !func(value, map2.get(key)) : value !== map2.get(key)) return false;
   }
 
   return true;
 }
+
+
+
 // 객체 순환 비교
 const checkObject = (target1, target2, func) => {
-  const keys1 = Object.keys(target1);
-  const keys2 = Object.keys(target2);
+  const map1 = new Map(Object.entries(target1));
+  const map2 = new Map(Object.entries(target2));
 
-  if (keys1.length !== keys2.length)  return false;
+  if (map1.size !== map2.size) return false;
 
-  for (let key of keys1) {
-    if (func ? !func(target1[key], target2[key]) : target1[key] !== target2[key]) return false;
+  for (let [key, value] of map1) {
+    if (func ? !func(value, map2.get(key)) : value !== map2.get(key)) return false;
   }
 
   return true;
 }
+
+
 // 객체 강력한 타입검사
 function isPlainObject(obj) {
   if (obj === null || typeof obj !== 'object') return false;
