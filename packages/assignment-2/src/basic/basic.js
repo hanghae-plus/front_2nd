@@ -1,4 +1,9 @@
-import { cloneData, checkShallowObj } from "./utils";
+import {
+  cloneData,
+  checkShallowObj,
+  isArray,
+  isConstructorTypeObject,
+} from "./utils";
 
 /**얕은 비교를 수행하는 함수*/
 export function shallowEquals(target1, target2) {
@@ -6,21 +11,19 @@ export function shallowEquals(target1, target2) {
     return target1 === target2;
   }
 
-  // Array일 때
-  if ((Array.isArray(target1), Array.isArray(target2))) {
+  // Array일 때 Or Object 생성자인지 확인
+  if (isArray(target1, target2) || isConstructorTypeObject(target1, target2)) {
     return checkShallowObj(target1, target2);
   }
 
-  // Object 생성자인지 확인
-  if (target1.constructor !== Object && target2.constructor !== Object) {
-    return false;
-  }
-
-  return checkShallowObj(target1, target2);
+  return false;
 }
 
 /**깊은 비교를 수행하는 함수*/
 export function deepEquals(target1, target2) {
+  /**
+   * dfs느낌처럼 재귀로 돌면서 얕은 비교를 수행
+   */
   if (target1 === target2) {
     return target1 === target2;
   }
@@ -28,24 +31,15 @@ export function deepEquals(target1, target2) {
   const key1 = Object.keys(target1);
   const key2 = Object.keys(target2);
 
-  // Array일 때
-  if ((Array.isArray(target1), Array.isArray(target2))) {
+  // Array일 때 Or Object 생성자인지 확인
+  if (isArray(target1, target2) || isConstructorTypeObject(target1, target2)) {
     return (
       checkShallowObj(key1, key2) &&
       key1.every((key) => deepEquals(target1[key], target2[key]))
     );
   }
 
-  // Object 생성자인지 확인
-  if (target1.constructor !== Object && target2.constructor !== Object) {
-    return false;
-  }
-
-  // Object일 때
-  return (
-    checkShallowObj(key1, key2) &&
-    key1.every((key) => deepEquals(target1[key], target2[key]))
-  );
+  return false;
 }
 
 /**number instance로 만드는 함수 */
@@ -62,7 +56,7 @@ export function createNumber2(n) {
 export function createNumber3(n) {
   /**
    * 기본적으로 객체의 Symbol.toPrimitive()를 통해 원시값에 접근합니다. (하지만 Symbol객체와 Date객체만 보유하고 있음.)
-   * Symbol.toPrimitive() 속서을 가지지 않는다면,
+   * Symbol.toPrimitive() 속성을 가지지 않는다면,
    * 내부적으로 객체의 기본적인 hint type은 number로 추론합니다. (default type = number)
    * hint가 number라면, valueOf -> toString 메서드 순으로 호출하고 호출이 가능하면 그 메서드를 호출하고 끝냅니다.
    * hint가 string이라면, toString -> valueOf 메서드 순서를 가지게 됩니다.
@@ -77,6 +71,7 @@ export function createNumber3(n) {
   return obj;
 }
 
+/** 내부에서 메모이제이션을 통해 인스턴스를 재활용?함. */
 export class CustomNumber {
   /**정적 메서드로 Memo */
   static map = new Map();
@@ -91,11 +86,11 @@ export class CustomNumber {
   valueOf() {
     return this.value;
   }
-  toString() {
-    return this.value;
-  }
   toJSON() {
     return `${this.value}`;
+  }
+  toString() {
+    return this.value;
   }
 }
 
@@ -143,7 +138,7 @@ export function map(target, callback) {
   if (target instanceof NodeList) {
     const newData = [];
     for (let ele of objArr) {
-      const value = ele[1];
+      const [, value] = ele;
       const newValue = callback(value);
       newData.push(newValue);
     }
@@ -171,7 +166,7 @@ export function filter(target, callback) {
   if (target instanceof NodeList) {
     const newData = [];
     for (let ele of objArr) {
-      const value = ele[1];
+      const [, value] = ele;
       if (!callback(value)) {
         continue;
       }

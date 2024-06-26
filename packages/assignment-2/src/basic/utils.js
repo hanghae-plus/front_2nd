@@ -1,3 +1,13 @@
+/** 두 요소가 array인지 판별 하는 함수 */
+const isArray = (data1, data2) => {
+  return Array.isArray(data1), Array.isArray(data2);
+};
+
+/** 두 요소의 contructor가 Object인지 확인하는 함수 */
+const isConstructorTypeObject = (data1, data2) => {
+  return data1.constructor === Object && data2.constructor === Object;
+};
+
 /**  두 Object가 같은지 판별(shallow)*/
 const checkShallowObj = (data1, data2) => {
   //value값 뽑아내기
@@ -34,4 +44,4 @@ const cloneData = (data) => {
   }
 };
 
-export { checkShallowObj, cloneData };
+export { checkShallowObj, cloneData, isArray, isConstructorTypeObject };
