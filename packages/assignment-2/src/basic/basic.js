@@ -103,16 +103,18 @@ export function createNumber3(n) {
   };
 }
 
-const cache = new Map();
 
 export class CustomNumber {
+  static cache = new Map();
+
   constructor(n){
-    if (cache.has(n)) {
-      return cache.get(n);
+    if (CustomNumber.cache.has(n)) {
+      return CustomNumber.cache.get(n);
     }
     this.value = n;
-    cache.set(n, this);
+    CustomNumber.cache.set(n, this);
   }
+
   valueOf() {
     return this.value;
   }
