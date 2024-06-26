@@ -16,12 +16,15 @@ export const memo1 = (fn) => checkCache(fn, fn);
 export const memo2 = (fn, arr) => checkCache(`${fn.toString()}_${JSON.stringify(arr)}`, fn);
 
 
-/* [useState를 이용한 캐싱] */
+// [useState를 이용한 캐싱]
 export const useCustomState = (initValue) => {
   const [state, setState] = useState(initValue);
-  const setCustomState = (val) => setState(prev => deepEquals(prev, val) ? prev : val);
+  const setCustomState = (val) => {
+    if (!deepEquals(state, val)) setState(val)
+  };
   return [state, setCustomState];
 }
+
 
 const textContextDefaultValue = {
   user: null,
