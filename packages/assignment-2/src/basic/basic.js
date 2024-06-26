@@ -87,18 +87,51 @@ export function deepEquals(target1, target2) {
 }
 
 export function createNumber1(n) {
-  return n;
+  return new Number(n);
 }
 
 export function createNumber2(n) {
-  return n;
+  return new String(n);
 }
 
 export function createNumber3(n) {
-  return n;
+  return {
+    valueOf() {
+      return n;
+    },
+    toString() {
+      return String(n);
+    },
+    toJSON() {
+      return `this is createNumber3 => ${n}`;
+    },
+  };
 }
 
-export class CustomNumber {}
+export class CustomNumber {
+  constructor(n) {
+    // 만약 n에 대한 생성자가 있다면 같은 참조 값을 가지도록 함
+    if (CustomNumber.instanceMap.has(n)) {
+      return CustomNumber.instanceMap.get(n);
+    }
+    this.n = n;
+    CustomNumber.instanceMap.set(n, this);
+  }
+
+  valueOf() {
+    return this.n;
+  }
+
+  toString() {
+    return String(this.n);
+  }
+
+  toJSON() {
+    return `${this.n}`;
+  }
+
+  static instanceMap = new Map();
+}
 
 export function createUnenumerableObject(target) {
   return target;
