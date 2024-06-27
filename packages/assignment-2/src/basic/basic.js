@@ -93,15 +93,23 @@ export function deepEquals(target1, target2) {
 }
 
 export function createNumber1(n) {
-  return n;
+  const number = new Number(n);
+  return number;
 }
 
 export function createNumber2(n) {
-  return n;
+  const number = Number(n);
+  return new String(number.toString());
 }
 
 export function createNumber3(n) {
-  return n;
+  const number = new Number(n);
+
+  number.toJSON = function () {
+    return `this is createNumber3 => ${this.valueOf()}`;
+  };
+
+  return number;
 }
 
 export class CustomNumber {}
