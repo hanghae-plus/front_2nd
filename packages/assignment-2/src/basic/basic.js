@@ -4,26 +4,26 @@ export function shallowEquals(target1, target2) {
     return true;
   }
 
-  // null 처리
-  if (typeof target1 !== 'object' || typeof target2 !== 'object' || 
-      target1 === null || target2 === null) {
+  // 원시값이 아닌데 객체도 아니라면 false
+  if (!(typeof target1 === 'object' || typeof target2 === 'object')){
     return false;
   }
 
-  // 생성자로 만들어진 객체 처리
-  if ((target1 instanceof Number && target2 instanceof Number) ||
-      (target1 instanceof String && target2 instanceof String)) {
+  const conditions = [
+    target1.constructor.toString().startsWith('class') || target2.constructor.toString().startsWith('class'),
+    target1 instanceof Number || target2 instanceof Number,
+    target1 instanceof String || target2 instanceof String,
+    target1 instanceof Boolean || target2 instanceof Boolean,
+    target1 instanceof Symbol || target2 instanceof Symbol,
+  ];
+
+  if (conditions.some(condition => condition)) {
     return false;
   }
 
   // 배열 비교
   if (Array.isArray(target1) && Array.isArray(target2)) {
     return target1.length === target2.length && target1.every((value, index) => value === target2[index]);
-  }
-
-  // 클래스 비교
-  if (target1.constructor !== Object || target2.constructor !== Object) {
-    return target1.constructor === target2.constructor;
   }
 
   // 객체 비교
@@ -41,28 +41,28 @@ export function deepEquals(target1, target2) {
   // 원시값 비교
   if (target1 === target2) {
     return true;
-  }
-
-  // null 처리
-  if (typeof target1 !== 'object' || typeof target2 !== 'object' || 
-      target1 === null || target2 === null) {
+  } 
+  
+  // 원시값이 아닌데 객체도 아니라면 false
+  if (!(typeof target1 === 'object' || typeof target2 === 'object')){
     return false;
   }
 
-  // 생성자로 만들어진 객체 처리
-  if ((target1 instanceof Number && target2 instanceof Number) ||
-      (target1 instanceof String && target2 instanceof String)) {
+  const conditions = [
+    target1.constructor.toString().startsWith('class') || target2.constructor.toString().startsWith('class'),
+    target1 instanceof Number || target2 instanceof Number,
+    target1 instanceof String || target2 instanceof String,
+    target1 instanceof Boolean || target2 instanceof Boolean,
+    target1 instanceof Symbol || target2 instanceof Symbol,
+  ];
+
+  if (conditions.some(condition => condition)) {
     return false;
   }
 
   // 배열 비교, 배열 내부 값 비교
   if (Array.isArray(target1) && Array.isArray(target2)) {
     return target1.length === target2.length && target1.every((value, index) => deepEquals(value, target2[index]));
-  }
-
-  // 클래스 비교
-  if (target1.constructor !== Object || target2.constructor !== Object) {
-    return target1.constructor === target2.constructor;
   }
 
   // 객체 비교
@@ -78,11 +78,33 @@ export function deepEquals(target1, target2) {
 
 
 export function createNumber1(n) {
-  return new Number(n);
+  return {
+    value: n,
+    valueOf() {
+      return this.value;
+    },
+    toJSON() {
+      return `this is createNumber1 => ${this.value}`;
+    },
+    toString() {
+      return this.value;
+    }
+  }
 }
 
 export function createNumber2(n) {
-  return new String(n);
+  return {
+    value: n,
+    valueOf() {
+      return this.value + "";
+    },
+    toJSON() {
+      return `this is createNumber2 => ${this.value}`;
+    },
+    toString() {
+      return this.value;
+    }
+  }
 }
 
 export function createNumber3(n) {
