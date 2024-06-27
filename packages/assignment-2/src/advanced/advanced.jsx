@@ -1,4 +1,10 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { shallowEquals } from "../basic/basic.js";
 // 캐싱 기능 검증 (클로저 활용)
 export const memo1 = (() => {
@@ -62,24 +68,24 @@ export const TestContextProvider = ({ children }) => {
   );
 };
 
-const useTestContext = () => {
-  return useContext(TestContext);
+const useTestContext = (key) => {
+  const { value, setValue } = useContext(TestContext);
+  const [state, setState] = useState(value[key]);
+
+  const memoizedSetValue = useCallback(
+    (newValue) => setValue({ state, newValue }),
+    [value[key]],
+  );
+
+  const memoizedValue = useMemo(() => {
+    return [state, setState];
+  }, [value[key], memoizedSetValue]);
+
+  return memoizedValue;
 };
 
-export const useUser = () => {
-  const { value, setValue } = useTestContext();
+export const useUser = () => useTestContext("user");
 
-  return [value.user, (user) => setValue({ ...value, user })];
-};
+export const useCounter = () => useTestContext("count");
 
-export const useCounter = () => {
-  const { value, setValue } = useTestContext();
-
-  return [value.count, (count) => setValue({ ...value, count })];
-};
-
-export const useTodoItems = () => {
-  const { value, setValue } = useTestContext();
-
-  return [value.todoItems, (todoItems) => setValue({ ...value, todoItems })];
-};
+export const useTodoItems = () => useTestContext("todoItems");
