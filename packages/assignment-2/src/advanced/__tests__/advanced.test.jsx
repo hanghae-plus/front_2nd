@@ -141,7 +141,7 @@ describe("assignment 2 > advanced", () => {
     });
   });
 
-  it.only("전역 상태를 참조할 때, 불필요한 렌더링 방지하기", async () => {
+  it("전역 상태를 참조할 때, 불필요한 렌더링 방지하기", async () => {
     const state = {
       user: null,
       todoItems: [
