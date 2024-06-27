@@ -67,29 +67,171 @@ export function deepEquals(target1, target2) {
 }
 
 export function createNumber1(n) {
-  return n;
+  return {
+    valueOf() {
+      return n;
+    },
+  };
 }
 
 export function createNumber2(n) {
-  return n;
+  return {
+    valueOf() {
+      return `${n}`;
+    },
+  };
 }
 
 export function createNumber3(n) {
-  return n;
+  return {
+    valueOf() {
+      return n;
+    },
+    toJSON() {
+      return `this is createNumber3 => ${n}`;
+    },
+    toString() {
+      return `${n}`;
+    },
+  };
 }
 
-export class CustomNumber {}
+export class CustomNumber {
+  static instanceMap = new Map();
+
+  constructor(n) {
+    if (CustomNumber.instanceMap.has(n)) {
+      return CustomNumber.instanceMap.get(n);
+    }
+
+    this.value = n;
+    CustomNumber.instanceMap.set(n, this);
+  }
+
+  valueOf() {
+    return this.value;
+  }
+
+  toString() {
+    return `${this.value}`;
+  }
+
+  toJSON() {
+    return `${this.value}`;
+  }
+}
 
 export function createUnenumerableObject(target) {
-  return target;
+  const unenumerableTarget = {};
+
+  for (const key in target) {
+    Object.defineProperty(unenumerableTarget, key, {
+      value: target[key],
+      enumerable: false,
+      writable: true,
+      configurable: true,
+    });
+  }
+
+  return unenumerableTarget;
 }
 
-export function forEach(target, callback) {}
+export function forEach(target, callback) {
+  if (Array.isArray(target) || target[Symbol.iterator]) {
+    for (let i = 0; i < target.length; i++) {
+      callback(target[i], i);
+    }
 
-export function map(target, callback) {}
+    return;
+  }
 
-export function filter(target, callback) {}
+  const properties = Object.getOwnPropertyNames(target);
+  for (let i = 0; i < properties.length; i++) {
+    const key = properties[i];
+    callback(target[key], key);
+  }
+}
 
-export function every(target, callback) {}
+export function map(target, callback) {
+  let result = [];
 
-export function some(target, callback) {}
+  if (Array.isArray(target) || target[Symbol.iterator]) {
+    for (let i = 0; i < target.length; i++) {
+      result.push(callback(target[i]));
+    }
+
+    return result;
+  }
+
+  result = {};
+  const properties = Object.getOwnPropertyNames(target);
+  for (let i = 0; i < properties.length; i++) {
+    const key = properties[i];
+
+    result[key] = callback(target[key]);
+  }
+
+  return result;
+}
+
+export function filter(target, callback) {
+  let result = [];
+
+  if (Array.isArray(target) || target[Symbol.iterator]) {
+    for (let i = 0; i < target.length; i++) {
+      if (callback(target[i])) result.push(target[i]);
+    }
+
+    return result;
+  }
+
+  result = {};
+  const properties = Object.getOwnPropertyNames(target);
+  for (let i = 0; i < properties.length; i++) {
+    const key = properties[i];
+
+    if (callback(target[key])) result[key] = target[key];
+  }
+
+  return result;
+}
+
+export function every(target, callback) {
+  if (Array.isArray(target) || target[Symbol.iterator]) {
+    for (let i = 0; i < target.length; i++) {
+      if (!callback(target[i])) return false;
+    }
+
+    return true;
+  }
+
+  const properties = Object.getOwnPropertyNames(target);
+
+  for (let i = 0; i < properties.length; i++) {
+    const key = properties[i];
+
+    if (!callback(target[key])) return false;
+  }
+
+  return true;
+}
+
+export function some(target, callback) {
+  if (Array.isArray(target) || target[Symbol.iterator]) {
+    for (let i = 0; i < target.length; i++) {
+      if (callback(target[i])) return true;
+    }
+
+    return false;
+  }
+
+  const properties = Object.getOwnPropertyNames(target);
+
+  for (let i = 0; i < properties.length; i++) {
+    const key = properties[i];
+
+    if (!callback(target[key])) return true;
+  }
+
+  return false;
+}
