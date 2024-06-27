@@ -1,21 +1,25 @@
-const cache = new Map();
+export const memo1 = (() => {
+  let result = null;
 
-export const memo1 = (fn) => {
-  const key = fn.toString();
-  if (cache.has(key)) {
-    return cache.get(key);
-  }
-  const result = fn();
-  cache.set(key, result);
-  return result;
-};
+  return (fn) => {
+    if (result) {
+      return result;
+    }
+    result = fn();
+    return result;
+  };
+})();
 
-export const memo2 = (fn, dependencies = []) => {
-  const key = JSON.stringify({ fn: fn.toString(), dependencies });
-  if (cache.has(key)) {
-    return cache.get(key);
-  }
-  const result = fn();
-  cache.set(key, result);
-  return result;
-};
+export const memo2 = (() => {
+  const cache = new Map();
+
+  return (fn, dependencies = []) => {
+    const key = [...dependencies].sort().join('-');
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    const result = fn();
+    cache.set(key, result);
+    return result;
+  };
+})();
