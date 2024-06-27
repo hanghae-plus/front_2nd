@@ -61,10 +61,61 @@ export function shallowEquals(target1, target2) {
   return false;
 }
 
-export function deepEquals(target1, target2) {
-  return target1 === target2;
-}
+// 이 문제는 깊게 비교할 수 있는 함수를 제작하는 것입니다.
+// 객체 혹은 배열에서 인간의 시각으로 형태가 동일하다면 성립합니다.
+// 다만 예외로 new로 제작된 객체는 항상 다른 것으로 인식합니다.
+// 그 외에는 같지 않습니다.
 
+// 내부를 재귀로 비교 합니다.
+export function deepEquals(target1, target2) {
+  if (target1 === target2) {
+    return true;
+  }
+
+  const isArray1 = Array.isArray(target1);
+  const isArray2 = Array.isArray(target2);
+
+  if (isArray1 && isArray2) {
+    if (target1.length !== target2.length) {
+      return false;
+    }
+
+    for (let i = 0; i < target1.length; i++) {
+      if (!deepEquals(target1[i], target2[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  const isObject1 = typeof target1 === "object";
+  const isObject2 = typeof target2 === "object";
+
+  if (isObject1 && isObject2) {
+    const isCreatedWithNew1 = target1.constructor !== Object;
+    const isCreatedWithNew2 = target2.constructor !== Object;
+
+    if (isCreatedWithNew1 || isCreatedWithNew2) {
+      return false;
+    }
+
+    const keys1 = Object.keys(target1);
+    const keys2 = Object.keys(target2);
+
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+
+    for (let key of keys1) {
+      if (!deepEquals(target1[key], target2[key])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
+}
 
 export function createNumber1(n) {
   return n;
