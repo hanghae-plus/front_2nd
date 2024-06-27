@@ -69,7 +69,10 @@ export const TestContext = createContext({
 });
 
 export const TestContextProvider = ({ children }) => {
-  const [value, setValue] = useState(textContextDefaultValue);
+  // ref를 사용하여 상태 업데이트가 컴포넌트를 리랜더링 하지 않도록 변경
+  // setValue 또한 useCallback을 사용하여 ref가 바뀌지 않으면 리랜더링 하지 않도록 방지
+  const ref = useRef(textContextDefaultValue);
+  const setValue = useCallback(
 
   return (
     <TestContext.Provider value={{ value, setValue }}>
