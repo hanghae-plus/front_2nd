@@ -99,7 +99,9 @@ export function createNumber1(n) {
   return Object(n);
 }
 
-export function createNumber2(n) {}
+export function createNumber2(n) {
+  return Object(n.toString());
+}
 
 export function createNumber3(n) {
   return n;
