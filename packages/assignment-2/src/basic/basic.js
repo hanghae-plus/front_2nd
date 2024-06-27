@@ -95,7 +95,9 @@ export function deepEquals(target1, target2) {
   }
 }
 
-export function createNumber1(n) {}
+export function createNumber1(n) {
+  return Object(n);
+}
 
 export function createNumber2(n) {}
 
