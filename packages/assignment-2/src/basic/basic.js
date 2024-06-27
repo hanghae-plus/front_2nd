@@ -140,6 +140,7 @@ export function createNumber3(n) {
   // 덧셈 연사자는 강제 형 변환 과정을 거침. Object에 대해서는 valueOf 함수가 적용됨.
   // JSON.stringify 는 인스턴스에 toJson형태로 사용이 가능하기 때문에 해당 함수를 만들어 JSON.stringify가 실행되면 원하는 값을 반환하도록 함.
   // basic.test.js 207줄의 JSON.stringify는 이미 덧셈 연사자로 강제 형 변환 과정을 거친 Object에 대해 JSON.stringify 함수가 실행되는 형태이기 때문에 "3"이 출력됨.
+  // to know override
   class CreateNum3 {
     constructor(n) {
       this.value = n;
@@ -161,6 +162,9 @@ export function createNumber3(n) {
   return createNum3;
 }
 const cache = {};
+
+{
+}
 
 export class CustomNumber {
   //출제의도: class를 생성하여 만들어낸 인스턴스 값 캐싱.
