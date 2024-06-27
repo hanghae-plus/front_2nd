@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { deepEquals } from "../basic/basic";
+import { deepEquals, shallowEquals } from "../basic/basic";
 
 const map = new Map();
 const dependencyMap = new Map();
@@ -57,7 +57,7 @@ export const useCustomState = (initValue) => {
 };
 
 const textContextDefaultValue = {
-  user: {},
+  user: null,
   todoItems: [],
   count: 0,
 };
@@ -90,7 +90,7 @@ const useTestContext = (key) => {
 
   const memorizedSetState = (newValue) => {
     //기존 값과 새로 들어온 값을 깊은 비교를 해 다르다면 리렌더링
-    if (!deepEquals(state, newValue)) {
+    if (!shallowEquals(state, newValue)) {
       return setState(newValue);
     }
     //아니라면 기존 값으로 setState하여 리렌더링 방지
