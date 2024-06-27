@@ -176,7 +176,22 @@ export class CustomNumber {
   }
 }
 
+// 비열거형 속성을 만드는 이유
+// 속성 숨기기: 속성을 숨겨서 외부 코드에서 실수로 접근하거나 변경 불가 처리
+// 정의된 인터페이스 유지: 객체의 "공개" 속성과 "비공개" 속성을 구분
+// 의도하지 않은 열거 방지: 특정 속성이 for...in 루프 등에 의해 의도하지 않게 열거되는 것을 방지
 export function createUnenumerableObject(target) {
+  const targetKeys = Object.keys(target);
+
+  targetKeys.forEach((value) => {
+    Object.defineProperty(target, value, {
+      value: target[value],
+      enumerable: false, // 비열거형 속성으로 설정
+      writable: true,
+      configurable: true,
+    });
+  });
+
   return target;
 }
 
