@@ -1,82 +1,24 @@
-import { createContext, useContext, useState, useCallback } from "react";
-
-/** reference: https://velog.io/@sarang_daddy/React-Data-Caching
- * const ONE_MINUTE_MS = 60 * 1000;
-
-const cacheManager = (cacheExpirationDuration: number = ONE_MINUTE_MS * 10) => {
-  const cache: Record<string, { data: any; expireTime: number }> = {};
-
-  return {
-    cacheData: (key: string, data?: any) => {
-      if (cache[key]) {
-        const { data: cachedData, expireTime } = cache[key];
-        if (expireTime > Date.now()) {
-          return cachedData;
-        }
-      }
-      cache[key] = { data, expireTime: Date.now() + cacheExpirationDuration };
-      return data;
-    },
-    isDataValid: (key: string) => {
-      if (!cache[key]) return false;
-      const { expireTime } = cache[key];
-      return expireTime > Date.now();
-    },
-  };
-};
-
-export default cacheManager;
-
- */
-const cacheManager = (cacheExpirationDuration = 60 * 1000 * 10) => {
-  const cache = new Map();
-
-  return {
-    get: (key) => {
-      if (cache.has(key)) {
-        const { data, expireTime } = cache.get(key);
-        if (expireTime > Date.now()) {
-          return data;
-        } else {
-          cache.delete(key); // 만료된 데이터 삭제
-        }
-      }
-      return null;
-    },
-    set: (key, data) => {
-      cache.set(key, {
-        data,
-        expireTime: Date.now() + cacheExpirationDuration,
-      });
-    }
-  };
-};
-
-// const cache = new Map();
-const memo1Cache = cacheManager();
+import { createContext, useContext, useState } from "react"; 
+ 
+const cache = {};
 
 export const memo1 = (fn) => {
-  const cachedData = memo1Cache.get(fn);
-  if (cachedData !== null) {
-    return cachedData;
+  const key = fn.toString();
+  if (!cache[key]) {
+    cache[key] = fn();
   }
-  const result = fn();
-  memo1Cache.set(fn, result);
-  return result;
+  return cache[key];
 };
 
-
-const memo2Cache = cacheManager();
 export const memo2 = (fn, args) => {
-  const key = JSON.stringify(args);
-  const cachedData = memo2Cache.get(key);
-  if (cachedData !== null) {
-    return cachedData;
+  const key = fn.toString() + JSON.stringify(args);
+  if (!cache[key]) {
+    cache[key] = fn(...args);
   }
-  const result = fn();
-  memo2Cache.set(key, result);
-  return result;
+  return cache[key];
 };
+
+
 
 const deepEqual = (a, b) => {
   if (a === b) return true;
@@ -96,23 +38,18 @@ const deepEqual = (a, b) => {
 };
 
 export const useCustomState = (initValue) => {
-  const [state, setState] = useState(initValue);
-
-  const setCustomState = useCallback((newState) => {
-    setState((prevState) => {
-      if (!deepEqual(prevState, newState)) {
-        return newState;
-      }
-      return prevState;
-    });
-  }, []);
+  const [state, setState] = useState(initValue); 
+  const setCustomState = (newState) => {
+    if (!deepEqual(state, newState)) {
+      setState(newState);
+    }
+  };
 
   return [state, setCustomState];
 };
 
 
-
-
+ 
 const textContextDefaultValue = {
   user: null,
   todoItems: [],
@@ -124,43 +61,72 @@ export const TestContext = createContext({
   setValue: () => null,
 });
 
-export const TestContextProvider = ({ children }) => {
-  const [value, setValue] = useState(textContextDefaultValue);
+ 
+const UserContext = createContext({
+  user: null,
+  setUser: () => null,
+});
 
+export const UserProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
   return (
-    <TestContext.Provider value={{ value, setValue }}>
+    <UserContext.Provider value={{ user, setUser }}>
       {children}
-    </TestContext.Provider>
-  )
-}
-
-const useTestContext = () => {
-  return useContext(TestContext);
-}
+    </UserContext.Provider>
+  );
+};
 
 export const useUser = () => {
-  const { value, setValue } = useTestContext();
+  const { user, setUser } = useContext(UserContext);
+  return [user, setUser];
+};
+ 
+const CountContext = createContext({
+  count: 0,
+  setCount: () => null,
+});
 
-  return [
-    value.user,
-    (user) => setValue({ ...value, user })
-  ];
-}
+export const CountProvider = ({ children }) => {
+  const [count, setCount] = useState(0);
+  return (
+    <CountContext.Provider value={{ count, setCount }}>
+      {children}
+    </CountContext.Provider>
+  );
+};
 
 export const useCounter = () => {
-  const { value, setValue } = useTestContext();
+  const { count, setCount } = useContext(CountContext);
+  return [count, setCount];
+};
+ 
+const TodoItemsContext = createContext({
+  todoItems: [],
+  setTodoItems: () => null,
+});
 
-  return [
-    value.count,
-    (count) => setValue({ ...value, count })
-  ];
-}
+export const TodoItemsProvider = ({ children }) => {
+  const [todoItems, setTodoItems] = useState([]);
+  return (
+    <TodoItemsContext.Provider value={{ todoItems, setTodoItems }}>
+      {children}
+    </TodoItemsContext.Provider>
+  );
+};
 
 export const useTodoItems = () => {
-  const { value, setValue } = useTestContext();
+  const { todoItems, setTodoItems } = useContext(TodoItemsContext);
+  return [todoItems, setTodoItems];
+};
+ 
+export const TestContextProvider = ({ children }) => {
+  return (
+    <UserProvider>
+      <CountProvider>
+        <TodoItemsProvider>{children}</TodoItemsProvider>
+      </CountProvider>
+    </UserProvider>
+  );
+};
+ 
 
-  return [
-    value.todoItems,
-    (todoItems) => setValue({ ...value, todoItems })
-  ];
-}
