@@ -73,41 +73,42 @@ export const TestContextProvider = ({ children }) => {
   // setValue 또한 useCallback을 사용하여 ref가 바뀌지 않으면 리랜더링 하지 않도록 방지
   const ref = useRef(textContextDefaultValue);
   const setValue = useCallback(
+    (key, value) => {
+      ref.current = { ...ref.current, [key]: value };
+    },
+    [ref]
+  );
 
   return (
-    <TestContext.Provider value={{ value, setValue }}>
+    <TestContext.Provider value={{ value: ref.current, setValue }}>
       {children}
     </TestContext.Provider>
-  )
-}
+  );
+};
 
-const useTestContext = () => {
-  return useContext(TestContext);
-}
+// key값으로 특정 상태 지정
+const useTestContext = (key) => {
+  const { value, setValue } = useContext(TestContext);
+  // 초기 상태 설정
+  const [state, setState] = useState(value[key]);
 
+  // 상태가 변경될 때마다 컨텍스트 값 업데이트
+  useEffect(() => {
+    setValue(key, state);
+  }, [state]);
+
+  return [state, setState];
+};
+
+//textContextDefaultValue 맞춘 키값
 export const useUser = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.user,
-    (user) => setValue({ ...value, user })
-  ];
-}
+  return useTestContext("user");
+};
 
 export const useCounter = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.count,
-    (count) => setValue({ ...value, count })
-  ];
-}
+  return useTestContext("count");
+};
 
 export const useTodoItems = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.todoItems,
-    (todoItems) => setValue({ ...value, todoItems })
-  ];
-}
+  return useTestContext("todoItems");
+};
