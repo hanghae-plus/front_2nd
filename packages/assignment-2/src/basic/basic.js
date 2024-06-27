@@ -118,19 +118,62 @@ export function deepEquals(target1, target2) {
 }
 
 export function createNumber1(n) {
-  return n;
+  return new Number(n);
 }
 
 export function createNumber2(n) {
-  return n;
+  return new String(n);
 }
 
+// 객체의 메서드 오버라이딩 (Overriding)
+// 객체에는 기본적으로 정의된 메서드가 있지만, 이를 사용자 정의 메서드로 오버라이딩할 수 있습니다.
+// 이를 통해 객체가 특정 상황에서 다르게 동작하도록 할 수 있습니다.
 export function createNumber3(n) {
-  return n;
+  return {
+    value: n,
+    // 객체가 원시 값으로 변환될 때 호출
+    // 숫자 연산이나 비교 연산에서 사용
+    // valueOf을 사용하면 === false, == true
+    valueOf: function () {
+      return this.value;
+    },
+    // 객체가 문자열로 변환될 때 호출
+    toString: function () {
+      return new String(this.value);
+    },
+    // JSON.stringify가 호출될 때 호출
+    toJSON: function () {
+      return `this is createNumber3 => ${this.value}`;
+    },
+  };
 }
 
 export class CustomNumber {
+  // expect(num1).toBe(num3)
+  // Singleton 패턴
+  // 주어진 값에 대해 항상 동일한 인스턴스 반환 보장
+  // CustomNumber 클래스의 인스턴스들이 주어진 값에 대한 동일성 유지 가능
+  static instances = new Map();
+  constructor(value) {
+    if (CustomNumber.instances.has(value)) {
+      return CustomNumber.instances.get(value);
+    }
 
+    this.value = value;
+    CustomNumber.instances.set(value, this);
+
+    return this;
+  }
+
+  valueOf() {
+    return this.value;
+  }
+  toString() {
+    return String(this.value);
+  }
+  toJSON() {
+    return String(this.value);
+  }
 }
 
 export function createUnenumerableObject(target) {
