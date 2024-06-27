@@ -45,8 +45,17 @@ export const memo2 = (() => {
 })();
 
 export const useCustomState = (initValue) => {
-  return useState(initValue);
-}
+  const [value, setValue] = useState(initValue);
+
+  // 객체가 깊은 비교를 했을때 다르다면 변경
+  const setDeepEqualsState = (state) => {
+    if (!deepEquals(value, state)) {
+      setValue(state);
+    }
+  };
+
+  return [value, setDeepEqualsState];
+};
 
 const textContextDefaultValue = {
   user: null,
