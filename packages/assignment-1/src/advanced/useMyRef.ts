@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
-
-export const useMyRef = ((initValue) => {
-  const ref = { current: initValue };
-  return () => ref;
-})();
+export function useMyRef<T>(initValue: T | null) {
+  const [ref] = useState({ current: initValue });
+  return ref;
+}
