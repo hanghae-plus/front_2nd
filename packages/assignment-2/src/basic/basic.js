@@ -74,7 +74,26 @@ export function shallowEquals(target1, target2) {
   }
 }
 
-export function deepEquals(target1, target2) {}
+export function deepEquals(target1, target2) {
+  // if (typeof target1 == "object" || typeof target1 == "array") {
+  //   return JSON.stringify(target1) === JSON.stringify(target2);
+  // } else {
+  // return Object.is(target1) === Object.is(target2;
+  // // }
+  // return Object.is(target1, target2);
+
+  if (
+    target1 instanceof Number ||
+    target1 instanceof String
+    // Object.entries(target1) instanceof Number
+    // JSON.stringify(target1).includes(`"Number"`)
+    // Object.values(target1).every((item) => item instanceof Number)
+  ) {
+    return target1 === target2;
+  } else {
+    return _.isEqual(target1, target2);
+  }
+}
 
 export function createNumber1(n) {}
 
