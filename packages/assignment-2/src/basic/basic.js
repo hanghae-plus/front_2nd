@@ -163,20 +163,6 @@ export function createUnenumerableObject(target) {
     });
   }
 
-  // 이터레이터를 정의하여 객체 내부의 값들을 순회할 수 있게 함
-  result[Symbol.iterator] = function* () {
-    const properties = Object.getOwnPropertyNames(this);
-    for (let i = 0; i < properties.length; i++) {
-      yield [properties[i], this[properties[i]]];
-    }
-  };
-
-  Object.defineProperty(result, Symbol.iterator, {
-    enumerable: false,
-    writable: false,
-    configurable: false
-  });
-
   return result
 }
 
@@ -197,10 +183,11 @@ export function forEach(target, callback) {
     }
     return;
   }
-  
+
   if (typeof target === 'object') {
-    for (const [key, value] of target) {
-      callback(value, key);
+    const keys = Object.getOwnPropertyNames(target);
+    for (const key of keys) {
+      callback(target[key], key);
     }
   }
 }
@@ -219,8 +206,10 @@ export function map(target, callback) {
   
   if (typeof target === 'object') {
     result = {};
-    for (const [key, value] of target) {
-      result[key] = callback(value);
+    const keys = Object.getOwnPropertyNames(target);
+
+    for (const key of keys) {
+      result[key] = callback(target[key]);
     }
   }
 
@@ -243,10 +232,11 @@ export function filter(target, callback) {
 
   if (typeof target === 'object') {
     result = {};
+    const keys = Object.getOwnPropertyNames(target);
 
-    for (const [key, value] of target) {
-      if (callback(value)) {
-        result[key] = value;
+    for (const key of keys) {
+      if (callback(target[key])) {
+        result[key] = target[key];
       }
     }
   }
@@ -267,8 +257,10 @@ export function every(target, callback) {
   }
   
   if (typeof target === 'object') {
-    for (const [, value] of target) {
-      if (!callback(value)) {
+    const keys = Object.getOwnPropertyNames(target);
+
+    for (const key of keys) {
+      if (!callback(target[key])) {
         return false;
       }
     }
@@ -290,8 +282,10 @@ export function some(target, callback) {
   } 
   
   if (typeof target === 'object') {
-    for (const [, value] of target) {
-      if (callback(value)) {
+    const keys = Object.getOwnPropertyNames(target);
+
+    for (const key of keys) {
+      if (callback(target[key])) {
         return true;
       }
     }
