@@ -196,25 +196,162 @@ export function createUnenumerableObject(target) {
 }
 
 export function forEach(target, callback) {
+  // 배열
+  // 각 요소에 대해 콜백함수 실행
+  // 인자는 (value, index)
+  if (
+    Array.isArray(target) ||
+    target instanceof NodeList ||
+    target instanceof HTMLCollection
+  ) {
+    const result = [];
 
+    for (let i = 0; i < target.length; i++) {
+      result.push(callback(target[i], i));
+    }
+
+    return result;
+  }
+
+  // 객체
+  // 각 속성에 대해 콜백함수 실행
+  // 인자는 (value, key)
+
+  // Object.keys() : 열거 가능한 속성만 가져옴
+  // Object.getOwnPropertyNames() : 열거가능, 불가능 모두 가져옴
+  // https://velog.io/@nemo/Object.keys-Object.getOwnPropertyNames
+  const propertyArray = Object.getOwnPropertyNames(target);
+
+  for (let i = 0; i < propertyArray.length; i++) {
+    callback(target[propertyArray[i]], propertyArray[i]);
+  }
 }
 
 export function map(target, callback) {
+  // 배열
+  // 각 요소에 callback 함수를 실행한 값 적용 후 새로운 값을 적용한 배열 반환
+  if (
+    Array.isArray(target) ||
+    target instanceof NodeList ||
+    target instanceof HTMLCollection
+  ) {
+    const result = [];
 
+    for (let i = 0; i < target.length; i++) {
+      result.push(callback(target[i], i));
+    }
+
+    return result;
+  }
+
+  // 객체
+  // 각 속성에 callback 함수를 실행한 값 적용 후 새로운 값을 적용한 객체 반환
+  // foreach와 다르게 반환 값 필요
+  const propertyArray = Object.getOwnPropertyNames(target);
+
+  const resultObject = {};
+  for (let i = 0; i < propertyArray.length; i++) {
+    resultObject[propertyArray[i]] = callback(target[propertyArray[i]]);
+  }
+
+  return resultObject;
 }
 
 export function filter(target, callback) {
+  // 배열
+  // 각 요소에 callback 함수를 실행한 값 적용 후 true 값만 반환
+  if (
+    Array.isArray(target) ||
+    target instanceof NodeList ||
+    target instanceof HTMLCollection
+  ) {
+    const result = [];
 
+    for (let i = 0; i < target.length; i++) {
+      const value = callback(target[i]);
+      if (value) {
+        result.push(target[i]);
+      }
+    }
+
+    return result;
+  }
+
+  // 객체
+  // 각 속성에 callback 함수를 실행한 값 적용 후  true 값만 반환
+  const propertyArray = Object.getOwnPropertyNames(target);
+
+  const resultObject = {};
+  for (let i = 0; i < propertyArray.length; i++) {
+    const result = callback(target[propertyArray[i]]);
+    if (result) {
+      resultObject[propertyArray[i]] = target[propertyArray[i]];
+    }
+  }
+
+  return resultObject;
 }
 
-
 export function every(target, callback) {
+  // 배열
+  // 각 요소에 callback 함수를 실행한 값 적용 후 모두 true면 true
+  if (
+    Array.isArray(target) ||
+    target instanceof NodeList ||
+    target instanceof HTMLCollection
+  ) {
+    for (let i = 0; i < target.length; i++) {
+      const value = callback(target[i]);
+      if (!value) {
+        return false;
+      }
+    }
 
+    return true;
+  }
+
+  // 객체
+  // 각 속성에 callback 함수를 실행한 값 적용 후 모두 true면 true
+  const propertyArray = Object.getOwnPropertyNames(target);
+
+  for (let i = 0; i < propertyArray.length; i++) {
+    const value = callback(target[propertyArray[i]]);
+    if (!value) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export function some(target, callback) {
+  // 배열
+  // 각 요소에 callback 함수를 실행한 값 적용 후 하나라도 true면 true
+  if (
+    Array.isArray(target) ||
+    target instanceof NodeList ||
+    target instanceof HTMLCollection
+  ) {
+    for (let i = 0; i < target.length; i++) {
+      const value = callback(target[i]);
+      if (value) {
+        return true;
+      }
+    }
 
+    return false;
+  }
+
+  // 객체
+  // 각 속성에 callback 함수를 실행한 값 적용 후 하나라도 true면 true
+  const propertyArray = Object.getOwnPropertyNames(target);
+
+  for (let i = 0; i < propertyArray.length; i++) {
+    const value = callback(target[propertyArray[i]]);
+    if (value) {
+      return true;
+    }
+  }
+
+  return false;
 }
-
-
-
