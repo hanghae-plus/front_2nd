@@ -83,12 +83,6 @@ export function createNumber1(n) {
     valueOf() {
       return this.value;
     },
-    toJSON() {
-      return `this is createNumber1 => ${this.value}`;
-    },
-    toString() {
-      return this.value;
-    }
   }
 }
 
@@ -98,30 +92,18 @@ export function createNumber2(n) {
     valueOf() {
       return this.value + "";
     },
-    toJSON() {
-      return `this is createNumber2 => ${this.value}`;
-    },
-    toString() {
-      return this.value;
-    }
   }
 }
 
 export function createNumber3(n) {
   return {
     value:n,
-    valueOf() {
-      return this.value;
-    },
     toJSON() {
       return `this is createNumber3 => ${this.value}`;
     },
     toString(){
       return this.value
     },
-    get() {
-      return this.value;
-    }
   };
 }
 
@@ -141,13 +123,10 @@ export class CustomNumber {
     return this.value;
   }
   toJSON(){
-    return String(this.value);
+    return this.value + "";
   }
   toString(){
-    return String(this.value);
-  }
-  get() {
-    return this.value;
+    return this.value + "";
   }
 }
 
