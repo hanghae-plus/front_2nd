@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, memo, useContext, useMemo, useState } from "react";
 import { deepEquals } from "../basic/basic";
 
 const map = new Map();
@@ -57,7 +57,7 @@ export const useCustomState = (initValue) => {
 };
 
 const textContextDefaultValue = {
-  user: null,
+  user: {},
   todoItems: [],
   count: 0,
 };
@@ -81,56 +81,33 @@ export const TestContextProvider = ({ children }) => {
  * useContext를 구독하고 있는 컴포넌트는 그 값이 변경됨에 따라,
  * 리렌더링이 되기때문에 실제 그 값이 사용되는 컴포넌트만 리렌더링하게
  * 해주어야함.
- * index를 key로 접근해 보려 했으나.. textContextDefaultValue에
- * 정의된 key를 매핑해야 실제 어느 컴포넌트에서 사용되는지 확인이 가능함.
  */
 const useTestContext = (key) => {
-  // console.log(key);
-  // console.log(useContext(TestContext).value[key]);
-  const { value, setValue } = useContext(TestContext);
+  const { value } = useContext(TestContext);
+  const [state, setState] = useState(value[key]);
 
-  return { value, setValue };
+  const memorizedValue = memo2(() => state, [value[key]]);
+
+  const memorizedSetState = (newValue) => {
+    //기존 값과 새로 들어온 값을 깊은 비교를 해 다르다면 리렌더링
+    if (!deepEquals(state, newValue)) {
+      return setState(newValue);
+    }
+    //아니라면 기존 값으로 setState하여 리렌더링 방지
+    return setState(state);
+  };
+
+  return [memorizedValue, memorizedSetState];
 };
 
 export const useUser = () => {
-  const { value, setValue } = useTestContext("user");
-
-  const setNewContext = (user) => {
-    if (!value["user"]) {
-      return setValue({ ...value, user });
-    }
-
-    if (deepEquals(value["user"], user)) {
-      return setValue({ ...value, user });
-    }
-
-    return setValue(value);
-  };
-
-  // return [value.user, (user) => setValue({ ...value, user })];
-  return [value.user, (user) => setNewContext(user)];
+  return useTestContext("user");
 };
 
 export const useCounter = () => {
-  const { value, setValue } = useTestContext("counter");
-
-  const setNewContext = (count) => {
-    if (!value["user"]) {
-      return setValue({ ...value, count });
-    }
-
-    if (deepEquals(value["count"], count)) {
-      return setValue({ ...value, count });
-    }
-
-    return setValue(value);
-  };
-
-  return [value.count, (count) => setNewContext(count)];
+  return useTestContext("count");
 };
 
 export const useTodoItems = () => {
-  const { value, setValue } = useTestContext("todoItems");
-
-  return [value.todoItems, (todoItems) => setValue({ ...value, todoItems })];
+  return useTestContext("todoItems");
 };
