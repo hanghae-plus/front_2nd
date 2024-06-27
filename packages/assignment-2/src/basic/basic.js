@@ -80,9 +80,13 @@ export function createNumber3(n) {
 
 export class CustomNumber {
   constructor(number) {
-    this.valueOf = () => this.number;
-    this.toJSON = () => this.number;
-    this.toString = () => this.number;
+    this.number = number;
+    // this.valueOf = () => this.number;
+    // this.toJSON = () => this.number;
+    // this.toString = () => this.number;
+  }
+  valueOf() {
+    return this.number + '';
   }
 }
 
@@ -91,19 +95,17 @@ export function createUnenumerableObject(target) {
 }
 
 export function forEach(target, callback) {
-  let results;
   if (typeof target === 'object') {
-    results = {};
-
-    const keys = Object.keys(target);
-    for (let i = 0; i < keys.length; i++) {
-      results[keys[i]] = target[keys[i]];
+    if (target instanceof Array) {
+      for (let i = 0; i < target.length; i++) {
+        callback(target[i], i);
+      }
+    } else {
+      const keys = Object.keys(target);
+      for (let i = 0; i < keys.length; i++) {
+        callback(target[keys[i]], keys[i]);
+      }
     }
-
-    console.log(results);
-    return results;
-  } else {
-    return false;
   }
 }
 
