@@ -1,5 +1,12 @@
-import { createContext, useContext, useState } from "react";
-
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { deepEquals, shallowEquals } from "../basic/basic.js";
 // 캐싱 기능 검증 (클로저 활용)
 export const memo1 = (() => {
   const cache = new Map(); // 자유 변수
@@ -27,7 +34,18 @@ export const memo2 = (() => {
 })();
 
 export const useCustomState = (initValue) => {
-  return useState(initValue);
+  const [state, setState] = useState(initValue);
+
+  const memoizedSetState = useCallback(
+    (newValue) => {
+      if (!deepEquals(state, newValue)) {
+        setState(newValue);
+      }
+    },
+    [initValue],
+  );
+
+  return [state, memoizedSetState];
 };
 
 const textContextDefaultValue = {
