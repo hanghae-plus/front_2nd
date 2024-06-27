@@ -107,7 +107,25 @@ export function createNumber3(n) {
   return n;
 }
 
-export class CustomNumber {}
+export class CustomNumber {
+  constructor(num) {
+    this.num = num;
+  }
+
+  // 숫자로 반환 num1 + num2 = 3; === 결과false; == 결과 true
+  valueOf() {
+    return this.num;
+  }
+  instanceOf() {
+    return this.num;
+  }
+  toString() {
+    return this.num.toString();
+  }
+  toJSON() {
+    return this.num.toString();
+  }
+}
 
 export function createUnenumerableObject(target) {
   return target;
