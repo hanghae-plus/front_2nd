@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { shallowEquals } from "../basic/basic";
 
 const map = new Map();
@@ -68,17 +68,17 @@ export const TestContext = createContext({
 });
 
 export const TestContextProvider = ({ children }) => {
-  let value = textContextDefaultValue;
+  const value = useRef(textContextDefaultValue);
 
   const setValue = (key, newValue) => {
     //기존 값과 새로 들어온 값을 깊은 비교를 해 다르다면 리렌더링
-    if (!shallowEquals(value, newValue)) {
-      return (value = { ...value, [key]: newValue });
+    if (!shallowEquals(value.current, newValue)) {
+      return (value.current = { ...value.current, [key]: newValue });
     }
   };
 
   return (
-    <TestContext.Provider value={{ value, setValue }}>
+    <TestContext.Provider value={{ value: value.current, setValue }}>
       {children}
     </TestContext.Provider>
   );
@@ -93,7 +93,9 @@ const useTestContext = (key) => {
   const { value, setValue } = useContext(TestContext);
   const [state, setState] = useState(value[key]);
 
-  setValue(key, state);
+  useEffect(() => {
+    setValue(key, state);
+  }, [state]);
 
   return [state, setState];
 };
