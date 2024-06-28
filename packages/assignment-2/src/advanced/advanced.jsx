@@ -93,9 +93,7 @@ const useTestContext = (key) => {
   const { value, setValue } = useContext(TestContext);
   const [state, setState] = useState(value[key]);
 
-  useEffect(() => {
-    setValue(key, state);
-  }, []);
+  setValue(key, state);
 
   return [state, setState];
 };
