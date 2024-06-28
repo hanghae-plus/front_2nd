@@ -89,9 +89,6 @@ export function createNumber2(value) {
   return {
     valueOf: function() { return String(value); },
     toString: function() { return String(value); },
-    [Symbol.toPrimitive]: function() {
-      return String(value);
-    }
   };
 }
 
