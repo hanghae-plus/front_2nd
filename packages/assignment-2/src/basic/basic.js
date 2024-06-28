@@ -30,7 +30,7 @@ export function shallowEquals(target1, target2) {
 
     // 얕은 비교: 각 키의 값을 비교
     for (let key in target1) {
-      if (!target2.hasOwnProperty(key) || target1[key] !== target2[key]) {
+      if (!Object.prototype.hasOwnProperty.call(target2, key) || target1[key] !== target2[key]) {
         return false;
       }
     }
@@ -155,7 +155,6 @@ export function forEach(target, callback) {
       callback(target[i], i);
     }
   } else if (typeof target === 'object' && target !== null) {
-    // Object.getOwnPropertyNames를 사용하여 열거 불가능한 속성도 포함
     Object.getOwnPropertyNames(target).forEach(key => {
       callback(target[key], key);
     });
