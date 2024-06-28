@@ -1,13 +1,47 @@
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { deepEquals } from "../basic/basic.js";
 
-export const memo1 = (fn) => fn();
+export const memo1 = (() => {
+  let cache;
 
-export const memo2 = (fn) => fn();
+  return (fn) => {
+    if (!cache) {
+      cache = fn();
+    }
+    return cache;
+  };
+})();
 
+export const memo2 = (() => {
+  const cache = new Map();
+
+  return (fn, value) => {
+    const key = JSON.stringify(value);
+    if (cache.has(key)) return cache.get(key);
+
+    cache.set(key, fn(...value));
+    return cache.get(key);
+  };
+})();
 
 export const useCustomState = (initValue) => {
-  return useState(initValue);
-}
+  const [value, setValue] = useState(initValue);
+
+  const setResultState = (state) => {
+    if (!deepEquals(value, state)) {
+      setValue(state);
+    }
+  };
+
+  return [value, setResultState];
+};
 
 const textContextDefaultValue = {
   user: null,
@@ -21,42 +55,34 @@ export const TestContext = createContext({
 });
 
 export const TestContextProvider = ({ children }) => {
-  const [value, setValue] = useState(textContextDefaultValue);
+  const valueRef = useRef(textContextDefaultValue);
+  const setValue = useCallback(
+    (key, newValue) => {
+      valueRef.current = { ...valueRef.current, [key]: newValue };
+    },
+    [valueRef],
+  );
 
   return (
-    <TestContext.Provider value={{ value, setValue }}>
+    <TestContext.Provider value={{ value: valueRef.current, setValue }}>
       {children}
     </TestContext.Provider>
-  )
-}
+  );
+};
 
-const useTestContext = () => {
-  return useContext(TestContext);
-}
+const useTestContext = (key) => {
+  const { value, setValue } = useContext(TestContext);
+  const [state, setState] = useState(value[key]);
 
-export const useUser = () => {
-  const { value, setValue } = useTestContext();
+  useEffect(() => {
+    setValue(key, state);
+  }, [state]);
 
-  return [
-    value.user,
-    (user) => setValue({ ...value, user })
-  ];
-}
+  return [state, setState];
+};
 
-export const useCounter = () => {
-  const { value, setValue } = useTestContext();
+export const useUser = () => useTestContext("user");
 
-  return [
-    value.count,
-    (count) => setValue({ ...value, count })
-  ];
-}
+export const useCounter = () => useTestContext("count");
 
-export const useTodoItems = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.todoItems,
-    (todoItems) => setValue({ ...value, todoItems })
-  ];
-}
+export const useTodoItems = () => useTestContext("todoItems");
