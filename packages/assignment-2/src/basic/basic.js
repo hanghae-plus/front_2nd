@@ -130,9 +130,8 @@ export class CustomNumber {
     return String(this.value);
   }
 
-  [Symbol.toPrimitive](hint) {
-    if (hint === 'number') return this.value;
-    return this.toString();
+  toJSON() {
+    return String(this.value);
   }
 }
 
