@@ -44,7 +44,6 @@ export function shallowEquals(target1, target2) {
   // 객체가 아니거나 타입이 다른 경우
   return target1 === target2;
 }
-
 export function deepEquals(target1, target2) {
   // null 또는 undefined 체크
   if (target1 == null || target2 == null) return target1 === target2;
@@ -98,32 +97,192 @@ export function createNumber1(n) {
 }
 
 export function createNumber2(n) {
-  const number = Number(n);
-  return new String(number.toString());
-}
-
-export function createNumber3(n) {
-  const number = new Number(n);
-
-  number.toJSON = function () {
-    return `this is createNumber3 => ${this.valueOf()}`;
-  };
-
+  const number = new String(Number(n).toString());
   return number;
 }
 
-export class CustomNumber {}
+export function createNumber3(n) {
+  const number = {
+    valueOf() {
+      return n;
+    },
+    toString() {
+      return `${n}`;
+    },
+    toJSON() {
+      return `this is createNumber3 => ${n}`;
+    },
+  };
+  return Object.create(number);
+}
+
+export class CustomNumber {
+  static instances = new Map();
+  constructor(value) {
+    if (CustomNumber.instances.has(value)) {
+      return CustomNumber.instances.get(value);
+    }
+
+    this.value = value;
+    CustomNumber.instances.set(value, this);
+
+    return this;
+  }
+
+  valueOf() {
+    return this.value;
+  }
+  toString() {
+    return String(this.value);
+  }
+  toJSON() {
+    return String(this.value);
+  }
+}
 
 export function createUnenumerableObject(target) {
+  const keys = Object.keys(target);
+  keys.forEach((key) => {
+    Object.defineProperty(target, key, {
+      value: target[key],
+      enumerable: false,
+      writable: true,
+      configurable: true,
+    });
+  });
   return target;
 }
 
-export function forEach(target, callback) {}
+export function forEach(target, callback) {
+  if (
+    Array.isArray(target) ||
+    target instanceof NodeList ||
+    target instanceof HTMLCollection
+  ) {
+    const result = [];
 
-export function map(target, callback) {}
+    for (let i = 0; i < target.length; i++) {
+      result.push(callback(target[i], i));
+    }
 
-export function filter(target, callback) {}
+    return result;
+  }
 
-export function every(target, callback) {}
+  const propertyArray = Object.getOwnPropertyNames(target);
 
-export function some(target, callback) {}
+  for (let i = 0; i < propertyArray.length; i++) {
+    callback(target[propertyArray[i]], propertyArray[i]);
+  }
+}
+
+export function map(target, callback) {
+  if (
+    Array.isArray(target) ||
+    target instanceof NodeList ||
+    target instanceof HTMLCollection
+  ) {
+    const result = [];
+
+    for (let i = 0; i < target.length; i++) {
+      result.push(callback(target[i], i));
+    }
+
+    return result;
+  }
+
+  const propertyArray = Object.getOwnPropertyNames(target);
+
+  const resultObject = {};
+  for (let i = 0; i < propertyArray.length; i++) {
+    resultObject[propertyArray[i]] = callback(target[propertyArray[i]]);
+  }
+
+  return resultObject;
+}
+
+export function filter(target, callback) {
+  if (
+    Array.isArray(target) ||
+    target instanceof NodeList ||
+    target instanceof HTMLCollection
+  ) {
+    const result = [];
+
+    for (let i = 0; i < target.length; i++) {
+      const value = callback(target[i]);
+      if (value) {
+        result.push(target[i]);
+      }
+    }
+
+    return result;
+  }
+
+  const propertyArray = Object.getOwnPropertyNames(target);
+
+  const resultObject = {};
+  for (let i = 0; i < propertyArray.length; i++) {
+    const result = callback(target[propertyArray[i]]);
+    if (result) {
+      resultObject[propertyArray[i]] = target[propertyArray[i]];
+    }
+  }
+
+  return resultObject;
+}
+
+export function every(target, callback) {
+  if (
+    Array.isArray(target) ||
+    target instanceof NodeList ||
+    target instanceof HTMLCollection
+  ) {
+    for (let i = 0; i < target.length; i++) {
+      const value = callback(target[i]);
+      if (!value) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  const propertyArray = Object.getOwnPropertyNames(target);
+
+  for (let i = 0; i < propertyArray.length; i++) {
+    const value = callback(target[propertyArray[i]]);
+    if (!value) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function some(target, callback) {
+  if (
+    Array.isArray(target) ||
+    target instanceof NodeList ||
+    target instanceof HTMLCollection
+  ) {
+    for (let i = 0; i < target.length; i++) {
+      const value = callback(target[i]);
+      if (value) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  const propertyArray = Object.getOwnPropertyNames(target);
+
+  for (let i = 0; i < propertyArray.length; i++) {
+    const value = callback(target[propertyArray[i]]);
+    if (value) {
+      return true;
+    }
+  }
+
+  return false;
+}
