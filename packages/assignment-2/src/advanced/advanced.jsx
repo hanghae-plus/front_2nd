@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useRef, useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
 
 // #region Q1, Q2) 메모
 /** 함수 객체를 키로 하여 함수 실행 결과를 저장하는 맵
@@ -74,117 +74,53 @@ export const useCustomState = (initValue) => {
 // #endregion
 
 // #region Q4) 전역 상태 참조
-// INFO: 컨텍스트를 분리하는 방법을 생각했으나, 컨텍스트가 더 많아질 경우를 생각해 useReducer를 사용해 해결
-
-// /** 상태 타입 */
-// interface State {
-//   user: { name: string } | null;
-//   todoItems: { id: number; content: string; completed: boolean }[];
-//   count: number;
-// }
-
-// /** 액션 타입 */
-// type Action =
-//   | { type: "SET_USER"; payload: { name: string } | null }
-//   | {
-//       type: "SET_TODO_ITEMS";
-//       payload: { id: number; content: string; completed: boolean }[];
-//     }
-//   | { type: "SET_COUNT"; payload: number };
-
-// /** 리듀서 타입 */
-// type Reducer = (state: State, action: Action) => State;
-
-// /** provider prop 타입 */
-// interface ProviderProps {
-//   children: ReactNode;
-// }
-
-//
-
 const textContextDefaultValue = {
   user: null,
   todoItems: [],
   count: 0,
 };
 
-// INFO: state와 dispatch 중 하나만 사용하는 컴포넌트가 불필요하게 리렌더링 되지 않도록 분리 (현재 테스트 코드엔 없지만..)
+const createProvider =
+  (Context, useCustomState) =>
+  ({ children }) => {
+    const [state, setState] = useCustomState();
+    return (
+      <Context.Provider value={{ state, setState }}>
+        {children}
+      </Context.Provider>
+    );
+  };
 
-/** 상태 값(state) 컨텍스트 */
-// const StateContext = createContext<State | undefined>(undefined);
-const StateContext = createContext(undefined);
+const UserContext = createContext();
+const CounterContext = createContext();
+const TodoContext = createContext();
 
-/** 상태 값 변경 함수(dispatch) 컨텍스트 */
-// const DispatchContext = createContext<Dispatch<Action> | undefined>(undefined);
-const DispatchContext = createContext(undefined);
+export const UserProvider = createProvider(UserContext, () =>
+  useCustomState(textContextDefaultValue.user)
+);
+export const CounterProvider = createProvider(CounterContext, () =>
+  useCustomState(textContextDefaultValue.count)
+);
+export const TodoProvider = createProvider(TodoContext, () =>
+  useCustomState(textContextDefaultValue.todoItems)
+);
 
-const reducer = (state, action) => {
-  switch (action.type) {
-    case "SET_USER":
-      return { ...state, user: action.payload };
-    case "SET_TODO_ITEMS":
-      return { ...state, todoItems: action.payload };
-    case "SET_COUNT":
-      return { ...state, count: action.payload };
-    default:
-      throw new Error(`Unhandled action type`);
-  }
+const createStateHook = (Context) => () => {
+  const context = useContext(Context);
+  return [context.state, context.setState];
 };
+
+export const useUser = createStateHook(UserContext);
+export const useCounter = createStateHook(CounterContext);
+export const useTodoItems = createStateHook(TodoContext);
 
 export const TestContextProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(reducer, textContextDefaultValue);
-
   return (
-    <StateContext.Provider value={state}>
-      <DispatchContext.Provider value={dispatch}>
-        {children}
-      </DispatchContext.Provider>
-    </StateContext.Provider>
+    <UserProvider>
+      <CounterProvider>
+        <TodoProvider>{children}</TodoProvider>
+      </CounterProvider>
+    </UserProvider>
   );
 };
-
-export const useStateContext = () => {
-  const context = useContext(StateContext);
-  if (context === undefined) {
-    throw new Error("There is no context!");
-  }
-  return context;
-};
-
-export const useDispatchContext = () => {
-  const context = useContext(DispatchContext);
-  if (context === undefined) {
-    throw new Error("There is no context!");
-  }
-  return context;
-};
-
-export const useUser = () => {
-  const state = useStateContext();
-  const dispatch = useDispatchContext();
-  const setUser = (user) => {
-    console.log("here user!");
-    return dispatch({ type: "SET_USER", payload: user });
-  };
-  return [state.user, setUser];
-};
-
-export const useTodoItems = () => {
-  const state = useStateContext();
-  const dispatch = useDispatchContext();
-  const setTodoItems = (items) =>
-    dispatch({ type: "SET_TODO_ITEMS", payload: items });
-  return [state.todoItems, setTodoItems];
-};
-
-export const useCounter = () => {
-  const state = useStateContext();
-  const dispatch = useDispatchContext();
-  const setCount = (count) => {
-    console.log("here count...");
-    return dispatch({ type: "SET_COUNT", payload: count });
-  };
-  return [state.count, setCount];
-};
-
 // #endregion
