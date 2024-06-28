@@ -155,11 +155,10 @@ export function forEach(target, callback) {
       callback(target[i], i);
     }
   } else if (typeof target === 'object' && target !== null) {
-    for (const key in target) {
-      if (Object.prototype.hasOwnProperty.call(target, key)) {
-        callback(target[key], key);
-      }
-    }
+    // Object.getOwnPropertyNames를 사용하여 열거 불가능한 속성도 포함
+    Object.getOwnPropertyNames(target).forEach(key => {
+      callback(target[key], key);
+    });
   }
 }
 
@@ -168,11 +167,9 @@ export function map(target, callback) {
     return Array.from(target).map(callback);
   } else if (typeof target === 'object' && target !== null) {
     const result = {};
-    for (const key in target) {
-      if (Object.prototype.hasOwnProperty.call(target, key)) {
-        result[key] = callback(target[key], key);
-      }
-    }
+    Object.getOwnPropertyNames(target).forEach(key => {
+      result[key] = callback(target[key], key);
+    });
     return result;
   }
 }
@@ -182,13 +179,11 @@ export function filter(target, callback) {
     return Array.from(target).filter(callback);
   } else if (typeof target === 'object' && target !== null) {
     const result = {};
-    for (const key in target) {
-      if (Object.prototype.hasOwnProperty.call(target, key)) {
-        if (callback(target[key], key)) {
-          result[key] = target[key];
-        }
+    Object.getOwnPropertyNames(target).forEach(key => {
+      if (callback(target[key], key)) {
+        result[key] = target[key];
       }
-    }
+    });
     return result;
   }
 }
@@ -198,14 +193,9 @@ export function every(target, callback) {
   if (Array.isArray(target) || target instanceof NodeList) {
     return Array.from(target).every(callback);
   } else if (typeof target === 'object' && target !== null) {
-    for (const key in target) {
-      if (Object.prototype.hasOwnProperty.call(target, key)) {
-        if (!callback(target[key], key)) {
-          return false;
-        }
-      }
-    }
-    return true;
+    return Object.getOwnPropertyNames(target).every(key =>
+      callback(target[key], key)
+    );
   }
   return true;
 }
@@ -214,14 +204,9 @@ export function some(target, callback) {
   if (Array.isArray(target) || target instanceof NodeList) {
     return Array.from(target).some(callback);
   } else if (typeof target === 'object' && target !== null) {
-    for (const key in target) {
-      if (Object.prototype.hasOwnProperty.call(target, key)) {
-        if (callback(target[key], key)) {
-          return true;
-        }
-      }
-    }
-    return false;
+    return Object.getOwnPropertyNames(target).some(key =>
+      callback(target[key], key)
+    );
   }
   return false;
 }
