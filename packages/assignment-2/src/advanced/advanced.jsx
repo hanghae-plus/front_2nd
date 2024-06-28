@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { shallowEquals } from "../basic/basic";
 
 const map = new Map();
@@ -68,7 +68,14 @@ export const TestContext = createContext({
 });
 
 export const TestContextProvider = ({ children }) => {
-  const [value, setValue] = useState(textContextDefaultValue);
+  let value = textContextDefaultValue;
+
+  const setValue = (key, newValue) => {
+    //기존 값과 새로 들어온 값을 깊은 비교를 해 다르다면 리렌더링
+    if (!shallowEquals(value, newValue)) {
+      return (value = { ...value, [key]: newValue });
+    }
+  };
 
   return (
     <TestContext.Provider value={{ value, setValue }}>
@@ -83,21 +90,14 @@ export const TestContextProvider = ({ children }) => {
  * 해주어야함.
  */
 const useTestContext = (key) => {
-  const { value } = useContext(TestContext);
+  const { value, setValue } = useContext(TestContext);
   const [state, setState] = useState(value[key]);
 
-  const memorizedValue = memo2(() => state, [value[key]]);
+  useEffect(() => {
+    setValue(key, state);
+  }, []);
 
-  const memorizedSetState = (newValue) => {
-    //기존 값과 새로 들어온 값을 깊은 비교를 해 다르다면 리렌더링
-    if (!shallowEquals(state, newValue)) {
-      return setState(newValue);
-    }
-    //아니라면 기존 값으로 setState하여 리렌더링 방지
-    return setState(state);
-  };
-
-  return [memorizedValue, memorizedSetState];
+  return [state, setState];
 };
 
 export const useUser = () => {

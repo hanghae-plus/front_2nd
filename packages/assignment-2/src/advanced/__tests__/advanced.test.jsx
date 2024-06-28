@@ -193,6 +193,7 @@ describe("assignment 2 > advanced", () => {
     const TodoItems = () => {
       countTodoRendering();
       const [todoItems, setTodoItems] = useTodoItems();
+
       return (
         <section>
           <ul>
