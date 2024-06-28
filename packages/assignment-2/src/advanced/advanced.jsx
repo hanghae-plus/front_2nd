@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { deepEquals, shallowEquals } from "../basic/basic";
+import { shallowEquals } from "../basic/basic";
 
 const map = new Map();
 const dependencyMap = new Map();
@@ -48,7 +48,7 @@ export const useCustomState = (initValue) => {
 
   const setValue = (newValue) => {
     //기존 값과 새로 들어온 값을 깊은 비교를 해 다르다면 리렌더링
-    if (!deepEquals(state, newValue)) {
+    if (!shallowEquals(state, newValue)) {
       return setState(newValue);
     }
   };
