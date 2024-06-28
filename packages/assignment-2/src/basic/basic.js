@@ -100,11 +100,6 @@ export function createNumber3(value) {
     value: value,
     valueOf: function() { return this.value; },
     toString: function() { return `${this.value}`; },
-    [Symbol.toPrimitive]: function(hint) {
-      if (hint === 'number') return this.value;
-      if (hint === 'string') return `${this.value}`;
-      return `this is createNumber3 => ${this.value}`;
-    },
     toJSON: function() {
       return `this is createNumber3 => ${this.value}`;
     }
