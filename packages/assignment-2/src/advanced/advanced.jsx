@@ -1,13 +1,60 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { shallowEquals } from "../basic/basic";
 
-export const memo1 = (fn) => fn();
+const map = new Map();
+const dependencyMap = new Map();
 
-export const memo2 = (fn) => fn();
+/**map에 함수 명 Mapping하여 있는 값이면 기존 값 반환하는 함수 */
+export const memo1 = (fn) => {
+  const key = fn.name;
 
+  if (map.get(key)) {
+    return map.get(key);
+  }
+
+  map.set(key, fn());
+
+  return map.get(key);
+};
+
+/**의존성 배열?에 따라 값 반환하는 함수 */
+export const memo2 = (fn, dependencyArr) => {
+  const mapKey = fn.name;
+
+  const currentDependency = dependencyMap.get(mapKey);
+
+  /**
+   * 기존 map의 의존성 배열 요소들과 현재 들어온 의존성 배열 요소가
+   * 하나라도 바뀌었는지 체크
+   */
+  const isNotChange = currentDependency?.every(
+    (ele, idx) => ele === dependencyArr[idx]
+  );
+
+  //바뀌지 않고 값이 이미 있다면 기존 값 리턴
+  if (map.get(mapKey) && isNotChange) {
+    return map.get(mapKey);
+  }
+
+  //아니라면 새로 값을 set
+  map.set(mapKey, fn());
+  dependencyMap.set(mapKey, dependencyArr);
+
+  return map.get(mapKey);
+};
 
 export const useCustomState = (initValue) => {
-  return useState(initValue);
-}
+  const [state, setState] = useState(initValue);
+
+  const setValue = (newValue) => {
+    //기존 값과 새로 들어온 값을 깊은 비교를 해 다르다면 리렌더링
+    if (!shallowEquals(state, newValue)) {
+      return setState(newValue);
+    }
+  };
+
+  return [state, setValue];
+};
 
 const textContextDefaultValue = {
   user: null,
@@ -21,42 +68,46 @@ export const TestContext = createContext({
 });
 
 export const TestContextProvider = ({ children }) => {
-  const [value, setValue] = useState(textContextDefaultValue);
+  const value = useRef(textContextDefaultValue);
+
+  const setValue = (key, newValue) => {
+    //기존 값과 새로 들어온 값을 깊은 비교를 해 다르다면 리렌더링
+    if (!shallowEquals(value.current, newValue)) {
+      return (value.current = { ...value.current, [key]: newValue });
+    }
+  };
 
   return (
-    <TestContext.Provider value={{ value, setValue }}>
+    <TestContext.Provider value={{ value: value.current, setValue }}>
       {children}
     </TestContext.Provider>
-  )
-}
+  );
+};
 
-const useTestContext = () => {
-  return useContext(TestContext);
-}
+/**
+ * useContext를 구독하고 있는 컴포넌트는 그 값이 변경됨에 따라,
+ * 리렌더링이 되기때문에 실제 그 값이 사용되는 컴포넌트만 리렌더링하게
+ * 해주어야함.
+ */
+const useTestContext = (key) => {
+  const { value, setValue } = useContext(TestContext);
+  const [state, setState] = useState(value[key]);
+
+  useEffect(() => {
+    setValue(key, state);
+  }, [state]);
+
+  return [state, setState];
+};
 
 export const useUser = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.user,
-    (user) => setValue({ ...value, user })
-  ];
-}
+  return useTestContext("user");
+};
 
 export const useCounter = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.count,
-    (count) => setValue({ ...value, count })
-  ];
-}
+  return useTestContext("count");
+};
 
 export const useTodoItems = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.todoItems,
-    (todoItems) => setValue({ ...value, todoItems })
-  ];
-}
+  return useTestContext("todoItems");
+};
