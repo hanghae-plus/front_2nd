@@ -1,13 +1,39 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState } from 'react';
+import { deepEquals } from '../basic/basic';
 
-export const memo1 = (fn) => fn();
+const memoMap = new Map();
 
-export const memo2 = (fn) => fn();
+export const memo1 = (fn) => {
+  const key = fn;
 
+  if (!memoMap.has(key)) {
+    memoMap.set(key, fn());
+  }
+
+  return memoMap.get(key);
+};
+
+export const memo2 = (fn, arr) => {
+  const key = arr.join('');
+
+  if (!memoMap.has(key)) {
+    memoMap.set(key, fn());
+  }
+
+  return memoMap.get(key);
+};
 
 export const useCustomState = (initValue) => {
-  return useState(initValue);
-}
+  const [value, setValue] = useState(initValue);
+
+  const setState = (newValue) => {
+    if (deepEquals(value, newValue)) return;
+
+    setValue(newValue);
+  };
+
+  return [value, setState];
+};
 
 const textContextDefaultValue = {
   user: null,
@@ -27,36 +53,27 @@ export const TestContextProvider = ({ children }) => {
     <TestContext.Provider value={{ value, setValue }}>
       {children}
     </TestContext.Provider>
-  )
-}
+  );
+};
 
 const useTestContext = () => {
   return useContext(TestContext);
-}
+};
 
 export const useUser = () => {
   const { value, setValue } = useTestContext();
 
-  return [
-    value.user,
-    (user) => setValue({ ...value, user })
-  ];
-}
+  return [value.user, (user) => setValue({ ...value, user })];
+};
 
 export const useCounter = () => {
   const { value, setValue } = useTestContext();
 
-  return [
-    value.count,
-    (count) => setValue({ ...value, count })
-  ];
-}
+  return [value.count, (count) => setValue({ ...value, count })];
+};
 
 export const useTodoItems = () => {
   const { value, setValue } = useTestContext();
 
-  return [
-    value.todoItems,
-    (todoItems) => setValue({ ...value, todoItems })
-  ];
-}
+  return [value.todoItems, (todoItems) => setValue({ ...value, todoItems })];
+};
