@@ -26,54 +26,61 @@ export const useCustomState = (initValue) => {
 }
 
 
-const textContextDefaultValue = {
-  user: null,
-  todoItems: [],
-  count: 0,
-};
+// const textContextDefaultValue = {
+//   user: null,
+//   todoItems: [],
+//   count: 0,
+// };
 
-export const TestContext = createContext({
-  value: textContextDefaultValue,
-  setValue: () => null,
-});
+
+// export const TestContext = createContext({
+//   value: textContextDefaultValue,
+//   setValue: () => null,
+// });
+
+const userContext = createContext({});
+const todoItemsContext = createContext({});
+const countContext = createContext({});
+
 
 export const TestContextProvider = ({ children }) => {
-  const [value, setValue] = useState(textContextDefaultValue);
+  const [user, setUser] = useState(null);
+  const [todoItems, setTodoItems] = useState([
+    { id: 1, content: 'PT 받기', completed: false },
+    { id: 2, content: '회사일', completed: false },
+    { id: 3, content: '멘토링', completed: false },
+    { id: 4, content: '과제 만들기', completed: false },
+    { id: 5, content: '발제자료 만들기', completed: false },
+    { id: 6, content: '고양이 밥주기', completed: false },
+  ]);
+  const [count, setCount] = useState(0);
+
 
   return (
-    <TestContext.Provider value={{ value, setValue }}>
-      {children}
-    </TestContext.Provider>
+    <userContext.Provider value={{ user, setUser }}>
+      <todoItemsContext.Provider value={{ todoItems, setTodoItems }}>
+        <countContext.Provider value={{ count, setCount }}>
+          {children}
+        </countContext.Provider>
+      </todoItemsContext.Provider>
+    </userContext.Provider>
   )
 }
 
-const useTestContext = () => {
-  return useContext(TestContext);
-}
-
 export const useUser = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.user,
-    (user) => setValue({ ...value, user })
-  ];
+  const context = useContext(userContext);
+  const { user, setUser } = context;
+  return [user, setUser];
 }
 
 export const useCounter = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.count,
-    (count) => setValue({ ...value, count })
-  ];
+  const context = useContext(countContext);
+  const { count, setCount } = context;
+  return [count, setCount];
 }
 
 export const useTodoItems = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.todoItems,
-    (todoItems) => setValue({ ...value, todoItems })
-  ];
+  const context = useContext(todoItemsContext);
+  const { count, setCount } = context;
+  return [count, setCount];
 }
