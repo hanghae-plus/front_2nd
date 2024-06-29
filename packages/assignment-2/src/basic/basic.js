@@ -11,6 +11,10 @@ export function shallowEquals(target1, target2) {
     return target1 === target2;
   }
 
+  if (target1 === null || target2 === null) {
+    return target1 === target2;
+  }
+
   // Array일 때 Or Object 생성자인지 확인
   if (isArray(target1, target2) || isConstructorTypeObject(target1, target2)) {
     return checkShallowObj(target1, target2);
