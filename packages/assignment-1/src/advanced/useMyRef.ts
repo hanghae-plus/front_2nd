@@ -1,10 +1,6 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
-interface RefObject<T> {
-  current : T | null
-}
-
-export function useMyRef<T>(initValue: T | null):RefObject<T> {
-  const [ref] = useState<RefObject<T>>({ current: initValue });
+export function useMyRef<T>(initValue: T | null) {
+  const [ref] = useState({ current: initValue });
   return ref;
 }
