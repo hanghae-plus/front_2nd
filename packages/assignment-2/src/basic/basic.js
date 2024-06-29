@@ -1,3 +1,7 @@
+export function isObject(target) {
+  return Object.getPrototypeOf(target).constructor === Object;
+}
+
 export function shallowEquals(target1, target2) {
   if (target1 === target2) return true;
   if (typeof target1 !== typeof target2) return false;
@@ -11,10 +15,7 @@ export function shallowEquals(target1, target2) {
     }
     return true;
   }
-  if (
-    target1.__proto__.constructor === Object &&
-    target2.__proto__.constructor === Object
-  ) {
+  if (isObject(target1) && isObject(target2)) {
     const isKeyEqual = shallowEquals(
       Object.keys(target1),
       Object.keys(target2)
@@ -43,10 +44,7 @@ export function deepEquals(target1, target2) {
         trueSet.add(deepEquals(target1[i], target2[i]));
         continue;
       }
-      if (
-        target1[i].__proto__.constructor === Object &&
-        target2[i].__proto__.constructor === Object
-      ) {
+      if (isObject(target1[i]) && isObject(target2[i])) {
         const isKeyEqual = deepEquals(
           Object.keys(target1[i]),
           Object.keys(target2[i])
@@ -66,10 +64,7 @@ export function deepEquals(target1, target2) {
     }
     return !trueSet.has(false);
   }
-  if (
-    target1.__proto__.constructor === Object &&
-    target2.__proto__.constructor === Object
-  ) {
+  if (isObject(target1) && isObject(target2)) {
     const isKeyEqual = deepEquals(Object.keys(target1), Object.keys(target2));
     const isValueEqual = deepEquals(
       Object.values(target1),
@@ -125,101 +120,134 @@ export class CustomNumber {
   }
 }
 
+function isIterable(target) {
+  return Array.isArray(target) || typeof target[Symbol.iterator] === "function";
+}
+
 export function createUnenumerableObject(target) {
   const newObj = {};
 
-  for (const key in target) {
-    if (target.hasOwnProperty(key)) {
-      Object.defineProperty(newObj, key, {
-        value: target[key],
-        enumerable: false,
-        writable: true,
-        configurable: true,
-      });
-    }
-  }
+  Object.setPrototypeOf(newObj, target);
+
+  // for (const key in target) {
+  //   Object.defineProperty(newObj, key, {
+  //     value: target[key],
+  //     enumerable: false,
+  //     writable: true,
+  //     configurable: true,
+  //   });
+  // }
 
   return newObj;
 }
 
 export function forEach(target, callback) {
-  if (target.__proto__.constructor === Object) {
-    const keys = Object.getOwnPropertyNames(target);
-    for (let i = 0; i < keys.length; i++) {
-      callback(target[keys[i]], keys[i]);
+  if (isObject(target)) {
+    for (const key in target) {
+      callback(target[key], key || key, target);
     }
     return;
+    // const keys = Object.getOwnPropertyNames(target);
+    // for (let i = 0; i < keys.length; i++) {
+    //   callback(target[keys[i]], keys[i]);
+    // }
   }
-
-  for (let i = 0; i < target.length; i++) {
-    callback(target[i], i);
+  if (isIterable(target)) {
+    Array.from(target).forEach(callback);
+    // for (let i = 0; i < target.length; i++) {
+    //   callback(target[i], i);
+    // }
   }
 }
 
 export function map(target, callback) {
-  if (target.__proto__.constructor === Object) {
+  if (isObject(target)) {
     const newTarget = {};
-    const keys = Object.getOwnPropertyNames(target);
-    for (let i = 0; i < keys.length; i++) {
-      newTarget[keys[i]] = callback(target[keys[i]]);
+    for (const key in target) {
+      newTarget[key] = callback(target[key], key);
     }
     return newTarget;
+    // const newTarget = {};
+    // const keys = Object.getOwnPropertyNames(target);
+    // for (let i = 0; i < keys.length; i++) {
+    //   newTarget[keys[i]] = callback(target[keys[i]]);
+    // }
+    // return newTarget;
   }
-  const newTarget = [];
-  for (let i = 0; i < target.length; i++) {
-    newTarget.push(callback(target[i]));
+  if (isIterable(target)) {
+    return Array.from(target).map(callback);
+    // const newTarget = [];
+    // for (let i = 0; i < target.length; i++) {
+    //   newTarget.push(callback(target[i]));
+    // }
+    // return newTarget;
   }
-
-  return newTarget;
 }
 
 export function filter(target, callback) {
-  if (target.__proto__.constructor === Object) {
+  if (isObject(target)) {
     const newTarget = {};
-    const keys = Object.getOwnPropertyNames(target);
-    for (let i = 0; i < keys.length; i++) {
-      if (callback(target[keys[i]])) {
-        newTarget[keys[i]] = target[keys[i]];
+    for (const key in target) {
+      if (callback(target[key], key)) {
+        newTarget[key] = target[key];
       }
     }
     return newTarget;
+    // const keys = Object.getOwnPropertyNames(target);
+    // for (let i = 0; i < keys.length; i++) {
+    //   if (callback(target[keys[i]])) {
+    //     newTarget[keys[i]] = target[keys[i]];
+    //   }
+    // }
   }
-  const newTarget = [];
-  for (let i = 0; i < target.length; i++) {
-    if (callback(target[i])) {
-      newTarget.push(target[i]);
-    }
-  }
-  return newTarget;
+  if (isIterable(target)) return Array.from(target).filter(callback);
+  // const newTarget = [];
+  // for (let i = 0; i < target.length; i++) {
+  //   if (callback(target[i])) {
+  //     newTarget.push(target[i]);
+  //   }
+  // }
+  // return newTarget;
 }
 
 export function every(target, callback) {
-  if (target.__proto__.constructor === Object) {
-    const keys = Object.getOwnPropertyNames(target);
-    for (let i = 0; i < keys.length; i++) {
-      if (!callback(target[keys[i]])) return false;
+  if (isObject(target)) {
+    for (const key in target) {
+      if (!callback(target[key], key)) return false;
     }
     return true;
+    // const keys = Object.getOwnPropertyNames(target);
+    // for (let i = 0; i < keys.length; i++) {
+    //   if (!callback(target[keys[i]])) return false;
+    // }
+    // return true;
   }
 
-  for (let i = 0; i < target.length; i++) {
-    if (!callback(target[i])) return false;
-  }
+  if (isIterable(target)) return Array.from(target).every(callback);
 
-  return true;
+  // for (let i = 0; i < target.length; i++) {
+  //   if (!callback(target[i])) return false;
+  // }
+
+  // return true;
 }
 
 export function some(target, callback) {
-  if (target.__proto__.constructor === Object) {
-    const keys = Object.getOwnPropertyNames(target);
-    for (let i = 0; i < keys.length; i++) {
-      if (callback(target[keys[i]])) return true;
+  if (isObject(target)) {
+    for (const key in target) {
+      if (callback(target[(key, key)])) return true;
     }
     return false;
+    // const keys = Object.getOwnPropertyNames(target);
+    // for (let i = 0; i < keys.length; i++) {
+    //   if (callback(target[keys[i]])) return true;
+    // }
+    // return false;
   }
 
-  for (let i = 0; i < target.length; i++) {
-    if (callback(target[i])) return true;
-  }
-  return false;
+  if (isIterable(target)) return Array.from(target).some(callback);
+  // for (let i = 0; i < target.length; i++) {
+  //   if (callback(target[i])) return true;
+  // }
+  // return false;
 }
