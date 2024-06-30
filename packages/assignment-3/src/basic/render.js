@@ -17,6 +17,10 @@ export function createElement(node) {
 
   const element = document.createElement(node.type);
 
+  Object.entries(node?.props ?? {}).forEach(([key, value]) => {
+    element.setAttribute(key, value);
+  });
+
   node.children
     .map(createElement)
     .forEach((child) => element.appendChild(child));
