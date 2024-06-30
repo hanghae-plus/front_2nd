@@ -19,8 +19,18 @@ export function createHooks(callback) {
     return [state[currentIndex], setState];
   };
 
+  let cachedMemo = null;
+  let cachedRefs = [];
   const useMemo = (fn, refs) => {
-    return fn();
+    const hasRefsChanged =
+      !cachedRefs || refs.some((ref, index) => ref !== cachedRefs[index]);
+
+    if (hasRefsChanged) {
+      cachedMemo = fn();
+      cachedRefs = refs;
+    }
+
+    return cachedMemo;
   };
 
   const resetContext = () => {
