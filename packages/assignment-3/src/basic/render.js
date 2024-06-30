@@ -40,9 +40,14 @@ export function render(parent, newNode, oldNode, index = 0) {
   // 1. 만약 newNode가 없고 oldNode만 있다면
   //   parent에서 oldNode를 제거
   //   종료
+  const newElement = createElement(newNode);
+  if (!newNode && oldNode) {
+    return;
+  }
   // 2. 만약 newNode가 있고 oldNode가 없다면
   //   newNode를 생성하여 parent에 추가
   //   종료
+
   // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
   //   oldNode를 newNode로 교체
   //   종료
@@ -50,6 +55,9 @@ export function render(parent, newNode, oldNode, index = 0) {
   //   oldNode를 newNode로 교체
   //   종료
   // 5. newNode와 oldNode에 대해 updateAttributes 실행
+  if (newNode && oldNode) {
+    updateAttributes(parent, newNode.props, oldNode.props);
+  }
   // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
   //   각 자식노드에 대해 재귀적으로 render 함수 호출
   parent.innerHTML = createElement(newNode);
