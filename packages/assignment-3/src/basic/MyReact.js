@@ -2,10 +2,25 @@ import { createHooks } from "./hooks";
 import { render as updateElement } from "./render";
 
 function MyReact() {
-  const _render = () => {};
-  function render($root, rootComponent) {}
+  let currentRoot = null;
+  let currentComponent = null;
 
-  const { useState, useMemo, resetContext: resetHookContext } = createHooks(_render);
+  const render = ($root, rootComponent) => {
+    currentRoot = $root;
+    currentComponent = rootComponent;
+    const element = rootComponent();
+    updateElement($root, element);
+  };
+
+  const reRender = () => {
+    render(currentRoot, currentComponent);
+  };
+
+  const {
+    useState,
+    useMemo,
+    resetContext: resetHookContext,
+  } = createHooks(reRender);
 
   return { render, useState, useMemo };
 }
