@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useMemo, useCallback } from "react";
 import {deepEquals} from "../basic/basic.js";
 
 
@@ -26,54 +26,75 @@ export const useCustomState = (initValue) => {
 }
 
 
-const textContextDefaultValue = {
-  user: null,
-  todoItems: [],
-  count: 0,
+// [ Provider를 여러개로 나누어 제공 ]
+const UserContext = createContext();
+const TodoItemsContext = createContext();
+const CountContext = createContext();
+
+const UserProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
 };
 
-export const TestContext = createContext({
-  value: textContextDefaultValue,
-  setValue: () => null,
-});
+const TodoItemsProvider = ({ children }) => {
+  const [todoItems, setTodoItems] = useState([
+    { id: 1, content: 'PT 받기', completed: false },
+    { id: 2, content: '회사일', completed: false },
+    { id: 3, content: '멘토링', completed: false },
+  ]);
+  const [externalItems, setExternalItems] = useState([
+    { id: 4, content: '과제 만들기', completed: false },
+    { id: 5, content: '발제자료 만들기', completed: false },
+    { id: 6, content: '고양이 밥주기', completed: false },
+  ]);
+
+  const value = useMemo(() => ({
+    todoItems,
+    setTodoItems,
+    externalItems,
+    setExternalItems
+  }), [todoItems, externalItems]);
+
+  return <TodoItemsContext.Provider value={value}>{children}</TodoItemsContext.Provider>;
+};
+
+const CountProvider = ({ children }) => {
+  const [count, setCount] = useState(0);
+  return <CountContext.Provider value={{ count, setCount }}>{children}</CountContext.Provider>;
+};
 
 export const TestContextProvider = ({ children }) => {
-  const [value, setValue] = useState(textContextDefaultValue);
-
   return (
-    <TestContext.Provider value={{ value, setValue }}>
-      {children}
-    </TestContext.Provider>
-  )
-}
-
-const useTestContext = () => {
-  return useContext(TestContext);
-}
+      <UserProvider>
+        <TodoItemsProvider>
+          <CountProvider>
+            {children}
+          </CountProvider>
+        </TodoItemsProvider>
+      </UserProvider>
+  );
+};
 
 export const useUser = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.user,
-    (user) => setValue({ ...value, user })
-  ];
-}
+  const context = useContext(UserContext);
+  return [context.user, context.setUser];
+};
 
 export const useCounter = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.count,
-    (count) => setValue({ ...value, count })
-  ];
-}
+  const context = useContext(CountContext);
+  return [context.count, context.setCount];
+};
 
 export const useTodoItems = () => {
-  const { value, setValue } = useTestContext();
+  const context = useContext(TodoItemsContext);
+  const addTodoItem = useCallback(() => {
+    context.setTodoItems(prev => {
+      if (context.externalItems.length === 0) return prev;
+      const [newItem, ...rest] = context.externalItems;
+      context.setExternalItems(rest);
+      return [...prev, newItem];
+    });
+  }, [context]);
 
-  return [
-    value.todoItems,
-    (todoItems) => setValue({ ...value, todoItems })
-  ];
-}
+  return [context.todoItems, addTodoItem];
+};
