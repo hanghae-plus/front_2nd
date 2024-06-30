@@ -1,62 +1,81 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useMemo, useCallback } from "react";
+import { deepEquals, shallowEquals } from "../basic/basic.js";
 
-export const memo1 = (fn) => fn();
+export const memo1 = (() => {
+  const cache = new WeakMap();
+  return (fn) => {
+    const cached = cache.get(fn);
+    if (cached) {
+      return cached;
+    }
+    const result = fn();
+    cache.set(fn, result);
+    return result;
+  }
+})();
 
-export const memo2 = (fn) => fn();
+export const memo2 = (() => {
+  const cache = new WeakMap();
+  const dependenciesCache = new WeakMap();
+  return (fn, dependencies) => {
+    const cached = cache.get(fn);
+    const cachedDependencies = dependenciesCache.get(fn);
+    
+    if (cached && shallowEquals(dependencies, cachedDependencies)) {
+      return cached;
+    }
+    const result = fn();
+    cache.set(fn, result);
+    dependenciesCache.set(fn, dependencies);
+    return result;
+  }
+})();
 
 
 export const useCustomState = (initValue) => {
-  return useState(initValue);
+  const [state, setState] = useState(initValue);
+
+  const setStateDeferenceAtDeepEquals = useCallback((newState) => {
+    if (!deepEquals(state, newState)) {
+      setState(newState);
+    }
+  }, [state]);
+
+  return [state, setStateDeferenceAtDeepEquals];
 }
 
-const textContextDefaultValue = {
-  user: null,
-  todoItems: [],
-  count: 0,
-};
-
-export const TestContext = createContext({
-  value: textContextDefaultValue,
-  setValue: () => null,
-});
+const UserContext = createContext([null, () => null]);
+const CounterContext = createContext([0, () => null]);
+const TodoItemsContext = createContext([[], () => null]);
 
 export const TestContextProvider = ({ children }) => {
-  const [value, setValue] = useState(textContextDefaultValue);
+  const [user, setUser] = useState(null);
+  const [counter, setCounter] = useState(0);
+  const [todoItems, setTodoItems] = useState([]);
+
+  const userContextValue = useMemo(() => [user, setUser], [user, setUser]);
+  const counterContextValue = useMemo(() => [counter, setCounter], [counter, setCounter]);
+  const todoItemsContextValue = useMemo(() => [todoItems, setTodoItems], [todoItems, setTodoItems]);
 
   return (
-    <TestContext.Provider value={{ value, setValue }}>
-      {children}
-    </TestContext.Provider>
+    <UserContext.Provider value={userContextValue}>
+      <CounterContext.Provider value={counterContextValue}>
+        <TodoItemsContext.Provider value={todoItemsContextValue}>
+          {children}
+        </TodoItemsContext.Provider>
+      </CounterContext.Provider>
+    </UserContext.Provider>
   )
 }
 
-const useTestContext = () => {
-  return useContext(TestContext);
-}
-
 export const useUser = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.user,
-    (user) => setValue({ ...value, user })
-  ];
+  return useContext(UserContext);
 }
 
 export const useCounter = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.count,
-    (count) => setValue({ ...value, count })
-  ];
+  return useContext(CounterContext);
 }
 
 export const useTodoItems = () => {
-  const { value, setValue } = useTestContext();
-
-  return [
-    value.todoItems,
-    (todoItems) => setValue({ ...value, todoItems })
-  ];
+ return useContext(TodoItemsContext);
 }
