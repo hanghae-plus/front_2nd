@@ -4,39 +4,24 @@ import { render as updateElement } from "./render";
 function MyReact() {
   const _render = () => {};
   function render($root, rootComponent) {
-    const { type, prop } = rootComponent();
+    const { type, prop: props } = rootComponent();
 
     //자식 노드 요소 만들기
     const node = document.createElement(type);
-    const children = prop.children;
 
-    // if (prop) {
-    //   for (const key in prop) {
-    //     node.setAttribute(key, prop[key]);
-    //   }
-    // }
+    // children의 속성을 순회하면서 넣기
+    for (let key in props) {
+      const attribute = props[key];
 
-    if (children) {
-      if (typeof children === "string") {
-        node.textContent = children;
+      // children이 string일 때 그대로 text넣기
+      if (key === "children" && typeof attribute === "string") {
+        //innerText로 했을때 예상대로 동작을 하지 않음.
+        node.textContent = attribute;
+        continue;
+      } else {
+        node.setAttribute(key, attribute);
       }
     }
-
-    // children이 문자열이면 텍스트 노드로 추가
-    // if (typeof children === 'string') {
-    //   node.textContent = children;
-    // }
-
-    // // 자식 요소가 배열이면 각각의 요소를 추가 (optional)
-    // if (Array.isArray(children)) {
-    //   children.forEach(child => {
-    //     if (typeof child === 'string') {
-    //       element.appendChild(document.createTextNode(child));
-    //     } else {
-    //       element.appendChild(child);
-    //     }
-    //   });
-    // }
 
     //상위 노드에 삽입하기
     $root.appendChild(node);

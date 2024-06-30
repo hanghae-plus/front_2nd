@@ -2,7 +2,7 @@ export function jsx(type, props, ...children) {
   //object 복사
   const prop = Object.assign({}, props);
 
-  //길이에따라 children 만들기
+  // 내부 길이에따라 children 만들기
   children.length > 1
     ? (prop.children = children)
     : (prop.children = children[0]);

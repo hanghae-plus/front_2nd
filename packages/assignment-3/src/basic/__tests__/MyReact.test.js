@@ -4,7 +4,7 @@ import react from "../MyReact";
 
 describe("MyReact > ", () => {
   describe("렌더링 테스트", () => {
-    test.only("한 개의 태그를 렌더링할 수 있다.", () => {
+    test("한 개의 태그를 렌더링할 수 있다.", () => {
       const $root = document.createElement("div");
 
       react.render($root, () => jsx("div", null, "div의 children 입니다."));
@@ -12,7 +12,7 @@ describe("MyReact > ", () => {
       expect($root.innerHTML).toBe(`<div>div의 children 입니다.</div>`);
     });
 
-    test.only("props를 추가할 수 있다.", () => {
+    test("props를 추가할 수 있다.", () => {
       const $root = document.createElement("div");
       react.render($root, () =>
         jsx(
