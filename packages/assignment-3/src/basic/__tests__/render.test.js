@@ -43,7 +43,7 @@ describe("render > ", () => {
       );
     });
 
-    test("두 번째 뎁스 테스트", () => {
+    test("세 번째 뎁스 테스트", () => {
       const App = jsx(
         "div",
         { id: "test-id", class: "test-class" },
