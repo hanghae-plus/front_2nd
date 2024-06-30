@@ -7,8 +7,6 @@ export function jsx(type, props, ...children) {
     ? (prop.children = children)
     : (prop.children = children[0]);
 
-  console.log(prop);
-
   return {
     type,
     prop,
