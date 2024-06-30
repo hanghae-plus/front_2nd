@@ -1,9 +1,27 @@
 export function jsx(type, props, ...children) {
-  return {}
+  return {type, props, ...children};
 }
 
-export function createElement(node) {
-  // jsx를 dom으로 변환
+// [ jsx를 dom으로 변환 ]
+export function createElement({type, props, ...children}) {
+  const el = document.createElement(type)
+
+  // props 적용
+  if (props) {
+    Object.entries(props).forEach(([key, value]) => {
+      el.setAttribute(key, value);
+    });
+  }
+
+  // children 적용
+  if (children) {
+    Object.values(children).forEach((child) => {
+      if(typeof child === 'string') el.innerHTML = child;
+      else el.appendChild(createElement(child))
+    });
+  }
+
+  return el;
 }
 
 function updateAttributes(target, newProps, oldProps) {
@@ -24,18 +42,31 @@ export function render(parent, newNode, oldNode, index = 0) {
   // 1. 만약 newNode가 없고 oldNode만 있다면
   //   parent에서 oldNode를 제거
   //   종료
+  if(!newNode && oldNode) return parent.removeChild(oldNode);
 
   // 2. 만약 newNode가 있고 oldNode가 없다면
   //   newNode를 생성하여 parent에 추가
   //   종료
+  if(newNode && !oldNode)  return parent.appendChild(createElement(newNode));
+
 
   // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
   //   oldNode를 newNode로 교체
   //   종료
+  if((typeof newNode === 'string' && typeof oldNode === 'string') && (newNode !== oldNode)) {
+    parent.removeChild(oldNode);
+    parent.appendChild(createElement(newNode));
+    return ;
+  }
 
   // 4. 만약 newNode와 oldNode의 타입이 다르다면
   //   oldNode를 newNode로 교체
   //   종료
+  if(typeof oldNode !== typeof newNode){
+    parent.removeChild(oldNode);
+    parent.appendChild(createElement(newNode));
+    return ;
+  }
 
   // 5. newNode와 oldNode에 대해 updateAttributes 실행
 

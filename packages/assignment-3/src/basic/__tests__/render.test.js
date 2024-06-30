@@ -13,6 +13,7 @@ describe('render > ', () => {
       const $root = document.createElement('div');
       render($root, App);
 
+
       expect($root.innerHTML).toBe(`<div>div의 children 입니다.</div>`);
     })
 
