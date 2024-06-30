@@ -14,30 +14,41 @@ export function jsx(type, props, ...children) {
 }
 
 export function createElement(node) {
-  // jsx를 dom으로 변환
-}
+  const { type, prop: props } = node;
 
-function updateAttributes(target, newProps, oldProps) {
-  for (let key in newProps) {
-    const attribute = newProps[key];
+  const $node = document.createElement(type);
+
+  for (let key in props) {
+    const attribute = props[key];
 
     // children이 string일 때 그대로 text넣기
     if (key === "children") {
       if (typeof attribute === "string") {
-        return (target.textContent = attribute);
+        //innerText시 오류,,
+        $node.textContent = attribute;
       } else {
-        // 내부 children node 속성이 있다면 재귀적으로 호출
-        for (let ele in attribute) {
-          const childrens = attribute[ele];
-          render(target, childrens);
+        if (attribute.length) {
+          for (let ele in attribute) {
+            const childrens = attribute[ele];
+            const $childNode = createElement(childrens);
+            $node.appendChild($childNode);
+          }
+        } else {
+          const $childNode = createElement(attribute);
+          $node.appendChild($childNode);
         }
       }
       continue;
     }
 
-    target.setAttribute(key, attribute);
+    $node.setAttribute(key, attribute);
   }
 
+  return $node;
+  // jsx를 dom으로 변환
+}
+
+function updateAttributes(target, newProps, oldProps) {
   // newProps들을 반복하여 각 속성과 값을 확인
   //   만약 oldProps에 같은 속성이 있고 값이 동일하다면
   //     다음 속성으로 넘어감 (변경 불필요)
@@ -51,27 +62,37 @@ function updateAttributes(target, newProps, oldProps) {
 }
 
 export function render(parent, newNode, oldNode, index = 0) {
-  const { type, prop: props } = newNode;
-
   //자식 노드 요소 만들기
-  const node = document.createElement(type);
-
-  updateAttributes(node, props);
 
   // 1. 만약 newNode가 없고 oldNode만 있다면
   //   parent에서 oldNode를 제거
+  if (!newNode) {
+  }
   //   종료
   // 2. 만약 newNode가 있고 oldNode가 없다면
   //   newNode를 생성하여 parent에 추가
-  return parent.appendChild(node);
+  if (newNode && !oldNode) {
+    return parent.appendChild(newNode);
+  }
   //   종료
   // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
   //   oldNode를 newNode로 교체
+  if (
+    typeof newNode === "string" &&
+    typeof oldNode === "string" &&
+    newNode !== oldNode
+  ) {
+  }
   //   종료
   // 4. 만약 newNode와 oldNode의 타입이 다르다면
   //   oldNode를 newNode로 교체
+  if (typeof newNode !== typeof oldNode) {
+  }
   //   종료
   // 5. newNode와 oldNode에 대해 updateAttributes 실행
   // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
   //   각 자식노드에 대해 재귀적으로 render 함수 호출
+  // if(newNode.length > oldNode.length){
+
+  // }
 }

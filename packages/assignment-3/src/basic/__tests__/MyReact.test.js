@@ -58,7 +58,7 @@ describe("MyReact > ", () => {
         expect($root.innerHTML).toBe(`<div>현재 state: 1</div>`);
       });
 
-      test("값을 업데이트 할 수 있다.", () => {
+      test.only("값을 업데이트 할 수 있다.", () => {
         let fn = null;
         const App = () => {
           const [size, setSize] = react.useState(1);

@@ -1,10 +1,22 @@
 import { createHooks } from "./hooks";
-import { render as updateElement } from "./render";
+import { createElement, render as updateElement } from "./render";
 
 function MyReact() {
-  const _render = () => {};
+  const globalState = new Map();
+  const stateIndex = 0;
+  let reactRoot;
+  let reactRootComponent;
+
+  const _render = () => {
+    return [globalState, stateIndex, reactRoot, reactRootComponent];
+  };
   function render($root, rootComponent) {
-    updateElement($root, rootComponent());
+    reactRoot = $root;
+    reactRootComponent = rootComponent;
+
+    const newNode = createElement(rootComponent());
+
+    updateElement($root, newNode);
   }
 
   const {
