@@ -18,6 +18,26 @@ export function createElement(node) {
 }
 
 function updateAttributes(target, newProps, oldProps) {
+  for (let key in newProps) {
+    const attribute = newProps[key];
+
+    // children이 string일 때 그대로 text넣기
+    if (key === "children") {
+      if (typeof attribute === "string") {
+        return (target.textContent = attribute);
+      } else {
+        // 내부 children node 속성이 있다면 재귀적으로 호출
+        for (let ele in attribute) {
+          const childrens = attribute[ele];
+          render(target, childrens);
+        }
+      }
+      continue;
+    }
+
+    target.setAttribute(key, attribute);
+  }
+
   // newProps들을 반복하여 각 속성과 값을 확인
   //   만약 oldProps에 같은 속성이 있고 값이 동일하다면
   //     다음 속성으로 넘어감 (변경 불필요)
@@ -31,11 +51,19 @@ function updateAttributes(target, newProps, oldProps) {
 }
 
 export function render(parent, newNode, oldNode, index = 0) {
+  const { type, prop: props } = newNode;
+
+  //자식 노드 요소 만들기
+  const node = document.createElement(type);
+
+  updateAttributes(node, props);
+
   // 1. 만약 newNode가 없고 oldNode만 있다면
   //   parent에서 oldNode를 제거
   //   종료
   // 2. 만약 newNode가 있고 oldNode가 없다면
   //   newNode를 생성하여 parent에 추가
+  return parent.appendChild(node);
   //   종료
   // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
   //   oldNode를 newNode로 교체
