@@ -1,8 +1,8 @@
 import { deepEquals } from "../../../assignment-2/src/basic/basic";
 
 export function createHooks(callback) {
-  const mems = [];
-  let lastMemKey = -1;
+  let states = [];
+  let statesCurrentIndex = -1;
   let waitingFrameCnt = 0;
 
   function waitForNextFrame() {
@@ -15,33 +15,47 @@ export function createHooks(callback) {
   }
 
   const useState = (initState) => {
-    mems.push(initState);
-    const memKey = ++lastMemKey;
+    states.push(initState);
+    statesCurrentIndex += 1;
+    const currentIndex = statesCurrentIndex;
 
-    const state = mems[memKey];
+    const state = states[currentIndex];
 
     const setState = function (newValue) {
-      if (deepEquals(mems[memKey], newValue)) return;
-      mems[memKey] = newValue;
+      if (!deepEquals(states[currentIndex], newValue)) {
+        states[currentIndex] = newValue;
 
-      waitForNextFrame();
+        waitForNextFrame();
+
+        // https://developer.mozilla.org/ko/docs/Web/API/Window/requestAnimationFrame
+      }
     };
 
     return [state, setState];
   };
 
+  let memoValues = [];
+  let memoRefs = [];
+  let memosCurrentIndex = -1;
+
   const useMemo = (fn, refs) => {
-    mems.push({ value: fn(), deps: refs });
-    const memKey = ++lastMemKey;
+    memoValues.push(fn());
+    memoRefs.push(refs);
+    memosCurrentIndex += 1;
+    const currentIndex = memosCurrentIndex;
 
-    if (deepEquals(mems[memKey].deps, refs)) return mems[memKey].value;
+    if (!deepEquals(memoRefs[currentIndex], refs)) {
+      memoRefs[currentIndex] = refs;
+      memoValues[currentIndex] = fn();
+    }
 
-    mems[memKey].deps = refs;
-    return (mems[memKey].value = fn());
+    const value = memoValues[currentIndex];
+    return value;
   };
 
   const resetContext = () => {
-    lastMemKey = -1;
+    statesCurrentIndex = -1;
+    memosCurrentIndex = -1;
   };
 
   return { useState, useMemo, resetContext };
