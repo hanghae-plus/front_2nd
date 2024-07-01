@@ -34,13 +34,15 @@ export function createElement(node) {
     }
   }
 
-  for (let child of node.children) {
-    if (typeof child === "string") {
-      element.innerHTML += child;
-      continue;
+  if (Array.isArray(node.children)) {
+    for (let child of node.children) {
+      if (typeof child === "string") {
+        element.innerHTML += child;
+        continue;
+      }
+      element.appendChild(createElement(child));
+      // https://www.w3schools.com/jsref/met_node_appendchild.asp
     }
-    element.appendChild(createElement(child));
-    // https://www.w3schools.com/jsref/met_node_appendchild.asp
   }
   return element;
   // jsx를 dom으로 변환
@@ -144,7 +146,9 @@ export function render(parent, newNode, oldNode, index = 0) {
   }
 
   // console.log("newNode와 oldNode에 대해 updateAttributes 실행");
-  updateAttributes(parent.children[0], newNode.props, oldNode.props);
+  if (parent.children.length > index) {
+    updateAttributes(parent.children[index], newNode.props, oldNode.props);
+  }
 
   // console.log(
   //   "newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복, 자식노드 재귀호출"
