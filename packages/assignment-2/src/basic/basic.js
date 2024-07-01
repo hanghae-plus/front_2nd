@@ -30,41 +30,34 @@ export function shallowEquals(target1, target2) {
 export function deepEquals(target1, target2) {
   if (typeof target1 !== typeof target2) return false;
 
-  if (typeof target1 === "object") {
-    if (target1 === null && target2 === null) return true;
-    if (target1 === null) return false;
-    if (target2 === null) return false;
+  if (typeof target1 !== "object") return target1 === target2;
 
-    if (
-      target1.constructor.name !== "Object" &&
-      target1.constructor.name !== "Array"
-    ) {
-      return Object.is(target1, target2);
-    }
+  if (target1 === null && target2 === null) return true;
+  if (target1 === null || target2 === null) return false;
 
-    const keys1 = Object.keys(target1);
-    const keys2 = Object.keys(target2);
-
-    if (keys1.length !== keys2.length) return false;
-
-    const isKeyEquals = new Array(keys1.length)
-      .fill(0)
-      .map((e, i) => {
-        return keys1[i] === keys2[i];
-      })
-      .includes(false);
-
-    const isValueEquals = new Array(keys1.length)
-      .fill(0)
-      .map((e, i) => {
-        return deepEquals(target1[keys1[i]], target2[keys2[i]]);
-      })
-      .includes(false);
-
-    return !(isKeyEquals || isValueEquals);
+  if (
+    target1.constructor.name !== "Object" &&
+    target1.constructor.name !== "Array"
+  ) {
+    return Object.is(target1, target2);
   }
 
-  return target1 === target2;
+  const keys1 = Object.keys(target1);
+  const keys2 = Object.keys(target2);
+
+  if (keys1.length !== keys2.length) return false;
+
+  const isKeyEquals = new Array(keys1.length).fill(0).every((e, i) => {
+    return keys1[i] === keys2[i];
+  });
+  if (!isKeyEquals) return false;
+
+  const isValueEquals = new Array(keys1.length).fill(0).every((e, i) => {
+    return deepEquals(target1[keys1[i]], target2[keys2[i]]);
+  });
+  if (!isValueEquals) return false;
+
+  return true;
 }
 
 export function createNumber1(n) {
