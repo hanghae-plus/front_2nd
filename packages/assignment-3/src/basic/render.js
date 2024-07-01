@@ -88,9 +88,6 @@ function updateAttributes(target, newProps, oldProps) {
 export function render(parent, newNode, oldNode, index = 0) {
   //자식 노드 요소 만들기
 
-  console.log("default", newNode);
-  console.log("util", util.inspect(newNode, false, null, true));
-
   // 1. 만약 newNode가 없고 oldNode만 있다면
   //   parent에서 oldNode를 제거
   if (!newNode && oldNode) {
