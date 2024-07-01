@@ -1,4 +1,5 @@
 export function isObject(target) {
+  if (target == null) return false;
   return Object.getPrototypeOf(target).constructor === Object;
 }
 
