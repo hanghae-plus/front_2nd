@@ -1,3 +1,4 @@
+import { deepEquals } from "packages/assignment-2/src/basic/basic.js";
 /*
 1. jsx 함수를 구현합니다. (dom 구조와 비슷한 객체를 만들어서 사용하기 위함)
 2. createElement 함수를 구현합니다. (jsx를 dom으로 변환하는 함수)
@@ -81,15 +82,12 @@ export function render(parent, newNode, oldNode, index = 0) {
 
   if (
     typeof newNode !== typeof oldNode ||
-    (typeof newNode === "string" &&
-      typeof oldNode === "string" &&
-      newNode !== oldNode)
+    (typeof newNode === "string" && newNode !== oldNode)
   ) {
     // parent.replaceChild(newNode, oldNode);
-    return;
   }
 
-  if (oldNode.props && newNode.props !== oldNode.props) {
+  if (!deepEquals(newNode.props, oldNode.props)) {
     const newNodeProps = newNode.props || {};
     const oldNodeProps = oldNode.props || {};
 
@@ -97,7 +95,7 @@ export function render(parent, newNode, oldNode, index = 0) {
     return;
   }
 
-  if (newNode.type && oldNode.type) {
+  if (newNode.type) {
     const newNodeChildren = newNode.children || [];
     const oldNodeChildren = oldNode.children || [];
 
