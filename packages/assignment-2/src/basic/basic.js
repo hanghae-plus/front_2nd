@@ -1,4 +1,9 @@
 export function shallowEquals(target1, target2) {
+  // refactor: 같은 객체인지 우선 비교
+  if (target1 === target2) {
+    return true;
+  }
+
   const typeOf = (target) => {
     const targetType =
       target?.constructor.name ?? Object.prototype.toString.call(target);
@@ -18,10 +23,15 @@ export function shallowEquals(target1, target2) {
     return Object.keys(target1).every((key) => target1[key] === target2[key]);
   }
 
-  return target1 === target2;
+  return false;
 }
 
 export function deepEquals(target1, target2) {
+  // refactor: 같은 객체인지 우선 비교
+  if (target1 === target2) {
+    return true;
+  }
+
   const typeOf = (target) => {
     const targetType =
       target?.constructor.name ?? Object.prototype.toString.call(target);
@@ -47,7 +57,7 @@ export function deepEquals(target1, target2) {
     );
   }
 
-  return target1 === target2;
+  return false;
 }
 
 export function createNumber1(n) {
