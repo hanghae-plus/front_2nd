@@ -2,8 +2,13 @@ import { shallowEquals } from "../../../assignment-2/src/basic/basic";
 import { render } from "./render";
 
 export function createHooks(callback) {
-  let globalState = [];
+  //index를 바탕으로 globalState접근
+  const globalState = [];
   let stateIdx = 0;
+
+  //메모이제이션을 위한 공간
+  const globalMemo = [];
+  let memoIdx = 0;
 
   const useState = (initState) => {
     const tempIdx = stateIdx;
@@ -43,11 +48,52 @@ export function createHooks(callback) {
   };
 
   const useMemo = (fn, refs) => {
-    return fn();
+    // 무기명 함수라서 map으로 set할시 구분을 못함.
+
+    // const currentDependency = memoDependency.get(fn);
+
+    // const isNotChange = currentDependency?.every(
+    //   (ele, idx) => ele === refs[idx]
+    // );
+
+    // console.log(memo.has(fn), memo);
+    // if (memo.has(fn) && isNotChange) {
+    //   return memo.get(fn);
+    // }
+
+    // const result = fn();
+    // memo.set(fn, result);
+    // memoDependency.set(fn, refs);
+
+    //현재 메모 인덱스
+    const currentIdx = memoIdx;
+    const previousMemo = globalMemo[currentIdx];
+
+    //이전 메모와 모든 의존성 배열 비교
+    if (previousMemo) {
+      const { refs: prevRefs, value } = previousMemo;
+      const isNotChanged = prevRefs.every((ref, idx) =>
+        Object.is(ref, refs[idx])
+      );
+
+      // 기존 value 리턴
+      if (isNotChanged) {
+        memoIdx++;
+        return value;
+      }
+    }
+
+    // 새롭게 만들기
+    const newValue = fn();
+    globalMemo[currentIdx] = { refs, value: newValue };
+    memoIdx++;
+
+    return newValue;
   };
 
   const resetContext = () => {
     stateIdx = 0;
+    memoIdx = 0;
   };
 
   return { useState, useMemo, resetContext };

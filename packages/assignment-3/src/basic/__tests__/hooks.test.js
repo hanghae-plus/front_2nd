@@ -79,7 +79,7 @@ describe("hooks test", () => {
   });
 
   describe("useMemo", () => {
-    test.only("useMemo로 만들어진 값은 캐싱된다.", () => {
+    test("useMemo로 만들어진 값은 캐싱된다.", () => {
       function getMemo() {
         resetContext();
         return useMemo(() => [], []);
