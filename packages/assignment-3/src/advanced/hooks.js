@@ -1,3 +1,5 @@
+import { deepEqual } from '../basic/equal';
+
 export function createHooks(callback) {
   let currentIndex = 0;
 
@@ -15,7 +17,7 @@ export function createHooks(callback) {
       if (typeof newState !== 'object') {
         if (states[index] === newState) return;
       } else {
-        if (Object.is(states[index], newState)) return;
+        if (deepEqual(states[index], newState)) return;
       }
       states[index] = newState;
       animationFrames[index] = callback;

@@ -21,12 +21,31 @@ export function createElement(node) {
 }
 
 function updateAttributes(target, newProps, oldProps) {
+  // body의 첫번째 div를 찾아 $root에 할당 - 테스트에서는 id root가 사용되지 않고 있음, 일반적으로 react 프로젝트 생성 시 id root를 사용함
+  // const $root = document.body.querySelector('#root');
+  const $root = document.body.querySelector('div');
   // newProps들을 반복하여 각 속성과 값을 확인
   //   만약 oldProps에 같은 속성이 있고 값이 동일하다면
   //     다음 속성으로 넘어감 (변경 불필요)
   //   만약 위 조건에 해당하지 않는다면 (속성값이 다르거나 구속성에 없음)
   //     target에 해당 속성을 새 값으로 설정
   Object.entries(newProps).forEach(([newKey, newValue]) => {
+    if (newKey.startsWith('on') && typeof newValue === 'function') {
+      if (
+        newKey in oldProps &&
+        oldProps[newKey].toString() !== newValue.toString()
+      ) {
+        ($root ?? document).removeEventListener(
+          newKey.slice(2).toLowerCase(),
+          oldProps[newKey]
+        );
+      }
+      ($root ?? document).addEventListener(
+        newKey.slice(2).toLowerCase(),
+        newValue
+      );
+      return;
+    }
     if (oldProps[newKey] !== newValue) {
       target.setAttribute(newKey, newValue);
     }
@@ -37,6 +56,13 @@ function updateAttributes(target, newProps, oldProps) {
   //   만약 newProps들에 해당 속성이 존재하지 않는다면
   //     target에서 해당 속성을 제거
   Object.keys(oldProps).forEach((oldKey) => {
+    if (oldKey.startsWith('on') && typeof oldProps[oldKey] === 'function') {
+      ($root ?? document).removeEventListener(
+        oldKey.slice(2).toLowerCase(),
+        oldProps[oldKey]
+      );
+      return;
+    }
     if (!(oldKey in newProps)) {
       target.removeAttribute(oldKey);
     }

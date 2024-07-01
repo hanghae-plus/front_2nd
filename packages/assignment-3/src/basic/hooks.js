@@ -1,9 +1,8 @@
 import { deepEqual } from './equal';
 
 export function createHooks(callback) {
-  const states = [];
-  const memos = [];
   let currentIndex = 0;
+  const states = [];
 
   const useState = (initState) => {
     const index = currentIndex++;
@@ -25,6 +24,8 @@ export function createHooks(callback) {
 
     return [states[index], setState];
   };
+
+  const memos = [];
 
   const useMemo = (fn, deps = []) => {
     const index = currentIndex++;
