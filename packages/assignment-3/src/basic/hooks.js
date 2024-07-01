@@ -1,3 +1,5 @@
+import { deepEqual } from './equal';
+
 export function createHooks(callback) {
   const states = [];
   const memos = [];
@@ -14,7 +16,7 @@ export function createHooks(callback) {
       if (typeof newState !== 'object') {
         if (states[index] === newState) return;
       } else {
-        if (Object.is(states[index], newState)) return;
+        if (deepEqual(states[index], newState)) return;
       }
       states[index] = newState;
       currentIndex = 0;
