@@ -34,8 +34,7 @@ export function createElement(node) {
 
 function updateAttributes(target, newProps, oldProps) {
   // body의 첫번째 div를 찾아 $root에 할당 - 테스트에서는 id root가 사용되지 않고 있음, 일반적으로 react 프로젝트 생성 시 id root를 사용함
-  // const $root = document.body.querySelector('#root');
-  const $root = document.body.querySelector('div');
+  const $root = document.querySelector('#root');
   // newProps들을 반복하여 각 속성과 값을 확인
   //   만약 oldProps에 같은 속성이 있고 값이 동일하다면
   //     다음 속성으로 넘어감 (변경 불필요)
@@ -43,19 +42,20 @@ function updateAttributes(target, newProps, oldProps) {
   //     target에 해당 속성을 새 값으로 설정
   Object.entries(newProps).forEach(([newKey, newValue]) => {
     if (newKey.startsWith('on') && typeof newValue === 'function') {
+      const eventType = newKey.slice(2).toLowerCase();
       if (
         newKey in oldProps &&
         oldProps[newKey].toString() !== newValue.toString()
       ) {
-        ($root ?? document).removeEventListener(
-          newKey.slice(2).toLowerCase(),
-          oldProps[newKey]
-        );
+        $root.removeEventListener(eventType, oldProps[newKey]);
       }
-      ($root ?? document).addEventListener(
-        newKey.slice(2).toLowerCase(),
-        newValue
-      );
+      $root.addEventListener(eventType, (event) => {
+        if (
+          event.target.closest(`[data-event-id="${target.dataset.eventId}"]`)
+        ) {
+          newValue(event);
+        }
+      });
       return;
     }
     if (oldProps[newKey] !== newValue) {
@@ -69,10 +69,12 @@ function updateAttributes(target, newProps, oldProps) {
   //     target에서 해당 속성을 제거
   Object.keys(oldProps).forEach((oldKey) => {
     if (oldKey.startsWith('on') && typeof oldProps[oldKey] === 'function') {
-      ($root ?? document).removeEventListener(
-        oldKey.slice(2).toLowerCase(),
-        oldProps[oldKey]
-      );
+      if (!(oldKey in newProps)) {
+        $root.removeEventListener(
+          oldKey.slice(2).toLowerCase(),
+          oldProps[oldKey]
+        );
+      }
       return;
     }
     if (!(oldKey in newProps)) {
@@ -80,6 +82,8 @@ function updateAttributes(target, newProps, oldProps) {
     }
   });
 }
+
+const createNodeId = () => crypto.randomUUID();
 
 // parent: 부모 노드
 // newNode: 신규 노드
@@ -94,7 +98,9 @@ export function render(parent, newNode, oldNode, index = 0) {
 
   // 2. add new node
   if (newNode && !oldNode) {
-    parent.appendChild(createElement(newNode));
+    const element = createElement(newNode);
+    element.dataset.eventId = createNodeId();
+    parent.appendChild(element);
     return;
   }
 
@@ -118,6 +124,7 @@ export function render(parent, newNode, oldNode, index = 0) {
   // 4. update existing node
   if (newNode.type === oldNode.type) {
     const element = parent.childNodes[index];
+    element.dataset.eventId = element.dataset.eventId ?? createNodeId();
     updateAttributes(element, newNode.props, oldNode.props);
 
     const newLength = newNode.children.length;
