@@ -1,4 +1,4 @@
-import { deepEquals } from "packages/assignment-2/src/basic/basic.js";
+import { deepEquals } from "../../../assignment-2/src/basic/basic.js";
 /*
 1. jsx 함수를 구현합니다. (dom 구조와 비슷한 객체를 만들어서 사용하기 위함)
 2. createElement 함수를 구현합니다. (jsx를 dom으로 변환하는 함수)
