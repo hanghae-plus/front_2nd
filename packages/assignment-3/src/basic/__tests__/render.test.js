@@ -45,7 +45,7 @@ describe("render > ", () => {
   });
 
   describe("리렌더링 테스트 - 변경된 내용만 반영되도록 한다.", () => {
-    test.only("하위 노드 추가", () => {
+    test("하위 노드 추가", () => {
       const $root = document.createElement("div");
 
       const App = jsx(

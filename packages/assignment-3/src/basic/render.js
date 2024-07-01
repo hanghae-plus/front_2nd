@@ -2,6 +2,11 @@ import {
   deepEquals,
   shallowEquals,
 } from "../../../assignment-2/src/basic/basic";
+const util = require("util");
+
+const checkDepth = (obj) => {
+  console.log(util.inspect(obj, false, null, true));
+};
 
 export function jsx(type, props, ...children) {
   //object 복사
@@ -71,7 +76,7 @@ function updateAttributes(target, newProps, oldProps) {
   for (const attr of Object.keys(oldProps)) {
     //   만약 newProps들에 해당 속성이 존재한다면
     //     다음 속성으로 넘어감 (속성 유지 필요)
-    if (newProps[attr] !== undefined) {
+    if (newProps[attr]) {
       continue;
     }
     //   만약 newProps들에 해당 속성이 존재하지 않는다면
@@ -82,6 +87,9 @@ function updateAttributes(target, newProps, oldProps) {
 
 export function render(parent, newNode, oldNode, index = 0) {
   //자식 노드 요소 만들기
+
+  console.log("default", newNode);
+  console.log("util", util.inspect(newNode, false, null, true));
 
   // 1. 만약 newNode가 없고 oldNode만 있다면
   //   parent에서 oldNode를 제거
@@ -100,13 +108,13 @@ export function render(parent, newNode, oldNode, index = 0) {
   //   종료
   // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
   //   oldNode를 newNode로 교체
-  if (
-    typeof newNode === "string" &&
-    typeof oldNode === "string" &&
-    newNode !== oldNode
-  ) {
-    const newElement = createElement(newNode);
-    return parent.replaceChild(newElement, parent.childNodes[index]);
+  if (typeof newNode === "string" && typeof oldNode === "string") {
+    if (newNode !== oldNode) {
+      const newElement = createElement(newNode);
+      return parent.replaceChild(newElement, parent.childNodes[index]);
+    } else {
+      return;
+    }
   }
 
   //   종료
@@ -118,6 +126,7 @@ export function render(parent, newNode, oldNode, index = 0) {
   }
 
   //   종료
+
   // 5. newNode와 oldNode에 대해 updateAttributes 실행
   if (newNode.type === oldNode.type) {
     updateAttributes(
@@ -126,15 +135,28 @@ export function render(parent, newNode, oldNode, index = 0) {
       oldNode.prop ?? {}
     );
   }
+
   // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
   //   각 자식노드에 대해 재귀적으로 render 함수 호출
-  const targetChildrenLength = Math.max(
-    newNode.prop.children.length,
-    oldNode.prop.children.length
-  );
+  if (
+    typeof newNode.prop.children === "string" &&
+    typeof oldNode.prop.children === "string"
+  ) {
+    return;
+  }
+  const newNodeLength = newNode.prop?.children.length ?? 0;
+  const oldNodeLength = oldNode.prop?.children.length ?? 0;
+
+  const targetChildrenLength = Math.max(newNodeLength, oldNodeLength);
+
+  if (targetChildrenLength < 1) {
+    return;
+  }
 
   for (let i = 0; i < targetChildrenLength; i++) {
-    //Dfs로 순회
+    //Dfs로 순회 ++ 여기서 부터 하위 childrenNode에 대해 Key 부여
+    // checkDepth(parent);
+
     render(
       parent.childNodes[index],
       newNode.prop.children[i],
@@ -142,8 +164,4 @@ export function render(parent, newNode, oldNode, index = 0) {
       i
     );
   }
-
-  // if (newNode.prop.children.length > oldNode.prop.children.length) {
-  //   console.log();
-  // }
 }
