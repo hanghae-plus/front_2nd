@@ -1,5 +1,11 @@
 export function jsx(type, props, ...children) {
-  return { type, props: props ?? {}, children };
+  const node = { type, props: props ?? {}, children };
+
+  if (props?.ref) {
+    node.ref = props.ref;
+  }
+
+  return node;
 }
 
 export function createElement(node) {
@@ -9,8 +15,14 @@ export function createElement(node) {
 
   const element = document.createElement(node.type);
 
+  if (node.ref) {
+    node.ref.current = element;
+  }
+
   Object.entries(node.props || {}).forEach(([key, value]) => {
-    element.setAttribute(key, value);
+    if (key !== 'ref') {
+      element.setAttribute(key, value);
+    }
   });
 
   node.children.forEach((child) => {

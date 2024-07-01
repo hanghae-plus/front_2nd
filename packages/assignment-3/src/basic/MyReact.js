@@ -28,10 +28,13 @@ function MyReact() {
   const {
     useState,
     useMemo,
+    useRef,
+    useCallback,
+    useEffect,
     resetContext: resetHookContext,
   } = createHooks(_render);
 
-  return { render, useState, useMemo };
+  return { render, useState, useMemo, useRef, useCallback, useEffect };
 }
 
 export default MyReact();
