@@ -83,7 +83,7 @@ function updateAttributes(target, newProps, oldProps) {
   });
 }
 
-const createNodeId = () => crypto.randomUUID();
+// const createNodeId = () => crypto.randomUUID();
 
 // parent: 부모 노드
 // newNode: 신규 노드
@@ -99,7 +99,7 @@ export function render(parent, newNode, oldNode, index = 0) {
   // 2. add new node
   if (newNode && !oldNode) {
     const element = createElement(newNode);
-    element.dataset.eventId = createNodeId();
+    // element.dataset.eventId = createNodeId();
     parent.appendChild(element);
     return;
   }
@@ -124,7 +124,7 @@ export function render(parent, newNode, oldNode, index = 0) {
   // 4. update existing node
   if (newNode.type === oldNode.type) {
     const element = parent.childNodes[index];
-    element.dataset.eventId = element.dataset.eventId ?? createNodeId();
+    // element.dataset.eventId = element.dataset.eventId ?? createNodeId();
     updateAttributes(element, newNode.props, oldNode.props);
 
     const newLength = newNode.children.length;

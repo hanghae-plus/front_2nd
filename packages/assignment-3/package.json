@@ -7,8 +7,7 @@
     "test": "vitest",
     "test:basic": "vitest src/basic",
     "test:advanced": "vitest src/advanced",
-    "test:ui": "vitest --ui",
-    "test:custom": "vitest src/basic/__tests__/custom.test.js"
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.2.0",
