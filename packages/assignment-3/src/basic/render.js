@@ -8,19 +8,24 @@ export function jsx(type, props, ...children) {
 
 export function createElement(node) {
   // jsx를 dom으로 변환
-  const props =
-    node.props !== null && typeof node.props === 'object'
-      ? ' ' +
-        Object.entries(node.props)
-          .map((prop) => `${prop[0]}="${prop[1]}"`)
-          .join(' ')
-      : '';
-  const children = node.children
-    .map((child) => (typeof child === 'object' ? createElement(child) : child))
-    .join('');
 
-  const element = `<${node.type}${props}>${children}</${node.type}>`;
-  return element.trim();
+  if (typeof node === 'string') {
+    return node;
+  } else {
+    const props =
+      node.props !== null && typeof node.props === 'object'
+        ? ' ' +
+          Object.entries(node.props)
+            .map((prop) => `${prop[0]}="${prop[1]}"`)
+            .join(' ')
+        : '';
+    // const children = node.children
+    //   .map((child) => (typeof child === 'object' ? createElement(child) : child))
+    //   .join('');
+
+    const element = `<${node.type}${props}></${node.type}>`;
+    return element.trim();
+  }
 }
 
 function updateAttributes(target, newProps, oldProps) {
@@ -37,28 +42,48 @@ function updateAttributes(target, newProps, oldProps) {
 }
 
 export function render(parent, newNode, oldNode, index = 0) {
+  // const newElement = createElement(newNode);
   // 1. 만약 newNode가 없고 oldNode만 있다면
-  //   parent에서 oldNode를 제거
-  //   종료
-  const newElement = createElement(newNode);
   if (!newNode && oldNode) {
+    //   parent에서 oldNode를 제거
+    parent.innerHTML = '';
+    //   종료
     return;
   }
   // 2. 만약 newNode가 있고 oldNode가 없다면
-  //   newNode를 생성하여 parent에 추가
-  //   종료
-
-  // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
-  //   oldNode를 newNode로 교체
-  //   종료
-  // 4. 만약 newNode와 oldNode의 타입이 다르다면
-  //   oldNode를 newNode로 교체
-  //   종료
-  // 5. newNode와 oldNode에 대해 updateAttributes 실행
-  if (newNode && oldNode) {
-    updateAttributes(parent, newNode.props, oldNode.props);
+  if (newNode && !oldNode) {
+    //   newNode를 생성하여 parent에 추가
+    parent.insertAdjacentHTML('beforeend', createElement(newNode));
+    if (newNode.children) {
+      const parentNode = parent.children[index];
+      newNode.children.map((child, idx) => {
+        render(parentNode, child, null, idx);
+      });
+    }
+    //   종료
+    return;
   }
+  // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
+  if (
+    typeof newNode === 'string' &&
+    typeof oldNode === 'string' &&
+    newNode !== oldNode
+  ) {
+    //   oldNode를 newNode로 교체
+    parent.innerHTML = newNode;
+    //   종료
+    return;
+  }
+  // 4. 만약 newNode와 oldNode의 타입이 다르다면
+  if (typeof newNode !== typeof oldNode) {
+    //   oldNode를 newNode로 교체
+    parent.innerHTML = createElement(newNode);
+    //   종료
+    return;
+  }
+  // 5. newNode와 oldNode에 대해 updateAttributes 실행
+  updateAttributes(parent, newNode.props, oldNode.props);
   // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
   //   각 자식노드에 대해 재귀적으로 render 함수 호출
-  parent.innerHTML = createElement(newNode);
+  newNode.children.map((child) => render(parent.firstNode, child));
 }
