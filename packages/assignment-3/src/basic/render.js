@@ -1,8 +1,23 @@
+//packages에 jsDom 설치되어 있는 것을 확인하여, 별도의 설치과정 생략.
+
 export function jsx(type, props, ...children) {
-  return {}
-}
+  const element = document.createElement(type);
+  if (props !== null) {
+    const keysPros = Object.keys(props);
+    for (let i = 0; i < keysPros.length; i++) {
+      element.setAttribute(keysPros[i], props[keysPros[i]]);
+    }
+  }
+  if (children.length > 0) {
+    for (let i = 0; i < children.length; i ++) {
+      element.innerHTML = children[i];
+    }
+  }
+  return element
+}   
 
 export function createElement(node) {
+  
   // jsx를 dom으로 변환
 }
 
@@ -21,6 +36,10 @@ function updateAttributes(target, newProps, oldProps) {
 }
 
 export function render(parent, newNode, oldNode, index = 0) {
+  if (newNode) {
+    parent.appendChild(newNode);
+  }
+  // console.log(parent, newNode, oldNode, index);
   // 1. 만약 newNode가 없고 oldNode만 있다면
   //   parent에서 oldNode를 제거
   //   종료
