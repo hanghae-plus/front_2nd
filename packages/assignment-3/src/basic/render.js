@@ -94,6 +94,7 @@ export function render(parent, newNode, oldNode, index = 0) {
     const oldNodeProps = oldNode.props || {};
 
     updateAttributes(parent.children[index], newNodeProps, oldNodeProps);
+    return;
   }
 
   if (newNode.type && oldNode.type) {
