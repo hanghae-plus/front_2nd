@@ -156,7 +156,7 @@ export function render(parent, newNode, oldNode, index = 0) {
    * ex) 0, 1, 2번 노드 중 1, 2번 삭제해야하는 경우 1번이 삭제되면 2번 재귀함수는 가리키는 노드가 사라져
    * 제대로 된 연산이 이루어지지 않음. 따라서 2 -> 1 순으로 삭제하도록 큰 인덱스부터 순회.
    */
-  for (let i = biggerNodeChildrenCnt; i > -1; i--) {
+  for (let i = biggerNodeChildrenCnt - 1; i > -1; i--) {
     render(
       parent.children[index],
       newNode.children.length === 0 ? null : newNode.children[i],
