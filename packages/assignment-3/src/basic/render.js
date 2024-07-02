@@ -158,7 +158,12 @@ export function render(parent, newNode, oldNode, index = 0) {
       newNode.type !== oldNode.type)
   ) {
     const child = parent.firstChild;
-    if (child) parent.replaceChild(child, createElement(newNode));
+    if (child) {
+      parent.removeChild(child);
+      parent.appendChild(createElement(newNode));
+    }
+    // 아래 코드로는 왜 추가테스트-문자열노드교체 테스트가 통과를 못 하는지 궁금합니다
+    // if (child) parent.replaceChild(child, createElement(newNode));
     return;
   }
 
