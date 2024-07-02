@@ -1,3 +1,5 @@
+import { depsEqual } from './utils';
+
 export function createHooks(callback) {
   const states = [];
   const memos = [];
@@ -35,12 +37,6 @@ export function createHooks(callback) {
     }
 
     return cacheResult.value;
-  };
-
-  const depsEqual = (prevDeps, nextDeps) => {
-    if (prevDeps === nextDeps) return true;
-    if (prevDeps.length !== nextDeps.length) return false;
-    return prevDeps.every((dep, i) => dep === nextDeps[i]);
   };
 
   const resetContext = () => {
