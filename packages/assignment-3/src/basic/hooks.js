@@ -15,7 +15,6 @@ export function createHooks(callback) {
     const setState = (newState) => {
       if (states[stateId] === newState) return;
       states[stateId] = newState;
-      resetContext();
       callback();
     };
 
