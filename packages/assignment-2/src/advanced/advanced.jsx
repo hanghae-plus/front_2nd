@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { deepEquals } from "../basic/basic";
 
 //함수가 사용하는 캐시 객체를 Map 객체를 사용해서 설정
 const memo1Cache = new Map();
@@ -19,7 +20,8 @@ export const memo1 = (fn) => {
   return result;
 };
 
-const memo2Cache = new Map();
+const memo2Cache = new Map(); //WeakMap() => 참조한 애들만 가능 //전역변수보다는 클로저 이용해서 안에서 사용하는게좋음~
+//Map하면 안되는 이유: fn1.tostring() === fn2.toString() 일 때 다르게 나올 수 있음
 export const memo2 = (fn, array) => {
   //인수 배열을 JSON 문자열로 변환하여 고유한 키로 사용
   //인수가 [a] 배열이므로 배열의 참조가 다르면 같은 배열 내용이라도 다른 키로 인식
@@ -46,7 +48,7 @@ export const useCustomState = (initValue) => {
 
   const customSetState = (newState) => {
     // 기존 상태와 새로운 상태를 깊이 비교하여 다를 경우에만 상태를 업데이트
-    if (JSON.stringify(state) !== JSON.stringify(newState)) {
+    if (!deepEquals(state, newState)) {
       setState(newState);
     }
   };
