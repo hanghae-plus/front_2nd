@@ -26,16 +26,16 @@ export function createHooks(callback) {
     const memoId = currentMemoId;
     currentMemoId++;
 
-    const memoized = memos[memoId];
-    const areDepsChanged = !memoized || !depsEqual(memoized.deps, deps);
+    const cacheResult = memos[memoId];
+    const hasDepsChanged = !cacheResult || !depsEqual(cacheResult.deps, deps);
 
-    if (areDepsChanged) {
+    if (hasDepsChanged) {
       const value = fn();
       memos[memoId] = { value, deps };
       return value;
     }
 
-    return memoized.value;
+    return cacheResult.value;
   };
 
   const depsEqual = (prevDeps, nextDeps) => {
