@@ -1,48 +1,36 @@
 import { deepEquals } from "../../../assignment-2/src/basic/basic";
 
 export function createHooks(callback) {
-  let states = [];
-  let statesCurrentIndex = -1;
+  const mems = [];
+  let lastCurrentIndex = -1;
 
   const useState = (initState) => {
-    states.push(initState);
-    statesCurrentIndex += 1;
-    const currentIndex = statesCurrentIndex;
+    mems.push(initState);
+    const memKey = ++lastCurrentIndex;
 
-    const state = states[currentIndex];
+    const state = mems[memKey];
 
     const setState = function (newValue) {
-      if (!deepEquals(states[currentIndex], newValue)) {
-        states[currentIndex] = newValue;
-        callback();
-      }
+      if (deepEquals(mems[memKey], newValue)) return;
+      mems[memKey] = newValue;
+      callback();
     };
 
     return [state, setState];
   };
 
-  let memoValues = [];
-  let memoRefs = [];
-  let memosCurrentIndex = -1;
-
   const useMemo = (fn, refs) => {
-    memoValues.push(fn());
-    memoRefs.push(refs);
-    memosCurrentIndex += 1;
-    const currentIndex = memosCurrentIndex;
+    mems.push({ value: fn(), deps: refs });
+    const memKey = ++lastCurrentIndex;
 
-    if (!deepEquals(memoRefs[currentIndex], refs)) {
-      memoRefs[currentIndex] = refs;
-      memoValues[currentIndex] = fn();
-    }
+    if (deepEquals(mems[memKey].deps, refs)) return mems[memKey].value;
 
-    const value = memoValues[currentIndex];
-    return value;
+    mems[memKey].deps = refs;
+    return (mems[memKey].value = fn());
   };
 
   const resetContext = () => {
-    statesCurrentIndex = -1;
-    memosCurrentIndex = -1;
+    lastCurrentIndex = -1;
   };
 
   return { useState, useMemo, resetContext };
