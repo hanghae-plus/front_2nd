@@ -1,6 +1,10 @@
+import { depsEqual } from '../basic/utils';
+
 export function createHooks(callback) {
   const states = [];
+  const memos = [];
   let currentStateId = 0;
+  let currentMemoId = 0;
   let requestAnimationFrameId = null;
   let isUpdating = false;
 
@@ -33,7 +37,19 @@ export function createHooks(callback) {
   };
 
   const useMemo = (fn, refs) => {
-    return fn();
+    const memoId = currentMemoId;
+    currentMemoId++;
+
+    const cacheResult = memos[memoId];
+    const hasDepsChanged = !cacheResult || !depsEqual(cacheResult.deps, refs);
+
+    if (hasDepsChanged) {
+      const value = fn();
+      memos[memoId] = { value, deps: refs };
+      return value;
+    }
+
+    return cacheResult.value;
   };
 
   const resetContext = () => {
