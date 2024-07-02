@@ -19,8 +19,12 @@ export function createHooks(callback) {
     return [states[currentKey], setState];
   };
 
+  const map = new Map();
   const useMemo = (fn, refs) => {
-    return fn();
+    const key = JSON.stringify([fn(), refs]);
+    if (map.has(key)) return map.get(key);
+    map.set(key, fn());
+    return map.get(key);
   };
 
   const resetContext = () => {
