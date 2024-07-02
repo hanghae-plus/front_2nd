@@ -1,14 +1,7 @@
 import { createHooks } from "./hooks";
 import { render as updateElement } from "./render";
 
-const util = require("util");
-
-const checkDepth = (obj) => {
-  console.log(util.inspect(obj, false, null, true));
-};
-
 function MyReact() {
-  let defaultRoot;
   let memorizedRoot;
   let oldNode;
   let newNode;
@@ -21,24 +14,25 @@ function MyReact() {
       return;
     }
 
+    //새로운 context를 가진 컴포넌트 실행
     const node = newNode();
+    updateElement(memorizedRoot, node, oldNode);
 
-    updateElement(defaultRoot, node, oldNode);
+    //다시 업데이트
     oldNode = node;
   };
   function render($root, rootComponent) {
     resetHookContext();
 
-    newNode = rootComponent;
-    defaultRoot = $root;
-    if (memorizedRoot === undefined) {
-      memorizedRoot = $root;
-    }
+    //루트를 저장
+    memorizedRoot = $root;
 
+    newNode = rootComponent;
     const node = newNode();
 
     updateElement($root, node);
 
+    //현재 context를 기반으로 한컴포넌트
     oldNode = node;
   }
 

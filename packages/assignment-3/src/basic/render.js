@@ -1,5 +1,3 @@
-import { shallowEquals } from "../../../assignment-2/src/basic/basic";
-
 const util = require("util");
 
 const checkDepth = (obj) => {
@@ -53,16 +51,16 @@ export function createElement(node) {
   }
 
   return $node;
-  // jsx를 dom으로 변환
 }
 
+//속성 업데이트
 function updateAttributes(target, newProps, oldProps) {
   // newProps들을 반복하여 각 속성과 값을 확인
 
   for (const [attr, value] of Object.entries(newProps)) {
     //   만약 oldProps에 같은 속성이 있고 값이 동일하다면
     //     다음 속성으로 넘어감 (변경 불필요) + children은 넘어감(속성을 정의하는 것이기 때문.)
-    if (shallowEquals(oldProps[attr], newProps[attr]) || attr === "children") {
+    if (Object.is(oldProps[attr], newProps[attr]) || attr === "children") {
       continue;
     }
     //   만약 위 조건에 해당하지 않는다면 (속성값이 다르거나 구속성에 없음)
@@ -86,47 +84,42 @@ function updateAttributes(target, newProps, oldProps) {
 export function render(parent, newNode, oldNode, index = 0) {
   //자식 노드 요소 만들기
 
-  // console.log("parent", parent);
-  // console.log("new");
-  // checkDepth(newNode);
-  // console.log("old");
-  // checkDepth(oldNode);
-
   // 1. 만약 newNode가 없고 oldNode만 있다면
   //   parent에서 oldNode를 제거
   if (!newNode && oldNode) {
     const targetNode = parent.childNode[index];
+    //   종료
+
     return parent.removeChild(targetNode);
   }
-  //   종료
   // 2. 만약 newNode가 있고 oldNode가 없다면
   //   newNode를 생성하여 parent에 추가
   if (newNode && !oldNode) {
     const newElement = createElement(newNode);
+    //   종료
     return parent.appendChild(newElement);
   }
 
-  //   종료
   // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
   //   oldNode를 newNode로 교체
   if (typeof newNode === "string" && typeof oldNode === "string") {
     if (newNode !== oldNode) {
       const newElement = createElement(newNode);
+      //   종료
       return parent.replaceChild(newElement, parent.childNodes[index]);
     } else {
+      //   종료
       return;
     }
   }
 
-  //   종료
   // 4. 만약 newNode와 oldNode의 타입이 다르다면
   //   oldNode를 newNode로 교체
   if (newNode.type !== oldNode.type) {
     const newElement = createElement(newNode);
+    //   종료
     return parent.replaceChild(newElement, parent.childNodes[index]);
   }
-
-  //   종료
 
   // 5. newNode와 oldNode에 대해 updateAttributes 실행
   if (newNode.type === oldNode.type) {
@@ -138,48 +131,18 @@ export function render(parent, newNode, oldNode, index = 0) {
   }
 
   // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
-  //   각 자식노드에 대해 재귀적으로 render 함수 호출
-  if (
-    typeof newNode.prop.children === "string" &&
-    typeof oldNode.prop.children === "string"
-  ) {
-    return;
+  const newChildren = newNode.prop.children.length
+    ? newNode.prop.children
+    : [newNode.prop.children];
+  const oldChildren = oldNode.prop.children.length
+    ? oldNode.prop.children
+    : [oldNode.prop.children];
+
+  const maxLength = Math.max(newChildren.length, oldChildren.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    //   각 자식노드에 대해 재귀적으로 render 함수 호출
+    //Dfs느낌으로 최하단 children까지 탐색
+    render(parent.childNodes[index], newChildren[i], oldChildren[i], i);
   }
-  const newNodeLength = newNode.prop?.children.length ?? 0;
-  const oldNodeLength = oldNode.prop?.children.length ?? 0;
-
-  const targetChildrenLength = Math.max(newNodeLength, oldNodeLength);
-
-  if (targetChildrenLength < 1) {
-    return;
-  }
-
-  console.log("new");
-  checkDepth(newNode);
-  console.log("old");
-  checkDepth(oldNode);
-  console.log(parent.childNodes[0].children);
-
-  for (let i = 0; i < targetChildrenLength; i++) {
-    //Dfs로 순회 ++ 여기서 부터 하위 childrenNode에 대해 Key 부여
-    // checkDepth(parent);
-
-    // console.log("makeP", parent.childNodes[index], index);
-    render(
-      parent.childNodes[index],
-      newNode.prop.children[i],
-      oldNode.prop.children[i],
-      index
-    );
-  }
-
-  // console.log("leng", targetChildrenLength);
-
-  // console.log("new");
-  // checkDepth(newNode);
-  // console.log(newNode.type);
-  // console.log("old");
-  // checkDepth(oldNode);
-  // console.log(oldNode.type);
-  // parent.replaceChild(createElement(newNode), parent.childNodes[index]);
 }

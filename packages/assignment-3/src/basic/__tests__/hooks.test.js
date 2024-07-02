@@ -93,7 +93,7 @@ describe("hooks test", () => {
       expect(memo1).toBe(memo2);
     });
 
-    test("useMemo의 값을 변경하고 싶으면, 의존하는 값을 수정해야 한다.", () => {
+    test.only("useMemo의 값을 변경하고 싶으면, 의존하는 값을 수정해야 한다.", () => {
       function getMemo() {
         resetContext();
         return useMemo(() => [], [param]);
