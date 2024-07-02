@@ -1,7 +1,5 @@
-import {
-  deepEquals,
-  shallowEquals,
-} from "../../../assignment-2/src/basic/basic";
+import { shallowEquals } from "../../../assignment-2/src/basic/basic";
+
 const util = require("util");
 
 const checkDepth = (obj) => {
@@ -88,6 +86,12 @@ function updateAttributes(target, newProps, oldProps) {
 export function render(parent, newNode, oldNode, index = 0) {
   //자식 노드 요소 만들기
 
+  // console.log("parent", parent);
+  // console.log("new");
+  // checkDepth(newNode);
+  // console.log("old");
+  // checkDepth(oldNode);
+
   // 1. 만약 newNode가 없고 oldNode만 있다면
   //   parent에서 oldNode를 제거
   if (!newNode && oldNode) {
@@ -150,15 +154,32 @@ export function render(parent, newNode, oldNode, index = 0) {
     return;
   }
 
+  console.log("new");
+  checkDepth(newNode);
+  console.log("old");
+  checkDepth(oldNode);
+  console.log(parent.childNodes[0].children);
+
   for (let i = 0; i < targetChildrenLength; i++) {
     //Dfs로 순회 ++ 여기서 부터 하위 childrenNode에 대해 Key 부여
     // checkDepth(parent);
 
+    // console.log("makeP", parent.childNodes[index], index);
     render(
       parent.childNodes[index],
       newNode.prop.children[i],
       oldNode.prop.children[i],
-      i
+      index
     );
   }
+
+  // console.log("leng", targetChildrenLength);
+
+  // console.log("new");
+  // checkDepth(newNode);
+  // console.log(newNode.type);
+  // console.log("old");
+  // checkDepth(oldNode);
+  // console.log(oldNode.type);
+  // parent.replaceChild(createElement(newNode), parent.childNodes[index]);
 }

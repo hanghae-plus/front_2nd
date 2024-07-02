@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { jsx, render } from "../render";
+import { jsx } from "../render";
 import react from "../MyReact";
 
 describe("MyReact > ", () => {
   describe("렌더링 테스트", () => {
-    test.only("한 개의 태그를 렌더링할 수 있다.", () => {
+    test("한 개의 태그를 렌더링할 수 있다.", () => {
       const $root = document.createElement("div");
 
       react.render($root, () => jsx("div", null, "div의 children 입니다."));

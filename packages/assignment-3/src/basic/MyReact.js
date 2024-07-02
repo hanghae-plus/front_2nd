@@ -1,22 +1,45 @@
 import { createHooks } from "./hooks";
-import { createElement, render as updateElement } from "./render";
+import { render as updateElement } from "./render";
+
+const util = require("util");
+
+const checkDepth = (obj) => {
+  console.log(util.inspect(obj, false, null, true));
+};
 
 function MyReact() {
-  const globalState = new Map();
-  const stateIndex = 0;
-  let reactRoot;
-  let reactRootComponent;
+  let defaultRoot;
+  let memorizedRoot;
+  let oldNode;
+  let newNode;
 
+  //useState에서 setState의 callback으로 넘겨야함
   const _render = () => {
-    return [globalState, stateIndex, reactRoot, reactRootComponent];
+    resetHookContext();
+
+    if (!oldNode || !newNode) {
+      return;
+    }
+
+    const node = newNode();
+
+    updateElement(defaultRoot, node, oldNode);
+    oldNode = node;
   };
   function render($root, rootComponent) {
-    reactRoot = $root;
-    reactRootComponent = rootComponent;
+    resetHookContext();
 
-    const newNode = createElement(rootComponent());
+    newNode = rootComponent;
+    defaultRoot = $root;
+    if (memorizedRoot === undefined) {
+      memorizedRoot = $root;
+    }
 
-    updateElement($root, newNode);
+    const node = newNode();
+
+    updateElement($root, node);
+
+    oldNode = node;
   }
 
   const {

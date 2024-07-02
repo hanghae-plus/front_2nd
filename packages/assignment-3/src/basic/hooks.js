@@ -26,6 +26,7 @@ export function createHooks(callback) {
 
       // useState선언 시점 idx내부적으로 지정 값이 바뀌더라도 같은 index참조
       let setStateIdx = tempIdx;
+
       const settingNewState = () => {
         if (!globalState[setStateIdx]) {
           globalState[setStateIdx] = newState;
