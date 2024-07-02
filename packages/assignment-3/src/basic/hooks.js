@@ -2,11 +2,11 @@ import { deepEquals } from "../../../assignment-2/src/basic/basic";
 
 export function createHooks(callback) {
   const mems = [];
-  let lastCurrentIndex = -1;
+  let lastMemKey = -1;
 
   const useState = (initState) => {
     mems.push(initState);
-    const memKey = ++lastCurrentIndex;
+    const memKey = ++lastMemKey;
 
     const state = mems[memKey];
 
@@ -21,7 +21,7 @@ export function createHooks(callback) {
 
   const useMemo = (fn, refs) => {
     mems.push({ value: fn(), deps: refs });
-    const memKey = ++lastCurrentIndex;
+    const memKey = ++lastMemKey;
 
     if (deepEquals(mems[memKey].deps, refs)) return mems[memKey].value;
 
@@ -30,7 +30,7 @@ export function createHooks(callback) {
   };
 
   const resetContext = () => {
-    lastCurrentIndex = -1;
+    lastMemKey = -1;
   };
 
   return { useState, useMemo, resetContext };
