@@ -54,7 +54,7 @@ export function render(parent, newNode, oldNode, index = 0) {
   //   parent에서 oldNode를 제거
   //   종료
   if (!newNode && oldNode) {
-    return parent.removeChild(parent.childNode[index]);
+    return parent.removeChild(parent.childNodes[index]);
   }
   // 2. 만약 newNode가 있고 oldNode가 없다면
   //   newNode를 생성하여 parent에 추가
