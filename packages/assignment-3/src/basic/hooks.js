@@ -1,6 +1,6 @@
 export function createHooks(callback) {
-  const states = {};
-  const memos = {};
+  const states = [];
+  const memos = [];
   let currentStateId = 0;
   let currentMemoId = 0;
 
