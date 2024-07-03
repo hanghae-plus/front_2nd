@@ -45,7 +45,7 @@ function updateAttributes(target, newProps, oldProps) {
     if (oldProps[props] === newProps[props]) {
       continue;
     }
-    target.setAttribute(props, newProps[props])
+    target.setAttribute(prop, newProps[prop])
   }
 
   // oldProps을 반복하여 각 속성 확인
@@ -57,7 +57,7 @@ function updateAttributes(target, newProps, oldProps) {
     if (newProps[props]) {
       continue;
     }
-    target.removeAttribute(props)
+    target.removeAttribute(prop)
   }
 }
 
@@ -66,7 +66,7 @@ export function render(parent, newNode, oldNode, index = 0) {
   //   parent에서 oldNode를 제거
   //   종료
   if (!newNode && oldNode) {
-    parent.removeChild(oldNode)
+    parent.removeChild(parent.childNodes[index])
     return
   }
   // 2. 만약 newNode가 있고 oldNode가 없다면
@@ -81,7 +81,7 @@ export function render(parent, newNode, oldNode, index = 0) {
   //   종료
   if (newNode.type === 'string' && oldNode.type === 'string') {
     if (newNode !== oldNode) {
-      parent.replaceChild(createElement(newNode), oldNode)
+      parent.replaceChild(document.createTextNode(newNode), parent.childNodes[index])
     }
     return
   }
@@ -89,7 +89,7 @@ export function render(parent, newNode, oldNode, index = 0) {
   //   oldNode를 newNode로 교체
   //   종료
   if (newNode.type !== oldNode.type) {
-    parent.replaceChild(createElement(newNode), oldNode)
+    parent.replaceChild(createElement(newNode), parent.childNodes[index])
     return
   }
   // 5. newNode와 oldNode에 대해 updateAttributes 실행
@@ -98,14 +98,8 @@ export function render(parent, newNode, oldNode, index = 0) {
 
   // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
   //   각 자식노드에 대해 재귀적으로 render 함수 호출
-
-  //   남은 newNode들을 추가
-  //   oldNode가 더 길다면
-  //   oldNode의 자식노드들을 기준으로 반복
-  render(parent, oldNode.children[index], newNode.children[index], index)
-
-  //   남은 oldNode들을 제거
-  //   newNode가 더 길다면
-  //   newNode의 자식노드들을 기준으로 반복
-  render(parent, newNode.children[index], oldNode.children[index], index)
+  const maxLength = Math.max(newNode.children.length, oldNode.children.length);
+  for (let i = 0; i < maxLength; i++) {
+    render(parent.childNodes[index], newNode.children[i], oldNode.children[i], i)
+  }
 }
