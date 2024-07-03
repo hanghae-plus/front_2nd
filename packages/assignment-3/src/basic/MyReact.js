@@ -2,9 +2,9 @@ import { createHooks } from "./hooks";
 import { render as updateElement } from "./render";
 
 function MyReact() {
-  let _entryNode;
-  let _oldNode = null;
-  let _component;
+  let _entryNode; //진입노드
+  let _oldNode = null; //이전노드
+  let _component; //관리중인 컴포넌트
 
   /**
    * @NOTE
@@ -18,6 +18,8 @@ function MyReact() {
   };
 
   /**
+   * @TODO
+   * 관리중인 컴포넌트가 여러개라면?
    * @NOTE
    * 0. 진입 Root가 달라지면, _root, _old를 초기화
    * 1. 컴포넌트에서 같은 useState 사용하도록, Hook idx 초기화
