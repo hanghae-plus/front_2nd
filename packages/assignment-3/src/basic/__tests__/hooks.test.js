@@ -16,6 +16,19 @@ describe('hooks test', () => {
       expect(render()).toBe(`a: foo, b: bar`);
     });
 
+    test('initializer function을 통해 initial state를 설정할 수 있다.', () => {
+      function render() {
+        const [a] = useState(() => 'foo');
+        const [b] = useState(() => 'bar');
+
+        return `a: ${a}, b: ${b}`;
+      }
+
+      const { useState } = createHooks(render);
+
+      expect(render()).toBe(`a: foo, b: bar`);
+    });
+
     test('setState를 실행할 경우, callback이 다시 실행된다.', () => {
       const render = vi.fn(() => {
         const [, setA] = useState('foo');
