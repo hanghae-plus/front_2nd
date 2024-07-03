@@ -1,6 +1,3 @@
-import { shallowEquals } from "../../../assignment-2/src/basic/basic";
-import { render } from "./render";
-
 export function createHooks(callback) {
   //index를 바탕으로 globalState접근
   const globalState = [];
@@ -13,7 +10,7 @@ export function createHooks(callback) {
   const useState = (initState) => {
     const tempIdx = stateIdx;
 
-    //게으른 초기화일시 함수 실행
+    //게으른 초기화일시 함수 실행 리턴값 넣어주기
     const initialState =
       typeof initState === "function" ? initState() : initState;
 
@@ -28,14 +25,8 @@ export function createHooks(callback) {
       let setStateIdx = tempIdx;
 
       const settingNewState = () => {
-        if (!globalState[setStateIdx]) {
+        if (!Object.is(globalState[setStateIdx], newState)) {
           globalState[setStateIdx] = newState;
-          return callback();
-        }
-
-        if (!shallowEquals(globalState[setStateIdx], newState)) {
-          globalState[setStateIdx] = newState;
-
           return callback();
         }
       };
@@ -49,30 +40,15 @@ export function createHooks(callback) {
   };
 
   const useMemo = (fn, refs) => {
-    // 무기명 함수라서 map으로 set할시 구분을 못함.
-
-    // const currentDependency = memoDependency.get(fn);
-
-    // const isNotChange = currentDependency?.every(
-    //   (ele, idx) => ele === refs[idx]
-    // );
-
-    // console.log(memo.has(fn), memo);
-    // if (memo.has(fn) && isNotChange) {
-    //   return memo.get(fn);
-    // }
-
-    // const result = fn();
-    // memo.set(fn, result);
-    // memoDependency.set(fn, refs);
-
     //현재 메모 인덱스
     const currentIdx = memoIdx;
     const previousMemo = globalMemo[currentIdx];
 
-    //이전 메모와 모든 의존성 배열 비교
+    //이전 메모와 비교
     if (previousMemo) {
       const { refs: prevRefs, value } = previousMemo;
+
+      // 의존성 배열에는 여러 값이 올 수 있기 때문에 모두 비교
       const isNotChanged = prevRefs.every((ref, idx) =>
         Object.is(ref, refs[idx])
       );
@@ -83,6 +59,8 @@ export function createHooks(callback) {
         return value;
       }
     }
+
+    // console.log(globalMemo, memoIdx);
 
     // 새롭게 만들기
     const newValue = fn();

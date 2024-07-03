@@ -10,12 +10,13 @@ function MyReact() {
   const _render = () => {
     resetHookContext();
 
-    if (!oldNode || !newNode) {
+    if (!oldNode || !newNode || !memorizedRoot) {
       return;
     }
 
     //새로운 context를 가진 컴포넌트 실행
     const node = newNode();
+
     updateElement(memorizedRoot, node, oldNode);
 
     //다시 업데이트
