@@ -1,3 +1,13 @@
+/**
+ * @TODO
+ * render.js파일은
+ * 준일 코치님 블로그 글에 정답이 나와 있었기 때문에
+ * 나중에 내 방식대로 수정하거나 다시 한번 복습해야함.
+ */
+/**
+ * @NOTE
+ * jsx 객체를 반납한다.
+ */
 export function jsx(type, props, ...children) {
   return { type, props, children: children.flat() };
 }
@@ -49,7 +59,6 @@ function updateAttributes(target, newProps, oldProps) {
   //     다음 속성으로 넘어감 (속성 유지 필요)
   //   만약 newProps들에 해당 속성이 존재하지 않는다면
   //     target에서 해당 속성을 제거
-
   for (const attr of Object.keys(oldProps)) {
     if (newProps[attr]) continue;
     target.removeAttribute(attr);

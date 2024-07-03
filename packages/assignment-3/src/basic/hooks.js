@@ -22,7 +22,7 @@ export function createHooks(callback) {
       typeof hooks[stateIdx] === "object" ? Object.freeze(hooks[stateIdx]) : hooks[stateIdx];
 
     function setState(updatedState) {
-      if (hooks[stateIdx] === updatedState) return;
+      if (deepEquals(hooks[stateIdx], updatedState)) return;
       hooks[stateIdx] = updatedState;
       callback();
     }
