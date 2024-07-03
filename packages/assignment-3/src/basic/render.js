@@ -1,9 +1,3 @@
-const util = require("util");
-
-const checkDepth = (obj) => {
-  console.log(util.inspect(obj, false, null, true));
-};
-
 export function jsx(type, props, ...children) {
   //object 복사
   const prop = Object.assign({}, props);
