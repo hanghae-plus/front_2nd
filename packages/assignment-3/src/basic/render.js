@@ -20,7 +20,7 @@ export function createElement(node) {
   let $el;
   //1.Text => textNode
   //2.나머지 => Element
-  if (typeof node === "string") {
+  if (typeof node === 'string') {
     $el = document.createTextNode(node);
   } else {
     $el = document.createElement(node.type);
@@ -88,11 +88,18 @@ export function render(parent, newNode, oldNode, index = 0) {
 
   //3. 변경 되었을 때
   if (newNode.type !== oldNode.type) {
-    return parent.replaceChild(createElement(newNode), parent.childNodes[index]);
+    return parent.replaceChild(
+      createElement(newNode),
+      parent.childNodes[index]
+    );
   }
 
   //4. 속성 갱신
-  updateAttributes(parent.childNodes[index], newNode.props || {}, oldNode.props || {});
+  updateAttributes(
+    parent.childNodes[index],
+    newNode.props || {},
+    oldNode.props || {}
+  );
 
   //5. 자식노드 재귀
   const newChildren = newNode.children || [];

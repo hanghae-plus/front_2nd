@@ -1,5 +1,5 @@
-import { createHooks } from "./hooks";
-import { render as updateElement } from "./render";
+import { createHooks } from './hooks';
+import { render as updateElement } from './render';
 
 function MyReact() {
   let _entryNode; //진입노드
@@ -41,7 +41,11 @@ function MyReact() {
     _oldNode = newNode;
   }
 
-  const { useState, useMemo, resetContext: resetHookContext } = createHooks(_render);
+  const {
+    useState,
+    useMemo,
+    resetContext: resetHookContext,
+  } = createHooks(_render);
 
   return { render, useState, useMemo };
 }
