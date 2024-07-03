@@ -2,9 +2,7 @@
  * @NOTE
  * jsx 객체를 반환한다.
  */
-export function jsx(type, props, ...children) {
-  return { type, props, children: children.flat() };
-}
+export function jsx(type, props, ...children) {}
 
 /**
  * @NOTE ReactElement는 VDOM에서 사용되기 위한 DOM 노드와 같은 역할을 함.
