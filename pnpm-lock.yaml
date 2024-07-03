@@ -67,35 +67,35 @@ importers:
     dependencies:
       react:
         specifier: ^18.2.0
-        version: 18.3.1
+        version: 18.2.0
       react-dom:
         specifier: ^18.2.0
-        version: 18.3.1(react@18.3.1)
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@testing-library/jest-dom':
         specifier: ^6.4.5
-        version: 6.4.5(vitest@1.6.0(@vitest/ui@1.6.0)(jsdom@24.0.0))
+        version: 6.4.5(vitest@1.6.0)
       '@testing-library/react':
         specifier: ^15.0.7
-        version: 15.0.7(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 15.0.7(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
       '@types/react':
         specifier: ^18.2.66
-        version: 18.3.3
+        version: 18.2.66
       '@types/react-dom':
         specifier: ^18.2.22
-        version: 18.3.0
+        version: 18.2.22
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.2.0
-        version: 7.10.0(@typescript-eslint/parser@7.10.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)
+        version: 7.2.0(@typescript-eslint/parser@7.2.0)(eslint@8.57.0)(typescript@5.2.2)
       '@typescript-eslint/parser':
         specifier: ^7.2.0
-        version: 7.10.0(eslint@8.57.0)(typescript@5.4.5)
+        version: 7.2.0(eslint@8.57.0)(typescript@5.2.2)
       '@vitejs/plugin-react':
         specifier: ^4.3.0
-        version: 4.3.0(vite@5.2.11)
+        version: 4.3.0(vite@5.3.1)
       '@vitejs/plugin-react-swc':
         specifier: ^3.5.0
-        version: 3.7.0(vite@5.2.11)
+        version: 3.5.0(vite@5.3.1)
       '@vitest/ui':
         specifier: ^1.6.0
         version: 1.6.0(vitest@1.6.0)
@@ -104,16 +104,16 @@ importers:
         version: 8.57.0
       eslint-plugin-react-hooks:
         specifier: ^4.6.0
-        version: 4.6.2(eslint@8.57.0)
+        version: 4.6.0(eslint@8.57.0)
       eslint-plugin-react-refresh:
         specifier: ^0.4.6
-        version: 0.4.7(eslint@8.57.0)
+        version: 0.4.6(eslint@8.57.0)
       jsdom:
         specifier: ^24.0.0
         version: 24.0.0
       typescript:
         specifier: ^5.2.2
-        version: 5.4.5
+        version: 5.2.2
       vitest:
         specifier: ^1.6.0
         version: 1.6.0(@vitest/ui@1.6.0)(jsdom@24.0.0)
@@ -122,10 +122,10 @@ importers:
     devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.2.0
-        version: 7.10.0(@typescript-eslint/parser@7.10.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)
+        version: 7.2.0(@typescript-eslint/parser@7.2.0)(eslint@8.57.0)(typescript@5.2.2)
       '@typescript-eslint/parser':
         specifier: ^7.2.0
-        version: 7.10.0(eslint@8.57.0)(typescript@5.4.5)
+        version: 7.2.0(eslint@8.57.0)(typescript@5.2.2)
       '@vitest/ui':
         specifier: ^1.6.0
         version: 1.6.0(vitest@1.6.0)
@@ -137,7 +137,7 @@ importers:
         version: 24.0.0
       typescript:
         specifier: ^5.2.2
-        version: 5.4.5
+        version: 5.2.2
       vitest:
         specifier: ^1.6.0
         version: 1.6.0(@vitest/ui@1.6.0)(jsdom@24.0.0)
