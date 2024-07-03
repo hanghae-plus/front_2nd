@@ -2,6 +2,7 @@ export function createHooks(callback) {
   //index를 바탕으로 globalState접근
   const globalState = [];
   let stateIdx = 0;
+  let isFirstRequest = true;
 
   //메모이제이션을 위한 공간
   const globalMemo = [];
@@ -27,18 +28,24 @@ export function createHooks(callback) {
       // setState를 호출하기 때문에 굳이 기명함수로 표현할 필요가 있을까ㅏ...?
       const settingNewState = () => {
         if (!Object.is(globalState[setStateIdx], newState)) {
+          // 지속적으로 들어오는 요청에 값은 변경되지만 리렌더링은 마지막만 되어야함.
           globalState[setStateIdx] = newState;
 
-          requestAnimationFrame(() => callback());
-          return;
+          //첫 요청이 아니라면 callback요청 하지 않음.
+          if (!isFirstRequest) {
+            return;
+          }
+
+          //첫 요청이라면 다음 요청에 대해 False처리 이후, requestAnimationFrame예약
+
+          isFirstRequest = false;
+
+          return requestAnimationFrame(() => callback());
         }
       };
 
       return settingNewState();
     };
-
-    //state를 새로 만들 때마다 다른 인덱스를 주기 위해 고유한 idx를 만들기
-    stateIdx++;
 
     return [tempState, setState];
   };
@@ -64,8 +71,6 @@ export function createHooks(callback) {
       }
     }
 
-    // console.log(globalMemo, memoIdx);
-
     // 새롭게 만들기
     const newValue = fn();
     globalMemo[currentIdx] = { refs, value: newValue };
@@ -78,6 +83,7 @@ export function createHooks(callback) {
   const resetContext = () => {
     stateIdx = 0;
     memoIdx = 0;
+    isFirstRequest = true;
   };
 
   return { useState, useMemo, resetContext };

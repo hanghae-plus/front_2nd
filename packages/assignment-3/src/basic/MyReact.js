@@ -33,7 +33,7 @@ function MyReact() {
 
     updateElement($root, node);
 
-    //현재 context를 기반으로 한컴포넌트
+    //현재 context를 기반으로 한 컴포넌트
     oldNode = node;
   }
 

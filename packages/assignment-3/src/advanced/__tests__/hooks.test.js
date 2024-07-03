@@ -5,7 +5,7 @@ const waitOneFrame = () =>
   new Promise((resolve) => requestAnimationFrame(resolve));
 
 describe("refactored useState", () => {
-  test.only("setState를 실행할 경우, 1frame 후에 callback이 다시 실행된다.", async () => {
+  test("setState를 실행할 경우, 1frame 후에 callback이 다시 실행된다.", async () => {
     const render = vi.fn(() => {
       const [, setA] = useState("foo");
       return { setA };
@@ -24,7 +24,7 @@ describe("refactored useState", () => {
     expect(render).toBeCalledTimes(2);
   });
 
-  test.only("setState가 동시에 여러번 실행될 경우, 마지막 setState에 대해서만 render가 호출된다.", async () => {
+  test("setState가 동시에 여러번 실행될 경우, 마지막 setState에 대해서만 render가 호출된다.", async () => {
     let currentState = null;
     const render = vi.fn(() => {
       resetContext();
