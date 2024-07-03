@@ -10,17 +10,15 @@ export const createHooks = (callback) => {
     const currentIndex = index;
     const currentState = state[currentIndex];
 
-    const setState = (() => {
-      let currentIndex = index;
-      return (value) => {
-        if (state[currentIndex] === value) return;
-
-        state[currentIndex] = value;
-        callback();
-      };
-    })();
-
     index += 1;
+
+    const setState = (value) => {
+      if (state[currentIndex] === value) return;
+
+      state[currentIndex] = value;
+      callback();
+    };
+
     return [currentState, setState];
   };
 
@@ -32,11 +30,11 @@ export const createHooks = (callback) => {
     let cache = {};
     let ref = [];
     return (fn, refs) => {
-      if (refs.every((v, k) => v === ref[k])) {
+      if (refs.every((v, i) => v === ref[i])) {
         return cache[refs];
       } else {
         ref = refs;
-        cache[refs] = fn;
+        cache[refs] = fn();
         return cache[refs];
       }
     };
