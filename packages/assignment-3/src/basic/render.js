@@ -28,6 +28,12 @@ function createElement(node) {
   return element;
 }
 
+/**
+ *
+ * @param {HTMLElement} target
+ * @param {object} newProps
+ * @param {object} oldProps
+ */
 function updateAttributes(target, newProps, oldProps) {
   // newProps들을 반복하여 각 속성과 값을 확인
   //   만약 oldProps에 같은 속성이 있고 값이 동일하다면
@@ -39,6 +45,20 @@ function updateAttributes(target, newProps, oldProps) {
   //     다음 속성으로 넘어감 (속성 유지 필요)
   //   만약 newProps들에 해당 속성이 존재하지 않는다면
   //     target에서 해당 속성을 제거
+  Object.entries(newProps ?? {}).forEach(([key, value]) => {
+    if (
+      !Object.hasOwn(oldProps ?? {}, key) ||
+      !Object.is(value, oldProps[key])
+    ) {
+      target.setAttribute(key, value);
+    }
+  });
+
+  Object.entries(oldProps ?? {}).forEach(([key]) => {
+    if (!Object.hasOwn(newProps ?? {}, key)) {
+      target.removeAttribute(key);
+    }
+  });
 }
 
 /**
@@ -84,13 +104,11 @@ export function render(parent, newNode, oldNode, index = 0) {
   }
 
   // 5. newNode와 oldNode에 대해 updateAttributes 실행
+  updateAttributes(parent.childNodes[index], newNode.props, oldNode.props);
 
   // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
   //   각 자식노드에 대해 재귀적으로 render 함수 호출
-  const maxLength = Math.max(
-    newNode?.children?.length ?? 0,
-    oldNode?.children?.length ?? 0
-  );
+  const maxLength = getMaxLength(newNode.children, oldNode.children);
   for (let i = 0; i < maxLength; i++) {
     render(
       parent.childNodes[index],
@@ -102,12 +120,10 @@ export function render(parent, newNode, oldNode, index = 0) {
 }
 
 /**
- *
- * @param {Array} array1
- * @param {Array} array2
+ * @param {any[]=} array1
+ * @param {any[]=} array2
+ * @returns {number}
  */
-function getLongerArray(array1, array2) {
-  if (!!array1 || !!array2) return [];
-
-  return array1.length > array2.length ? array1 : array2;
+function getMaxLength(array1, array2) {
+  return Math.max(array1?.length ?? 0, array2?.length ?? 0);
 }
