@@ -46,20 +46,14 @@ export function shallowEquals(target1, target2) {
     return target1 == target2;
   }
 
-  //3. 익명함수 비교
-  if (target1.constructor.name === "" || target2.constructor.name === "") {
-    return target1 == target2;
-  }
-
-  //4. 객체 비교
-  if (typeof target1 === "object" && typeof target2 === "object") {
+  if (target1.constructor === Object && target2.constructor === Object) {
     const keys1 = Object.keys(target1);
     const keys2 = Object.keys(target2);
-
     if (keys1.length !== keys2.length) {
       return false;
     }
-    return keys1.every((key) => target1[key] == target2[key]);
+
+    return keys1.every((key) => target1[key] === target2[key]);
   }
   return target1 == target2;
 >>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
@@ -110,20 +104,17 @@ export function deepEquals(target1, target2) {
     return target1 == target2;
   }
 
-  if (target1.constructor.name === "" || target2.constructor.name === "") {
-    return target1 == target2;
-  }
-
-  if (typeof target1 === "object" && typeof target2 === "object") {
+  if (target1.constructor === Object && target2.constructor === Object) {
     const keys1 = Object.keys(target1);
     const keys2 = Object.keys(target2);
-
     if (keys1.length !== keys2.length) {
       return false;
     }
-    //재귀호출
+
     return keys1.every((key) => deepEquals(target1[key], target2[key]));
   }
+
+  return false;
 }
 
 /**
@@ -222,8 +213,8 @@ export class CustomNumber {
   number;
 
   constructor(n) {
-    if (CustomNumber.dataMap.has(n)) {
-      return CustomNumber.dataMap.get(n);
+    if (CustomNumber.#dataMap.has(n)) {
+      return CustomNumber.#dataMap.get(n);
     }
     this.number = n;
     CustomNumber.dataMap.set(n, this);
