@@ -1,44 +1,105 @@
+/**
+ * @typedef {Object} JSXElement
+ * @property {string|Function} type
+ * @property {Object} [props]
+ * @property {Array<JSXElement|string>} [children]
+ */
+
+/**
+ * 토큰 jsx로 변환
+ * @param {string| Object} type
+ * @param {Object} [props]
+ * @param {...(JSXElement|string)} [children]
+ * @returns {JSXElement}
+ */
 export function jsx(type, props, ...children) {
-  return {}
+  return {
+    type,
+    props,
+    children: children.flat(),
+  };
 }
-
+/**
+ * jsx를 dom으로 변환
+ * @param {string | JSXElement} node
+ * @returns {Node}
+ */
 export function createElement(node) {
-  // jsx를 dom으로 변환
+  // string이면 text node 반환
+  if (typeof node === 'string') return document.createTextNode(node);
+
+  //node가 컴포넌트일때
+  if (typeof node === 'function') node = node();
+  const $el = document.createElement(node.type);
+
+  // attr 적재
+  Object.entries(node.props || {}).forEach(([attr, value]) => {
+    if (!value) return;
+    $el.setAttribute(attr, value);
+  });
+
+  // children 적재
+  if (node.children)
+    node.children.forEach((child) => $el.appendChild(createElement(child)));
+
+  return $el;
 }
 
+/**
+ * Dom의 attributes 구현.
+ * @param {HTMLElement} target
+ * @param {Object} newProps
+ * @param {Object} oldProps
+ */
 function updateAttributes(target, newProps, oldProps) {
-  // newProps들을 반복하여 각 속성과 값을 확인
-  //   만약 oldProps에 같은 속성이 있고 값이 동일하다면
-  //     다음 속성으로 넘어감 (변경 불필요)
-  //   만약 위 조건에 해당하지 않는다면 (속성값이 다르거나 구속성에 없음)
-  //     target에 해당 속성을 새 값으로 설정
+  // props key list 구현
+  const props = new Set([
+    ...Object.keys(newProps || {}),
+    ...Object.keys(oldProps || {}),
+  ]);
 
-  // oldProps을 반복하여 각 속성 확인
-  //   만약 newProps들에 해당 속성이 존재한다면
-  //     다음 속성으로 넘어감 (속성 유지 필요)
-  //   만약 newProps들에 해당 속성이 존재하지 않는다면
-  //     target에서 해당 속성을 제거
+  props.forEach((attr) => {
+    const newValue = newProps[attr];
+    const oldValue = oldProps[attr];
+    if (newValue === oldValue) return;
+    if (!newValue) return target.removeAttribute(attr);
+    target.setAttribute(attr, newValue);
+  });
 }
 
+/**
+ *
+ * @param {HTMLElement} parent
+ * @param {JSXElement|null} newNode
+ * @param {JSXElement|null} [oldNode]
+ * @param {number} [index=0]
+ */
 export function render(parent, newNode, oldNode, index = 0) {
-  // 1. 만약 newNode가 없고 oldNode만 있다면
-  //   parent에서 oldNode를 제거
-  //   종료
+  // target을 찾는 연산을 줄이기 위해 변수선언
+  const $oldNode = parent.childNodes[index];
 
-  // 2. 만약 newNode가 있고 oldNode가 없다면
-  //   newNode를 생성하여 parent에 추가
-  //   종료
+  // !newNode && oldNode일때 oldNode 제거
+  if (!newNode && oldNode) return parent.removeChild($oldNode);
 
-  // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
-  //   oldNode를 newNode로 교체
-  //   종료
+  // newNode가 있고 oldNode가 없을때 생성
+  if (newNode && !oldNode) return parent.appendChild(createElement(newNode));
 
-  // 4. 만약 newNode와 oldNode의 타입이 다르다면
-  //   oldNode를 newNode로 교체
-  //   종료
+  // 둘다 string일때 처리
+  if (typeof newNode === 'string' && typeof oldNode === 'string') {
+    if (newNode === oldNode) return;
+    $oldNode.text = createElement(newNode);
+  }
 
-  // 5. newNode와 oldNode에 대해 updateAttributes 실행
+  //만약 newNode와 oldNode의 타입이 다르다면 oldNode를 newNode로 교체
+  if (newNode.type !== oldNode.type)
+    return parent.replaceChild(createElement(newNode), $oldNode);
 
-  // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
-  //   각 자식노드에 대해 재귀적으로 render 함수 호출
+  //attr 세팅
+  updateAttributes($oldNode, newNode.props || {}, oldNode.props || {});
+
+  //newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
+  const maxLen = Math.max(newNode.children.length, oldNode.children.length);
+  [...Array(maxLen)].forEach((_, i) =>
+    render($oldNode, newNode.children[i], oldNode.children[i], i)
+  );
 }
