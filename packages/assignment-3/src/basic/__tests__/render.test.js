@@ -124,4 +124,44 @@ describe("render > ", () => {
       expect(children[1]).toBe(newChildren[1]);
     });
   });
+
+  test("노드 type이 변경됨", () => {
+    const $root = document.createElement("div");
+
+    const App = jsx(
+      "div",
+      { id: "test-id", class: "test-class" },
+      jsx("p", null, "첫 번째 문단"),
+      jsx("p", null, "두 번째 문단")
+    );
+
+    render($root, App);
+
+    expect($root.innerHTML).toBe(
+      `<div id="test-id" class="test-class"><p>첫 번째 문단</p><p>두 번째 문단</p></div>`
+    );
+
+    const children = [...$root.querySelectorAll("p")];
+
+    render(
+      $root,
+      jsx(
+        "div",
+        { id: "test-id", class: "test-class" },
+        jsx("p", null, "첫 번째 문단"),
+        // p 태그에서 div로 변경됨
+        jsx("div", null, "두 번째 문단")
+      ),
+      App
+    );
+
+    expect($root.innerHTML).toBe(
+      `<div id="test-id" class="test-class"><p>첫 번째 문단</p><div>두 번째 문단</div></div>`
+    );
+
+    const newChildren = [...$root.querySelectorAll("p")];
+
+    expect(children[0]).toBe(newChildren[0]);
+    expect(children[1]).not.toBe(newChildren[1]);
+  });
 });

@@ -7,13 +7,14 @@ describe("hooks test", () => {
       function render() {
         const [a] = useState("foo");
         const [b] = useState("bar");
+        const [c] = useState("sion");
 
-        return `a: ${a}, b: ${b}`;
+        return `a: ${a}, b: ${b} c: ${c}`;
       }
 
       const { useState } = createHooks(render);
 
-      expect(render()).toBe(`a: foo, b: bar`);
+      expect(render()).toBe(`a: foo, b: bar c: sion`);
     });
 
     test("setState를 실행할 경우, callback이 다시 실행된다.", () => {
@@ -75,6 +76,10 @@ describe("hooks test", () => {
       expect(result).toBe(`a: foo-change, b: bar-change`);
 
       expect(render).toBeCalledTimes(3);
+
+      // resetContext를 실행하지 않았을 때 값이 반영되지 않는 것을 테스트
+      setB("bar-change123");
+      expect(result).not.toBe(`a: foo-change, b: bar-change123`);
     });
   });
 
@@ -94,24 +99,41 @@ describe("hooks test", () => {
     });
 
     test("useMemo의 값을 변경하고 싶으면, 의존하는 값을 수정해야 한다.", () => {
-      function getMemo() {
+      function getMemo(dependenciesArray) {
         resetContext();
-        return useMemo(() => [], [param]);
+        return useMemo(() => [], dependenciesArray);
       }
 
       const { useMemo, resetContext } = createHooks(getMemo);
       let param = 1;
 
-      const memo1 = getMemo();
+      const memo1 = getMemo([param]);
       param = 2;
 
-      const memo2 = getMemo();
-      const memo3 = getMemo();
+      const memo2 = getMemo([param]);
+      const memo3 = getMemo([param]);
       expect(memo1).not.toBe(memo2);
       expect(memo2).toBe(memo3);
       param = 3;
-      const memo4 = getMemo();
+
+      const memo4 = getMemo([param]);
       expect(memo3).not.toBe(memo4);
+
+      // 1 -> 2 -> 3 -> 1
+      // 다시 param을 1로 지정했을 때 이전 의존성(3)과 다른 값이기 때문에 새로운 값을 반환하여 memo1과 memo5가 다른 것인지?
+      param = 1;
+      const memo5 = getMemo([param]);
+      expect(memo1).not.toBe(memo5);
+
+      // 의존성에 여러개의 값이 있을때 하나라도 변경되지 않으면 캐싱됨
+      const memo6 = getMemo([1, 2, 3]);
+      const memo7 = getMemo([1, 2, 3]);
+
+      expect(memo6).toBe(memo7);
+
+      // 여러개 의존성 중 한개라도 변경되면 새로운 값을 return
+      const memo8 = getMemo([1, 2, 100]);
+      expect(memo8).not.toBe(memo6);
     });
   });
 });
