@@ -3,8 +3,8 @@ export function jsx(type, props, ...children) {
 }
 
 export function createElement(node) {
-  // jsx를 dom으로 변환
   const { type, props, children } = node;
+
   const element = document.createElement(type);
 
   if (props) {
@@ -53,15 +53,13 @@ export function render(parent, newNode, oldNode, index = 0) {
   //   parent에서 oldNode를 제거
   //   종료
   if (!newNode && oldNode) {
-    parent.removeChild(parent.childNodes[index]);
-    return;
+    return parent.removeChild(parent.childNodes[index]);
   }
   // 2. 만약 newNode가 있고 oldNode가 없다면
   //   newNode를 생성하여 parent에 추가
   //   종료
   if (newNode && !oldNode) {
-    parent.appendChild(createElement(newNode));
-    return;
+    return parent.appendChild(createElement(newNode));
   }
   // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
   //   oldNode를 newNode로 교체
@@ -71,33 +69,35 @@ export function render(parent, newNode, oldNode, index = 0) {
     typeof oldNode === "string" &&
     newNode !== oldNode
   ) {
-    parent.replaceChild(
-      document.createTextNode(newNode),
+    return parent.replaceChild(
+      createElement(newNode),
       parent.childNodes[index]
     );
-    return;
   }
   // 4. 만약 newNode와 oldNode의 타입이 다르다면
   //   oldNode를 newNode로 교체
   //   종료
   if (newNode.type !== oldNode.type) {
-    parent.replaceChild(createElement(newNode), parent.childNodes[index]);
-    return;
+    return parent.replaceChild(
+      createElement(newNode),
+      parent.childNodes[index]
+    );
   }
   // 5. newNode와 oldNode에 대해 updateAttributes 실행
   updateAttributes(parent.childNodes[index], newNode.props, oldNode.props);
   // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
   //   각 자식노드에 대해 재귀적으로 render 함수 호출
-  for (
-    let i = 0;
-    i < Math.max(newNode?.children?.length, oldNode?.children?.length);
-    i++
-  ) {
+  const maxLength = Math.max(
+    newNode?.children?.length || 0,
+    oldNode?.children?.length || 0
+  );
+
+  Array.from({ length: maxLength }).forEach((_, i) => {
     render(
       parent.childNodes[index],
       newNode.children[i],
       oldNode.children[i],
       i
     );
-  }
+  });
 }

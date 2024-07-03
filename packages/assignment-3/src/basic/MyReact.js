@@ -6,6 +6,7 @@ function MyReact() {
   let currentComponent = null;
 
   const render = ($root, rootComponent) => {
+    resetHookContext();
     currentRoot = $root;
     currentComponent = rootComponent;
     const element = rootComponent();
@@ -13,6 +14,8 @@ function MyReact() {
   };
 
   const reRender = () => {
+    resetHookContext();
+    currentRoot.innerHTML = "";
     render(currentRoot, currentComponent);
   };
 
