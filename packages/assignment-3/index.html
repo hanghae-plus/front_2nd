@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>간단한 TodoList</title>
+  <style>
+    .completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+<h1>TodoList</h1>
+<input type="text" id="todoInput" placeholder="할 일을 입력하세요">
+<button id="addButton">추가</button>
+<ul id="todoList"></ul>
+
+<script>
+  function getTodoListElement() {
+    return document.getElementById('todoList');
+  }
+
+  function resetInputValue() {
+    document.getElementById('todoInput').value = '';
+  }
+
+  function getInputValue() {
+    return document.getElementById('todoInput').value;
+  }
+
+  function registerToggleEvent($el) {
+    $el.addEventListener('click', function() {
+      $el.classList.toggle('completed');
+    });
+  }
+
+  function createContent(children) {
+    const span = document.createElement('span');
+    span.textContent = children;
+    registerToggleEvent(span);
+    return span;
+  }
+
+  function createDeleteButton(deleteItem) {
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = '삭제';
+    deleteButton.addEventListener('click', deleteItem);
+    return deleteButton;
+  }
+
+  function createTodoItem() {
+    const li = document.createElement('li');
+    const span = createContent(getInputValue());
+    const deleteButton = createDeleteButton(() => getTodoListElement().removeChild(li));
+
+    li.setAttribute('id', Date.now());
+    li.appendChild(span);
+    li.appendChild(deleteButton);
+
+    return li;
+  }
+
+  function render() {
+    document.getElementById('addButton').addEventListener('click', function() {
+      if (getInputValue() === '') {
+        return;
+      }
+      getTodoListElement().appendChild(createTodoItem());
+      resetInputValue();
+    });
+  }
+
+  render();
+</script>
+</body>
+</html>
