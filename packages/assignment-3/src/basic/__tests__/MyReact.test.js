@@ -64,6 +64,8 @@ describe('MyReact > ', () => {
         let fn = null;
         const App = () => {
           const [size, setSize] = react.useState(1);
+          const [text, setText] = react.useState('hello');
+          
           fn = setSize;
           return jsx(
             'div',
