@@ -3,15 +3,16 @@ export function createHooks(callback) {
   const hooks = [];
 
   const useState = (initState) => {
-    if (hooks[index] == null) {
+    const currentIndex = index;
+
+    if (hooks[currentIndex] == null) {
       if (typeof initState === 'function') {
-        hooks[index] = initState();
+        hooks[currentIndex] = initState();
       } else {
-        hooks[index] = initState;
+        hooks[currentIndex] = initState;
       }
     }
 
-    const currentIndex = index;
     function setState(nextState) {
       if (typeof nextState === 'function') {
         hooks[currentIndex] = nextState(hooks[currentIndex]);
@@ -29,12 +30,31 @@ export function createHooks(callback) {
     }
 
     index++;
-
     return [hooks[currentIndex], setState];
   };
 
-  const useMemo = (fn, refs) => {
-    return fn();
+  const useMemo = (fn, newDependencies) => {
+    const currentIndex = index;
+
+    if (hooks[currentIndex] == null) {
+      hooks[currentIndex] = [newDependencies, fn()];
+    }
+
+    const [oldDependencies] = hooks[currentIndex];
+
+    let isChanged = true;
+    if (oldDependencies) {
+      isChanged = newDependencies.some(
+        (dependency, index) => !Object.is(dependency, oldDependencies[index])
+      );
+    }
+
+    if (isChanged) {
+      hooks[currentIndex] = [newDependencies, fn()];
+    }
+
+    index++;
+    return hooks[currentIndex][0];
   };
 
   const resetContext = () => {
