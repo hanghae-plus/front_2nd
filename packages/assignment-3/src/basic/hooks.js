@@ -60,8 +60,6 @@ export function createHooks(callback) {
       }
     }
 
-    // console.log(globalMemo, memoIdx);
-
     // 새롭게 만들기
     const newValue = fn();
     globalMemo[currentIdx] = { refs, value: newValue };

@@ -96,11 +96,14 @@ describe("hooks test", () => {
     test("useMemo의 값을 변경하고 싶으면, 의존하는 값을 수정해야 한다.", () => {
       function getMemo() {
         resetContext();
-        return useMemo(() => [], [param]);
+        //의존성 배열 추가
+        return useMemo(() => [], [param, number]);
       }
 
       const { useMemo, resetContext } = createHooks(getMemo);
+
       let param = 1;
+      let number = 1;
 
       const memo1 = getMemo();
       param = 2;
@@ -112,6 +115,14 @@ describe("hooks test", () => {
       param = 3;
       const memo4 = getMemo();
       expect(memo3).not.toBe(memo4);
+
+      number = 100;
+      const memo5 = getMemo();
+      const memo6 = getMemo();
+
+      //새로운 테스트 케이스 추가 (의존성 배열 수를 모두 체크)
+      expect(memo5).not.toBe(memo4);
+      expect(memo5).toBe(memo6);
     });
   });
 });
