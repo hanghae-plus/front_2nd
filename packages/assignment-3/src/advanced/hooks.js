@@ -25,7 +25,10 @@ export function createHooks(callback) {
       }
 
       // 상태 변경을 다음 애니메이션 프레임에 동기화하여 UI 업데이트 스케줄링
-      requestAnimationFrameId = requestAnimationFrame(callback);
+      requestAnimationFrameId = requestAnimationFrame(() => {
+        callback();
+        requestAnimationFrameId = null;
+      });
     };
 
     return [states[stateId], setState];
