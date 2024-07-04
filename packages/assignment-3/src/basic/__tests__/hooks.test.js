@@ -16,18 +16,26 @@ describe("hooks test", () => {
       expect(render()).toBe(`a: foo, b: bar`);
     });
 
-    test("setState를 실행할 경우, callback이 다시 실행된다.", () => {
+    test.only("setState를 실행할 경우, callback이 다시 실행된다.", () => {
+      //게으른 초기화 테스트
+      const getData = () => {
+        return "initializedData";
+      };
+
       const render = vi.fn(() => {
-        const [, setA] = useState("foo");
+        const [, setA] = useState(() => getData());
+
         return { setA };
       });
 
-      const { useState } = createHooks(render);
+      const { useState, resetContext } = createHooks(render);
 
       const { setA } = render();
       expect(render).toBeCalledTimes(1);
 
       setA("test");
+      resetContext();
+
       expect(render).toBeCalledTimes(2);
     });
 
