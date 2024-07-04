@@ -11,12 +11,13 @@ export function createHooks(callback) {
     currentStateId++;
 
     if (states.length === stateId) {
-      states.push(initState);
+      states.push(typeof initState === 'function' ? initState() : initState);
     }
 
     const setState = (newState) => {
-      if (states[stateId] === newState) return;
-      states[stateId] = newState;
+      const newStateValue = typeof newState === 'function' ? newState(states[stateId]) : newState;
+      if (states[stateId] === newStateValue) return;
+      states[stateId] = newStateValue;
       callback();
     };
 
