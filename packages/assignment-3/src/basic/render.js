@@ -25,7 +25,7 @@ export function createElement(node) {
     if (key === "children") {
       if (typeof attribute === "string") {
         //innerText시 오류,,
-        $node.innerHTML = attribute;
+        $node.textContent = attribute;
       } else {
         if (attribute.length) {
           for (let ele in attribute) {

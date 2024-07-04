@@ -19,7 +19,7 @@ function MyReact() {
 
     updateElement(memorizedRoot, node, oldNode);
 
-    //다시 업데이트
+    //새로운 노드는 oldNode가 된다.
     oldNode = node;
   };
   function render($root, rootComponent) {
