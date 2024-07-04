@@ -1,12 +1,12 @@
-import { expect, describe, test, vi } from 'vitest'
-import { createHooks } from '../hooks.js'
+import { expect, describe, test, vi } from 'vitest';
+import { createHooks } from '../hooks.js';
 
-describe("hooks test", () => {
-  describe("useState", () => {
-    test("useState로 state를 만들 수 있다.", () => {
+describe('hooks test', () => {
+  describe('useState', () => {
+    test('useState로 state를 만들 수 있다.', () => {
       function render() {
-        const [a] = useState("foo");
-        const [b] = useState("bar");
+        const [a] = useState('foo');
+        const [b] = useState('bar');
 
         return `a: ${a}, b: ${b}`;
       }
@@ -16,9 +16,9 @@ describe("hooks test", () => {
       expect(render()).toBe(`a: foo, b: bar`);
     });
 
-    test("setState를 실행할 경우, callback이 다시 실행된다.", () => {
+    test('setState를 실행할 경우, callback이 다시 실행된다.', () => {
       const render = vi.fn(() => {
-        const [, setA] = useState("foo");
+        const [, setA] = useState('foo');
         return { setA };
       });
 
@@ -27,13 +27,13 @@ describe("hooks test", () => {
       const { setA } = render();
       expect(render).toBeCalledTimes(1);
 
-      setA("test");
+      setA('test');
       expect(render).toBeCalledTimes(2);
     });
 
-    test("state의 값이 이전과 동일할 경우, 다시 실행되지 않는다.", () => {
+    test('state의 값이 이전과 동일할 경우, 다시 실행되지 않는다.', () => {
       const render = vi.fn(() => {
-        const [, setA] = useState("foo");
+        const [, setA] = useState('foo');
         return { setA };
       });
 
@@ -42,19 +42,18 @@ describe("hooks test", () => {
       const { setA } = render();
       expect(render).toBeCalledTimes(1);
 
-      setA("test");
+      setA('test');
       expect(render).toBeCalledTimes(2);
 
-      setA("test");
+      setA('test');
       expect(render).toBeCalledTimes(2);
     });
 
-    test("hook의 callback이 실행 되기 이전에 resetContext를 실행해야 값이 정상적으로 반영된다.", () => {
-
-      let result = "";
+    test('hook의 callback이 실행 되기 이전에 resetContext를 실행해야 값이 정상적으로 반영된다.', () => {
+      let result = '';
       const render = vi.fn(() => {
-        const [a, setA] = useState("foo");
-        const [b, setB] = useState("bar");
+        const [a, setA] = useState('foo');
+        const [b, setB] = useState('bar');
 
         result = `a: ${a}, b: ${b}`;
 
@@ -68,20 +67,48 @@ describe("hooks test", () => {
       expect(result).toBe(`a: foo, b: bar`);
 
       resetContext();
-      setA("foo-change");
+      setA('foo-change');
       expect(result).toBe(`a: foo-change, b: bar`);
 
       resetContext();
-      setB("bar-change");
+      setB('bar-change');
       expect(result).toBe(`a: foo-change, b: bar-change`);
 
       expect(render).toBeCalledTimes(3);
     });
+    test('setState를 사용하지 않고 직접 상태를 수정하려고 할 때 경고 메시지가 출력된다.', () => {
+      const render = vi.fn(() => {
+        const { useState } = createHooks(render);
+        const [state, setState] = useState({ foo: 'bar' });
+        return { state, setState };
+      });
+
+      const consoleWarnMock = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
+
+      const { useState, resetContext } = createHooks(render);
+
+      const { state, setState } = render();
+      expect(state.foo).toBe('bar');
+      expect(render).toBeCalledTimes(1);
+
+      resetContext();
+      state.foo = 'baz'; // 직접 수정 시도
+      expect(consoleWarnMock).toHaveBeenCalledWith('setState를 사용해 주세요.');
+      expect(state.foo).toBe('bar'); // 값이 변경되지 않아야 합니다.
+
+      resetContext();
+      delete state.foo; // 속성 삭제 시도
+      expect(consoleWarnMock).toHaveBeenCalledWith('setState를 사용해 주세요.');
+      expect(state.foo).toBe('bar'); // 속성이 삭제되지 않아야 합니다.
+
+      consoleWarnMock.mockRestore();
+    });
   });
 
-  describe("useMemo", () => {
-
-    test("useMemo로 만들어진 값은 캐싱된다.", () => {
+  describe('useMemo', () => {
+    test('useMemo로 만들어진 값은 캐싱된다.', () => {
       function getMemo() {
         resetContext();
         return useMemo(() => [], []);
@@ -95,7 +122,7 @@ describe("hooks test", () => {
       expect(memo1).toBe(memo2);
     });
 
-    test("useMemo의 값을 변경하고 싶으면, 의존하는 값을 수정해야 한다.", () => {
+    test('useMemo의 값을 변경하고 싶으면, 의존하는 값을 수정해야 한다.', () => {
       function getMemo() {
         resetContext();
         return useMemo(() => [], [param]);
