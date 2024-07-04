@@ -2,23 +2,25 @@ import { createHooks } from './hooks';
 import { render as updateElement } from './render';
 
 function MyReact() {
+  let renderComponent = null;
+  let oldNode = null;
   let root = null;
-  let rootComponent = null;
 
   const _render = () => {
-    if (!root || !rootComponent) return;
+    if (!root || !renderComponent) return;
     resetHookContext();
 
-    root.innerHTML = '';
+    const newNode = renderComponent();
 
-    const newComponent = rootComponent();
+    updateElement(root, newNode, oldNode);
 
-    updateElement(root, newComponent);
+    oldNode = newNode;
   };
 
   function render($root, component) {
+    oldNode = null;
     root = $root;
-    rootComponent = component;
+    renderComponent = component;
     _render();
   }
 
