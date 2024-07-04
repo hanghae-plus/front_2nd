@@ -15,14 +15,13 @@ export function jsx(type, props, ...children) {
 export function createElement(node) {
   const $element = document.createElement(node.type);
 
-  if ("props" in node && node.props) {
-    const nodeProps = node.props;
-    for (let [key, value] of Object.entries(nodeProps)) {
+  if (node.props && "props" in node) {
+    for (let [key, value] of Object.entries(node.props)) {
       $element.setAttribute(key, value);
     }
   }
 
-  if ("children" in node && node.children) {
+  if (node.children && "children" in node) {
     node.children.forEach((children) => {
       if (typeof children === "string") {
         $element.insertAdjacentText("afterbegin", children);
@@ -45,7 +44,6 @@ export function createElement(node) {
 function updateAttributes(target, newProps, oldProps) {
   for (const [key, value] of Object.entries(newProps)) {
     if (key === "children" || oldProps[key] === value) continue;
-
     target.setAttribute(key, value);
   }
 
@@ -69,22 +67,34 @@ function updateAttributes(target, newProps, oldProps) {
 }
 
 export function render(parent, newNode, oldNode, index = 0) {
+  if (deepEquals(newNode, oldNode)) {
+    console.log("---");
+    console.log("deepEquals()");
+    console.log("---");
+
+    return;
+  }
+
   if (!oldNode) {
     const newRenderNode = createElement(newNode);
     parent.insertAdjacentElement("beforeend", newRenderNode);
+    // parent.appendChild(newRenderNode);
     return;
   }
 
   if (!newNode) {
-    // parent.removeChild
+    parent.removeChild(parent.childNodes[index]);
     return;
   }
 
   if (
     typeof newNode !== typeof oldNode ||
-    (typeof newNode === "string" && newNode !== oldNode)
+    (typeof newNode === "string" && newNode !== oldNode) ||
+    newNode.type !== oldNode.type
   ) {
     // parent.replaceChild(newNode, oldNode);
+    const newRenderNode = createElement(newNode);
+    parent.replaceChild(newRenderNode, parent.childNodes[index]);
   }
 
   if (!deepEquals(newNode.props, oldNode.props)) {
@@ -96,6 +106,13 @@ export function render(parent, newNode, oldNode, index = 0) {
   }
 
   if (newNode.type) {
+    /*    const newNodeProps = newNode.props || {};
+    const oldNodeProps = oldNode.props || {};
+
+    if (deepEquals(newNodeProps, oldNodeProps)) {
+    updateAttributes(parent.childNodes[index], newNode.props, oldNode.props);
+    }*/
+
     const newNodeChildren = newNode.children || [];
     const oldNodeChildren = oldNode.children || [];
 
@@ -106,7 +123,12 @@ export function render(parent, newNode, oldNode, index = 0) {
       );
 
       for (let i = 0; i < maxLength; i++) {
-        render(parent.children[index], newNodeChildren[i], oldNodeChildren[i]);
+        render(
+          parent.children[index],
+          newNodeChildren[i],
+          oldNodeChildren[i],
+          i,
+        );
       }
     }
   }
