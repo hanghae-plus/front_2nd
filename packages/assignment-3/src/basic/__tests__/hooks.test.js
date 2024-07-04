@@ -16,8 +16,8 @@ describe("hooks test", () => {
       expect(render()).toBe(`a: foo, b: bar`);
     });
 
-    test.only("setState를 실행할 경우, callback이 다시 실행된다.", () => {
-      //게으른 초기화 테스트
+    test("setState를 실행할 경우, callback이 다시 실행된다.", () => {
+      //게으른 초기화로 테스트
       const getData = () => {
         return "initializedData";
       };
