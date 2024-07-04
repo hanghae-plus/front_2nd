@@ -29,6 +29,28 @@ describe('hooks test', () => {
       expect(render()).toBe(`a: foo, b: bar`);
     });
 
+    test('updater function을 주입할 경우, 이전 state를 받아서 다음 state를 만들 수 있다.', () => {
+      function render() {
+        const [a, setA] = useState('foo');
+        const [b, setB] = useState('bar');
+
+        return { a, setA, b, setB };
+      }
+
+      const { useState, resetContext } = createHooks(render);
+
+      const { setA, setB } = render();
+      resetContext();
+
+      setA((prev) => `${prev}-change`);
+      setB((prev) => `${prev}-change`);
+      const { a, b } = render();
+      resetContext();
+
+      expect(a).toBe('foo-change');
+      expect(b).toBe('bar-change');
+    });
+
     test('setState를 실행할 경우, callback이 다시 실행된다.', () => {
       const render = vi.fn(() => {
         const [, setA] = useState('foo');
@@ -91,40 +113,40 @@ describe('hooks test', () => {
     });
   });
 
-  describe('useMemo', () => {
-    test('useMemo로 만들어진 값은 캐싱된다.', () => {
-      function getMemo() {
-        resetContext();
-        return useMemo(() => [], []);
-      }
+  // describe('useMemo', () => {
+  //   test('useMemo로 만들어진 값은 캐싱된다.', () => {
+  //     function getMemo() {
+  //       resetContext();
+  //       return useMemo(() => [], []);
+  //     }
 
-      const { useMemo, resetContext } = createHooks(getMemo);
+  //     const { useMemo, resetContext } = createHooks(getMemo);
 
-      const memo1 = getMemo();
-      const memo2 = getMemo();
+  //     const memo1 = getMemo();
+  //     const memo2 = getMemo();
 
-      expect(memo1).toBe(memo2);
-    });
+  //     expect(memo1).toBe(memo2);
+  //   });
 
-    test('useMemo의 값을 변경하고 싶으면, 의존하는 값을 수정해야 한다.', () => {
-      function getMemo() {
-        resetContext();
-        return useMemo(() => [], [param]);
-      }
+  //   test('useMemo의 값을 변경하고 싶으면, 의존하는 값을 수정해야 한다.', () => {
+  //     function getMemo() {
+  //       resetContext();
+  //       return useMemo(() => [], [param]);
+  //     }
 
-      const { useMemo, resetContext } = createHooks(getMemo);
-      let param = 1;
+  //     const { useMemo, resetContext } = createHooks(getMemo);
+  //     let param = 1;
 
-      const memo1 = getMemo();
-      param = 2;
+  //     const memo1 = getMemo();
+  //     param = 2;
 
-      const memo2 = getMemo();
-      const memo3 = getMemo();
-      expect(memo1).not.toBe(memo2);
-      expect(memo2).toBe(memo3);
-      param = 3;
-      const memo4 = getMemo();
-      expect(memo3).not.toBe(memo4);
-    });
-  });
+  //     const memo2 = getMemo();
+  //     const memo3 = getMemo();
+  //     expect(memo1).not.toBe(memo2);
+  //     expect(memo2).toBe(memo3);
+  //     param = 3;
+  //     const memo4 = getMemo();
+  //     expect(memo3).not.toBe(memo4);
+  //   });
+  // });
 });

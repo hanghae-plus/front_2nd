@@ -1,34 +1,36 @@
 export function createHooks(callback) {
-  let currentIndex = 0;
+  let index = 0;
   const hooks = [];
 
   const useState = (initState) => {
-    if (hooks[currentIndex] == null) {
+    if (hooks[index] == null) {
       if (typeof initState === 'function') {
-        hooks[currentIndex] = initState();
+        hooks[index] = initState();
       } else {
-        hooks[currentIndex] = initState;
+        hooks[index] = initState;
       }
     }
 
-    const state = hooks[currentIndex];
-    currentIndex++;
-
+    const currentIndex = index;
     function setState(nextState) {
       if (typeof nextState === 'function') {
-        nextState(state);
+        hooks[currentIndex] = nextState(hooks[currentIndex]);
         callback();
         resetContext();
+        return;
       }
 
-      if (!Object.is(nextState, state)) {
+      if (!Object.is(nextState, hooks[currentIndex])) {
         hooks[currentIndex] = nextState;
         callback();
         resetContext();
+        return;
       }
     }
 
-    return [state, setState];
+    index++;
+
+    return [hooks[currentIndex], setState];
   };
 
   const useMemo = (fn, refs) => {
@@ -36,7 +38,7 @@ export function createHooks(callback) {
   };
 
   const resetContext = () => {
-    currentIndex = 0;
+    index = 0;
   };
 
   return { useState, useMemo, resetContext };
