@@ -2,10 +2,30 @@ import { createHooks } from "./hooks";
 import { render as updateElement } from "./render";
 
 function MyReact() {
-  const _render = () => {};
-  function render($root, rootComponent) {}
+  let rootElement = null;
+  let rootComponent = null;
 
-  const { useState, useMemo, resetContext: resetHookContext } = createHooks(_render);
+  const _render = () => {
+    resetHookContext();
+
+    if (rootElement && rootComponent) {
+      const newVNode = rootComponent();
+      updateElement(rootElement, newVNode, rootElement._oldVNode || null);
+      rootElement._oldVNode = newVNode;
+    }
+  };
+
+  function render($root, rootComponentFn) {
+    rootElement = $root;
+    rootComponent = rootComponentFn;
+    _render();
+  }
+
+  const {
+    useState,
+    useMemo,
+    resetContext: resetHookContext,
+  } = createHooks(_render);
 
   return { render, useState, useMemo };
 }
