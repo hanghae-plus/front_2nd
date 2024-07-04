@@ -28,8 +28,6 @@ export function createElement(node) {
   // string이면 text node 반환
   if (typeof node === 'string') return document.createTextNode(node);
 
-  //node가 컴포넌트일때
-  if (typeof node === 'function') node = node();
   const $el = document.createElement(node.type);
 
   // attr 적재
