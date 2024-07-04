@@ -11,8 +11,8 @@ export function createHooks(callback) {
     const stateId = currentStateId;
     currentStateId++;
 
-    if (states[stateId] === undefined) {
-      states[stateId] = initState;
+    if (states.length === stateId) {
+      states.push(initState);
     }
 
     const setState = (newState) => {
