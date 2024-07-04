@@ -37,8 +37,10 @@ export function createElement(node) {
   });
 
   // children 적재
-  if (node.children)
-    node.children.forEach((child) => $el.appendChild(createElement(child)));
+
+  node.children.forEach((child) => {
+    return $el.appendChild(createElement(child));
+  });
 
   return $el;
 }
