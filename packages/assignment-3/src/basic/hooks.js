@@ -1,12 +1,6 @@
 import { deepEquals } from "../../../assignment-2/src/basic/basic.js";
 
 export function createHooks(callback) {
-  /*
-      배열을 사용하는 이유
-        1. 다수의 훅 지원: 각 훅의 상태를 배열의 다른 인덱스에 저장
-        2. 순서 보장
-        3. 독립성
-   */
   let hookStates = [];
   let hookIndex = 0;
 
@@ -19,7 +13,7 @@ export function createHooks(callback) {
 
     hookIndex++;
 
-    const setState = function (newValue) {
+    const setState = (newValue) => {
       if (!deepEquals(hookStates[currentIndex], newValue)) {
         hookStates[currentIndex] = newValue;
         callback();

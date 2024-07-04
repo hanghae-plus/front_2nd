@@ -1,36 +1,30 @@
 import { createHooks } from "./hooks";
 import { render as updateElement } from "./render";
-import { deepEquals } from "../../../assignment-2/src/basic/basic.js";
 
 /*
   render와 hooks를 결합하여 MyReact의 내용을 채워야합니다.
  */
 
 function MyReact() {
-  let root = {
-    $root: null,
-    newElement: null,
+  let elementNodes = {
+    rootNode: null,
+    newNode: null,
+    oldNode: null,
   };
 
   const _render = () => {
     resetHookContext();
-    const [state, setState] = useState(null);
-    const newElement = root.newElement();
-    console.log("state", state);
-    console.log("newElement", newElement);
-    updateElement(root.$root, newElement, state);
 
-    // resetHookContext();
-    setState(newElement);
+    const newComponent = elementNodes.newNode();
+    const oldComponent = elementNodes.oldNode;
+
+    updateElement(elementNodes.rootNode, newComponent, oldComponent);
+
+    elementNodes.oldNode = elementNodes.newNode;
   };
-
   function render($root, rootComponent) {
-    root = { ...root, $root, newElement: rootComponent };
-
-    resetHookContext();
-    useMemo(() => {
-      _render();
-    }, [root]);
+    elementNodes = { rootNode: $root, newNode: rootComponent, oldNode: null };
+    _render();
   }
 
   const {
