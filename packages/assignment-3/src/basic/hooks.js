@@ -57,13 +57,13 @@ export function createHooks(callback) {
     //초기값 세팅
     if (global.memo[currentIndex] === undefined) {
       global.memo[currentIndex] = { value: fn(), refs };
-      return global.memo[currentIndex].value;
-    }
-    const { refs: memoRefs } = global.memo[currentIndex];
-    //의존성 배열이 바뀐게 있는지 확인
-    const isChanged = refs.some((v, i) => !deepEquals(v, memoRefs[i]));
+    } else {
+      const { refs: memoRefs } = global.memo[currentIndex];
+      //의존성 배열이 바뀐게 있는지 확인
+      const isChanged = refs.some((v, i) => !deepEquals(v, memoRefs[i]));
 
-    if (isChanged) global.memo[currentIndex] = { value: fn(), refs };
+      if (isChanged) global.memo[currentIndex] = { value: fn(), refs };
+    }
 
     return global.memo[currentIndex].value;
   };
