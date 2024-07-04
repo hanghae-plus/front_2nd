@@ -1,10 +1,7 @@
 import { deepEquals } from '../../../assignment-2/src/basic/basic';
 
 /**
- * 지연 함수(debounce)
- *
- * - 동시에 setState()가 여러 번 실행될 때, 마지막 setState()만 대응한다.
- * - 1프레임에 최대 정해진 주사율 만큼만 렌더되도록 한다.
+ * 훅 생성 함수
  *
  * @param {Function} callback
  * @returns
@@ -20,20 +17,6 @@ import { deepEquals } from '../../../assignment-2/src/basic/basic';
  * - 스케줄된 애니메이션 프레임 요청을 취소
  * - clearTimeout()과 유사하게 requestAnimationFrame에서 반환된 식별값을 사용
  */
-function debounceFrame(callback) {
-  let nextFrameCallback = -1;
-  return () => {
-    cancelAnimationFrame(nextFrameCallback);
-    nextFrameCallback = requestAnimationFrame(callback);
-  };
-}
-
-/**
- * 훅 생성 함수
- *
- * @param {Function} callback
- * @returns
- */
 export function createHooks(callback) {
   /** useState에서 쓰이는 상태 배열 */
   let states = [];
@@ -48,6 +31,8 @@ export function createHooks(callback) {
 
   const useState = (initState) => {
     const stateKey = currentStateKey;
+    let frameCallbackId = -1;
+
     currentStateKey += 1;
 
     if (states[stateKey] === undefined) {
@@ -57,7 +42,11 @@ export function createHooks(callback) {
     function setState(newValue) {
       if (!deepEquals(states[stateKey], newValue)) {
         states[stateKey] = newValue;
-        debounceFrame(callback);
+
+        // setState가 동시에 여러 번 실행되면 마지막 setState에 대해서만 render를 호출하기 위해서
+        cancelAnimationFrame(frameCallbackId);
+        // 1frame 후에 콜백 다시 실행 시키기 위해서
+        frameCallbackId = requestAnimationFrame(callback);
       }
     }
 
