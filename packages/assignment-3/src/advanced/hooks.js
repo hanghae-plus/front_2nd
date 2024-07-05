@@ -1,57 +1,31 @@
 export function createHooks(callback) {
-  const stateContext = {
-    current: 0,
-    states: [],
-  };
-
-  const memoContext = {
-    current: 0,
-    memos: [],
-  };
-
-  function resetContext() {
-    stateContext.current = 0;
-    memoContext.current = 0;
-  }
-
+  let index = 0;
+  const states = [];
+  let nextFrameCallback;
   const useState = (initState) => {
-    const { current, states } = stateContext;
-    stateContext.current += 1;
+    const currentIndex = index;
+    index += 1;
 
-    states[current] = states[current] ?? initState;
-
+    if (states.length === currentIndex) {
+      states[currentIndex] = initState;
+    }
     const setState = (newState) => {
-      if (newState === states[current]) return;
-      states[current] = newState;
-      callback();
+      if (states[currentIndex] !== newState) {
+        states[currentIndex] = newState;
+        cancelAnimationFrame(nextFrameCallback);
+        nextFrameCallback = requestAnimationFrame(callback);
+      }
     };
 
-    return [states[current], setState];
+    return [states[currentIndex], setState];
   };
 
   const useMemo = (fn, refs) => {
-    const { current, memos } = memoContext;
-    memoContext.current += 1;
+    return fn();
+  };
 
-    const memo = memos[current];
-
-    const resetAndReturn = () => {
-      const value = fn();
-      memos[current] = {
-        value,
-        refs,
-      };
-      return value;
-    };
-
-    if (!memo) {
-      return resetAndReturn();
-    }
-
-    if (refs.length > 0 && memo.refs.find((v, k) => v !== refs[k])) {
-      return resetAndReturn();
-    }
-    return memo.value;
+  const resetContext = () => {
+    index = 0;
   };
 
   return { useState, useMemo, resetContext };
