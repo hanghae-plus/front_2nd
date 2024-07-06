@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest",
-    "test:basic": "vitest src/basic/__tests__/MyReact.test.js",
+    "test:basic": "vitest src/basic",
     "test:advanced": "vitest src/advanced",
     "test:ui": "vitest --ui"
   },
