@@ -1,3 +1,4 @@
+// 가상돔은 객체로 추상화 되어있고, html에 변화를 Jsx의 변화를 통해 감지하기 때문에, jsx의 구조를 객체로 반환해주었습니다.
 // jsx는 render가 감싸져 사용합니다.
 // 따라서 jsx에서 object로 형태를 만든 후, createElement를 사용해 render에서 node로 변경해줍니다.
 export function jsx(type, props, ...children) {
@@ -6,8 +7,7 @@ export function jsx(type, props, ...children) {
 }
 
 export function createElement(node) {
-  // type 속성이 문자열 또는 객체가 될 수 있음
-
+  // children을 재귀적으로 사용하기 떄문에 type 속성이 문자열 또는 객체가 될 수 있습니다.
   // children이 string으로 들어올 수 있음
   if (typeof node === "string") {
     return document.createTextNode(node);
