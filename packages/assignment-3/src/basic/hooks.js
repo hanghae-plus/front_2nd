@@ -6,26 +6,16 @@ export function createHooks(callback) {
     const currentIndex = index;
 
     if (hooks[currentIndex] == null) {
-      if (typeof initState === 'function') {
-        hooks[currentIndex] = initState();
-      } else {
-        hooks[currentIndex] = initState;
-      }
+      hooks[currentIndex] = isFunction(initState) ? initState() : initState;
     }
 
     function setState(nextState) {
-      if (typeof nextState === 'function') {
-        hooks[currentIndex] = nextState(hooks[currentIndex]);
-        callback();
-        resetContext();
-        return;
-      }
-
       if (!Object.is(nextState, hooks[currentIndex])) {
-        hooks[currentIndex] = nextState;
+        hooks[currentIndex] = isFunction(nextState)
+          ? nextState(hooks[currentIndex])
+          : nextState;
         callback();
         resetContext();
-        return;
       }
     }
 
@@ -62,4 +52,8 @@ export function createHooks(callback) {
   }
 
   return { useState, useMemo, resetContext };
+}
+
+function isFunction(fn) {
+  return typeof fn === 'function';
 }
