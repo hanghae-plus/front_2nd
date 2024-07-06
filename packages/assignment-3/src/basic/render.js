@@ -1,27 +1,28 @@
+
 export function jsx(type, props, ...children) {
-  return {type, props, ...children};
+  return {type, props, children: children.flat()};
 }
 
 // [ jsx를 dom으로 변환 ]
-export function createElement({type, props, ...children}) {
-  const el = document.createElement(type)
-
-  // props 적용
-  if (props) {
-    Object.entries(props).forEach(([key, value]) => {
-      el.setAttribute(key, value);
-    });
+export function createElement(node) {
+  if (typeof node === 'string') {
+    return document.createTextNode(node);
   }
 
-  // children 적용
-  if (children) {
-    Object.values(children).forEach((child) => {
-      if(typeof child === 'string') el.innerHTML = child;
-      else el.appendChild(createElement(child))
-    });
+  const $el = document.createElement(node.type);
+
+  if(node.props){
+    Object.entries(node.props )
+        .forEach(([i, value]) => (
+            $el.setAttribute(i, value)
+        ));
   }
 
-  return el;
+
+  const childernList = node.children.map(createElement)
+  childernList.forEach(child => $el.appendChild(child));
+
+  return $el;
 }
 
 function updateAttributes(target, newProps, oldProps) {
@@ -36,13 +37,22 @@ function updateAttributes(target, newProps, oldProps) {
   //     다음 속성으로 넘어감 (속성 유지 필요)
   //   만약 newProps들에 해당 속성이 존재하지 않는다면
   //     target에서 해당 속성을 제거
+  const newKeys =   Object.keys(newProps);
+  const oldKeys =  Object.keys(oldProps);
+
+  for (let newKey of newKeys) {
+    if (oldProps[newKey] !== newProps[newKey]) target.setAttribute(newKey, newProps[newKey]);
+  }
+  for (let oldKey of oldKeys) {
+    if (newProps[oldKey] === undefined) target.removeAttribute(oldKey)
+  }
 }
 
 export function render(parent, newNode, oldNode, index = 0) {
   // 1. 만약 newNode가 없고 oldNode만 있다면
   //   parent에서 oldNode를 제거
   //   종료
-  if(!newNode && oldNode) return parent.removeChild(oldNode);
+  if(!newNode && oldNode) return parent.removeChild(parent.childNode[index]);
 
   // 2. 만약 newNode가 있고 oldNode가 없다면
   //   newNode를 생성하여 parent에 추가
@@ -69,7 +79,21 @@ export function render(parent, newNode, oldNode, index = 0) {
   }
 
   // 5. newNode와 oldNode에 대해 updateAttributes 실행
+  updateAttributes(parent.children[index], newNode.props || {}, oldNode.props || {});
 
-  // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
-  //   각 자식노드에 대해 재귀적으로 render 함수 호출
+    // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
+    //   각 자식노드에 대해 재귀적으로 render 함수 호출
+    const newNodeLength = newNode.children ? newNode.children.length : 0
+    const oldNodeLength = oldNode.children ? oldNode.children.length : 0
+    const cnt = Math.max(newNodeLength, oldNodeLength);
+
+
+    for (let i = 0; i < cnt; i++) {
+      render(
+          parent.children[index],
+          newNodeLength === 0 ? null : newNode.children[i],
+          oldNodeLength === 0 ? null : oldNode.children[i],
+          i
+      );
+    }
 }
