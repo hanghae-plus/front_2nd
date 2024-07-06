@@ -11,9 +11,9 @@
     "test:basic": "vitest src/basic",
     "test:advanced": "vitest src/advanced",
     "test:ui": "vitest --ui",
-    "prettify": "prettier --write src/**/*.js",
-    "prettify:basic": "prettier --write src/basic/**/*.js",
-    "prettify:advanced": "prettier --write src/advanced/**/*.js",
+    "prettify": "prettier --write src",
+    "prettify:basic": "prettier --write src/basic",
+    "prettify:advanced": "prettier --write src/advanced",
     "lint": "eslint src/**/*.js",
     "lint:basic": "eslint src/basic/**/*.js",
     "lint:advanced": "eslint src/advanced/**/*.js"
