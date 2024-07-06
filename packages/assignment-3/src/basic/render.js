@@ -1,44 +1,103 @@
+/**
+ * @NOTE
+ * jsx 객체를 반환한다.
+ */
 export function jsx(type, props, ...children) {
-  return {}
+  return { type, props, children: children.flat() };
 }
 
+/**
+ * @NOTE ReactElement는 VDOM에서 사용되기 위한 DOM 노드와 같은 역할을 함.
+ * Node의 종류
+ * 1. Element
+ * 2. Text
+ * 3. Attribute
+ * 4. Comment
+ * @param {*} node
+ * @returns
+ */
 export function createElement(node) {
-  // jsx를 dom으로 변환
+  let $el;
+  //1.Text => textNode
+  //2.나머지 => Element
+  if (typeof node === "string") {
+    $el = document.createTextNode(node);
+  } else {
+    $el = document.createElement(node.type);
+  }
+
+  //3. 속성값 세팅
+  if (node.props) {
+    for (const [attr, value] of Object.entries(node.props)) {
+      $el.setAttribute(attr, value);
+    }
+  }
+
+  //4. children 붙이기
+  if (node.children) {
+    for (const child of node.children) {
+      $el.appendChild(createElement(child));
+    }
+  }
+
+  return $el;
 }
 
+/**
+ * @NOTE ReactElement에 Props를 갱신한다.
+ * 이전 Props와 새로운 Props를 비교하여 있다면 set, 없다면 delete
+ * @param {*} target
+ * @param {*} newProps
+ * @param {*} oldProps
+ */
 function updateAttributes(target, newProps, oldProps) {
-  // newProps들을 반복하여 각 속성과 값을 확인
-  //   만약 oldProps에 같은 속성이 있고 값이 동일하다면
-  //     다음 속성으로 넘어감 (변경 불필요)
-  //   만약 위 조건에 해당하지 않는다면 (속성값이 다르거나 구속성에 없음)
-  //     target에 해당 속성을 새 값으로 설정
+  const allProps = { ...newProps, ...oldProps };
 
-  // oldProps을 반복하여 각 속성 확인
-  //   만약 newProps들에 해당 속성이 존재한다면
-  //     다음 속성으로 넘어감 (속성 유지 필요)
-  //   만약 newProps들에 해당 속성이 존재하지 않는다면
-  //     target에서 해당 속성을 제거
+  for (const attrName of Object.keys(allProps)) {
+    if (!newProps[attrName]) {
+      target.removeAttribute(attrName);
+    } else if (newProps[attrName] !== oldProps[attrName]) {
+      target.setAttribute(attrName, newProps[attrName]);
+    }
+  }
 }
 
+/**
+ * @NOTE 가상 VDOM 을 만든다.
+ * 1. newNode가 추가되었을 때
+ * 2. oldNode가 제거되었을 때
+ * 3. 변경 되었을 때
+ * 4. 속성 갱신
+ * 5. 자식노드 재귀
+ * @param {*} parent ReactElement
+ * @param {*} newNode 새로운 node
+ * @param {*} oldNode 이전 node
+ * @param {*} index
+ */
 export function render(parent, newNode, oldNode, index = 0) {
-  // 1. 만약 newNode가 없고 oldNode만 있다면
-  //   parent에서 oldNode를 제거
-  //   종료
+  //1. 새로운 Node는 있고, 이전 Node가 없으면 => 새로운 Node추가
+  if (newNode && !oldNode) {
+    return parent.appendChild(createElement(newNode));
+  }
 
-  // 2. 만약 newNode가 있고 oldNode가 없다면
-  //   newNode를 생성하여 parent에 추가
-  //   종료
+  //2. 기존 Node는 있고, 새로운 Node가 없으면 => 기존 Node제거
+  if (!newNode && oldNode) {
+    return parent.removeChild(parent.childNodes[index]);
+  }
 
-  // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
-  //   oldNode를 newNode로 교체
-  //   종료
+  //3. 변경 되었을 때
+  if (newNode.type !== oldNode.type) {
+    return parent.replaceChild(createElement(newNode), parent.childNodes[index]);
+  }
 
-  // 4. 만약 newNode와 oldNode의 타입이 다르다면
-  //   oldNode를 newNode로 교체
-  //   종료
+  //4. 속성 갱신
+  updateAttributes(parent.childNodes[index], newNode.props || {}, oldNode.props || {});
 
-  // 5. newNode와 oldNode에 대해 updateAttributes 실행
-
-  // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
-  //   각 자식노드에 대해 재귀적으로 render 함수 호출
+  //5. 자식노드 재귀
+  const newChildren = newNode.children || [];
+  const oldChildren = oldNode.children || [];
+  const MAX = Math.max(newChildren.length, oldChildren.length);
+  for (let i = 0; i < MAX; i++) {
+    render(parent.childNodes[index], newChildren[i], oldChildren[i], i);
+  }
 }
