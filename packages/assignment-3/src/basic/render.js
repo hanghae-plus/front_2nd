@@ -57,26 +57,14 @@ export function render(parent, newNode, oldNode, index = 0) {
   // 2. 만약 newNode가 있고 oldNode가 없다면
   //   newNode를 생성하여 parent에 추가
   //   종료
-  if(newNode && !oldNode)  return parent.appendChild(createElement(newNode));
-
 
   // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
   //   oldNode를 newNode로 교체
   //   종료
-  if((typeof newNode === 'string' && typeof oldNode === 'string') && (newNode !== oldNode)) {
-    parent.removeChild(oldNode);
-    parent.appendChild(createElement(newNode));
-    return ;
-  }
 
   // 4. 만약 newNode와 oldNode의 타입이 다르다면
   //   oldNode를 newNode로 교체
   //   종료
-  if(typeof oldNode !== typeof newNode){
-    parent.removeChild(oldNode);
-    parent.appendChild(createElement(newNode));
-    return ;
-  }
 
   // 5. newNode와 oldNode에 대해 updateAttributes 실행
   updateAttributes(parent.children[index], newNode.props || {}, oldNode.props || {});
