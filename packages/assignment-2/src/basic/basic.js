@@ -206,19 +206,33 @@ export function createUnenumerableObject(target) {
 
   return resultObj;
 }
+function isIterable(obj) {
+  // checks for null and undefined
+  if (obj == null) {
+    return false;
+  }
+  return typeof obj[Symbol.iterator] === 'function';
+}
+
 
 export function forEach(target, callback) {
+  console.log(target,callback);
   // target이 array, object, Nodelist중 어느 것인지 파악하여 해당하는 자료형에 맞는 for문을 돌려
   // callback function의 수행 동작을 수행한 값 들을 배열 또는 객체에 담아 반환 하도록 한다.
   // 출제의도: Object.getOwnPropertyNames() 메서드는 객체 자체의 모든 프로퍼티를 반환하며, enumerable 속성 여부와 관계없이 모든 프로퍼티를 포함하는 것을 알게 하기 위함.
-  if (Array.isArray(target)) {
+  // if (Array.isArray(target)) {
+  //   for (let i = 0; i < target.length; i++) {
+  //     callback(target[i], i);
+  //   }
+  // } else if (target instanceof NodeList) {
+  //   const toArray = Array.from(target);
+  //   for (let j = 0; j < toArray.length; j++) {
+  //     callback(toArray[j], j);
+  //   }
+  // }
+  if (isIterable(target)) {
     for (let i = 0; i < target.length; i++) {
-      callback(target[i], i);
-    }
-  } else if (target instanceof NodeList) {
-    const toArray = Array.from(target);
-    for (let j = 0; j < toArray.length; j++) {
-      callback(toArray[j], j);
+      callback(target[i], i)
     }
   } else {
     const values = Object.getOwnPropertyNames(target);
