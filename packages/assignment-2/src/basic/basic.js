@@ -1,4 +1,9 @@
 export function shallowEquals(target1, target2) {
+  // refactor: 같은 객체인지 우선 비교
+  if (target1 === target2) {
+    return true;
+  }
+
   const typeOf = (target) => {
     const targetType =
       target?.constructor.name ?? Object.prototype.toString.call(target);
@@ -18,36 +23,31 @@ export function shallowEquals(target1, target2) {
     return Object.keys(target1).every((key) => target1[key] === target2[key]);
   }
 
-  return target1 === target2;
+  return false;
 }
 
 export function deepEquals(target1, target2) {
-  const typeOf = (target) => {
-    const targetType =
-      target?.constructor.name ?? Object.prototype.toString.call(target);
-    return targetType;
-  };
-
-  if (typeOf(target1) !== typeOf(target2)) {
-    return false;
+  // shallowEquals와 유사하지만, 재귀적으로 내부 객체까지 비교
+  if (target1 === target2) {
+    return true;
   }
-
-  if (typeOf(target1) === "Array") {
-    if (target1.length !== target2.length) {
-      return false;
-    }
-    return target1.every((el, index) => deepEquals(el, target2[index]));
-  } else if (typeOf(target1) === "Object") {
-    if (Object.keys(target1).length !== Object.keys(target2).length) {
-      return false;
-    }
-
-    return Object.keys(target1).every((key) =>
-      deepEquals(target1[key], target2[key]),
+  if (
+    Array.isArray(target1) &&
+    Array.isArray(target2) &&
+    target1.length === target2.length
+  ) {
+    return target1.every((v, k) => deepEquals(v, target2[k]));
+  }
+  if (target1?.constructor === Object && target2?.constructor === Object) {
+    const key1 = Object.keys(target1);
+    const key2 = Object.keys(target2);
+    return (
+      target1 === target2 ||
+      (key1.length === key2.length &&
+        key1.every((key) => deepEquals(target1[key], target2[key])))
     );
   }
-
-  return target1 === target2;
+  return false;
 }
 
 export function createNumber1(n) {
