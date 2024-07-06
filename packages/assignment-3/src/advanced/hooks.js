@@ -14,11 +14,10 @@ export function createHooks(callback) {
         requestAnimationFrame(() => {
           pendingUpdate = false;
           callback();
-          resetContext();
         });
       }
     }
-    
+
     if (hooks[currentIndex] == null) {
       hooks[currentIndex] = [initState, setState];
     }
