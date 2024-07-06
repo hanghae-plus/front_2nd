@@ -2,7 +2,7 @@ export function createHooks(callback) {
   let index = 0;
   const hooks = [];
 
-  const useState = (initState) => {
+  function useState(initState) {
     const currentIndex = index;
 
     if (hooks[currentIndex] == null) {
@@ -31,9 +31,9 @@ export function createHooks(callback) {
 
     index++;
     return [hooks[currentIndex], setState];
-  };
+  }
 
-  const useMemo = (fn, newDependencies) => {
+  function useMemo(fn, newDependencies) {
     const currentIndex = index;
 
     if (hooks[currentIndex] == null) {
@@ -55,11 +55,11 @@ export function createHooks(callback) {
 
     index++;
     return hooks[currentIndex][0];
-  };
+  }
 
-  const resetContext = () => {
+  function resetContext() {
     index = 0;
-  };
+  }
 
   return { useState, useMemo, resetContext };
 }
