@@ -33,8 +33,17 @@ function isObject(obj) {
 }
 
 export function shallowEquals(target1, target2) {
-  // 래퍼 객체 비교 (테스트 코드 상으로 래퍼 객체면 false 반환)
-  if (isWrapper(target1) && isWrapper(target2)) return false;
+  // INFO: 과제 피드백(1) - 같을 때 조건을 먼저 처리해줘서 불필요한 조건 비교 연산 줄이기
+  if (target1 === target2) return true;
+
+  // 래퍼 객체 비교
+  // 따로 해줘야 하는 이유: 생성자(constructor)가 같기 때문..!
+  if (isWrapper(target1) && isWrapper(target2)) {
+    // INFO: 과제 피드백(2) - 엣지 케이스 대응
+    // const a = new Number(1);
+    // shallowEquals(a, a) => true가 나와야 한다.
+    return target1 === target2
+  }
 
   // 배열 비교 (테스트 코드 상으로 얕은 비교)
   if (Array.isArray(target1) && Array.isArray(target2)) {
@@ -79,11 +88,13 @@ export function shallowEquals(target1, target2) {
     return true;
   }
 
-  return target1 === target2;
+  return false;
 }
 
 export function deepEquals(target1, target2) {
-  // 래퍼 객체 비교 (테스트 코드 상으로 래퍼 객체면 false 반환)
+  if (target1 === target2) return true;
+
+  // 래퍼 객체 비교
   if (isWrapper(target1) && isWrapper(target2)) return false;
 
   // 배열 비교
@@ -125,7 +136,7 @@ export function deepEquals(target1, target2) {
     return true;
   }
 
-  return target1 === target2;
+  return false;
 }
 
 export function createNumber1(n) {
