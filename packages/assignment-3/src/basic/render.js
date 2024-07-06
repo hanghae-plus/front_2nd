@@ -60,6 +60,10 @@ function updateAttributes(target, newProps, oldProps) {
  */
 export function render(parent, newNode, oldNode, index = 0) {
   if (!newNode && oldNode) {
+    console.log(
+      '🚀 ~ render ~ parent.childNodes[index]:',
+      parent.childNodes[index]
+    );
     parent.removeChild(parent.childNodes[index]);
     return;
   }
