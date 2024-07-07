@@ -1,4 +1,4 @@
-import { shallowEquals } from "../../../assignment-2/src/basic/basic";
+import { shallowEquals } from '../../../assignment-2/src/basic/basic';
 
 export function createHooks(callback) {
   let states = [];
@@ -19,16 +19,58 @@ export function createHooks(callback) {
     return [states[currentKey], setState];
   };
 
-  const map = new Map();
+  let memoKey = 0;
+  const memos = [];
+
   const useMemo = (fn, refs) => {
-    const key = JSON.stringify([fn(), refs]);
-    if (map.has(key)) return map.get(key);
-    map.set(key, fn());
-    return map.get(key);
+    const currentKey = memoKey;
+    const memo = memos[currentKey];
+
+    memoKey++;
+
+    const resetAndReturn = () => {
+      const value = fn();
+      memos[currentKey] = { value, refs };
+      return value;
+    };
+
+    if (!memo) return resetAndReturn();
+
+    if (refs.length > 0 && memo.refs.find((v, k) => !shallowEquals(v, refs[k])))
+      return resetAndReturn();
+
+    return memo.value;
   };
+
+  // 코치님 코드
+  // const useMemo = (fn, refs) => {
+  //   const { current, memos } = memoContext;
+  //   memoContext.current += 1;
+
+  //   const memo = memos[current];
+
+  //   const resetAndReturn = () => {
+  //     const value = fn();
+  //     memos[current] = {
+  //       value,
+  //       refs,
+  //     };
+  //     return value;
+  //   };
+
+  //   if (!memo) {
+  //     return resetAndReturn();
+  //   }
+
+  //   if (refs.length > 0 && memo.refs.find((v, k) => v !== refs[k])) {
+  //     return resetAndReturn();
+  //   }
+  //   return memo.value;
+  // };
 
   const resetContext = () => {
     key = 0;
+    memoKey = 0;
   };
 
   return { useState, useMemo, resetContext };

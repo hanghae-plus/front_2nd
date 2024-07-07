@@ -1,6 +1,6 @@
 // @ts-check
 
-import { deepEquals } from "../../../assignment-2/src/basic/basic";
+import { deepEquals } from '../../../assignment-2/src/basic/basic';
 
 /**
  * jsx
@@ -33,30 +33,31 @@ export function jsx(type, props = null, ...children) {
 /**
  * node 정보를 받아 HTMLElement를 만듭니다.
  * @param {node} node
- * @returns {HTMLElement}
+ * @returns {HTMLElement | Text}
  */
 export function createElement(node) {
   // jsx를 dom으로 변환
-  if (typeof node === "string") {
-    return document.createElement(node);
+  if (typeof node === 'string') {
+    return document.createTextNode(node);
   }
 
   const dom = document.createElement(node.type);
 
   if (node.props !== null) {
     Object.keys(node.props).forEach((key) => {
-      dom.setAttribute(key, node.props[key]);
+      dom.setAttribute(key, node.props?.[key]);
     });
   }
 
+  // 코치님 코드
+  // Object.entries(node.props ?? {})
+  //   .filter(([, value]) => value)
+  //   .forEach(([attr, value]) => dom.setAttribute(attr, value));
+
   if (node.children?.length >= 0) {
-    if (typeof node.children[0] === "string") {
-      dom.innerHTML = node.children[0];
-    } else {
-      node.children.forEach((jsx) => {
-        dom.appendChild(createElement(jsx));
-      });
-    }
+    node.children.forEach((child) => {
+      dom.appendChild(createElement(child));
+    });
   }
 
   return dom;
@@ -64,7 +65,7 @@ export function createElement(node) {
 
 /**
  * oldProps와 newProps를 비교하여 변경점을 반영합니다.
- * @param {HTMLElement} target
+ * @param {HTMLElement } target
  * @param {jsx['props']} newProps
  * @param {jsx['props']} oldProps
  */
@@ -72,8 +73,8 @@ function updateAttributes(target, newProps, oldProps) {
   if (oldProps == null || target == null) return;
 
   if (newProps == null) {
-    target.removeAttribute("id");
-    target.removeAttribute("class");
+    target.removeAttribute('id');
+    target.removeAttribute('class');
     return;
   }
 
@@ -87,6 +88,16 @@ function updateAttributes(target, newProps, oldProps) {
     if (!(key in newProps)) {
       target.removeAttribute(key);
     }
+
+    // 코치님 코드
+    // for (const [attr, value] of Object.entries(newProps)) {
+    //   if (oldProps[attr] === newProps[attr]) continue;
+    //   target.setAttribute(attr, value);
+    // }
+
+    // for (const attr of Object.keys(oldProps)) {
+    //   if (newProps[attr] !== undefined) continue;
+    //   target.removeAttribute(attr);
   }
 
   // newProps들을 반복하여 각 속성과 값을 확인
@@ -137,7 +148,7 @@ export function render(parent, newNode, oldNode, index = 0) {
 
   // case1
   if (newNode == null && oldNode) {
-    const child = parent.firstChild;
+    const child = parent.childNodes[index];
     if (child) parent.removeChild(child);
     return;
   }
@@ -150,27 +161,29 @@ export function render(parent, newNode, oldNode, index = 0) {
 
   // case3, case4
   if (
-    (typeof newNode === "string" &&
-      typeof oldNode === "string" &&
-      newNode !== oldNode) ||
-    (typeof newNode !== "string" &&
-      typeof oldNode !== "string" &&
+    (typeof newNode === 'string' && typeof oldNode === 'string') ||
+    (typeof newNode !== 'string' &&
+      typeof oldNode !== 'string' &&
       newNode.type !== oldNode.type)
   ) {
+    if (newNode === oldNode) return;
+
     const child = parent.firstChild;
-    if (child) {
-      parent.removeChild(child);
-      parent.appendChild(createElement(newNode));
-    }
+    // if (child) {
+    //   parent.removeChild(child);
+    //   parent.appendChild(createElement(newNode));
+    // }
+
     // 아래 코드로는 왜 추가테스트-문자열노드교체 테스트가 통과를 못 하는지 궁금합니다
-    // if (child) parent.replaceChild(child, createElement(newNode));
+    //  -> 제가 인자 순서를 잘못 적었네요.........;;
+    if (child) parent.replaceChild(createElement(newNode), child);
     return;
   }
 
   // case5, case6
   if (
-    typeof newNode !== "string" &&
-    typeof oldNode !== "string" &&
+    typeof newNode !== 'string' &&
+    typeof oldNode !== 'string' &&
     newNode.children.length > 0 &&
     oldNode.children.length > 0
   ) {
