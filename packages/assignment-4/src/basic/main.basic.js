@@ -43,9 +43,13 @@ function updateTotalPrice() {
           const discountRate = quantity >= 10 ? DISCOUNT_RATES[productId] : 0;
           return sum + price * quantity * (1 - discountRate);
         }, 0);
-  const appliedDiscountRate = 1 - totalPrice / totalPriceBeforeDiscount;
 
   const cartTotalElement = document.querySelector('#cart-total');
+  if (totalPrice === 0) {
+    cartTotalElement.innerHTML = '';
+    return;
+  }
+  const appliedDiscountRate = 1 - totalPrice / totalPriceBeforeDiscount;
   cartTotalElement.innerHTML = `총액: ${totalPrice}원${
     appliedDiscountRate > 0
       ? `
@@ -142,8 +146,8 @@ function decreaceQuantity(productId) {
     delete newCartItems[productId];
   }
   updateCartItems(newCartItems);
-  updateTotalPrice();
   updateCart();
+  updateTotalPrice();
 }
 
 function increaseQuantity(productId) {
@@ -151,8 +155,8 @@ function increaseQuantity(productId) {
   const newCartItems = structuredClone(currentCartItems);
   newCartItems[productId].quantity += 1;
   updateCartItems(newCartItems);
-  updateTotalPrice();
   updateCart();
+  updateTotalPrice();
 }
 
 function removeItemFromCart(productId) {
@@ -160,8 +164,8 @@ function removeItemFromCart(productId) {
   const newCartItems = structuredClone(currentCartItems);
   delete newCartItems[productId];
   updateCartItems(newCartItems);
-  updateTotalPrice();
   updateCart();
+  updateTotalPrice();
 }
 
 function addItemToCart() {
@@ -182,8 +186,8 @@ function addItemToCart() {
     };
   }
   updateCartItems(newCartItems);
-  updateTotalPrice();
   updateCart();
+  updateTotalPrice();
 }
 
 function attachEventListeners() {
@@ -237,6 +241,9 @@ function main() {
 
   // root에 필요한 이벤트 리스너들을 추가
   attachEventListeners();
+
+  // 현재 카트에 담긴 상품들을 렌더링
+  updateCart();
 }
 
 main();
