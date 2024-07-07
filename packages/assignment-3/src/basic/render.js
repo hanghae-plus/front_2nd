@@ -58,6 +58,7 @@ function updateAttributes(target, newProps, oldProps) {
       target.removeAttribute(attrName);
     } else if (newProps[attrName] !== oldProps[attrName]) {
       target.setAttribute(attrName, newProps[attrName]);
+      //기존것 빼줘야하나?
     }
   }
 }

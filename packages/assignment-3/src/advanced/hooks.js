@@ -1,8 +1,19 @@
-import { deepEquals } from "../../../assignment-2/src/basic/basic";
+import { shallowEquals } from "../../../assignment-2/src/basic/basic";
+
+const rebounceOneFrame = (callback) => {
+  let currentReRenderPromiseIdx = -1;
+
+  return (...args) => {
+    cancelAnimationFrame(currentReRenderPromiseIdx);
+    currentReRenderPromiseIdx = requestAnimationFrame(() => callback(...args));
+  };
+};
 
 export function createHooks(callback) {
-  const hooks = [];
-  let currentHookIdx = 0;
+  const stateHooks = [];
+  const memoHooks = [];
+  let currentStateHookIdx = 0;
+  let currentMemoHookIdx = 0;
 
   /**
    * @NOTE
@@ -19,51 +30,46 @@ export function createHooks(callback) {
    * @returns
    */
   const useState = (initState) => {
-    let stateIdx = currentHookIdx;
-    let callStack = [];
+    let stateIdx = currentStateHookIdx;
+    const rebounceCallback = rebounceOneFrame(callback);
 
-    hooks[stateIdx] = hooks[stateIdx] || initState;
+    stateHooks[stateIdx] = stateHooks[stateIdx] || initState;
 
     const state =
-      typeof hooks[stateIdx] === "object" ? Object.freeze(hooks[stateIdx]) : hooks[stateIdx];
+      typeof stateHooks[stateIdx] === "object"
+        ? Object.freeze(stateHooks[stateIdx])
+        : stateHooks[stateIdx];
 
     function setState(updatedState) {
-      if (hooks[stateIdx] === updatedState) return;
-
-      callStack.push(updatedState);
-
-      requestAnimationFrame(() => {
-        if (callStack.length > 0) {
-          hooks[stateIdx] = callStack.pop();
-          callStack = [];
-          callback();
-        }
-      });
+      if (shallowEquals(stateHooks[stateIdx], updatedState)) return;
+      stateHooks[stateIdx] = updatedState;
+      rebounceCallback();
     }
 
-    currentHookIdx++;
+    currentStateHookIdx++;
     return [state, setState];
   };
 
   const useMemo = (fn, refs) => {
-    let memoIdx = currentHookIdx;
-    hooks[memoIdx] = hooks[memoIdx] || [fn(), refs];
+    let memoIdx = currentMemoHookIdx;
+    memoHooks[memoIdx] = memoHooks[memoIdx] || { memoizedValue: fn(), dependency: refs };
 
-    const [memoizedValue, prevDeps] = hooks[memoIdx];
+    const { memoizedValue, dependency } = memoHooks[memoIdx];
 
-    if (deepEquals(prevDeps, refs)) {
+    if (shallowEquals(dependency, refs)) {
       return typeof memoizedValue === "object" ? Object.freeze(memoizedValue) : memoizedValue;
     }
 
     const newValue = fn();
-    hooks[memoIdx] = [newValue, refs];
+    memoHooks[memoIdx] = { memoizedValue: newValue, dependency: refs };
 
-    currentHookIdx++;
+    currentMemoHookIdx++;
     return typeof newValue === "object" ? Object.freeze(newValue) : newValue;
   };
 
   const resetContext = () => {
-    currentHookIdx = 0;
+    currentStateHookIdx = 0;
+    currentMemoHookIdx = 0;
   };
 
   return { useState, useMemo, resetContext };
