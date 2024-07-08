@@ -1,10 +1,22 @@
 function main() {
-  /**  상품목록*/
-  var itemLists = [
+  /** 상품목록*/
+  const ITEM_LISTS = [
     { id: "p1", title: "상품1", price: 10000 },
     { id: "p2", title: "상품2", price: 20000 },
     { id: "p3", title: "상품3", price: 30000 },
   ];
+
+  /** 할인율 */
+  const DISCOUNT_RATES = {
+    p1: 0.1,
+    p2: 0.15,
+    p3: 0.2,
+  };
+
+  // 할인율 계산 함수
+  const getDiscountRate = (item, quantity) => {
+    return quantity >= 10 ? DISCOUNT_RATES[item.id] ?? 0 : 0;
+  };
 
   /**app root**/
   const $app = document.getElementById("app");
@@ -30,6 +42,7 @@ function main() {
   /**상품 추가 버튼 */
   const $addItemButton = document.createElement("button");
 
+  // id나 class를 어떻게 정리해야할지 고민중..(상수이긴 한데..)
   $cart.id = "cart-items";
   $discountedTotalPrice.id = "cart-total";
   $itemSelectbox.id = "product-select";
@@ -45,14 +58,7 @@ function main() {
   $addItemButton.textContent = "추가";
 
   // 상품목록 select에 option을 넘어주는 반복문
-  // for (var j = 0; j < itemLists.length; j++) {
-  //   const $selectOption = document.createElement("option");
-  //   $selectOption.value = itemLists[j].id;
-  //   $selectOption.textContent =
-  //     itemLists[j].title + " - " + itemLists[j].price + "원";
-  //   $itemSelectbox.appendChild($selectOption);
-  // }
-  itemLists.forEach((item) => {
+  ITEM_LISTS.forEach((item) => {
     const $selectOption = document.createElement("option");
     $selectOption.value = item.id;
     $selectOption.textContent = `${item.title}-${item.price}+원`;
@@ -70,23 +76,16 @@ function main() {
   /**총액을 계산하는 함수 */
   function updateTotalPrice() {
     /**총 금액(할인 o) */
-    var discountedTotalPrice = 0;
+    let discountedTotalPrice = 0;
     /**장바구니에 담긴 물품의 총 수량 */
-    var totalQuantity = 0;
+    let totalQuantity = 0;
     /**장바구니에 담긴 children node */
-    var items = $cart.children;
+    let items = $cart.children;
     /**총 금액(할인 x) */
-    var totalPrice = 0;
+    let totalPrice = 0;
 
-    for (var m = 0; m < items.length; m++) {
-      // let item;
-      // for (var n = 0; n < itemLists.length; n++) {
-      //   if (itemLists[n].id === items[m].id) {
-      //     item = itemLists[n];
-      //     break;
-      //   }
-      // }
-      const item = itemLists.find((item) => item.id === items[m].id);
+    for (let m = 0; m < items.length; m++) {
+      const item = ITEM_LISTS.find((item) => item.id === items[m].id);
 
       const quantity = parseInt(
         items[m].querySelector("span").textContent.split("x ")[1]
@@ -94,21 +93,18 @@ function main() {
 
       /**해당 id 아이템의 총 수량 */
       const itemTotal = item.price * quantity;
-      /**해당 id에 따른 할인율 */
-      let disc = 0;
 
       totalQuantity += quantity;
       totalPrice += itemTotal;
-      if (quantity >= 10) {
-        if (item.id === "p1") disc = 0.1;
-        else if (item.id === "p2") disc = 0.15;
-        else if (item.id === "p3") disc = 0.2;
-      }
-      discountedTotalPrice += itemTotal * (1 - disc);
+
+      /**해당 id에 따른 할인율 */
+      const discountRate = getDiscountRate(item, quantity);
+
+      discountedTotalPrice += itemTotal * (1 - discountRate);
     }
 
     /**할인율 */
-    var discountRate = 0;
+    let discountRate = 0;
 
     //물품의 총갯수가 30개 이상이라면??
     if (totalQuantity >= 30) {
@@ -132,44 +128,42 @@ function main() {
       discountRate = (totalPrice - discountedTotalPrice) / totalPrice;
     }
 
-    $discountedTotalPrice.textContent =
-      "총액: " + Math.round(discountedTotalPrice) + "원";
+    $discountedTotalPrice.textContent = `총액: ${Math.round(
+      discountedTotalPrice
+    )}원`;
     if (discountRate > 0) {
       const $discountSpan = document.createElement("span");
       $discountSpan.className = "text-green-500 ml-2";
-      $discountSpan.textContent =
-        "(" + (discountRate * 100).toFixed(1) + "% 할인 적용)";
+      $discountSpan.textContent = `(${(discountRate * 100).toFixed(
+        1
+      )}% 할인 적용)`;
       $discountedTotalPrice.appendChild($discountSpan);
     }
   }
 
+  $addItemButton.addEventListener("click", () => addItemHandler());
+
   /**추가 버튼 이벤트 핸들러 */
-  $addItemButton.onclick = function () {
+  function addItemHandler() {
     /**현재 select된 item의 id값 */
     const selectedItemId = $itemSelectbox.value;
 
     /**클릭한 상품의 세부 목록(object) */
-    let targetItem;
-
-    /**상품 목록에서 선택한 id로 값을 찾는 과정 */
-    for (var k = 0; k < itemLists.length; k++) {
-      if (itemLists[k].id === selectedItemId) {
-        targetItem = itemLists[k];
-        break;
-      }
-    }
+    const targetItem = ITEM_LISTS.find((item) => item.id === selectedItemId);
 
     if (targetItem) {
       const $targetItem = document.getElementById(targetItem.id);
 
       //선택한 상품이 이미 장바구니에 있다면??
       if ($targetItem) {
-        const quantity =
-          parseInt(
-            $targetItem.querySelector("span").textContent.split("x ")[1]
-          ) + 1;
-        $targetItem.querySelector("span").textContent =
-          targetItem.title + " - " + targetItem.price + "원 x " + quantity;
+        const [_, currentQuantity] = $targetItem
+          .querySelector("span")
+          .textContent.split("x ");
+
+        const quantity = parseInt(currentQuantity) + 1;
+        $targetItem.querySelector(
+          "span"
+        ).textContent = `${targetItem.title} - ${targetItem.price}원 x ${quantity}`;
       }
       //선택한 상품이 장바구니에 없다면??
       else {
@@ -220,12 +214,11 @@ function main() {
       //금액 업데이트
       updateTotalPrice();
     }
-  };
+  }
 
   /**장바구니에 담긴 상품 버튼들에 대한 이벤트(+,-,삭제 버튼) */
-  $cart.onclick = function (event) {
-    const target = event.target;
-
+  $cart.addEventListener("click", (event) => cartItemButtonHandler(event));
+  function cartItemButtonHandler({ target }) {
     /**
      * 버튼의 class에 'quantity-chagne'(+,- 버튼) 혹은
      * 'remove-item'(삭제 버튼)이 포함되어 있다면??
@@ -249,17 +242,19 @@ function main() {
         // +1일수도 -1일수도 있는데 어떻게??
         const change = parseInt(target.dataset.change);
 
+        // 해당 아이템 구조분해
+        const [targetItemInform, currentQuantity] = item
+          .querySelector("span")
+          .textContent.split("x ");
+
         /**해당 아이템의 총 수량 */
-        const quantity =
-          parseInt(item.querySelector("span").textContent.split("x ")[1]) +
-          change;
+        const quantity = Number(currentQuantity) + change;
 
         // 수량이 1개이상인 경우
         if (quantity > 0) {
-          item.querySelector("span").textContent =
-            item.querySelector("span").textContent.split("x ")[0] +
-            "x " +
-            quantity;
+          item.querySelector(
+            "span"
+          ).textContent = `${targetItemInform}x ${quantity}`;
         }
         // 수량이 없는 경우
         else {
@@ -272,7 +267,7 @@ function main() {
       }
       updateTotalPrice();
     }
-  };
+  }
 }
 
 main();
