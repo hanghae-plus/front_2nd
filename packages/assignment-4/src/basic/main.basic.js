@@ -5,21 +5,11 @@ import {appOptions, discountOptions} from "./data/elOptions.js";
 // 공통함수 uitls로 관리
 import { createEl, appendChild } from "./utils/utils.js";
 
-// 상수모음
-import {
-    BIGGER_BULK_DIS_RATE,
-    BULK_DIS_RATE,
-    DIS_COUNT,
-    PRODUCT_ONE,
-    PRODUCT_ONE_RATE,
-    PRODUCT_THREE,
-    PRODUCT_THREE_RATE,
-    PRODUCT_TWO,
-    PRODUCT_TWO_RATE, TOTAL_DIS_COUNT
-} from "./constants/constants.js";
-
 // item을 생성 및 관리 하기위한 class
 import ItemClass from "./class/itemClass.js";
+
+// 할인율 계산 을 위한 함수들
+import {calculateTotals , applyBulkDiscount} from './service/discountService.js'
 
 
 // 재사용 되는 함수 아님 -> 즉시실행함수로 불필요한 메모리할당 x, 실행된 이후 가비지 컬렉션으로 이동
@@ -69,69 +59,12 @@ import ItemClass from "./class/itemClass.js";
 
     // [ 카트 데이터 업데이트 ]
     const updateCart = () => {
-        // 각 상품별 할인율 반환 함수
-        function calculateItemDis(item, quantity) {
-            let disRate = 0;
-            // 10개이상 구매시 할인율 적용
-            if (quantity >= DIS_COUNT) {
-                if (item.id === PRODUCT_ONE) disRate = PRODUCT_ONE_RATE;
-                else if (item.id === PRODUCT_TWO) disRate = PRODUCT_TWO_RATE;
-                else if (item.id === PRODUCT_THREE) disRate = PRODUCT_THREE_RATE;
-            }
-            return disRate;
-        }
-
-        // 각 상품별 할인율 계산후 반환
-        function calculateTotals(items) {
-            let totalAfterDis = 0;
-            let totalQuantity = 0;
-            let totalBeforeDis = 0;
-
-            for (let key of Object.keys(items)) {
-                const item = productList.find(val => val.id === items[key].$item.id);
-                const quantity = parseInt(items[key].$item.dataset.quantity);
-                const total = item.price * quantity;
-                const disRate = calculateItemDis(item, quantity);
-
-                totalQuantity += quantity;
-                totalBeforeDis += total;
-                totalAfterDis += total * (1 - disRate);
-            }
-
-            return { totalAfterDis, totalQuantity, totalBeforeDis };
-        }
-
-        function applyBulkDiscount(totalAfterDis, totalBeforeDis, totalQuantity) {
-            let finalDisRate = 0;
-            /*
-            * 총 수량이 30개 이상일 경우
-            * - 개별 상품 할인의 총합
-            * - 전체 25% 할인
-            * - 더 큰 할인을 제공하는쪽을 선택
-            * */
-            if (totalQuantity >= TOTAL_DIS_COUNT) {
-                let bulkDis = totalAfterDis * BULK_DIS_RATE;
-                let individualDis = totalBeforeDis - totalAfterDis;
-                if (bulkDis > individualDis) {
-                    totalAfterDis = totalBeforeDis * BIGGER_BULK_DIS_RATE;
-                    finalDisRate = BULK_DIS_RATE;
-                } else {
-                    finalDisRate = (totalBeforeDis - totalAfterDis) / totalBeforeDis;
-                }
-            } else {
-                finalDisRate = (totalBeforeDis - totalAfterDis) / totalBeforeDis;
-            }
-            return { totalAfterDis, finalDisRate };
-        }
-
         // 할인율 Dom에 표현함수
         function updateTotalDisplay(totalAfterDis, finalDisRate) {
             $total.textContent = `총액: ${Math.round(totalAfterDis)}원`;
             if (finalDisRate > 0) {
-                const $discount = createEl('span', {
-                    ...discountOptions,
-                    textContent: `(${(finalDisRate * 100).toFixed(1)}% 할인 적용)`
-                });
+                const text = `(${(finalDisRate * 100).toFixed(1)}% 할인 적용)`
+                const $discount = createEl('span', {...discountOptions, textContent: text});
                 appendChild($total, $discount);
             }
         }
