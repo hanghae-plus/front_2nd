@@ -11,33 +11,28 @@ export const MainLayout =
           <button id="add-to-cart" class="bg-blue-500 text-white px-4 py-2 rounded">추가</button>
         </div>`;
 
-export const CartItem = ({ productId, productName, price, quantity = 0 }) => `
-    <div class="flex justify-between items-center mb-2">
-        ${
-          quantity > 0 &&
-          `
-            <span>${productName} - ${price}원 x ${quantity}</span>
-            <div>
-                <button 
-                    class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
-                    data-product-id="${productId}"
-                    data-change="-1"
-                >-</button>
-                <button
-                    class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
-                    data-product-id="${productId}"
-                    data-change="1"
-                >+</button>
-                <button 
-                    class="remove-item bg-red-500 text-white px-2 py-1 rounded" 
-                    data-product-id="${productId}"
-                >삭제</button>
-            </div>
-        `
-        }
+export const CartItem = ({ productId, productName, price, quantity }) => `
+    <div id="${productId}" class="flex justify-between items-center mb-2">
+        <span>${productName} - ${price}원 x ${quantity}</span>
+        <div>
+            <button 
+                class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
+                data-product-id="${productId}"
+                data-change="-1"
+            >-</button>
+            <button
+                class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
+                data-product-id="${productId}"
+                data-change="1"
+            >+</button>
+            <button 
+                class="remove-item bg-red-500 text-white px-2 py-1 rounded" 
+                data-product-id="${productId}"
+            >삭제</button>
+        </div>
     </div>
 `;
 
-export const CartTotal = ({ totalPrice, appliedDiscountRate }) => `
-        <span class="text-green-500 ml-2">총액: ${totalPrice}원${appliedDiscountRate > 0 && `${(appliedDiscountRate * 100).toFixed(1)}% 할인 적용`}</span>
+export const CartTotal = ({ total, discountRate }) => `
+        총액: ${total}원${discountRate > 0 ? `<span class="text-green-500 ml-2">${(discountRate * 100).toFixed(1)}% 할인 적용</span>` : ''}
 `;
