@@ -280,7 +280,7 @@ describe('advanced test', () => {
           { product: products[1], discount: products[1].discount[0][1] * 100, expected: 170000 }, // [1, 10, 170000], // 상품2
           { product: products[2], discount: products[2].discount[0][1] * 100, expected: 240000 }, // [2, 10, 240000]  // 상품3
         ])(
-          '$product.name: 10개 이상 구매 시, $discount% 할인이 적용되어 $expected원이 된다.',
+          '$product.productName: 10개 이상 구매 시, $discount% 할인이 적용되어 $expected원이 된다.',
           ({ product, expected }) => {
             cart.addItem(product, 10);
             const { total } = cart.getTotal();
