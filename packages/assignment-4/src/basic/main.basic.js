@@ -52,14 +52,8 @@ function updateCart() {
         price: currentCartItems[productId].price,
         quantity: currentCartItems[productId].quantity,
       });
-      const position = currentRenderedProductIds.findIndex((currentProductId) => {
-        const currentProductIdInNumber = parseInt(currentProductId.split('p')[1], 10);
-        const productIdInNumber = parseInt(productId.split('p')[1], 10);
-        return currentProductIdInNumber > productIdInNumber;
-      });
 
-      const referenceElement = position === -1 ? null : currentCartItemElements[position];
-      cartItemsElement.insertBefore(newCartItemElement, referenceElement);
+      cartItemsElement.appendChild(newCartItemElement);
       return;
     }
 
