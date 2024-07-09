@@ -1,3 +1,20 @@
+//유틸 로직
+
+/**
+ * template만들기
+ * @param1 html template
+ */
+const createTemplate = (template = ``) => {
+  const templateElement = document.createElement('template');
+
+  templateElement.innerHTML = template;
+
+  const $node = templateElement.content.firstElementChild;
+
+  return $node;
+};
+
+//비즈니스 로직
 /** 상품목록*/
 const ITEM_LISTS = [
   { id: 'p1', title: '상품1', price: 10000 },
@@ -10,11 +27,20 @@ const DISCOUNT_RATES = {
   p1: 0.1,
   p2: 0.15,
   p3: 0.2,
+  bulk: 0.25,
+};
+
+/** 할인받을 수 있는 수량 */
+const MIN_DISCOUNT_QUANTITY = {
+  bulk: 30,
+  individual: 10,
 };
 
 // 할인율 계산 함수
 const getDiscountRate = (item, quantity) => {
-  return quantity >= 10 ? DISCOUNT_RATES[item.id] ?? 0 : 0;
+  return quantity >= MIN_DISCOUNT_QUANTITY.individual
+    ? DISCOUNT_RATES[item.id] ?? 0
+    : 0;
 };
 
 function main() {
@@ -22,46 +48,41 @@ function main() {
   const $app = document.getElementById('app');
 
   /**root내부 회색 배경 */
-  const $background = document.createElement('div');
+  const $background = createTemplate(`<div class='bg-gray-100 p-8'/>`);
 
   /**장바구니를 감싸고 있는 card */
-  const $card = document.createElement('div');
+  const $card = createTemplate(
+    `<div class='max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8'/>`
+  );
 
   /**card내부 title */
-  const $cardTitle = document.createElement('h1');
+  const $cardTitle = createTemplate(
+    `<h1 class='text-2xl font-bold $minusButton-4'>장바구니</h1>`
+  );
 
   /**장바구니에 담긴 item div */
-  const $cart = document.createElement('div');
+  const $cart = createTemplate(`<div id='cart-items'/>`);
 
   /**가격 총액을 담고 있는 div */
-  const $discountedTotalPrice = document.createElement('div');
+  const $discountedTotalPrice = createTemplate(
+    `<div id='cart-total' class='text-xl font-bold my-4'/>`
+  );
 
   /** 상품 목록 select*/
-  const $itemSelectbox = document.createElement('select');
+  const $itemSelectbox = createTemplate(
+    `<select id='product-select' class='border rounded p-2 mr-2' />`
+  );
 
   /**상품 추가 버튼 */
-  const $addItemButton = document.createElement('button');
-
-  // id나 class를 어떻게 정리해야할지 고민중..(상수이긴 한데..)
-  $cart.id = 'cart-items';
-  $discountedTotalPrice.id = 'cart-total';
-  $itemSelectbox.id = 'product-select';
-  $addItemButton.id = 'add-to-cart';
-  $background.className = 'bg-gray-100 p-8';
-  $card.className =
-    'max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8';
-  $cardTitle.className = 'text-2xl font-bold $minusButton-4';
-  $discountedTotalPrice.className = 'text-xl font-bold my-4';
-  $itemSelectbox.className = 'border rounded p-2 mr-2';
-  $addItemButton.className = 'bg-blue-500 text-white px-4 py-2 rounded';
-  $cardTitle.textContent = '장바구니';
-  $addItemButton.textContent = '추가';
+  const $addItemButton = createTemplate(
+    `<button id='add-to-cart' class='bg-blue-500 text-white px-4 py-2 rounded'>추가</button>`
+  );
 
   // 상품목록 select에 option을 넘어주는 반복문
   ITEM_LISTS.forEach((item) => {
-    const $selectOption = document.createElement('option');
-    $selectOption.value = item.id;
-    $selectOption.textContent = `${item.title}-${item.price}+원`;
+    const $selectOption = createTemplate(
+      `<option value=${item.id}>${item.title}-${item.price}+원</option>`
+    );
     $itemSelectbox.appendChild($selectOption);
   });
 
@@ -109,16 +130,16 @@ function main() {
     let discountRate = 0;
 
     //물품의 총갯수가 30개 이상이라면??
-    if (totalQuantity >= 30) {
+    if (totalQuantity >= MIN_DISCOUNT_QUANTITY.bulk) {
       //25퍼센트 할인 금액
-      const bulkDiscount = discountedTotalPrice * 0.25;
+      const bulkDiscount = discountedTotalPrice * DISCOUNT_RATES.bulk;
       //개별 할인 금액
       const individualDiscount = totalPrice - discountedTotalPrice;
 
       //25퍼센트 할인금액이 개별 할인 금액보다 크다면??
       if (bulkDiscount > individualDiscount) {
         discountedTotalPrice = totalPrice * 0.75;
-        discountRate = 0.25;
+        discountRate = DISCOUNT_RATES.bulk;
       }
       //개별할인 금액이 더 크다면??
       else {
@@ -136,9 +157,10 @@ function main() {
     if (discountRate > 0) {
       const $discountSpan = document.createElement('span');
       $discountSpan.className = 'text-green-500 ml-2';
-      $discountSpan.textContent = `(${(discountRate * 100).toFixed(
-        1
-      )}% 할인 적용)`;
+
+      const formattingDiscountRate = (discountRate * 100).toFixed(1);
+      $discountSpan.textContent = `(${formattingDiscountRate}% 할인 적용)`;
+
       $discountedTotalPrice.appendChild($discountSpan);
     }
   }
@@ -170,40 +192,38 @@ function main() {
       //선택한 상품이 장바구니에 없다면??
       else {
         /**상품의 id를 해당 태그 id로 지정 */
-        const $itemList = document.createElement('div');
+        const $itemList = createTemplate(
+          `<div id=${targetItem.id} class='flex justify-between items-center $minusButton-2'/>`
+        );
+
         /**장바구니 상품 정보 span */
-        const $itemInform = document.createElement('span');
+        const $itemInform = createTemplate(
+          `<span>${targetItem.title}-${targetItem.price}원 x 1</span>`
+        );
+
         /**장바구니 아이템에 버튼을 grouping하는 div */
-        const $buttonGroup = document.createElement('div');
+        const $buttonGroup = createTemplate(`<div/>`);
+
         /**상품 -버튼 */
-        const $minusButton = document.createElement('button');
+        const $minusButton = createTemplate(
+          `<button class='quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1'
+          data-product-id=${targetItem.id} data-change='-1'
+          >-</button>`
+        );
+
         /**상품 +버튼 */
-        const $plusButton = document.createElement('button');
+
+        const $plusButton = createTemplate(
+          `<button class='quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1'
+          data-product-id=${targetItem.id} data-change='1'
+          >+</button>`
+        );
+
         /**상품 삭제 버튼 */
-        const $removeButton = document.createElement('button');
+        const $removeButton = createTemplate(
+          `<button class='remove-item bg-red-500 text-white px-2 py-1 rounded'>삭제</button>`
+        );
 
-        $itemList.id = targetItem.id;
-        $itemList.className =
-          'flex justify-between items-center $minusButton-2';
-        $itemInform.textContent = `${targetItem.title}-${targetItem.price}원 x 1`;
-        //상품 +버튼 관련
-        $minusButton.className =
-          'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1';
-        $minusButton.textContent = '-';
-        $minusButton.dataset.productId = targetItem.id;
-        $minusButton.dataset.change = '-1';
-
-        //상품 +버튼 관련
-        $plusButton.className =
-          'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1';
-        $plusButton.textContent = '+';
-        $plusButton.dataset.productId = targetItem.id;
-        $plusButton.dataset.change = '1';
-
-        //상품 삭제 버튼 관련
-        $removeButton.className =
-          'remove-item bg-red-500 text-white px-2 py-1 rounded';
-        $removeButton.textContent = '삭제';
         $removeButton.dataset.productId = targetItem.id;
         $buttonGroup.appendChild($minusButton);
         $buttonGroup.appendChild($plusButton);
