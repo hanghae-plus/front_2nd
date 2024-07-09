@@ -1,5 +1,5 @@
 /**
- * @param {{ productId: string, productName: string; price: number }[]} products
+ * @param {{ productId: string, productName: string; price: number; dicsount: [[number, number]] }[]} products
  * @returns {string} templateLiteral to be HTML
  */
 export const MainLayout = (products) => `<div class="bg-gray-100 p-8">
@@ -15,14 +15,14 @@ export const MainLayout = (products) => `<div class="bg-gray-100 p-8">
   </div>`;
 
 /**
- * @param {{ productId: string, productName: string; price: number }} product
+ * @param {{ productId: string, productName: string; price: number; discount: [[number, number]] }} product
  * @returns {string} templateLiteral to be HTML
  */
 export const ProductOption = ({ productId, productName, price }) =>
   `<option value="${productId}">${productName} - ${price}원</option>`;
 
 /**
- * @param {{ product: { productId: string, productName: string; price: number}, quantity: number }} cartItem
+ * @param {{ product: { productId: string, productName: string; price: number; discount: [[number, number]]}, quantity: number }} cartItem
  * @returns {string} templateLiteral to be HTML
  */
 export const CartItem = ({

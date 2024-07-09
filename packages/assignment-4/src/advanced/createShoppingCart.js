@@ -1,5 +1,12 @@
+import { cartChangeEvent } from './customEvent.js';
+
 export const createShoppingCart = () => {
   const items = {};
+
+  /**
+   * @returns {{ product: { productId: string; productName: string; price: number }, quantity: number }[]} items array
+   */
+  const getItems = () => Object.values(items);
 
   /**
    * @param {{ productId: string; productName: string; price: number; discount?: [[number, number]] }} product
@@ -12,18 +19,15 @@ export const createShoppingCart = () => {
       return;
     }
     items[productId].quantity += addCount ?? 1;
+    dispatchEvent(cartChangeEvent);
   };
-
-  /**
-   * @returns {{ product: { productId: string; productName: string; price: number }, quantity: number }[]} items array
-   */
-  const getItems = () => Object.values(items);
 
   /**
    * @param {string} productId
    */
   const removeItem = (productId) => {
     delete items[productId];
+    dispatchEvent(cartChangeEvent);
   };
 
   /**
@@ -31,10 +35,16 @@ export const createShoppingCart = () => {
    * @param {number} nextQuantity
    */
   const updateQuantity = (productId, nextQuantity) => {
-    items[productId].quantity = nextQuantity;
+    // nextQuantity가 1이나 -1인 경우
+    if (nextQuantity === 1 || nextQuantity === -1) {
+      items[productId].quantity += nextQuantity;
+    } else {
+      items[productId].quantity = nextQuantity;
+    }
     if (items[productId].quantity <= 0) {
       removeItem(productId);
     }
+    dispatchEvent(cartChangeEvent);
   };
 
   /**
@@ -52,8 +62,10 @@ export const createShoppingCart = () => {
         discountRate: 0.25,
       };
     }
+
     const totalPrice = Object.values(items).reduce((sum, { product: { price, discount }, quantity }) => {
-      const [applicationQuantity, discountRate] = discount[0] || [0, 0];
+      // product가 할인율을 가지고 있지 않은 경우 할인 갯수, 할인율을 각각 0으로 처리
+      const [applicationQuantity, discountRate] = discount?.[0] ?? [0, 0];
       if (quantity >= applicationQuantity) {
         return sum + price * quantity * (1 - discountRate);
       }
