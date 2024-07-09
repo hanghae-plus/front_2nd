@@ -1,23 +1,23 @@
+/** 상품목록*/
+const ITEM_LISTS = [
+  { id: 'p1', title: '상품1', price: 10000 },
+  { id: 'p2', title: '상품2', price: 20000 },
+  { id: 'p3', title: '상품3', price: 30000 },
+];
+
+/** 할인율 */
+const DISCOUNT_RATES = {
+  p1: 0.1,
+  p2: 0.15,
+  p3: 0.2,
+};
+
+// 할인율 계산 함수
+const getDiscountRate = (item, quantity) => {
+  return quantity >= 10 ? DISCOUNT_RATES[item.id] ?? 0 : 0;
+};
+
 function main() {
-  /** 상품목록*/
-  const ITEM_LISTS = [
-    { id: 'p1', title: '상품1', price: 10000 },
-    { id: 'p2', title: '상품2', price: 20000 },
-    { id: 'p3', title: '상품3', price: 30000 },
-  ];
-
-  /** 할인율 */
-  const DISCOUNT_RATES = {
-    p1: 0.1,
-    p2: 0.15,
-    p3: 0.2,
-  };
-
-  // 할인율 계산 함수
-  const getDiscountRate = (item, quantity) => {
-    return quantity >= 10 ? DISCOUNT_RATES[item.id] ?? 0 : 0;
-  };
-
   /**app root**/
   const $app = document.getElementById('app');
 
@@ -75,33 +75,35 @@ function main() {
 
   /**총액을 계산하는 함수 */
   function updateTotalPrice() {
-    /**총 금액(할인 o) */
-    let discountedTotalPrice = 0;
-    /**장바구니에 담긴 물품의 총 수량 */
-    let totalQuantity = 0;
     /**장바구니에 담긴 children node */
-    let items = $cart.children;
-    /**총 금액(할인 x) */
-    let totalPrice = 0;
+    let items = Array.from($cart.children);
 
-    for (let m = 0; m < items.length; m++) {
-      const item = ITEM_LISTS.find((item) => item.id === items[m].id);
+    /**
+     * totalPrice : 총 금액(할인 x)
+     * totalQuantity : 장바구니에 담긴 물품의 총 수량
+     * discountedTotalPrice : 총 금액(할인 o)
+     */
+    let { totalPrice, totalQuantity, discountedTotalPrice } = items.reduce(
+      (acc, currentItem) => {
+        const item = ITEM_LISTS.find(
+          (listItem) => listItem.id === currentItem.id
+        );
 
-      const quantity = parseInt(
-        items[m].querySelector('span').textContent.split('x ')[1]
-      );
+        const quantity = parseInt(
+          currentItem.querySelector('span').textContent.split('x ')[1]
+        );
+        const itemTotal = item.price * quantity;
+        const discountRate = getDiscountRate(item, quantity);
+        const discountedItemTotal = itemTotal * (1 - discountRate);
 
-      /**해당 id 아이템의 총 수량 */
-      const itemTotal = item.price * quantity;
-
-      totalQuantity += quantity;
-      totalPrice += itemTotal;
-
-      /**해당 id에 따른 할인율 */
-      const discountRate = getDiscountRate(item, quantity);
-
-      discountedTotalPrice += itemTotal * (1 - discountRate);
-    }
+        return {
+          totalQuantity: acc.totalQuantity + quantity,
+          totalPrice: acc.totalPrice + itemTotal,
+          discountedTotalPrice: acc.discountedTotalPrice + discountedItemTotal,
+        };
+      },
+      { totalQuantity: 0, totalPrice: 0, discountedTotalPrice: 0 }
+    );
 
     /**할인율 */
     let discountRate = 0;
@@ -183,8 +185,7 @@ function main() {
         $itemList.id = targetItem.id;
         $itemList.className =
           'flex justify-between items-center $minusButton-2';
-        $itemInform.textContent =
-          targetItem.title + ' - ' + targetItem.price + '원 x 1';
+        $itemInform.textContent = `${targetItem.title}-${targetItem.price}원 x 1`;
         //상품 +버튼 관련
         $minusButton.className =
           'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1';
