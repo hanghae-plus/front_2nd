@@ -37,4 +37,9 @@ export const CartItem = ({
     </div>
   </div>`;
 
-export const CartTotal = () => ``;
+/**
+ * @param {{ total: number; discountRate: number }}
+ * @returns {string} templateLiteral to be HTML
+ */
+export const CartTotal = ({ total, discountRate }) =>
+  `총액: ${total}원${discountRate > 0 ? `<span class="text-green-500 ml-2">${(discountRate * 100).toFixed(1)}% 할인 적용</span>` : ''}`;
