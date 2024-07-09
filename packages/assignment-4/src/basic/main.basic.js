@@ -1,7 +1,7 @@
 import { createCartItem, createAppTemplate, createCartTotalPrice, createProductOption } from './templates.js';
 import { getCurrentCartItems } from './localStorage.js';
 import { addItemToCart, updateQuantity, removeItemFromCart } from './eventHandlers.js';
-import { products } from './constants.js';
+import { products } from './shopInfos.js';
 import { calculateTotalPrice, calculateTotalPriceBeforeDiscount, calculateTotalQuantity } from './calculates.js';
 
 function updateTotalPrice() {
@@ -53,8 +53,8 @@ function updateCart() {
         quantity: currentCartItems[productId].quantity,
       });
       const position = currentRenderedProductIds.findIndex((currentProductId) => {
-        const currentProductIdInNumber = parseInt(currentProductId.split('product')[1], 10);
-        const productIdInNumber = parseInt(productId.split('product')[1], 10);
+        const currentProductIdInNumber = parseInt(currentProductId.split('p')[1], 10);
+        const productIdInNumber = parseInt(productId.split('p')[1], 10);
         return currentProductIdInNumber > productIdInNumber;
       });
 

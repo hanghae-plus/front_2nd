@@ -1,4 +1,4 @@
-import { DISCOUNT_RATES } from './constants.js';
+import { DISCOUNT_RATES } from './shopInfos.js';
 
 export const calculateTotalQuantity = (cartItems) =>
   Object.keys(cartItems).reduce((sum, productId) => sum + cartItems[productId].quantity, 0);
