@@ -157,7 +157,7 @@ describe('advanced test', () => {
           { productId: 'id1', productName: '테스트 상품 1', price: 100 },
           { productId: 'id2', productName: '테스트 상품 2', price: 200 },
         ];
-        const result = MainLayout({ items });
+        const result = MainLayout(items);
         expect(result).toBe(`<div class="bg-gray-100 p-8">
     <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8">
       <h1 class="text-2xl font-bold mb-4">장바구니</h1>
