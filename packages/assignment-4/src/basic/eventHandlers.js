@@ -1,5 +1,5 @@
 import { getCurrentCartItems, updateCartItems } from './localStorage.js';
-import { products } from './constants.js';
+import { products } from './shopInfos.js';
 
 export function updateQuantity({ productId, change }) {
   const currentCartItems = getCurrentCartItems();
