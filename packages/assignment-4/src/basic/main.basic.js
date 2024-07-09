@@ -1,8 +1,7 @@
-//유틸 로직
-
+//유틸/뷰 로직
 /**
  * template만들기
- * @param1 html template
+ * @param  template
  */
 const createTemplate = (template = ``) => {
   const templateElement = document.createElement('template');
@@ -155,11 +154,11 @@ function main() {
       discountedTotalPrice
     )}원`;
     if (discountRate > 0) {
-      const $discountSpan = document.createElement('span');
-      $discountSpan.className = 'text-green-500 ml-2';
-
       const formattingDiscountRate = (discountRate * 100).toFixed(1);
-      $discountSpan.textContent = `(${formattingDiscountRate}% 할인 적용)`;
+
+      const $discountSpan = createTemplate(
+        `<span class='text-green-500 ml-2'>(${formattingDiscountRate}% 할인 적용)</span>`
+      );
 
       $discountedTotalPrice.appendChild($discountSpan);
     }
