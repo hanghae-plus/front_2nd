@@ -1,16 +1,22 @@
 import { cartChangeEvent } from './customEvent.js';
 
+/**
+ * 장바구니 관리 객체 생성
+ * @returns {object} 장바구니 관리 메서드 (getItems, addItem, removeItem, updateQuantity, getTotal)
+ */
 export const createShoppingCart = () => {
   const items = {};
 
   /**
-   * @returns {{ product: { productId: string; productName: string; price: number }, quantity: number }[]} items array
+   * 현재 장바구니의 항목을 반환
+   * @returns {Array} 장바구니 항목의 배열 Array of { proudct, quantity }
    */
   const getItems = () => Object.values(items);
 
   /**
+   * 장바구니에 상품을 추가
    * @param {{ productId: string; productName: string; price: number; discount?: [[number, number]] }} product
-   * @param {number?} addCount - the count to add : optional
+   * @param {number?} addCount 추가할 상품의 갯수 - 없을 경우 1로 처리
    */
   const addItem = (product, addCount) => {
     const { productId, productName, price, discount } = product;
@@ -23,6 +29,7 @@ export const createShoppingCart = () => {
   };
 
   /**
+   * 장바구니에서 항목을 제거
    * @param {string} productId
    */
   const removeItem = (productId) => {
@@ -31,8 +38,9 @@ export const createShoppingCart = () => {
   };
 
   /**
+   * 장바구니 항목의 수량을 변경
    * @param {string} productId
-   * @param {number} nextQuantity
+   * @param {number} nextQuantity - +1, -1 또는 결과 수량
    */
   const updateQuantity = (productId, nextQuantity) => {
     // nextQuantity가 1이나 -1인 경우
@@ -48,6 +56,7 @@ export const createShoppingCart = () => {
   };
 
   /**
+   * 장바구니의 총액과 적용 할인율을 반환
    * @returns {{ total: number; discountRate: number }}
    */
   const getTotal = () => {
