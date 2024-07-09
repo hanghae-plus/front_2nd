@@ -41,7 +41,9 @@ export const createCartView = (root, products) => {
     const items = getItems();
     cartItems.innerHTML = '';
     items.forEach(({ product: { productId, productName, price }, quantity }) => {
-      cartItems.innerHTML += CartItem({ product: { productId, productName, price }, quantity });
+      if (quantity !== 0) {
+        cartItems.innerHTML += CartItem({ product: { productId, productName, price }, quantity });
+      }
     });
   };
 

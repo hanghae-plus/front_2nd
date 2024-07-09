@@ -73,7 +73,7 @@ export const createShoppingCart = () => {
     }, 0);
     return {
       total: totalPrice,
-      discountRate: totalPrice / totalPriceBeforeDiscount,
+      discountRate: 1 - totalPrice / totalPriceBeforeDiscount,
     };
   };
 
