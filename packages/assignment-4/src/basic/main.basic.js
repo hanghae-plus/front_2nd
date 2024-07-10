@@ -7,19 +7,19 @@
  */
 const PRODUCT_LIST = [
   {
-    id: "product-1",
+    id: "p1",
     name: "상품1",
     price: 10000,
     discount: 0.1
   },
   {
-    id: "product-2",
+    id: "p2",
     name: "상품2",
     price: 20000,
     discount: 0.15
   },
   {
-    id: "product-3",
+    id: "p3",
     name: "상품3",
     price: 30000,
     discount: 0.2
@@ -136,34 +136,34 @@ function updateCartUI() {
   CART_LIST.forEach(item => {
     //INFO: li 태그로 구현했으나, 테스트 코드 통과를 위해 div로 변경..
     const cartItem = `
-        <div id="${item.id}" class="flex justify-between items-center mb-2">
-            <span>${item.name} - ${item.price}원 x ${item.quantity}</span>
-            <div>
-                <button
-                    class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
-                    data-product-id="${item.id}"
-                    data-change="-1"
-                    data-action="decrease"
-                >
-                -
-                </button>
-                <button
-                    class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
-                    data-product-id="${item.id}"
-                    data-change="1"
-                    data-action="increase"
-                >
-                +
-                </button>
-                <button 
-                    class="remove-item bg-red-500 text-white px-2 py-1 rounded" 
-                    data-product-id="${item.id}"
-                    data-action="remove"
-                >
-                삭제
-                </button>
-            </div>
-        </div>
+      <div id="${item.id}" class="flex justify-between items-center mb-2">
+          <span>${item.name} - ${item.price}원 x ${item.quantity}</span>
+          <div>
+              <button
+                  class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
+                  data-product-id="${item.id}"
+                  data-change="-1"
+                  data-action="decrease"
+              >
+              -
+              </button>
+              <button
+                  class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
+                  data-product-id="${item.id}"
+                  data-change="1"
+                  data-action="increase"
+              >
+              +
+              </button>
+              <button 
+                  class="remove-item bg-red-500 text-white px-2 py-1 rounded" 
+                  data-product-id="${item.id}"
+                  data-action="remove"
+              >
+              삭제
+              </button>
+          </div>
+      </div>
     `;
     
     cartList.innerHTML += cartItem;
@@ -206,15 +206,11 @@ const handleAddClick = (event) => {
 
   // @ts-ignore
   const selectedId = selectElement.value;
-  const selectedItem = PRODUCT_LIST.find(
-    (product) => product.id === selectedId,
-  );
+  const selectedItem = PRODUCT_LIST.find(product => product.id === selectedId);
 
   if (!selectedItem) return;
 
-  const isInCart = CART_LIST.find(
-    (cartItem) => cartItem.id === selectedItem.id,
-  );
+  const isInCart = CART_LIST.find(cartItem => cartItem.id === selectedItem.id);
 
   if (isInCart) {
     updateQuantity(selectedItem.id, "increase");
