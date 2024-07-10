@@ -1,15 +1,10 @@
-import { useState, useEffect, useRef } from "react";
-import useCalcurateCost from "./useCalcurateCost";
+import { useState, useEffect } from "react";
 
 const OPTIONS = [
   { id: "p1", name: "상품1", cost: 10000 },
   { id: "p2", name: "상품2", cost: 20000 },
   { id: "p3", name: "상품3", cost: 30000 },
 ];
-
-// 방법1. cart에 순차적으로 담고 보여질 때만 정리
-// 방법2. cart에 담을 때부터 정리
-//immer설치가 안 되네..
 
 function App() {
   const [cart, setCart] = useState(
@@ -18,11 +13,133 @@ function App() {
     })
   );
   const [selectOption, setSelectedOption] = useState(0);
-  const totalCost = useCalcurateCost(cart);
+  const [totalCost, setTotalCost] = useState(0);
+  const [discount, setDiscount] = useState(0);
+
+  useEffect(() => {
+    const { nowTotalCost, discountedTotalCost, totalCnt } =
+      calcurateTotalCost(cart);
+
+    const { conclusedTotalCost, totalDc } = calcurateDiscount(
+      nowTotalCost,
+      discountedTotalCost,
+      totalCnt
+    );
+
+    setTotalCost(conclusedTotalCost);
+    setDiscount(totalDc);
+  }, [cart]);
+
+  const calcurateTotalCost = (nowCart) => {
+    return nowCart.reduce(
+      (accumulator, currentOption) => {
+        let disc = 0;
+
+        if (currentOption.cnt >= 10) {
+          if (currentOption.id === "p1") disc = 0.1;
+          else if (currentOption.id === "p2") disc = 0.15;
+          else if (currentOption.id === "p3") disc = 0.2;
+        }
+
+        return {
+          nowTotalCost:
+            accumulator.nowTotalCost + currentOption.cost * currentOption.cnt,
+          discountedTotalCost:
+            accumulator.discountedTotalCost +
+            currentOption.cost * currentOption.cnt * (1 - disc),
+          totalCnt: accumulator.cnt + currentOption.cnt,
+        };
+      },
+      {
+        nowTotalCost: 0,
+        discountedTotalCost: 0,
+        totalCnt: 0,
+      }
+    );
+  };
+
+  const calcurateDiscount = (nowTotalCost, discountedTotalCost_, totalCnt) => {
+    let dc = 0;
+    let discountedTotalCost = discountedTotalCost_;
+
+    if (totalCnt >= 30) {
+      const bulkDiscount = discountedTotalCost * 0.25;
+      const individualDiscount = nowTotalCost - discountedTotalCost;
+      if (bulkDiscount > individualDiscount) {
+        discountedTotalCost = nowTotalCost * 0.75;
+        dc = 0.25;
+      } else dc = (nowTotalCost - discountedTotalCost) / nowTotalCost;
+    } else dc = (nowTotalCost - discountedTotalCost) / nowTotalCost;
+
+    return {
+      conclusedTotalCost: Math.round(discountedTotalCost),
+      totalDc: (dc * 100).toFixed(1),
+    };
+  };
 
   const handleSelectChange = (e) => {
     const selectedIndex = e.target.selectedIndex;
     setSelectedOption(selectedIndex);
+  };
+
+  const MinusButton = ({ index }) => {
+    return (
+      <button
+        className="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
+        onClick={() => {
+          setCart((x) => {
+            const next = [...x];
+            next[index] = {
+              ...next[index],
+              cnt: next[index].cnt - 1,
+            };
+            return next;
+          });
+        }}
+      >
+        -
+      </button>
+    );
+  };
+
+  const PlusButton = ({ index }) => {
+    return (
+      <button
+        className="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
+        onClick={() => {
+          setCart((x) => {
+            const next = [...x];
+            next[index] = {
+              ...next[index],
+              cnt: next[index].cnt + 1,
+            };
+            return next;
+          });
+        }}
+      >
+        +
+      </button>
+    );
+  };
+
+  const DeleteButton = ({ index }) => {
+    return (
+      <button
+        className="remove-item bg-red-500 text-white px-2 py-1 rounded"
+        onClick={() => {
+          setCart((x) => {
+            const next = [...x];
+            next[index] = {
+              ...next[index],
+              cnt: 0,
+            };
+            return next;
+          });
+        }}
+      >
+        삭제
+      </button>
+    );
   };
 
   const Item = ({ item, key }) => {
@@ -34,51 +151,9 @@ function App() {
           {item.name} - {item.cost}원 x {item.cnt}
         </span>
         <div>
-          <button
-            className="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
-            onClick={() => {
-              setCart((x) => {
-                const next = [...x];
-                next[index] = {
-                  ...next[index],
-                  cnt: next[index].cnt - 1,
-                };
-                return next;
-              });
-            }}
-          >
-            -
-          </button>
-          <button
-            className="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
-            onClick={() => {
-              setCart((x) => {
-                const next = [...x];
-                next[index] = {
-                  ...next[index],
-                  cnt: next[index].cnt + 1,
-                };
-                return next;
-              });
-            }}
-          >
-            +
-          </button>
-          <button
-            className="remove-item bg-red-500 text-white px-2 py-1 rounded"
-            onClick={() => {
-              setCart((x) => {
-                const next = [...x];
-                next[index] = {
-                  ...next[index],
-                  cnt: 0,
-                };
-                return next;
-              });
-            }}
-          >
-            삭제
-          </button>
+          <MinusButton index={index} />
+          <PlusButton index={index} />
+          <DeleteButton index={index} />
         </div>
       </div>
     );
@@ -100,8 +175,13 @@ function App() {
         {totalCost > 0 && (
           <div id="cart-total" className="text-xl font-bold my-4">
             {totalCost}
+
+            {discount > 0 && (
+              <span class="text-green-500 ml-2">({discount}% 할인 적용)</span>
+            )}
           </div>
         )}
+
         <select
           id="product-select"
           className="border rounded p-2 mr-2"
