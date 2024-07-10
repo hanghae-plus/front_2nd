@@ -12,7 +12,7 @@ function App() {
       return { ...option, cnt: 0 };
     })
   );
-  const [selectOption, setSelectedOption] = useState(0);
+  const [selectOptionIndex, setSelectedOptionIndex] = useState(0);
   const [totalCost, setTotalCost] = useState(0);
   const [discount, setDiscount] = useState(0);
 
@@ -75,7 +75,7 @@ function App() {
 
   const handleSelectChange = (e) => {
     const selectedIndex = e.target.selectedIndex;
-    setSelectedOption(selectedIndex);
+    setSelectedOptionIndex(selectedIndex);
   };
 
   const MinusButton = ({ index }) => {
@@ -165,9 +165,9 @@ function App() {
         onClick={() => {
           setCart((x) => {
             const next = [...x];
-            next[selectOption] = {
-              ...next[selectOption],
-              cnt: next[selectOption].cnt + 1,
+            next[selectOptionIndex] = {
+              ...next[selectOptionIndex],
+              cnt: next[selectOptionIndex].cnt + 1,
             };
             return next;
           });
@@ -212,6 +212,7 @@ function App() {
         <select
           id="product-select"
           className="border rounded p-2 mr-2"
+          value={OPTIONS[selectOptionIndex]}
           onChange={handleSelectChange}
         >
           {OPTIONS.map((option) => (
