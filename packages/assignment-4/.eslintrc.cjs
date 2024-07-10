@@ -1,8 +1,16 @@
 module.exports = {
   root: true,
   env: { browser: true, es2020: true },
-  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'prettier'],
+  ignorePatterns: ['dist', '.eslintrc.cjs', '__tests__'],
   parser: '@typescript-eslint/parser',
-  rules: {},
+  rules: {
+    'import/order': [
+      'error',
+      {
+        groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
+        'newlines-between': 'always',
+      },
+    ],
+  },
 };
