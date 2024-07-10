@@ -5,8 +5,8 @@ export default function TotalCost({ cart }) {
   const [discount, setDiscount] = useState(0);
 
   useEffect(() => {
-    const { nowTotalCost, dcTotalCost, totalCnt } = calcurateTotalCost(cart);
-    const { conclusedTotalCost, totalDc } = calcurateDiscount(
+    const { nowTotalCost, dcTotalCost, totalCnt } = calculateTotalCost(cart);
+    const { conclusedTotalCost, totalDc } = calculateDiscount(
       nowTotalCost,
       dcTotalCost,
       totalCnt
@@ -16,7 +16,7 @@ export default function TotalCost({ cart }) {
     setDiscount(totalDc);
   }, [cart]);
 
-  const calcurateTotalCost = (nowCart) => {
+  const calculateTotalCost = (nowCart) => {
     return nowCart.reduce(
       (accumulator, current) => {
         let disc = 0;
@@ -42,8 +42,8 @@ export default function TotalCost({ cart }) {
     );
   };
 
-  const calcurateDiscount = (nowTotalCost, dcTotalCost, totalCnt) => {
-    let dc = 0;
+  const calculateDiscount = (nowTotalCost, dcTotalCost, totalCnt) => {
+    let dc = (nowTotalCost - dcTotalCost) / nowTotalCost;
     let finalDcTotalCost = dcTotalCost;
 
     if (totalCnt >= 30) {
@@ -52,8 +52,8 @@ export default function TotalCost({ cart }) {
       if (bulkDiscount > individualDiscount) {
         finalDcTotalCost = nowTotalCost * 0.75;
         dc = 0.25;
-      } else dc = (nowTotalCost - dcTotalCost) / nowTotalCost;
-    } else dc = (nowTotalCost - dcTotalCost) / nowTotalCost;
+      }
+    }
 
     return {
       conclusedTotalCost: Math.round(finalDcTotalCost),
