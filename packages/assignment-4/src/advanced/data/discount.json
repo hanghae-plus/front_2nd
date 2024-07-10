@@ -1,0 +1,20 @@
+{
+  "data": {
+    "bulk": {
+      "threshold": 30,
+      "ratio": 0.25
+    },
+    "p1": {
+      "threshold": 10,
+      "ratio": 0.1
+    },
+    "p2": {
+      "threshold": 10,
+      "ratio": 0.15
+    },
+    "p3": {
+      "threshold": 10,
+      "ratio": 0.2
+    }
+  }
+}
