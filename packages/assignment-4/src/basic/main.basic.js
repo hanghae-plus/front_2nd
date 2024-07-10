@@ -18,19 +18,18 @@ const PRODUCTS = [
   { id: 'p3', name: '상품3', price: 30000 },
 ];
 
-// 상품당 할인률
-const DISCOUNT = {
-  p1: 0.1,
-  p2: 0.15,
-  p3: 0.2,
+const DISCOUNT_CONFIG = {
+  DISCOUNT_BY_PRODUCT_ID: {
+    p1: 0.1,
+    p2: 0.15,
+    p3: 0.2,
+  },
+  MINIMUM_COUNT: {
+    PER_PRODUCT: 10,
+    TOTAL_PRODUCT: 30,
+  },
+  TOTAL_DISCOUNT_RATE: 0.25,
 };
-
-// 할인이 적용되기 위한 최소 개수
-const MINIMUM_COUNT_FOR_DISCOUNT = 10;
-const MINIMUM_TOTAL_COUNT_FOR_DISCOUNT = 30;
-
-// 최종 할인률
-const TOTAL_DISCOUNT_RATE = 0.25;
 
 // 속성 부여 함수
 const setAttributes = (target, attributes) => {
@@ -111,7 +110,9 @@ const calculateProducts = () => {
 // 수량이 10개 이상인 경우 제품당 할인 적용
 const applyProductDiscount = (productId, price, count) => {
   const discount =
-    count >= MINIMUM_COUNT_FOR_DISCOUNT ? DISCOUNT[productId] : 0; // 상품당 할인율
+    count >= DISCOUNT_CONFIG.MINIMUM_COUNT.PER_PRODUCT
+      ? DISCOUNT_CONFIG.DISCOUNT_BY_PRODUCT_ID[productId]
+      : 0; // 상품당 할인율
   return price * count * (1 - discount);
 };
 
@@ -119,8 +120,9 @@ const applyProductDiscount = (productId, price, count) => {
 const canApplyDiscount = totalProducts => {
   const { discountedPrice, totalPrice, totalCount } = totalProducts;
   return (
-    totalCount >= MINIMUM_TOTAL_COUNT_FOR_DISCOUNT &&
-    discountedPrice * TOTAL_DISCOUNT_RATE > totalPrice - discountedPrice
+    totalCount >= DISCOUNT_CONFIG.MINIMUM_COUNT.TOTAL_PRODUCT &&
+    discountedPrice * DISCOUNT_CONFIG.TOTAL_DISCOUNT_RATE >
+      totalPrice - discountedPrice
   );
 };
 
@@ -131,8 +133,9 @@ const applyTotalDiscount = totalProducts => {
   let finalDiscountRate = (totalPrice - discountedPrice) / totalPrice;
 
   if (canApplyDiscount(totalProducts)) {
-    finalDiscountedPrice = totalPrice * (1 - TOTAL_DISCOUNT_RATE);
-    finalDiscountRate = TOTAL_DISCOUNT_RATE;
+    finalDiscountedPrice =
+      totalPrice * (1 - DISCOUNT_CONFIG.TOTAL_DISCOUNT_RATE);
+    finalDiscountRate = DISCOUNT_CONFIG.TOTAL_DISCOUNT_RATE;
   }
 
   return { finalDiscountedPrice, finalDiscountRate };
