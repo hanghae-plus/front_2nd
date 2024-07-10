@@ -166,7 +166,6 @@ function main() {
 
   ct.onclick = function (event) {
     let target = event.target;
-    console.log('??');
     if (
       target.classList.contains('quantity-change') ||
       target.classList.contains('remove-item')
