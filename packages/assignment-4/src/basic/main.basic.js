@@ -114,7 +114,7 @@ function main() {
 
   // 장바구니 화면 업데이트
   function updateCart(id) {
-    // 장바구니 아이템
+    // 장바구니 아이템 수량 업데이트
     const $item = document.getElementById(id);
     const itemData = cartStatus.items[id];
 
@@ -140,11 +140,11 @@ function main() {
       );
     }
 
-    // 총액
+    // 장바구니 총액 업데이트
     const $cartTotal = document.getElementById('cart-total');
     const { finalPrice, finalRate } = cartStatus.calcDiscount();
 
-    $cartTotal.textContent = '총액: ' + Math.round(finalPrice) + '원';
+    $cartTotal.textContent = `총액: ${Math.round(finalPrice)}원`;
 
     if (finalRate > 0) {
       render(
@@ -173,16 +173,16 @@ function main() {
   // 장바구니 아이템 버튼 이벤트
   $cartItem.onclick = function (event) {
     const target = event.target;
-    const productId = target.dataset.productId;
+    const targetId = target.dataset.productId;
 
     if (target.classList.contains('quantity-change')) {
       const change = parseInt(target.dataset.change);
-      cartStatus.updateItem(productId, change);
+      cartStatus.updateItem(targetId, change);
     } else if (target.classList.contains('remove-item')) {
-      cartStatus.deleteItem(productId);
+      cartStatus.deleteItem(targetId);
     }
 
-    updateCart(productId);
+    updateCart(targetId);
   };
 }
 
