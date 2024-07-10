@@ -7,7 +7,7 @@ export default function Selector({ selectedOptionId, setSelectedOptionId }) {
 
   const Option = ({ option }) => {
     return (
-      <option value={option.id} key={option.id} onChange={handleSelectChange}>
+      <option value={option.id} onChange={handleSelectChange}>
         {option.name} - {option.cost}원
       </option>
     );
@@ -21,7 +21,7 @@ export default function Selector({ selectedOptionId, setSelectedOptionId }) {
       onChange={handleSelectChange}
     >
       {OPTIONS.map((option) => (
-        <Option option={option} />
+        <Option option={option} key={`option${option.id}`} />
       ))}
     </select>
   );

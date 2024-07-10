@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { OPTIONS } from "./constant";
 import Selector from "./components/Selector";
 import Cart from "./components/Cart";

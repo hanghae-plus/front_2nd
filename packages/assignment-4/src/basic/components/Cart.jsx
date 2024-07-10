@@ -1,6 +1,24 @@
 import { OPTIONS } from "../constant";
+import { Fragment } from "react";
 
 export default function Cart({ cart, setCart }) {
+  const Item = ({ item }) => {
+    const index = OPTIONS.findIndex((option) => option.id === item.id);
+
+    return (
+      <div className="flex justify-between items-center mb-2">
+        <span>
+          {item.name} - {item.cost}원 x {item.cnt}
+        </span>
+        <div>
+          <MinusButton index={index} />
+          <PlusButton index={index} />
+          <DeleteButton index={index} />
+        </div>
+      </div>
+    );
+  };
+
   const MinusButton = ({ index }) => {
     return (
       <button
@@ -63,27 +81,14 @@ export default function Cart({ cart, setCart }) {
     );
   };
 
-  const Item = ({ item, key }) => {
-    const index = OPTIONS.findIndex((option) => option.id === item.id);
-
-    return (
-      <div className="flex justify-between items-center mb-2" key={key}>
-        <span>
-          {item.name} - {item.cost}원 x {item.cnt}
-        </span>
-        <div>
-          <MinusButton index={index} />
-          <PlusButton index={index} />
-          <DeleteButton index={index} />
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div id="cart-items">
       {cart.map((item) =>
-        item.cnt > 0 ? <Item item={item} key={`item${item.id}`} /> : <></>
+        item.cnt > 0 ? (
+          <Item item={item} key={`item${item.id}`} />
+        ) : (
+          <Fragment key={`item${item.id}`} />
+        )
       )}
     </div>
   );
