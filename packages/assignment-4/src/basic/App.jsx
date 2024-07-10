@@ -29,17 +29,24 @@ const PRODUCTS = [
 ];
 
 const ADD_QUANTITY = 1;
+const DISCOUNT_QUANTITY = 10;
+const BULK_QUANTITY = 30;
+const BULK_DISCOUNT_RATE = 0.25;
+const DEFAULT_DISCOUNT_RATE = 0;
 
 export default function App() {
   const [selectedProductId, setSelectedProductId] = useState(PRODUCTS[0].id);
+
   const selectProduct = useCallback(function (e) {
     setSelectedProductId(e.target.value);
   });
 
   const [cartItemList, setCartItemList] = useState([]);
+
   const hasItemInCart = useCallback(function (itemList, id) {
     return Boolean(itemList.find((item) => item.id === id));
   }, []);
+
   function addToCart(id = selectedProductId) {
     if (hasItemInCart(cartItemList, id)) {
       const newCartItemList = cartItemList.map((item) => {
@@ -59,22 +66,23 @@ export default function App() {
     setCartItemList((pre) => [...pre, newCartItem]);
   }
 
-  const isOneItem = useCallback(function (id) {
-    return cartItemList.find((item) => item.id === id).quantity === 1;
+  const isOneItem = useCallback(function (itemList, id) {
+    return itemList.find((item) => item.id === id).quantity === 1;
   }, []);
+
   const modifyCart = {
     plusItem(id) {
       addToCart(id);
     },
+
     minusItem(id) {
       if (!hasItemInCart(cartItemList, id)) {
         return;
       }
-      if (isOneItem(id)) {
+      if (isOneItem(cartItemList, id)) {
         modifyCart.deleteItem(id);
         return;
       }
-
       const newCartItemList = cartItemList.map((item) => {
         if (item.id === id) item.quantity -= ADD_QUANTITY;
         return item;
@@ -95,9 +103,35 @@ export default function App() {
     },
   };
 
-  // const [cartTotal, setCartTotal] = useState(0);
   const cartTotal = useMemo(() => {
     return cartItemList.reduce((pre, cur) => pre + cur.price * cur.quantity, 0);
+  }, [cartItemList]);
+
+  const isBulk = useCallback(function (itemList) {
+    return (
+      itemList.reduce((pre, cur) => pre + cur.quantity, 0) >= BULK_QUANTITY
+    );
+  }, []);
+
+  const isNeedDiscount = useCallback(function (itemList) {
+    return Boolean(itemList.find((item) => item.quantity >= DISCOUNT_QUANTITY));
+  }, []);
+
+  const discountRate = useMemo(() => {
+    if (isBulk(cartItemList)) {
+      return BULK_DISCOUNT_RATE;
+    }
+    if (isNeedDiscount(cartItemList)) {
+      const discountedTotal = cartItemList.reduce((pre, cur) => {
+        if (cur.quantity >= DISCOUNT_QUANTITY) {
+          return pre + cur.quantity * cur.price * (1 - cur.discountRate);
+        }
+        return pre + cur.quantity * cur.price;
+      }, 0);
+
+      return (cartTotal - discountedTotal) / cartTotal;
+    }
+    return DEFAULT_DISCOUNT_RATE;
   }, [cartItemList]);
 
   return (
@@ -111,10 +145,18 @@ export default function App() {
             ))}
         </div>
         {cartItemList.length > 0 && (
-          <div
-            id="cart-total"
-            className="text-xl font-bold my-4"
-          >{`총액: ${Math.round(cartTotal)}원`}</div>
+          <div id="cart-total" className="text-xl font-bold my-4">
+            {`총액: ${Math.round(
+              discountRate > DEFAULT_DISCOUNT_RATE
+                ? cartTotal * (1 - discountRate)
+                : cartTotal
+            )}원`}
+            {discountRate > DEFAULT_DISCOUNT_RATE && (
+              <span className="text-green-500 ml-2">{`(${(
+                discountRate * 100
+              ).toFixed(1)}% 할인 적용)`}</span>
+            )}
+          </div>
         )}
         <select
           onChange={selectProduct}
@@ -122,10 +164,9 @@ export default function App() {
           className="border rounded p-2 mr-2"
         >
           {PRODUCTS.map((product) => (
-            <option
-              key={product.id}
-              value={product.id}
-            >{`${product.name} - ${product.price}원`}</option>
+            <option key={product.id} value={product.id}>
+              {`${product.name} - ${product.price}원`}
+            </option>
           ))}
         </select>
         <button

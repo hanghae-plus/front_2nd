@@ -7,19 +7,19 @@ export default function CartItem({ item, modifyCart }) {
       <div>
         <button
           onClick={() => minusItem(item.id)}
-          className="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
+          className="bg-blue-500 text-white px-2 py-1 rounded mr-1"
         >
           -
         </button>
         <button
           onClick={() => plusItem(item.id)}
-          className="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
+          className="bg-blue-500 text-white px-2 py-1 rounded mr-1"
         >
           +
         </button>
         <button
           onClick={() => deleteItem(item.id)}
-          className="remove-item bg-red-500 text-white px-2 py-1 rounded"
+          className="bg-red-500 text-white px-2 py-1 rounded"
         >
           삭제
         </button>
