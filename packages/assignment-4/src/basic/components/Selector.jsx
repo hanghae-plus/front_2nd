@@ -1,21 +1,13 @@
 import { OPTIONS } from "../constant";
 
-export default function Selector({
-  selectOptionIndex,
-  setSelectedOptionIndex,
-}) {
+export default function Selector({ selectedOptionId, setSelectedOptionId }) {
   const handleSelectChange = (e) => {
-    const selectedIndex = e.target.selectedIndex;
-    setSelectedOptionIndex(selectedIndex);
+    setSelectedOptionId(e.target.value);
   };
 
   const Option = ({ option }) => {
     return (
-      <option
-        value={option.id}
-        key={`option${option.id}`}
-        onChange={handleSelectChange}
-      >
+      <option value={option.id} key={option.id} onChange={handleSelectChange}>
         {option.name} - {option.cost}원
       </option>
     );
@@ -25,7 +17,7 @@ export default function Selector({
     <select
       id="product-select"
       className="border rounded p-2 mr-2"
-      value={OPTIONS[selectOptionIndex]}
+      value={selectedOptionId}
       onChange={handleSelectChange}
     >
       {OPTIONS.map((option) => (
