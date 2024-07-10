@@ -74,7 +74,6 @@ export default function App() {
     plusItem(id) {
       addToCart(id);
     },
-
     minusItem(id) {
       if (!hasItemInCart(cartItemList, id)) {
         return;
