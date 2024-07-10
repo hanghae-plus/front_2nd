@@ -46,10 +46,10 @@ function main() {
   b.appendChild(ab);
 
   function uc() {
-    var t = 0;
-    var tq = 0;
+    var tttt = 0;
+    var ttquantity = 0;
     var items = ct.children;
-    var tb = 0;
+    var cartTotal = 0;
 
     for (var m = 0; m < items.length; m++) {
       var item;
@@ -65,31 +65,31 @@ function main() {
       var itemTotal = item.p * quantity;
       var disc = 0;
 
-      tq += quantity;
-      tb += itemTotal;
+      ttquantity += quantity;
+      cartTotal += itemTotal;
       if (quantity >= 10) {
         if (item.id === 'p1') disc = 0.1;
         else if (item.id === 'p2') disc = 0.15;
         else if (item.id === 'p3') disc = 0.2;
       }
-      t += itemTotal * (1 - disc);
+      tttt += itemTotal * (1 - disc);
     }
 
     var dr = 0;
-    if (tq >= 30) {
-      var bulkDiscount = t * 0.25;
-      var individualDiscount = tb - t;
+    if (ttquantity >= 30) {
+      var bulkDiscount = tttt * 0.25;
+      var individualDiscount = cartTotal - tttt;
       if (bulkDiscount > individualDiscount) {
-        t = tb * 0.75;
+        tttt = cartTotal * 0.75;
         dr = 0.25;
       } else {
-        dr = (tb - t) / tb;
+        dr = (cartTotal - tttt) / cartTotal;
       }
     } else {
-      dr = (tb - t) / tb;
+      dr = (cartTotal - tttt) / cartTotal;
     }
 
-    tt.textContent = '총액: ' + Math.round(t) + '원';
+    tt.textContent = '총액: ' + Math.round(tttt) + '원';
     if (dr > 0) {
       var dspan = document.createElement('span');
       dspan.className = 'text-green-500 ml-2';
