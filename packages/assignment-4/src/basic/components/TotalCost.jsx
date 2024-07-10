@@ -14,7 +14,7 @@ export default function TotalCost({ cart }) {
 
     setTotalCost(conclusedTotalCost);
     setDiscount(totalDc);
-  }, []);
+  }, [cart]);
 
   const calcurateTotalCost = (nowCart) => {
     return nowCart.reduce(
