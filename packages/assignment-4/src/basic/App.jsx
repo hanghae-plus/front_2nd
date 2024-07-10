@@ -17,12 +17,10 @@ function App() {
   const [discount, setDiscount] = useState(0);
 
   useEffect(() => {
-    const { nowTotalCost, discountedTotalCost, totalCnt } =
-      calcurateTotalCost(cart);
-
+    const { nowTotalCost, dcTotalCost, totalCnt } = calcurateTotalCost(cart);
     const { conclusedTotalCost, totalDc } = calcurateDiscount(
       nowTotalCost,
-      discountedTotalCost,
+      dcTotalCost,
       totalCnt
     );
 
@@ -32,47 +30,45 @@ function App() {
 
   const calcurateTotalCost = (nowCart) => {
     return nowCart.reduce(
-      (accumulator, currentOption) => {
+      (accumulator, current) => {
         let disc = 0;
 
-        if (currentOption.cnt >= 10) {
-          if (currentOption.id === "p1") disc = 0.1;
-          else if (currentOption.id === "p2") disc = 0.15;
-          else if (currentOption.id === "p3") disc = 0.2;
+        if (current.cnt >= 10) {
+          if (current.id === "p1") disc = 0.1;
+          else if (current.id === "p2") disc = 0.15;
+          else if (current.id === "p3") disc = 0.2;
         }
+        const optionTotalCost = current.cost * current.cnt;
 
         return {
-          nowTotalCost:
-            accumulator.nowTotalCost + currentOption.cost * currentOption.cnt,
-          discountedTotalCost:
-            accumulator.discountedTotalCost +
-            currentOption.cost * currentOption.cnt * (1 - disc),
-          totalCnt: accumulator.cnt + currentOption.cnt,
+          nowTotalCost: accumulator.nowTotalCost + optionTotalCost,
+          dcTotalCost: accumulator.dcTotalCost + optionTotalCost * (1 - disc),
+          totalCnt: accumulator.totalCnt + current.cnt,
         };
       },
       {
         nowTotalCost: 0,
-        discountedTotalCost: 0,
+        dcTotalCost: 0,
         totalCnt: 0,
       }
     );
   };
 
-  const calcurateDiscount = (nowTotalCost, discountedTotalCost_, totalCnt) => {
+  const calcurateDiscount = (nowTotalCost, dcTotalCost, totalCnt) => {
     let dc = 0;
-    let discountedTotalCost = discountedTotalCost_;
+    let finalDcTotalCost = dcTotalCost;
 
     if (totalCnt >= 30) {
-      const bulkDiscount = discountedTotalCost * 0.25;
-      const individualDiscount = nowTotalCost - discountedTotalCost;
+      const bulkDiscount = dcTotalCost * 0.25;
+      const individualDiscount = nowTotalCost - dcTotalCost;
       if (bulkDiscount > individualDiscount) {
-        discountedTotalCost = nowTotalCost * 0.75;
+        finalDcTotalCost = nowTotalCost * 0.75;
         dc = 0.25;
-      } else dc = (nowTotalCost - discountedTotalCost) / nowTotalCost;
-    } else dc = (nowTotalCost - discountedTotalCost) / nowTotalCost;
+      } else dc = (nowTotalCost - dcTotalCost) / nowTotalCost;
+    } else dc = (nowTotalCost - dcTotalCost) / nowTotalCost;
 
     return {
-      conclusedTotalCost: Math.round(discountedTotalCost),
+      conclusedTotalCost: Math.round(finalDcTotalCost),
       totalDc: (dc * 100).toFixed(1),
     };
   };
@@ -87,12 +83,13 @@ function App() {
       <button
         className="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
         onClick={() => {
-          setCart((x) => {
-            const next = [...x];
+          setCart((prev) => {
+            const next = [...prev];
             next[index] = {
               ...next[index],
               cnt: next[index].cnt - 1,
             };
+
             return next;
           });
         }}
@@ -107,12 +104,13 @@ function App() {
       <button
         className="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1"
         onClick={() => {
-          setCart((x) => {
-            const next = [...x];
+          setCart((prev) => {
+            const next = [...prev];
             next[index] = {
               ...next[index],
               cnt: next[index].cnt + 1,
             };
+
             return next;
           });
         }}
@@ -127,8 +125,8 @@ function App() {
       <button
         className="remove-item bg-red-500 text-white px-2 py-1 rounded"
         onClick={() => {
-          setCart((x) => {
-            const next = [...x];
+          setCart((prev) => {
+            const next = [...prev];
             next[index] = {
               ...next[index],
               cnt: 0,
@@ -159,23 +157,52 @@ function App() {
     );
   };
 
+  const CartAddButton = () => {
+    return (
+      <button
+        id="add-to-cart"
+        className="bg-blue-500 text-white px-4 py-2 rounded"
+        onClick={() => {
+          setCart((x) => {
+            const next = [...x];
+            next[selectOption] = {
+              ...next[selectOption],
+              cnt: next[selectOption].cnt + 1,
+            };
+            return next;
+          });
+        }}
+      >
+        추가
+      </button>
+    );
+  };
+
+  const Option = ({ option }) => {
+    return (
+      <option
+        value={option.id}
+        key={`option${option.id}`}
+        onChange={handleSelectChange}
+      >
+        {option.name} - {option.cost}원
+      </option>
+    );
+  };
+
   return (
     <div className="bg-gray-100 p-8">
       <div className="max-div1-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-div1-2xl p-8">
         <h1 className="text-2xl font-bold mb-4">장바구니</h1>
         <div id="cart-items">
-          {cart.map((item) => {
-            return item.cnt > 0 ? (
-              <Item item={item} key={`item${item.id}`} />
-            ) : (
-              <></>
-            );
-          })}
+          {cart.map((item) =>
+            item.cnt > 0 ? <Item item={item} key={`item${item.id}`} /> : <></>
+          )}
         </div>
+
         {totalCost > 0 && (
           <div id="cart-total" className="text-xl font-bold my-4">
-            {totalCost}
-
+            총액: {totalCost}원
             {discount > 0 && (
               <span class="text-green-500 ml-2">({discount}% 할인 적용)</span>
             )}
@@ -187,34 +214,12 @@ function App() {
           className="border rounded p-2 mr-2"
           onChange={handleSelectChange}
         >
-          {OPTIONS.map((option) => {
-            return (
-              <option
-                value={option.id}
-                key={`option${option.id}`}
-                onChange={handleSelectChange}
-              >
-                {option.name} - {option.cost}원
-              </option>
-            );
-          })}
+          {OPTIONS.map((option) => (
+            <Option option={option} />
+          ))}
         </select>
-        <button
-          id="add-to-cart"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          onClick={() => {
-            setCart((x) => {
-              const next = [...x];
-              next[selectOption] = {
-                ...next[selectOption],
-                cnt: next[selectOption].cnt + 1,
-              };
-              return next;
-            });
-          }}
-        >
-          추가
-        </button>
+
+        <CartAddButton />
       </div>
     </div>
   );
