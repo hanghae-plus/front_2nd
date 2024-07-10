@@ -108,56 +108,36 @@ const getAddButtonElement = function () {
   addButton.className = "bg-blue-500 text-white px-4 py-2 rounded";
   addButton.textContent = "추가";
 
+  const select = document.createElement('select');
+
   const handleClickAddButton = function () {
-    var v = s.value;
-    var i;
+    let selectedId = select.value;
+    let id;
+
     for (var k = 0; k < PRICES.length; k++) {
-      if (PRICES[k].id === v) {
-        i = PRICES[k];
+      if (PRICES[k].id === selectedId) {
+        id = PRICES[k];
         break;
       }
     }
-    if (i) {
-      var e = document.getElementById(i.id);
+
+    if (id) {
+      const e = document.getElementById(id.id);
       if (e) {
-        var q =
-          parseInt(e.querySelector("span").textContent.split("x ")[1]) + 1;
-        e.querySelector("span").textContent = i.n + " - " + i.p + "원 x " + q;
+        var quantity = parseInt(e.querySelector("span").textContent.split("x ")[1]) + 1;
+        e.querySelector("span").textContent = id.n + " - " + id.p + "원 x " + quantity;
       } else {
-        var d = document.createElement("div");
-        var sp = document.createElement("span");
-        var bd = document.createElement("div");
-        var mb = document.createElement("button");
-        var pb = document.createElement("button");
-        var rb = document.createElement("button");
-        d.id = i.id;
-        d.className = "flex justify-between items-center mb-2";
-        sp.textContent = i.n + " - " + i.p + "원 x 1";
-
-        mb.className =
-          "quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1";
-        mb.textContent = "-";
-        mb.dataset.productId = i.id;
-        mb.dataset.change = "-1";
-
-        pb.className =
-          "quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1";
-        pb.textContent = "+";
-        pb.dataset.productId = i.id;
-        pb.dataset.change = "1";
-
-        rb.className = "remove-item bg-red-500 text-white px-2 py-1 rounded";
-        rb.textContent = "삭제";
-        rb.dataset.productId = i.id;
-
-        bd.appendChild(mb);
-        bd.appendChild(pb);
-        bd.appendChild(rb);
-
-        d.appendChild(sp);
-        d.appendChild(bd);
-
-        ct.appendChild(d);
+        return `<div id="container">
+        <div id="product-id-1" class="flex justify-between items-center mb-2">
+            <span>상품 ${id.n} - ${id.p} 원 x 1</span>
+            <div>
+                <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-1" data-change="-1">-</button>
+                <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-1" data-change="1">+</button>
+                <button class="remove-item bg-red-500 text-white px-2 py-1 rounded" data-product-id="product-id-1">삭제</button>
+            </div>
+        </div>
+    </div>
+        `
       }
       updateCart();
     }
@@ -168,55 +148,58 @@ const getAddButtonElement = function () {
 };
 
 function updateCart() {
-  const total = 0;
-  const totalQuantity = 0;
+  const cartItem = getCartItemElement();
+  const cartTotal = getCartTotalElement();
+
+  let total = 0;
+  let totalQuantity = 0;
   const items = cartItem.children;
-  const tb = 0;
+  let totalCount = 0;
 
   for (var m = 0; m < items.length; m++) {
-    var item;
+    let item;
+
     for (var n = 0; n < PRICES.length; n++) {
       if (PRICES[n].id === items[m].id) {
         item = PRICES[n];
         break;
       }
     }
-    var quantity = parseInt(
-      items[m].querySelector("span").textContent.split("x ")[1]
-    );
-    var itemTotal = item.p * quantity;
-    var disc = 0;
+
+    const quantity = parseInt(items[m].querySelector("span").textContent.split("x ")[1]);
+    const itemTotal = item.p * quantity;
+    let discount = 0;
 
     totalQuantity += quantity;
-    tb += itemTotal;
+    totalCount += itemTotal;
     if (quantity >= 10) {
-      if (item.id === "p1") disc = 0.1;
-      else if (item.id === "p2") disc = 0.15;
-      else if (item.id === "p3") disc = 0.2;
+      if (item.id === "p1") discount = 0.1;
+      else if (item.id === "p2") discount = 0.15;
+      else if (item.id === "p3") discount = 0.2;
     }
-    total += itemTotal * (1 - disc);
+    total += itemTotal * (1 - discount);
   }
 
-  var dr = 0;
+  let discountRatio = 0;
   if (totalQuantity >= 30) {
-    var bulkDiscount = total * 0.25;
-    var individualDiscount = tb - total;
+    const bulkDiscount = total * 0.25;
+    const individualDiscount = totalCount - total;
     if (bulkDiscount > individualDiscount) {
-      total = tb * 0.75;
-      dr = 0.25;
+      total = totalCount * 0.75;
+      discountRatio = 0.25;
     } else {
-      dr = (tb - total) / tb;
+      discountRatio = (totalCount - total) / totalCount;
     }
   } else {
-    dr = (tb - total) / tb;
+    discountRatio = (totalCount - total) / totalCount;
   }
 
   cartTotal.textContent = "총액: " + Math.round(total) + "원";
-  if (dr > 0) {
-    var dspan = document.createElement("span");
-    dspan.className = "text-green-500 ml-2";
-    dspan.textContent = "(" + (dr * 100).toFixed(1) + "% 할인 적용)";
-    cartTotal.appendChild(dspan);
+
+  if (discountRatio > 0) {
+    cartTotal.appendChild(`<span className="text-green-500 ml-2">
+        (${discountRatio}% 할인 적용)
+    </span>`);
   }
 }
 
