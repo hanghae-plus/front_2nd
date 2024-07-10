@@ -1,7 +1,7 @@
 const PRICES = [
-  { id: "p1", n: "상품1", p: 10000 },
-  { id: "p2", n: "상품2", p: 20000 },
-  { id: "p3", n: "상품3", p: 30000 },
+  {id: "p1", n: "상품1", p: 10000},
+  {id: "p2", n: "상품2", p: 20000},
+  {id: "p3", n: "상품3", p: 30000},
 ];
 
 function main() {
@@ -47,30 +47,31 @@ const getCartItemElement = function () {
   cartItem.id = "cart-items";
 
   const handleClickCartItem = function (event) {
-    var target = event.target;
+    const target = event.target;
+    const classList = Array.from(target.classList);
+    const isQuantityChange = classList.includes("quantity-change");
+    const isRemoveItem = classList.includes("remove-item");
 
-    if (
-      target.classList.contains("quantity-change") ||
-      target.classList.contains("remove-item")
-    ) {
-      var productId = target.dataset.productId;
-      var item = document.getElementById(productId);
-      if (target.classList.contains("quantity-change")) {
-        var change = parseInt(target.dataset.change);
-        var quantity =
-          parseInt(item.querySelector("span").textContent.split("x ")[1]) +
-          change;
+    if (isQuantityChange|| isRemoveItem) {
+      const productId = target.dataset.productId;
+      const item = document.getElementById(productId);
+      const itemSpan = item.querySelector("span")
+
+      if (isQuantityChange) {
+        const change = parseInt(target.dataset.change); // 1 or -1
+        const quantity = parseInt(itemSpan.textContent.split("x ")[1]) + change;
+
         if (quantity > 0) {
-          item.querySelector("span").textContent =
-            item.querySelector("span").textContent.split("x ")[0] +
-            "x " +
-            quantity;
+          itemSpan.textContent = itemSpan.textContent.split("x ")[0] + "x " + quantity;
         } else {
           item.remove();
         }
-      } else if (target.classList.contains("remove-item")) {
+      }
+
+      if (isRemoveItem) {
         item.remove();
       }
+
       updateCart();
     }
   };
@@ -167,10 +168,10 @@ const getAddButtonElement = function () {
 };
 
 function updateCart() {
-  var t = 0;
-  var tq = 0;
-  var items = ct.children;
-  var tb = 0;
+  const total = 0;
+  const totalQuantity = 0;
+  const items = cartItem.children;
+  const tb = 0;
 
   for (var m = 0; m < items.length; m++) {
     var item;
@@ -186,31 +187,31 @@ function updateCart() {
     var itemTotal = item.p * quantity;
     var disc = 0;
 
-    tq += quantity;
+    totalQuantity += quantity;
     tb += itemTotal;
     if (quantity >= 10) {
       if (item.id === "p1") disc = 0.1;
       else if (item.id === "p2") disc = 0.15;
       else if (item.id === "p3") disc = 0.2;
     }
-    t += itemTotal * (1 - disc);
+    total += itemTotal * (1 - disc);
   }
 
   var dr = 0;
-  if (tq >= 30) {
-    var bulkDiscount = t * 0.25;
-    var individualDiscount = tb - t;
+  if (totalQuantity >= 30) {
+    var bulkDiscount = total * 0.25;
+    var individualDiscount = tb - total;
     if (bulkDiscount > individualDiscount) {
-      t = tb * 0.75;
+      total = tb * 0.75;
       dr = 0.25;
     } else {
-      dr = (tb - t) / tb;
+      dr = (tb - total) / tb;
     }
   } else {
-    dr = (tb - t) / tb;
+    dr = (tb - total) / tb;
   }
 
-  cartTotal.textContent = "총액: " + Math.round(t) + "원";
+  cartTotal.textContent = "총액: " + Math.round(total) + "원";
   if (dr > 0) {
     var dspan = document.createElement("span");
     dspan.className = "text-green-500 ml-2";
