@@ -1,198 +1,185 @@
+/**
+ * - 상수는 대문자로 표기
+ * - 복수는 list가 아닌 s를 사용
+ * - 함수 인자는 최소한으로 작성
+ * - 변수/함수명을 축약형으로 작성 X
+ * - element >> $를 붙인다
+ * - 구성 요소를 하나하나 만들어서 조립: build~
+ * - 속성을 부여: set~ / 변경: update~
+ * - 실질적으로 레이아웃을 만들어주는 함수명 create~
+ * - 클릭 함수: onClick~
+ * - 총합에 대한 변수명: total > final
+ */
+
+// 상품 목록
 const PRODUCTS = [
   { id: 'p1', name: '상품1', price: 10000 },
   { id: 'p2', name: '상품2', price: 20000 },
   { id: 'p3', name: '상품3', price: 30000 },
 ];
 
+// 상품당 할인률
+const DISCOUNT = {
+  p1: 0.1,
+  p2: 0.15,
+  p3: 0.2,
+};
+
+// 할인이 적용되기 위한 최소 개수
+const MINIMUM_COUNT_FOR_DISCOUNT = 10;
+const MINIMUM_TOTAL_COUNT_FOR_DISCOUNT = 30;
+
+// 최종 할인률
+const TOTAL_DISCOUNT_RATE = 0.25;
+
 // 속성 부여 함수
 const setAttributes = (target, attributes) => {
-  for (const [key, value] of Object.entries(attributes)) {
-    if (key === 'dataset') {
-      for (const [dataKey, dataValue] of Object.entries(value)) {
-        target.dataset[dataKey] = dataValue;
-      }
+  for (const [key, attribute] of Object.entries(attributes)) {
+    if (typeof attribute === 'object') {
+      setAttributes(target[key], attribute);
     } else {
-      target[key] = value;
+      target[key] = attribute;
     }
   }
+};
+
+// 자식요소 append
+const appendChildElements = (target, ...$child) => {
+  return target.append(...$child.flat());
 };
 
 // 레이아웃 구성
-const createLayout = (tagName, attributes = {}) => {
+const createLayout = (tagName, attributes = {}, $parent) => {
   const $layout = document.createElement(tagName);
   setAttributes($layout, attributes);
+  appendChildElements($parent, $layout);
   return $layout;
 };
 
-// PRODUCUS에 대한 option값 생성
-const addProductOption = target => {
+// PRODUCTS에 대한 option값 생성
+const createProductOption = target => {
+  const $productSelect = document.getElementById('product-select');
+
   PRODUCTS.map(product => {
-    const $option = createLayout('option', {
-      value: product.id,
-      textContent: `${product.name} - ${product.price}원`,
-    });
-    target.appendChild($option);
+    createLayout(
+      'option',
+      {
+        value: product.id,
+        textContent: `${product.name} - ${product.price}원`,
+      },
+      $productSelect,
+    );
   });
 };
 
-const appendChildElements = (target, ...childElement) => {
-  return target.append(...childElement);
+// 상품에 대한 이름, 가격, 수량 조회
+const getProductInfo = $productInfo => {
+  const productInfo = $productInfo.textContent.match(/(.+?) - (\d+)원 x (\d+)/);
+
+  const name = productInfo[1];
+  const price = parseInt(productInfo[2]);
+  const count = parseInt(productInfo[3]);
+
+  return { name, price, count };
 };
 
-const generateInitElement = () => {
-  const $app = document.getElementById('app');
+// 상품 전체 가격 및 수량 계산
+const calculateProducts = () => {
+  let discountedPrice = 0; // 할인 적용된 가격
 
-  const $wrapper = createLayout('div', { className: 'bg-gray-100 p-8' });
-  const $container = createLayout('div', {
-    className:
-      'max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8',
+  let totalPrice = 0; // 총 가격
+  let totalCount = 0; // 총 수량
+
+  const $products = document.getElementById('cart-items');
+  const $productsChildren = $products.childNodes ?? [];
+
+  $productsChildren.forEach($product => {
+    const productId = $product.id;
+
+    const $productInfo = $product.querySelector('span');
+    const { price, count } = getProductInfo($productInfo);
+
+    totalPrice += price * count;
+    totalCount += count;
+
+    discountedPrice += applyProductDiscount(productId, price, count);
   });
 
-  const $header = createLayout('h1', {
-    className: 'text-2xl font-bold mb-4',
-    textContent: '장바구니',
-  });
+  return { discountedPrice, totalPrice, totalCount };
+};
 
-  const $cartProducts = createLayout('div', { id: 'cart-items' });
-  const $totalProduct = createLayout('div', {
-    id: 'cart-total',
-    className: 'text-xl font-bold my-4',
-  });
+// 수량이 10개 이상인 경우 제품당 할인 적용
+const applyProductDiscount = (productId, price, count) => {
+  const discount =
+    count >= MINIMUM_COUNT_FOR_DISCOUNT ? DISCOUNT[productId] : 0; // 상품당 할인율
+  return price * count * (1 - discount);
+};
 
-  const $productSelect = createLayout('select', {
-    id: 'product-select',
-    className: 'border rounded p-2 mr-2',
-  });
-  addProductOption($productSelect);
-
-  const $addButton = createLayout('button', {
-    id: 'add-to-cart',
-    className: 'bg-blue-500 text-white px-4 py-2 rounded',
-    textContent: '추가',
-    onclick: onClickAddButton,
-  });
-
-  appendChildElements(
-    $container,
-    $header,
-    $cartProducts,
-    $totalProduct,
-    $productSelect,
-    $addButton,
+// 총 수량이 30개 이상인 경우 추가 할인 적용
+const canApplyDiscount = totalProducts => {
+  const { discountedPrice, totalPrice, totalCount } = totalProducts;
+  return (
+    totalCount >= MINIMUM_TOTAL_COUNT_FOR_DISCOUNT &&
+    discountedPrice * TOTAL_DISCOUNT_RATE > totalPrice - discountedPrice
   );
-  appendChildElements($wrapper, $container);
-  appendChildElements($app, $wrapper);
 };
 
-const getCartProductInfos = () => {
-  let total = 0;
-  let totalPrice = 0;
-  let totalQuantity = 0;
+// 총 수량이 30개 이상인 경우 추가 할인 적용
+const applyTotalDiscount = totalProducts => {
+  const { discountedPrice, totalPrice } = totalProducts;
+  let finalDiscountedPrice = discountedPrice;
+  let finalDiscountRate = (totalPrice - discountedPrice) / totalPrice;
 
-  let discount = 0;
-
-  const $cartItem = document.getElementById('cart-items');
-  const $cartItemChildren = $cartItem.children ?? [];
-
-  $cartItemChildren.forEach(children => {
-    const productId = children.id;
-
-    const $productInfo = children.querySelector('span');
-    const { price, count } = getTargetProductInfo($productInfo);
-
-    totalPrice += price;
-    totalQuantity += count;
-
-    discount = count >= 10 ? getDiscount[productId] : 0;
-    total += totalQuantity * (1 - discount);
-  });
-
-  return { total, totalQuantity, totalPrice };
-};
-
-const getDisCountRate = (total, totalQuantity, totalPrice) => {
-  let discountRate = 0;
-
-  if (totalQuantity >= 30) {
-    const bulkDiscount = total * 0.25; // 총액의 25% 추가 할인
-    const individualDiscount = totalPrice - total;
-    // 더 큰 할인율 적용
-    if (bulkDiscount > individualDiscount) {
-      total = totalPrice * 0.75;
-      discountRate = 0.25;
-    } else {
-      discountRate = (totalPrice - total) / totalPrice;
-    }
-  } else {
-    discountRate = (totalPrice - total) / totalPrice;
+  if (canApplyDiscount(totalProducts)) {
+    finalDiscountedPrice = totalPrice * (1 - TOTAL_DISCOUNT_RATE);
+    finalDiscountRate = TOTAL_DISCOUNT_RATE;
   }
 
-  return discountRate;
+  return { finalDiscountedPrice, finalDiscountRate };
 };
 
-const updateCart = () => {
-  const { total, totalQuantity, totalPrice } = getCartProductInfos();
-  getDisCountRate(total, totalQuantity, totalPrice);
+const updateTotalProducts = () => {
+  const totalProducts = calculateProducts();
+  const { finalDiscountedPrice, finalDiscountRate } =
+    applyTotalDiscount(totalProducts);
+
+  const $totalProduct = document.getElementById('cart-total');
+
+  setAttributes($totalProduct, {
+    textContent: `총액: ${Math.round(finalDiscountedPrice)}원`,
+  });
+
+  // 할인률이 0이상일 경우 할인적용 layout 추가
+  finalDiscountRate > 0 &&
+    createLayout(
+      'span',
+      {
+        className: 'text-green-500 ml-2',
+        textContent: `(${(finalDiscountRate * 100).toFixed(1)}% 할인 적용)`,
+      },
+      $totalProduct,
+    );
 };
 
+// [추가] 버튼 클릭시 동작
 const onClickAddButton = () => {
   const $productSelect = document.getElementById('product-select');
   const selectedProduct = PRODUCTS.find(
     product => product.id === $productSelect.value,
   );
 
-  if (!selectedProduct) return;
-
   const $product = document.getElementById(selectedProduct.id);
 
+  // 선택된 상품이 장바구니에 존재한다면 해당상품 +1
   if ($product) {
-    const target = $product.querySelector('button[data-change="1"]');
-    onClickCountChangeButton({ target });
+    const $plusButton = $product.querySelector('button[data-change="1"]');
+    onClickCountChangeButton({ target: $plusButton });
+    updateTotalProducts();
     return;
   }
 
-  const $cartProducts = document.getElementById('cart-items');
-
-  const $cartProduct = createLayout('div', {
-    className: 'flex justify-between items-center mb-2',
-    id: selectedProduct.id,
-  });
-
-  const $productInfo = createLayout('span', {
-    textContent: `${selectedProduct.name} - ${selectedProduct.price}원 x ${1}`,
-  });
-
-  const $buttonWrapper = createLayout('div');
-  const $minusButton = createLayout('button', {
-    className: 'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1',
-    textContent: '-',
-    dataset: {
-      productId: selectedProduct.id,
-      change: '-1',
-    },
-    onclick: getButtonClickEvent['-'],
-  });
-  const $plusButton = createLayout('button', {
-    className: 'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1',
-    textContent: '+',
-    dataset: {
-      productId: selectedProduct.id,
-      change: '1',
-    },
-    onclick: getButtonClickEvent['+'],
-  });
-  const $removeButton = createLayout('button', {
-    className: 'remove-item bg-red-500 text-white px-2 py-1 rounded',
-    textContent: '삭제',
-    dataset: {
-      productId: selectedProduct.id,
-    },
-    onclick: getButtonClickEvent['삭제'],
-  });
-
-  appendChildElements($buttonWrapper, $minusButton, $plusButton, $removeButton);
-  appendChildElements($cartProduct, $productInfo, $buttonWrapper);
-  appendChildElements($cartProducts, $cartProduct);
+  buildSelectedProduct(selectedProduct);
+  updateTotalProducts();
 };
 
 // +/- 버튼 클릭 이벤트
@@ -201,12 +188,17 @@ const onClickCountChangeButton = ({ target }) => {
   const change = target.dataset.change;
   const $productInfo = document.querySelector(`[id=${productId}] > span`);
 
-  const { name, price, count } = getTargetProductInfo($productInfo);
+  const { name, price, count } = getProductInfo($productInfo);
 
-  if (count === 1 && change === '-1')
+  if (count === 1 && change === '-1') {
     return onClickProductRemoveButton({ target });
+  }
 
-  $productInfo.textContent = `${name} - ${price}원 x ${count + parseInt(change)}`;
+  setAttributes($productInfo, {
+    textContent: `${name} - ${price}원 x ${count + parseInt(change)}`,
+  });
+
+  updateTotalProducts();
 };
 
 // 제거 버튼 클릭 이벤트
@@ -215,6 +207,7 @@ const onClickProductRemoveButton = ({ target }) => {
   const $product = document.getElementById(productId);
 
   $product.remove();
+  updateTotalProducts();
 };
 
 // 버튼 이벤트 객체
@@ -224,24 +217,131 @@ const getButtonClickEvent = {
   ['삭제']: onClickProductRemoveButton,
 };
 
-const getTargetProductInfo = $productInfo => {
-  const productInfo = $productInfo.innerText.match(/(.+?) - (\d+)원 x (\d+)/);
+// 선택된 상품 render
+const buildSelectedProduct = selectedProduct => {
+  const $cartProducts = document.getElementById('cart-items');
 
-  const name = productInfo[1];
-  const price = parseInt(productInfo[2]);
-  const count = parseInt(productInfo[3]);
+  const $cartProduct = createLayout(
+    'div',
+    {
+      className: 'flex justify-between items-center mb-2',
+      id: selectedProduct.id,
+    },
+    $cartProducts,
+  );
 
-  return { name, price, count };
+  createLayout(
+    'span',
+    {
+      textContent: `${selectedProduct.name} - ${selectedProduct.price}원 x ${1}`,
+    },
+    $cartProduct,
+  );
+
+  const $buttonWrapper = createLayout('div', {}, $cartProduct);
+
+  createLayout(
+    'button',
+    {
+      className:
+        'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1',
+      textContent: '-',
+      dataset: {
+        productId: selectedProduct.id,
+        change: '-1',
+      },
+      onclick: getButtonClickEvent['-'],
+    },
+    $buttonWrapper,
+  );
+
+  createLayout(
+    'button',
+    {
+      className:
+        'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1',
+      textContent: '+',
+      dataset: {
+        productId: selectedProduct.id,
+        change: '1',
+      },
+      onclick: getButtonClickEvent['+'],
+    },
+    $buttonWrapper,
+  );
+
+  createLayout(
+    'button',
+    {
+      className: 'remove-item bg-red-500 text-white px-2 py-1 rounded',
+      textContent: '삭제',
+      dataset: {
+        productId: selectedProduct.id,
+      },
+      onclick: getButtonClickEvent['삭제'],
+    },
+    $buttonWrapper,
+  );
 };
 
-const getDiscount = {
-  p1: 0.1,
-  p2: 0.15,
-  p3: 0.2,
+// 초기 장바구니 render
+const buildCart = () => {
+  const $app = document.getElementById('app');
+
+  const $wrapper = createLayout('div', { className: 'bg-gray-100 p-8' }, $app);
+  const $container = createLayout(
+    'div',
+    {
+      className:
+        'max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8',
+    },
+    $wrapper,
+  );
+
+  createLayout(
+    'h1',
+    {
+      className: 'text-2xl font-bold mb-4',
+      textContent: '장바구니',
+    },
+    $container,
+  );
+
+  createLayout('div', { id: 'cart-items' }, $container);
+
+  createLayout(
+    'div',
+    {
+      id: 'cart-total',
+      className: 'text-xl font-bold my-4',
+    },
+    $container,
+  );
+
+  const $productSelect = createLayout(
+    'select',
+    {
+      id: 'product-select',
+      className: 'border rounded p-2 mr-2',
+    },
+    $container,
+  );
+  createProductOption($productSelect);
+
+  createLayout(
+    'button',
+    {
+      id: 'add-to-cart',
+      className: 'bg-blue-500 text-white px-4 py-2 rounded',
+      textContent: '추가',
+      onclick: onClickAddButton,
+    },
+    $container,
+  );
 };
 
 function main() {
-  generateInitElement();
+  buildCart();
 }
 
 main();
