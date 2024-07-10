@@ -13,6 +13,8 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
