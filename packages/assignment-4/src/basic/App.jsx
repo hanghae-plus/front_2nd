@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import CartItem from './components/CartItem';
 
 const PRODUCTS = [
@@ -37,11 +37,11 @@ export default function App() {
   });
 
   const [cartItemList, setCartItemList] = useState([]);
-  const hasItemInCart = useCallback(function (id) {
-    return Boolean(cartItemList.find((item) => item.id === id));
+  const hasItemInCart = useCallback(function (itemList, id) {
+    return Boolean(itemList.find((item) => item.id === id));
   }, []);
-  const addToCart = useCallback(function (id = selectedProductId) {
-    if (hasItemInCart(id)) {
+  function addToCart(id = selectedProductId) {
+    if (hasItemInCart(cartItemList, id)) {
       const newCartItemList = cartItemList.map((item) => {
         if (item.id === id) {
           item.quantity += ADD_QUANTITY;
@@ -54,10 +54,11 @@ export default function App() {
     const newCartItem = {
       ...PRODUCTS.find((product) => product.id === selectedProductId),
     };
-    newCartItem.quantity += ADD_QUANTITY;
 
+    newCartItem.quantity += ADD_QUANTITY;
     setCartItemList((pre) => [...pre, newCartItem]);
-  }, []);
+  }
+
   const isOneItem = useCallback(function (id) {
     return cartItemList.find((item) => item.id === id).quantity === 1;
   }, []);
@@ -65,12 +66,10 @@ export default function App() {
     plusItem(id) {
       addToCart(id);
     },
-
     minusItem(id) {
-      if (!hasItemInCart(id)) {
+      if (!hasItemInCart(cartItemList, id)) {
         return;
       }
-
       if (isOneItem(id)) {
         modifyCart.deleteItem(id);
         return;
