@@ -28,9 +28,28 @@ function createCartHTML() {
   `;
 }
 
+// 제품 옵션 생성 함수
+function createProductOption(product) {
+  return `<option value="${product.id}">${product.name} - ${product.price}원</option>`;
+}
+
+// 제품 선택 옵션 채우기 함수
+function populateProductSelect(selectElement) {
+  selectElement.innerHTML = PRODUCTS.map(createProductOption).join('');
+}
+
 function initializeCart() {
   const app = getElement(SELECTORS.APP);
   app.innerHTML = createCartHTML();
+
+  const elements = {
+    productSelect: getElement(SELECTORS.PRODUCT_SELECT),
+    addToCartButton: getElement(SELECTORS.ADD_TO_CART_BUTTON),
+    cartItems: getElement(SELECTORS.CART_ITEMS),
+    cartTotal: getElement(SELECTORS.CART_TOTAL),
+  };
+
+  populateProductSelect(elements.productSelect);
 }
 
 function main() {
@@ -39,13 +58,6 @@ function main() {
   const $addToCartButton = getElement(SELECTORS.ADD_TO_CART_BUTTON);
   const $cartItems = getElement(SELECTORS.CART_ITEMS);
   const $cartTotal = getElement(SELECTORS.CART_TOTAL);
-
-  PRODUCTS.forEach((product) => {
-    const $option = document.createElement('option');
-    $option.value = product.id;
-    $option.textContent = `${product.name} - ${product.price}원`;
-    $productSelect.appendChild($option);
-  });
 
   function uc() {
     let t = 0;
