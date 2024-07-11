@@ -1,12 +1,10 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 describe('basic test', () => {
-
   describe.each([
-    { type: 'origin', loadFile: () => import('../../main.js'), },
-    { type: 'basic', loadFile: () => import('../main.basic.js'), },
+    { type: 'origin', loadFile: () => import('../../main.js') },
+    { type: 'basic', loadFile: () => import('../main.basic.js') },
   ])('$type 장바구니 시나리오 테스트', ({ loadFile }) => {
-
     beforeAll(async () => {
       // DOM 초기화
       document.body.innerHTML = '<div id="app"></div>';
@@ -141,4 +139,4 @@ describe('basic test', () => {
       });
     });
   });
-})
+});
