@@ -1,85 +1,87 @@
 import { cartChangeEvent } from './customEvent.js';
 
 /**
- * 장바구니 관리 객체 생성
+ * 장바구니 관리 객체를 생성합니다.
  * @returns {object} 장바구니 관리 메서드 (getItems, addItem, removeItem, updateQuantity, getTotal)
  */
 export const createShoppingCart = () => {
-  const items = {};
+  const cartItemsObj = {};
 
   /**
-   * 현재 장바구니의 항목을 반환
-   * @returns {Array} 장바구니 항목의 배열 Array of { proudct, quantity }
+   * 현재 장바구니의 항목을 반환합니다.
+   * @returns {Array} 장바구니 항목의 배열 (product와 quantity를 포함한 객체들의 배열)
    */
-  const getItems = () => Object.values(items);
+  const getItems = () => Object.values(cartItemsObj);
 
   /**
-   * 장바구니에 상품을 추가
-   * @param {{ productId: string; productName: string; price: number; discount?: [[number, number]] }} product
-   * @param {number?} addCount 추가할 상품의 갯수 - 없을 경우 1로 처리
+   * 장바구니에 상품을 추가합니다.
+   * @param {{ productId: string; productName: string; price: number; discount?: [[number, number]] }} productObj - 추가할 상품 객체
+   * @param {number} [addCount=1] - 추가할 상품의 갯수 (기본값: 1)
    */
-  const addItem = (product, addCount) => {
-    const { productId, productName, price, discount } = product;
-    if (!items[productId]) {
-      items[productId] = { product: { productId, productName, price, discount }, quantity: addCount ?? 1 };
-      return;
+  const addItem = (productObj, addCount = 1) => {
+    const { productId } = productObj;
+    if (!cartItemsObj[productId]) {
+      cartItemsObj[productId] = { product: productObj, quantity: addCount };
+    } else {
+      cartItemsObj[productId].quantity += addCount;
     }
-    items[productId].quantity += addCount ?? 1;
     dispatchEvent(cartChangeEvent);
   };
 
   /**
-   * 장바구니에서 항목을 제거
-   * @param {string} productId
+   * 장바구니에서 항목을 제거합니다.
+   * @param {string} productId - 제거할 상품의 ID
    */
   const removeItem = (productId) => {
-    delete items[productId];
+    delete cartItemsObj[productId];
     dispatchEvent(cartChangeEvent);
   };
 
   /**
-   * 장바구니 항목의 수량을 변경
-   * @param {string} productId
-   * @param {number} nextQuantity - +1, -1 또는 결과 수량
+   * 장바구니 항목의 수량을 변경합니다.
+   * @param {string} productId - 수량을 변경할 상품의 ID
+   * @param {number} changeAmount - 변경할 수량 (+1, -1) 또는 새로운 수량
    */
-  const updateQuantity = (productId, nextQuantity) => {
-    // nextQuantity가 1이나 -1인 경우
-    if (nextQuantity === 1 || nextQuantity === -1) {
-      items[productId].quantity += nextQuantity;
+  const updateQuantity = (productId, changeAmount) => {
+    if (!cartItemsObj[productId]) return;
+
+    if (changeAmount === 1 || changeAmount === -1) {
+      cartItemsObj[productId].quantity += changeAmount;
     } else {
-      items[productId].quantity = nextQuantity;
+      cartItemsObj[productId].quantity = changeAmount;
     }
-    if (items[productId].quantity <= 0) {
+
+    if (cartItemsObj[productId].quantity <= 0) {
       removeItem(productId);
+    } else {
+      dispatchEvent(cartChangeEvent);
     }
-    dispatchEvent(cartChangeEvent);
   };
 
   /**
-   * 장바구니의 총액과 적용 할인율을 반환
-   * @returns {{ total: number; discountRate: number }}
+   * 장바구니의 총액과 적용된 할인율을 계산합니다.
+   * @returns {{ total: number; discountRate: number }} 총액과 할인율
    */
   const getTotal = () => {
-    const totalQuantity = Object.values(items).reduce((sum, { quantity }) => sum + quantity, 0);
-    const totalPriceBeforeDiscount = Object.values(items).reduce(
+    const totalQuantity = getItems().reduce((sum, { quantity }) => sum + quantity, 0);
+    const totalPriceBeforeDiscount = getItems().reduce(
       (sum, { product: { price }, quantity }) => sum + price * quantity,
       0,
     );
+
     if (totalQuantity >= 30) {
       return {
-        total: totalPriceBeforeDiscount * (1 - 0.25),
+        total: totalPriceBeforeDiscount * 0.75,
         discountRate: 0.25,
       };
     }
 
-    const totalPrice = Object.values(items).reduce((sum, { product: { price, discount }, quantity }) => {
-      // product가 할인율을 가지고 있지 않은 경우 할인 갯수, 할인율을 각각 0으로 처리
-      const [applicationQuantity, discountRate] = discount?.[0] ?? [0, 0];
-      if (quantity >= applicationQuantity) {
-        return sum + price * quantity * (1 - discountRate);
-      }
-      return sum + price * quantity;
+    const totalPrice = getItems().reduce((sum, { product: { price, discount }, quantity }) => {
+      const [applicationQuantity = 0, discountRate = 0] = discount?.[0] ?? [];
+      const itemPrice = quantity >= applicationQuantity ? price * quantity * (1 - discountRate) : price * quantity;
+      return sum + itemPrice;
     }, 0);
+
     return {
       total: totalPrice,
       discountRate: 1 - totalPrice / totalPriceBeforeDiscount,
