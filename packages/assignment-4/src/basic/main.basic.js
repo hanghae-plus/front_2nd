@@ -28,6 +28,19 @@ function createCartHTML() {
   `;
 }
 
+function createCartItemHTML(product, quantity) {
+  return `
+    <div id="${product.id}" class="flex justify-between items-center mb-2">
+      <span>${product.name} - ${product.price}원 x ${quantity}</span>
+      <div>
+        <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="${product.id}" data-change="-1">-</button>
+        <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="${product.id}" data-change="1">+</button>
+        <button class="remove-item bg-red-500 text-white px-2 py-1 rounded" data-product-id="${product.id}">삭제</button>
+      </div>
+    </div>
+  `;
+}
+
 // 제품 옵션 생성 함수
 function createProductOption(product) {
   return `<option value="${product.id}">${product.name} - ${product.price}원</option>`;
@@ -103,49 +116,25 @@ function initializeCart() {
   }
 
   function addToCart() {
-    const v = elements.productSelect.value;
-    let i;
-    for (let k = 0; k < PRODUCTS.length; k += 1) {
-      if (PRODUCTS[k].id === v) {
-        i = PRODUCTS[k];
-        break;
-      }
+    const { value } = elements.productSelect;
+
+    const selectedProduct = PRODUCTS.find((product) => product.id === value);
+
+    if (!selectedProduct) {
+      return;
     }
-    if (i) {
-      const e = document.getElementById(i.id);
-      if (e) {
-        const q = parseInt(e.querySelector('span').textContent.split('x ')[1]) + 1;
-        e.querySelector('span').textContent = i.name + ' - ' + i.price + '원 x ' + q;
-      } else {
-        const d = document.createElement('div');
-        const sp = document.createElement('span');
-        const bd = document.createElement('div');
-        const mb = document.createElement('button');
-        const pb = document.createElement('button');
-        const rb = document.createElement('button');
-        d.id = i.id;
-        d.className = 'flex justify-between items-center mb-2';
-        sp.textContent = i.name + ' - ' + i.price + '원 x 1';
-        mb.className = 'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1';
-        mb.textContent = '-';
-        mb.dataset.productId = i.id;
-        mb.dataset.change = '-1';
-        pb.className = 'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1';
-        pb.textContent = '+';
-        pb.dataset.productId = i.id;
-        pb.dataset.change = '1';
-        rb.className = 'remove-item bg-red-500 text-white px-2 py-1 rounded';
-        rb.textContent = '삭제';
-        rb.dataset.productId = i.id;
-        bd.appendChild(mb);
-        bd.appendChild(pb);
-        bd.appendChild(rb);
-        d.appendChild(sp);
-        d.appendChild(bd);
-        elements.cartItems.appendChild(d);
-      }
-      uc();
+
+    const existingItem = document.getElementById(selectedProduct.id);
+
+    if (existingItem) {
+      const quantitySpan = existingItem.querySelector('span');
+      const quantity = parseInt(quantitySpan.textContent.split('x ')[1], 10) + 1;
+      quantitySpan.textContent = `${selectedProduct.name} - ${selectedProduct.price}원 x ${quantity}`;
+    } else {
+      const cartItemHTML = createCartItemHTML(selectedProduct, 1);
+      elements.cartItems.insertAdjacentHTML('beforeend', cartItemHTML);
     }
+    uc();
   }
 
   function handleClickCartItems(event) {
