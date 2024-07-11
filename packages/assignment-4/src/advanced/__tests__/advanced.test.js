@@ -1,14 +1,17 @@
-import { describe, it, expect, beforeEach, beforeAll, vi } from "vitest";
-import { ProductOption, MainLayout, CartItem, CartTotal } from '../templates.js'
-import { createShoppingCart } from "../createShoppingCart.js";
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
+import {
+  ProductOption,
+  MainLayout,
+  CartItem,
+  CartTotal,
+} from '../templates.js';
+import { createShoppingCart } from '../createShoppingCart.js';
 
 describe('advanced test', () => {
-
   describe.each([
-    { type: 'origin', loadFile: () => import('../../main.js'), },
-    { type: 'advanced', loadFile: () => import('../main.advanced.js'), },
+    { type: 'origin', loadFile: () => import('../../main.js') },
+    { type: 'advanced', loadFile: () => import('../main.advanced.js') },
   ])('$type 장바구니 시나리오 테스트', ({ loadFile }) => {
-
     beforeAll(async () => {
       // DOM 초기화
       document.body.innerHTML = '<div id="app"></div>';
@@ -76,7 +79,9 @@ describe('advanced test', () => {
       });
 
       // 상품 제거
-      const removeButton = document.querySelector('.remove-item[data-product-id="p1"]');
+      const removeButton = document.querySelector(
+        '.remove-item[data-product-id="p1"]'
+      );
       removeButton.click();
 
       // 제거 후 장바구니 상태 검증
@@ -99,7 +104,9 @@ describe('advanced test', () => {
       await vi.waitFor(() => {
         const cartItems = document.querySelectorAll('#cart-items > div');
         expect(cartItems.length).toBe(0);
-        expect(document.querySelector('#cart-total').textContent.trim()).toBe('총액: 0원');
+        expect(document.querySelector('#cart-total').textContent.trim()).toBe(
+          '총액: 0원'
+        );
       });
 
       // 새로운 상품 추가 - 할인 조건을 만족시키기 위해 상품3을 10개 추가
@@ -157,7 +164,7 @@ describe('advanced test', () => {
       it('items를 토대로 렌더링할 수 있다.', () => {
         const items = [
           { id: 'id1', name: '테스트 상품 1', price: 100 },
-          { id: 'id2', name: '테스트 상품 2', price: 200 }
+          { id: 'id2', name: '테스트 상품 2', price: 200 },
         ];
         const result = MainLayout({ items });
         expect(result).toBe(`<div class="bg-gray-100 p-8">
@@ -176,9 +183,13 @@ describe('advanced test', () => {
 
     describe('CartItem', () => {
       it('상품 정보를 받아서 장바구니 UI로 표현한다.', () => {
-        const item = { product: { id: 'p1', name: '상품1', price: 10000 }, quantity: 2 };
+        const item = {
+          product: { id: 'p1', name: '상품1', price: 10000 },
+          quantity: 2,
+        };
         const result = CartItem(item);
-        expect(result).toBe(`<div class="flex justify-between items-center mb-2">
+        expect(result)
+          .toBe(`<div class="flex justify-between items-center mb-2">
     <span>상품1 - 10000원 x 2</span>
     <div>
       <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="p1" data-change="-1">-</button>
@@ -266,27 +277,42 @@ describe('advanced test', () => {
       const product2 = { id: 'p2', name: '상품2', price: 20000 };
       cart.addItem(product1);
       cart.addItem(product2, 2);
+      console.log(cart.getTotal());
       expect(cart.getTotal().total).toBe(50000);
     });
-
 
     describe('할인 로직', () => {
       const products = [
         { id: 'p1', name: '상품1', price: 10000, discount: [[10, 0.1]] },
         { id: 'p2', name: '상품2', price: 20000, discount: [[10, 0.15]] },
-        { id: 'p3', name: '상품3', price: 30000, discount: [[10, 0.2]] }
-      ]
+        { id: 'p3', name: '상품3', price: 30000, discount: [[10, 0.2]] },
+      ];
 
       describe('상품별 할인 적용', () => {
         it.each([
-          { product: products[0], discount: products[0].discount[0][1]*100, expected: 90000 },// [0, 10, 90000],  // 상품1
-          { product: products[1], discount: products[1].discount[0][1]*100, expected: 170000 },// [1, 10, 170000], // 상품2
-          { product: products[2], discount: products[2].discount[0][1]*100, expected: 240000 },// [2, 10, 240000]  // 상품3
-        ])('$product.name: 10개 이상 구매 시, $discount% 할인이 적용되어 $expected원이 된다.', ({ product, expected }) => {
-          cart.addItem(product, 10);
-          const { total } = cart.getTotal();
-          expect(total).toBe(expected);
-        });
+          {
+            product: products[0],
+            discount: products[0].discount[0][1] * 100,
+            expected: 90000,
+          }, // [0, 10, 90000],  // 상품1
+          {
+            product: products[1],
+            discount: products[1].discount[0][1] * 100,
+            expected: 170000,
+          }, // [1, 10, 170000], // 상품2
+          {
+            product: products[2],
+            discount: products[2].discount[0][1] * 100,
+            expected: 240000,
+          }, // [2, 10, 240000]  // 상품3
+        ])(
+          '$product.name: 10개 이상 구매 시, $discount% 할인이 적용되어 $expected원이 된다.',
+          ({ product, expected }) => {
+            cart.addItem(product, 10);
+            const { total } = cart.getTotal();
+            expect(total).toBe(expected);
+          }
+        );
       });
 
       it('30개 이상 구매 시 전체 25% 할인이 적용되어야 한다', () => {
@@ -312,4 +338,4 @@ describe('advanced test', () => {
       });
     });
   });
-})
+});
