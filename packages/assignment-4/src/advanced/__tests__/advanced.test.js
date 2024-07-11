@@ -277,7 +277,6 @@ describe('advanced test', () => {
       const product2 = { id: 'p2', name: '상품2', price: 20000 };
       cart.addItem(product1);
       cart.addItem(product2, 2);
-      console.log(cart.getTotal());
       expect(cart.getTotal().total).toBe(50000);
     });
 
