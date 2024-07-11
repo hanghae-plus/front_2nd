@@ -270,18 +270,6 @@ function main() {
 
       /**해당 아이템의 총 수량 */
       const quantity = Number(currentQuantity) + change;
-
-      // 수량이 1개이상인 경우
-      // if (quantity > 0) {
-      //   item.querySelector(
-      //     'span'
-      //   ).textContent = `${targetItemInform}x ${quantity}`;
-      // }
-      // // 수량이 없는 경우
-      // else {
-      //   item.remove();
-      // }
-
       quantity > 0
         ? (item.querySelector(
             'span'
@@ -293,7 +281,6 @@ function main() {
       item.remove();
     }
     updateTotalPrice();
-    // }
   }
 }
 
