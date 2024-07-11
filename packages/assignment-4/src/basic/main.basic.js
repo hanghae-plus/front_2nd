@@ -4,6 +4,10 @@ const PRICES = [
   { id: "p3", n: "상품3", p: 30000 },
 ];
 
+function getQuantity(element){
+  return parseInt(element.querySelector("span").textContent.split("x ")[1])
+}
+
 function main() {
   const appElement = document.getElementById("app");
   const wrapperElement = document.createElement("div");
@@ -47,8 +51,7 @@ const getTitleElement = function () {
 const getCartItemElement = function () {
   const cartItem = document.createElement("div");
   cartItem.id = "cart-items";
-
-  const handleClickCartItem = function (event) {
+  cartItem.onclick = function (event) {
     const target = event.target;
     const classList = Array.from(target.classList);
     const isQuantityChange = classList.includes("quantity-change");
@@ -61,7 +64,7 @@ const getCartItemElement = function () {
 
       if (isQuantityChange) {
         const change = parseInt(target.dataset.change); // 1 or -1
-        const quantity = parseInt(itemSpan.textContent.split("x ")[1]) + change;
+        const quantity = getQuantity(itemSpan) + change;
 
         if (quantity > 0) {
           itemSpan.textContent =
@@ -78,7 +81,6 @@ const getCartItemElement = function () {
       updateCart();
     }
   };
-  cartItem.onclick = handleClickCartItem;
   return cartItem;
 };
 
@@ -110,43 +112,29 @@ const getAddButtonElement = function (select, cartItem) {
   addButton.id = "add-to-cart";
   addButton.className = "bg-blue-500 text-white px-4 py-2 rounded";
   addButton.textContent = "추가";
+  addButton.onclick = function () {
+    const selectedId = select.value;
+    const newId = PRICES.filter(price => price.id === selectedId)[0]
 
-  const handleClickAddButton = function () {
-    let selectedId = select.value;
-    let id;
-
-    for (let item = 0; item < PRICES.length; item++) {
-      if (PRICES[item].id === selectedId) {
-        id = PRICES[item];
-        break;
-      }
-    }
-
-    if (id) {
-      const exitedId = document.getElementById(id.id);
+    if (newId) {
+      const exitedId = document.getElementById(newId.id);
       if (exitedId) {
-        const quantity =
-          parseInt(exitedId.querySelector("span").textContent.split("x ")[1]) +
-          1;
-        exitedId.querySelector("span").textContent =
-          id.n + " - " + id.p + "원 x " + quantity;
-      } else {
-        cartItem.innerHTML += `<div id=${id.id}>
-        <div id="product-id-${id.id}" class="flex justify-between items-center mb-2">
-            <span>상품 ${id.n} - ${id.p} 원 x 1</span>
-            <div>
-                <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-${id.id}" data-change="-1">-</button>
-                <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-${id.id}" data-change="1">+</button>
-                <button class="remove-item bg-red-500 text-white px-2 py-1 rounded" data-product-id="product-id-${id.id}">삭제</button>
-            </div>
-        </div>
-    </div>
-        `;
+        const quantity = getQuantity(exitedId) + 1;
+        exitedId.querySelector("span").textContent = `${newId.n} - ${newId.p}원 x ${quantity}`;
       }
+      cartItem.innerHTML += `<div id=${newId.id}>
+    <div id="product-id-${newId.id}" class="flex justify-between items-center mb-2">
+      <span>상품 ${newId.n} - ${newId.p} 원 x 1</span>
+      <div>
+        <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-${newId.id}" data-change="-1">-</button>
+        <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-${newId.id}" data-change="1">+</button>
+        <button class="remove-item bg-red-500 text-white px-2 py-1 rounded" data-product-id="product-id-${newId.id}">삭제</button>
+      </div>
+    </div>
+  </div>`;
       updateCart();
-    }
-  };
-  addButton.onclick = handleClickAddButton;
+      }
+    };
   return addButton;
 };
 
@@ -174,7 +162,7 @@ function getTotalPrice(items) {
 
   Array.from(items).forEach((item) => {
     const newItem = PRICES.filter(price => price.id === item.id)
-    const quantity = parseInt(item.querySelector("span").textContent.split("x ")[1]);
+    const quantity = getQuantity(item);
     const itemTotal = newItem[0].p * quantity;
 
     totalQuantity += quantity;
