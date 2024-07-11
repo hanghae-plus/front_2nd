@@ -1,3 +1,16 @@
+/**
+ * - 상수는 대문자로 표기
+ * - 복수는 list가 아닌 s를 사용
+ * - 함수 인자는 최소한으로 작성
+ * - 변수/함수명을 축약형으로 작성 X
+ * - element >> $를 붙인다
+ * - 구성 요소를 하나하나 만들어서 조립: build~
+ * - 속성을 부여: set~ / 변경: update~
+ * - 실질적으로 레이아웃을 만들어주는 함수명 create~
+ * - 클릭 함수: onClick~
+ * - 총합에 대한 변수명: total > final
+ */
+
 // 상품 목록
 const PRODUCTS = [
   { id: 'p1', name: '상품1', price: 10000 },
@@ -19,8 +32,6 @@ const DISCOUNT_CONFIG = {
 };
 
 const INITIAL_COUNT = 1;
-
-///////////////////////////////////////////////////////////////////////////////////
 
 // 속성 부여 함수
 const setAttributes = (target, attributes) => {
@@ -47,8 +58,9 @@ const createLayout = (tagName, attributes = {}, $parent) => {
 };
 
 ////////////////////////////////////////////////////////////////////////
-const getProductInfo = productId => {
-  const $productInfo = document.getElementById(productId);
+
+// 상품에 대한 이름, 가격, 수량 조회
+const getProductInfo = $productInfo => {
   const [_, name, price, count] = $productInfo.textContent.match(
     /(.+?) - (\d+)원 x (\d+)/,
   );
@@ -67,8 +79,7 @@ const getDiscountedPricePerProduct = (productId, productInfo) => {
   return price * count * (1 - discountRate);
 };
 
-// 예/아니오로 나온다 >> is , has , can
-// 할인 적용 여부 - 총 수량이 30개 이상인 경우 + 조건에 해당하는지 여부 ..
+// 할인 적용 여부 - 총 수량이 30개 이상인 경우 추가
 const canApplyTotalDiscount = totalDiscountedPrice => {
   const { totalPrice, totalCount } = getProductTotalInfo();
   return (
