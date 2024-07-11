@@ -1,11 +1,11 @@
 import { SELECTORS } from '../../../shared/constants/element';
-import { PRODUCTS } from '../../../shared/constants/product';
 import { getElement } from '../../../shared/utils/element';
-import { addToCart, handleCartItemActions } from '../service/cartService';
+import { createCartService } from '../service/cartService';
+import { createDiscountService } from '../service/discountService';
 import { createCartHTML } from './CartItem';
-import { populateProductSelect } from './ProductSelect';
+import { createProductSelect } from './ProductSelect';
 
-export function initializeCart() {
+export function initializeCart(products, discountRates, bulkDiscountRate, bulkDiscountThreshold) {
   const app = getElement(SELECTORS.APP);
   app.innerHTML = createCartHTML();
 
@@ -16,10 +16,14 @@ export function initializeCart() {
     cartTotal: getElement(SELECTORS.CART_TOTAL),
   };
 
-  populateProductSelect(elements.productSelect, PRODUCTS);
+  const populateProductSelect = createProductSelect(products);
+  populateProductSelect(elements.productSelect);
 
-  elements.addToCartButton.addEventListener('click', () => addToCart(elements));
-  elements.cartItems.addEventListener('click', (event) => handleCartItemActions(event, elements));
+  const discountService = createDiscountService(discountRates, bulkDiscountRate, bulkDiscountThreshold);
+  const cartService = createCartService(products, discountService);
+
+  elements.addToCartButton.addEventListener('click', () => cartService.addToCart(elements));
+  elements.cartItems.addEventListener('click', (event) => cartService.handleCartItemActions(event, elements));
 
   return elements;
 }
