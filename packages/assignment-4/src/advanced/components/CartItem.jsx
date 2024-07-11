@@ -1,5 +1,5 @@
 export default function CartItem({ item, modifyCart }) {
-  const { plusItem, minusItem, deleteItem } = modifyCart;
+  const { plusItem, minusItem, deleteItem } = modifyCart();
 
   return (
     <div id={item.id} className="flex justify-between items-center mb-2">

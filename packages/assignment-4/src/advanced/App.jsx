@@ -3,24 +3,20 @@ import CartItem from './components/CartItem';
 import {
   ADD_QUANTITY,
   BULK_DISCOUNT_RATE,
-  BULK_QUANTITY,
   DEFAULT_DISCOUNT_RATE,
   DISCOUNT_QUANTITY,
   PRODUCTS,
 } from './constants';
+import { hasItemInCart, isBulk, isNeedDiscount } from './utils';
 
 export default function App() {
   const [selectedProductId, setSelectedProductId] = useState(PRODUCTS[0].id);
 
   const selectProduct = useCallback(function (e) {
     setSelectedProductId(e.target.value);
-  });
+  }, []);
 
   const [cartItemList, setCartItemList] = useState([]);
-
-  const hasItemInCart = useCallback(function (itemList, id) {
-    return Boolean(itemList.find((item) => item.id === id));
-  }, []);
 
   function addToCart(id = selectedProductId) {
     if (hasItemInCart(cartItemList, id)) {
@@ -41,16 +37,12 @@ export default function App() {
     setCartItemList((pre) => [...pre, newCartItem]);
   }
 
-  const isOneItem = useCallback(function (itemList, id) {
-    return itemList.find((item) => item.id === id).quantity === 1;
-  }, []);
-
-  const modifyCart = {
-    plusItem(id) {
+  function modifyCart() {
+    function plusItem(id) {
       addToCart(id);
-    },
+    }
 
-    minusItem(id) {
+    function minusItem(id) {
       if (!hasItemInCart(cartItemList, id)) {
         return;
       }
@@ -63,9 +55,9 @@ export default function App() {
         return item;
       });
       setCartItemList(newCartItemList);
-    },
+    }
 
-    deleteItem(id) {
+    function deleteItem(id) {
       const newCartItemList = cartItemList
         .map((item) => {
           if (item.id === id) {
@@ -75,22 +67,14 @@ export default function App() {
         })
         .filter((item) => item.id !== id);
       setCartItemList(newCartItemList);
-    },
-  };
+    }
+
+    return { plusItem, minusItem, deleteItem };
+  }
 
   const cartTotal = useMemo(() => {
     return cartItemList.reduce((pre, cur) => pre + cur.price * cur.quantity, 0);
   }, [cartItemList]);
-
-  const isBulk = useCallback(function (itemList) {
-    return (
-      itemList.reduce((pre, cur) => pre + cur.quantity, 0) >= BULK_QUANTITY
-    );
-  }, []);
-
-  const isNeedDiscount = useCallback(function (itemList) {
-    return Boolean(itemList.find((item) => item.quantity >= DISCOUNT_QUANTITY));
-  }, []);
 
   const discountRate = useMemo(() => {
     if (isBulk(cartItemList)) {
