@@ -21,22 +21,22 @@ function main() {
 
   app.innerHTML = cartHTML;
 
-  const s = document.getElementById('product-select');
-  const ab = document.getElementById('add-to-cart');
-  const ct = document.getElementById('cart-items');
-  const tt = document.getElementById('cart-total');
+  const $productSelect = document.getElementById('product-select');
+  const $addToCartButton = document.getElementById('add-to-cart');
+  const $cartItems = document.getElementById('cart-items');
+  const $cartTotal = document.getElementById('cart-total');
 
   PRODUCTS.forEach((product) => {
-    const o = document.createElement('option');
-    o.value = product.id;
-    o.textContent = `${product.name} - ${product.price}원`;
-    s.appendChild(o);
+    const $option = document.createElement('option');
+    $option.value = product.id;
+    $option.textContent = `${product.name} - ${product.price}원`;
+    $productSelect.appendChild($option);
   });
 
   function uc() {
     let t = 0;
     let tq = 0;
-    const items = ct.children;
+    const items = $cartItems.children;
     let tb = 0;
 
     for (let m = 0; m < items.length; m += 1) {
@@ -75,17 +75,17 @@ function main() {
       dr = (tb - t) / tb;
     }
 
-    tt.textContent = '총액: ' + Math.round(t) + '원';
+    $cartTotal.textContent = '총액: ' + Math.round(t) + '원';
     if (dr > 0) {
       const dspan = document.createElement('span');
       dspan.className = 'text-green-500 ml-2';
       dspan.textContent = '(' + (dr * 100).toFixed(1) + '% 할인 적용)';
-      tt.appendChild(dspan);
+      $cartTotal.appendChild(dspan);
     }
   }
 
-  ab.onclick = function () {
-    const v = s.value;
+  $addToCartButton.onclick = function () {
+    const v = $productSelect.value;
     let i;
     for (let k = 0; k < PRODUCTS.length; k += 1) {
       if (PRODUCTS[k].id === v) {
@@ -124,13 +124,13 @@ function main() {
         bd.appendChild(rb);
         d.appendChild(sp);
         d.appendChild(bd);
-        ct.appendChild(d);
+        $cartItems.appendChild(d);
       }
       uc();
     }
   };
 
-  ct.onclick = function (event) {
+  $cartItems.onclick = function (event) {
     const target = event.target;
     if (target.classList.contains('quantity-change') || target.classList.contains('remove-item')) {
       const productId = target.dataset.productId;
