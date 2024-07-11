@@ -1,27 +1,5 @@
+import { PRODUCTS, BULK_DISCOUNT_RATE, BULK_DISCOUNT_THRESHOLD, DISCOUNT_RATES, SELECTORS } from './constants';
 import getElement from './utils/element';
-
-const PRODUCTS = [
-  { id: 'p1', name: '상품1', price: 10000 },
-  { id: 'p2', name: '상품2', price: 20000 },
-  { id: 'p3', name: '상품3', price: 30000 },
-];
-
-const DISCOUNT_RATES = {
-  p1: 0.1,
-  p2: 0.15,
-  p3: 0.2,
-};
-
-const BULK_DISCOUNT_THRESHOLD = 30;
-const BULK_DISCOUNT_RATE = 0.25;
-
-const SELECTORS = {
-  APP: '#app',
-  CART_ITEMS: '#cart-items',
-  CART_TOTAL: '#cart-total',
-  PRODUCT_SELECT: '#product-select',
-  ADD_TO_CART_BUTTON: '#add-to-cart',
-};
 
 function createCartHTML() {
   return `
