@@ -29,14 +29,14 @@ export const createShoppingCart = () => {
   const getTotalQuantity = () => {
     return Object.values(items).reduce(
       (accumulator, item) => accumulator + item.quantity,
-      0
+      0,
     );
   };
 
   const getTotalBeforeDiscount = () => {
     return Object.values(items).reduce(
       (accumulator, item) => accumulator + item.product.price * item.quantity,
-      0
+      0,
     );
   };
 
@@ -50,51 +50,13 @@ export const createShoppingCart = () => {
   const MINIMUM_DISCOUNT_QUANTITY = 10;
   const BULK_QUANTITY_THRESHOLD = 30;
 
-  // const calculateDiscount = (
-  //   itemsArray,
-  //   totalBeforeDiscount,
-  //   totalQuantity
-  // ) => {
-  //   let individualDiscountedTotal = 0;
-  //   let discountDetails = {};
-
-  //   for (const item of itemsArray) {
-  //     const { product, quantity } = item;
-  //     const discountRate =
-  //       quantity >= MINIMUM_DISCOUNT_QUANTITY
-  //         ? PRODUCT_DISCOUNT_RATES[product.id]
-  //         : 0;
-  //     discountDetails[product.id] = discountRate;
-  //     individualDiscountedTotal +=
-  //       product.price * quantity * (1 - discountRate);
-  //   }
-
-  //   let bulkDiscountedTotal = totalBeforeDiscount;
-  //   if (totalQuantity >= BULK_QUANTITY_THRESHOLD) {
-  //     bulkDiscountedTotal =
-  //       totalBeforeDiscount * (1 - PRODUCT_DISCOUNT_RATES.bulk);
-  //   }
-
-  //   let total = individualDiscountedTotal;
-  //   let appliedDiscount = 'individual';
-
-  //   if (individualDiscountedTotal > bulkDiscountedTotal) {
-  //     total = bulkDiscountedTotal;
-  //     appliedDiscount = 'bulk';
-  //     discountDetails = { bulk: PRODUCT_DISCOUNT_RATES.bulk };
-  //   }
-
-  //   return { total, appliedDiscount, discountRate: discountDetails };
-  // };
-
   const calculateDiscount = (
     itemsArray,
     totalBeforeDiscount,
-    totalQuantity
+    totalQuantity,
   ) => {
     let individualDiscountedTotal = 0;
     let totalDiscountAmount = 0;
-    let discountDetails = {};
 
     for (const item of itemsArray) {
       const { product, quantity } = item;
@@ -102,7 +64,7 @@ export const createShoppingCart = () => {
         quantity >= MINIMUM_DISCOUNT_QUANTITY
           ? PRODUCT_DISCOUNT_RATES[product.id]
           : 0;
-      discountDetails[product.id] = discountRate;
+
       const discountedPrice = product.price * quantity * (1 - discountRate);
       individualDiscountedTotal += discountedPrice;
       totalDiscountAmount += product.price * quantity * discountRate;
@@ -124,7 +86,6 @@ export const createShoppingCart = () => {
       total = bulkDiscountedTotal;
       appliedDiscount = 'bulk';
       discountRate = bulkDiscountAmount / totalBeforeDiscount;
-      discountDetails = { bulk: PRODUCT_DISCOUNT_RATES.bulk };
     }
 
     return { total, appliedDiscount, discountRate };
