@@ -1,207 +1,149 @@
+let cartState = {
+  cart: {},
+  total: 0,
+  discountRatio: 0
+};
+
 const PRICES = [
-  { id: "p1", n: "상품1", p: 10000 },
-  { id: "p2", n: "상품2", p: 20000 },
-  { id: "p3", n: "상품3", p: 30000 },
+  { id: "p1", name: "상품1", price: 10000 },
+  { id: "p2", name: "상품2", price: 20000 },
+  { id: "p3", name: "상품3", price: 30000 },
 ];
 
-function getQuantity(element){
-  return parseInt(element.querySelector("span").textContent.split("x ")[1])
-}
+const updateCartState = () => {
+  const { total, totalQuantity, totalCount } = calculateTotals();
+  const discountRatio = calculateDiscountRatio(total, totalCount, totalQuantity);
 
-function main() {
-  const appElement = document.getElementById("app");
-  const wrapperElement = document.createElement("div");
-  const contentElement = getContentElement();
+  cartState.total = Math.round(total);
+  cartState.discountRatio = discountRatio;
 
-  wrapperElement.className = "bg-gray-100 p-8";
-  wrapperElement.appendChild(contentElement);
-  appElement.appendChild(wrapperElement);
-}
-
-function getContentElement() {
-  const contents = document.createElement("div");
-  contents.className =
-    "max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8";
-
-  const titleElement = getTitleElement();
-  const cartItemElement = getCartItemElement();
-  const cartTotalElement = getCartTotalElement();
-  const selectElement = getCartItemSelector();
-  const addButtonElement = getAddButtonElement(selectElement, cartItemElement);
-
-  [
-    titleElement,
-    cartItemElement,
-    cartTotalElement,
-    selectElement,
-    addButtonElement,
-  ].forEach((el) => contents.appendChild(el));
-
-  return contents;
-}
-
-const getTitleElement = function () {
-  const title = document.createElement("h1");
-  title.className = "text-2xl font-bold mb-4";
-  title.textContent = "장바구니";
-
-  return title;
+  renderCartTotal();
 };
 
-const getCartItemElement = function () {
-  const cartItem = document.createElement("div");
-  cartItem.id = "cart-items";
-  cartItem.onclick = function (event) {
-    const target = event.target;
-    const classList = Array.from(target.classList);
-    const isQuantityChange = classList.includes("quantity-change");
-    const isRemoveItem = classList.includes("remove-item");
+const calculateTotals = () => {
+  const result = Object.entries(cartState.cart).reduce((acc, [id, quantity]) => {
+    const { price } = PRICES.find(item => item.id === id);
+    const itemTotal = price * quantity;
+    const discount = getDiscount(quantity, id);
 
-    const productId = target.dataset.productId;
-    const item = document.getElementById(productId);
-    const itemSpan = item.querySelector("span");
+    return {
+      total: acc.total + itemTotal * (1 - discount),
+      totalQuantity: acc.totalQuantity + quantity,
+      totalCount: acc.totalCount + itemTotal
+    };
+  }, { total: 0, totalQuantity: 0, totalCount: 0 });
 
-    if(!isQuantityChange && !isRemoveItem) return cartItem;
-    if (isQuantityChange) {
-      const change = parseInt(target.dataset.change); // 1 or -1
-      const quantity = getQuantity(itemSpan) + change;
+  if (result.totalQuantity >= 30) {
+    result.total = Math.min(result.total, result.totalCount * 0.75);
+  }
 
-      if (quantity > 0) {
-        itemSpan.textContent =
-          itemSpan.textContent.split("x ")[0] + "x " + quantity;
-      } else {
-        item.remove();
-      }
-    }
-
-    if (isRemoveItem) {
-      item.remove();
-    }
-
-    updateCart();
-  };
-  return cartItem;
+  return result;
 };
 
-const getCartTotalElement = function () {
-  const cartTotal = document.createElement("div");
-  cartTotal.id = "cart-total";
-  cartTotal.className = "text-xl font-bold my-4";
-
-  return cartTotal;
+const calculateDiscountRatio = (total, totalCount) => {
+  const discountRatio = (totalCount - total) / totalCount;
+  return Number((discountRatio * 100).toFixed(1)) / 100;
 };
 
-const getCartItemSelector = function () {
-  const selector = document.createElement("select");
-  selector.id = "product-select";
-  selector.className = "border rounded p-2 mr-2";
+const getDiscount = (quantity, itemId) => {
+  if (quantity >= 10) {
+    const discounts = { p1: 0.1, p2: 0.15, p3: 0.2 };
+    return discounts[itemId] || 0;
+  }
+  return 0;
+};
 
-  PRICES.forEach((item) => {
-    const option = document.createElement("option");
-    option.value = item.id;
-    option.textContent = `${item.n} - ${item.p}원`;
-    selector.appendChild(option);
+const renderCartItems = () => {
+  const cartItemsElement = document.getElementById("cart-items");
+  cartItemsElement.innerHTML = '';
+
+  Object.entries(cartState.cart).forEach(([id, quantity]) => {
+    const item = PRICES.find(price => price.id === id);
+    const itemElement = document.createElement('div');
+    itemElement.id = id;
+    itemElement.innerHTML = `
+      <div id="product-id-${id}" class="flex justify-between items-center mb-2">
+        <span>${item.name} - ${item.price}원 x ${quantity}</span>
+        <div>
+          <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="${id}" data-change="-1">-</button>
+          <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="${id}" data-change="1">+</button>
+          <button class="remove-item bg-red-500 text-white px-2 py-1 rounded" data-product-id="${id}">삭제</button>
+        </div>
+      </div>
+    `;
+    cartItemsElement.appendChild(itemElement);
   });
-
-  return selector;
 };
 
-const getAddButtonElement = function (select, cartItem) {
-  const addButton = document.createElement("button");
-  addButton.id = "add-to-cart";
-  addButton.className = "bg-blue-500 text-white px-4 py-2 rounded";
-  addButton.textContent = "추가";
-  addButton.onclick = function () {
-    const selectedId = select.value;
-    const newId = PRICES.filter(price => price.id === selectedId)[0]
+const renderCartTotal = () => {
+  const cartTotalElement = document.getElementById("cart-total");
+  cartTotalElement.textContent = `총액: ${cartState.total}원`;
+  if (cartState.discountRatio > 0) {
+    cartTotalElement.innerHTML += `<span class="text-green-500 ml-2">(${(cartState.discountRatio * 100).toFixed(1)}% 할인 적용)</span>`;
+  }
+};
 
-    if (newId) {
-      const exitedId = document.getElementById(newId.id);
-      if (exitedId) {
-        const quantity = getQuantity(exitedId) + 1;
-        exitedId.querySelector("span").textContent = `${newId.n} - ${newId.p}원 x ${quantity}`;
-      } else {
-        cartItem.innerHTML += `<div id=${newId.id}>
-    <div id="product-id-${newId.id}" class="flex justify-between items-center mb-2">
-      <span>상품 ${newId.n} - ${newId.p} 원 x 1</span>
-      <div>
-        <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-${newId.id}" data-change="-1">-</button>
-        <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-${newId.id}" data-change="1">+</button>
-        <button class="remove-item bg-red-500 text-white px-2 py-1 rounded" data-product-id="product-id-${newId.id}">삭제</button>
+// 이벤트 핸들러
+const handleCartItemClick = (event) => {
+  const { target } = event;
+  const isQuantityChange = target.classList.contains("quantity-change");
+  const isRemoveItem = target.classList.contains("remove-item");
+
+  if (!isQuantityChange && !isRemoveItem) return;
+
+  const productId = target.dataset.productId;
+
+  if (isQuantityChange) {
+    const change = parseInt(target.dataset.change);
+    cartState.cart[productId] = (cartState.cart[productId] || 0) + change;
+    if (cartState.cart[productId] <= 0) {
+      delete cartState.cart[productId];
+    }
+  }
+
+  if (isRemoveItem) {
+    delete cartState.cart[productId];
+  }
+
+  renderCartItems();
+  updateCartState();
+};
+
+const handleAddToCart = () => {
+  const selectElement = document.getElementById("product-select");
+  const selectedId = selectElement.value;
+  cartState.cart[selectedId] = (cartState.cart[selectedId] || 0) + 1;
+  renderCartItems();
+  updateCartState();
+};
+
+
+// main 함수
+const main = () => {
+  const appElement = document.getElementById("app");
+
+  appElement.innerHTML = `
+    <div class="bg-gray-100 p-8">
+      <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8">
+        <h1 class="text-2xl font-bold mb-4">장바구니</h1>
+        <div id="cart-items"></div>
+        <div id="cart-total" class="text-xl font-bold my-4"></div>
+        <select id="product-select" class="border rounded p-2 mr-2">
+          ${PRICES.map(({ id, name, price }) => `
+            <option value="${id}">${name} - ${price}원</option>
+          `).join('')}
+        </select>
+        <button id="add-to-cart" class="bg-blue-500 text-white px-4 py-2 rounded">추가</button>
       </div>
     </div>
-  </div>`;
-      }
-      updateCart();
-    }
-  };
-  return addButton;
+  `;
+
+  // 이벤트 핸들러 등록
+  document.getElementById("cart-items").onclick = handleCartItemClick;
+  document.getElementById("add-to-cart").onclick = handleAddToCart;
+
+  renderCartItems();
+  updateCartState();
 };
-
-function updateCart() {
-  const cartItem = document.getElementById("cart-items");
-  const cartTotal = document.getElementById("cart-total");
-
-  const items = cartItem.children;
-  const {total, totalQuantity, totalCount} = getTotalPrice(items);
-
-  const discountRatio = calculateDiscountRatio(total, totalCount, totalQuantity)
-  cartTotal.textContent = "총액: " + Math.round(total) + "원";
-
-  if (discountRatio > 0) {
-    cartTotal.innerHTML = `<span class="text-green-500 ml-2">
-        (${discountRatio}% 할인 적용)
-    </span>`;
-  }
-}
-
-function getTotalPrice(items) {
-  let total = 0;
-  let totalQuantity = 0;
-  let totalCount = 0;
-
-  Array.from(items).forEach((item) => {
-    const newItem = PRICES.filter(price => price.id === item.id)
-    const quantity = getQuantity(item);
-    const itemTotal = newItem[0].p * quantity;
-
-    totalQuantity += quantity;
-    totalCount += itemTotal;
-
-    const discount = getDiscount(quantity, newItem)
-    total += itemTotal * (1 - discount)
-  })
-
-  return {total, totalQuantity, totalCount}
-}
-
-function getDiscount(quantity, item){
-  if (quantity >= 10) {
-    switch(item.id){
-      case "p1":
-        return 0.1
-      case "p2":
-        return 0.15
-      case "p3":
-        return 0.2
-      default:
-        return 0
-    }
-  }
-  return 0
-}
-
-function calculateDiscountRatio(total, totalCount, totalQuantity){
-  const bulkDiscount = total * 0.25;
-  const individualDiscount = totalCount - total;
-
-  const discountRatio = (totalCount - total) / totalCount;
-
-  if (totalQuantity >= 30) {
-    return bulkDiscount > individualDiscount ? 0.25 : discountRatio;
-  }
-
-  return discountRatio;
-}
 
 main();
