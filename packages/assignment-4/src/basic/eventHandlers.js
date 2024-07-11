@@ -1,8 +1,8 @@
-import { getCurrentCartItems, updateCartItems } from './localStorage.js';
-import { products } from './shopInfos.js';
+import { updateCartItemsObj, getCartItemsObj } from '/src/basic/localStorage.js';
+import { products } from '/src/basic/shopInfos.js';
 
 export function updateQuantity({ productId, change }) {
-  const cartItemsObj = getCurrentCartItems();
+  const cartItemsObj = getCartItemsObj();
   const newCartItemsObj = structuredClone(cartItemsObj);
   newCartItemsObj[productId].quantity += Number(change);
 
@@ -10,11 +10,11 @@ export function updateQuantity({ productId, change }) {
     delete newCartItemsObj[productId];
   }
 
-  updateCartItems(newCartItemsObj);
+  updateCartItemsObj(newCartItemsObj);
 }
 
 export function removeItemFromCart(productId) {
-  const cartItemsObj = getCurrentCartItems();
+  const cartItemsObj = getCartItemsObj();
   const newCartItemsObj = structuredClone(cartItemsObj);
   delete newCartItemsObj[productId];
   updateCartItems(newCartItemsObj);
@@ -25,7 +25,7 @@ export function addItemToCart() {
   const selectedProductId = productSelectElement.value;
   const selectedProductObj = products.find(({ productId }) => productId === selectedProductId);
 
-  const cartItemsObj = getCurrentCartItems();
+  const cartItemsObj = getCartItemsObj();
   const newCartItemsObj = structuredClone(cartItemsObj);
 
   if (!newCartItemsObj[selectedProductId]) {
@@ -37,5 +37,5 @@ export function addItemToCart() {
     newCartItemsObj[selectedProductId].quantity += 1;
   }
 
-  updateCartItems(newCartItemsObj);
+  updateCartItemsObj(newCartItemsObj);
 }
