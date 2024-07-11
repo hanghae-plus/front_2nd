@@ -1,4 +1,4 @@
-import { DISCOUNT_RATES } from './shopInfos.js';
+import { DISCOUNT_RATES } from '/src/basic/shopInfos.js';
 
 export function calculateTotalQuantity(cartItemsObj) {
   return Object.values(cartItemsObj).reduce((sum, { quantity }) => sum + quantity, 0);

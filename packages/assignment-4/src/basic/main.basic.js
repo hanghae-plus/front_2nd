@@ -3,16 +3,16 @@ import {
   createAppTemplateElement,
   createCartTotalPriceElement,
   createProductOptionElement,
-} from './templates.js';
-import { getCartItemsObj } from './localStorage.js';
-import { addItemToCart, updateQuantity, removeItemFromCart } from './eventHandlers.js';
-import { productList } from './shopInfos.js';
+} from '/src/basic/templates.js';
+import { getCartItemsObj } from '/src/basic/localStorage.js';
+import { addItemToCart, updateQuantity, removeItemFromCart } from '/src/basic/eventHandlers.js';
+import { productList } from '/src/basic/shopInfos.js';
 import {
   calculateTotalPrice,
   calculateTotalPriceBeforeDiscount,
   calculateTotalQuantity,
   calculateAppliedDiscountRate,
-} from './calculates.js';
+} from '/src/basic/calculates.js';
 
 function updateTotalPriceElement() {
   const cartItemsObj = getCartItemsObj();
