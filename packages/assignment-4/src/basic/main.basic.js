@@ -1,7 +1,7 @@
 const PRICES = [
-  {id: "p1", n: "상품1", p: 10000},
-  {id: "p2", n: "상품2", p: 20000},
-  {id: "p3", n: "상품3", p: 30000},
+  { id: "p1", n: "상품1", p: 10000 },
+  { id: "p2", n: "상품2", p: 20000 },
+  { id: "p3", n: "상품3", p: 30000 },
 ];
 
 function main() {
@@ -25,11 +25,13 @@ function getContentElement() {
   const selectElement = getCartItemSelector();
   const addButtonElement = getAddButtonElement();
 
-  contents.appendChild(titleElement);
-  contents.appendChild(cartItemElement);
-  contents.appendChild(cartTotalElement);
-  contents.appendChild(selectElement);
-  contents.appendChild(addButtonElement);
+  [
+    titleElement,
+    cartItemElement,
+    cartTotalElement,
+    selectElement,
+    addButtonElement,
+  ].forEach((el) => contents.appendChild(el));
 
   return contents;
 }
@@ -52,17 +54,18 @@ const getCartItemElement = function () {
     const isQuantityChange = classList.includes("quantity-change");
     const isRemoveItem = classList.includes("remove-item");
 
-    if (isQuantityChange|| isRemoveItem) {
+    if (isQuantityChange || isRemoveItem) {
       const productId = target.dataset.productId;
       const item = document.getElementById(productId);
-      const itemSpan = item.querySelector("span")
+      const itemSpan = item.querySelector("span");
 
       if (isQuantityChange) {
         const change = parseInt(target.dataset.change); // 1 or -1
         const quantity = parseInt(itemSpan.textContent.split("x ")[1]) + change;
 
         if (quantity > 0) {
-          itemSpan.textContent = itemSpan.textContent.split("x ")[0] + "x " + quantity;
+          itemSpan.textContent =
+            itemSpan.textContent.split("x ")[0] + "x " + quantity;
         } else {
           item.remove();
         }
@@ -108,36 +111,39 @@ const getAddButtonElement = function () {
   addButton.className = "bg-blue-500 text-white px-4 py-2 rounded";
   addButton.textContent = "추가";
 
-  const select = document.createElement('select');
-
+  const select = document.createElement("select");
+  const cartItem = getCartItemElement();
   const handleClickAddButton = function () {
     let selectedId = select.value;
     let id;
 
-    for (var k = 0; k < PRICES.length; k++) {
-      if (PRICES[k].id === selectedId) {
-        id = PRICES[k];
+    for (let item = 0; item < PRICES.length; item++) {
+      if (PRICES[item].id === selectedId) {
+        id = PRICES[item];
         break;
       }
     }
 
     if (id) {
-      const e = document.getElementById(id.id);
-      if (e) {
-        var quantity = parseInt(e.querySelector("span").textContent.split("x ")[1]) + 1;
-        e.querySelector("span").textContent = id.n + " - " + id.p + "원 x " + quantity;
+      const exitedId = document.getElementById(id.id);
+      if (exitedId) {
+        var quantity =
+          parseInt(exitedId.querySelector("span").textContent.split("x ")[1]) +
+          1;
+        exitedId.querySelector("span").textContent =
+          id.n + " - " + id.p + "원 x " + quantity;
       } else {
-        return `<div id="container">
-        <div id="product-id-1" class="flex justify-between items-center mb-2">
+        cartItem.appendChild(`<div id=${id.id}>
+        <div id="product-id-${id.id}" class="flex justify-between items-center mb-2">
             <span>상품 ${id.n} - ${id.p} 원 x 1</span>
             <div>
-                <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-1" data-change="-1">-</button>
-                <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-1" data-change="1">+</button>
-                <button class="remove-item bg-red-500 text-white px-2 py-1 rounded" data-product-id="product-id-1">삭제</button>
+                <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-${id.id}" data-change="-1">-</button>
+                <button class="quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1" data-product-id="product-id-${id.id}" data-change="1">+</button>
+                <button class="remove-item bg-red-500 text-white px-2 py-1 rounded" data-product-id="product-id-${id.id}">삭제</button>
             </div>
         </div>
     </div>
-        `
+        `);
       }
       updateCart();
     }
@@ -166,7 +172,9 @@ function updateCart() {
       }
     }
 
-    const quantity = parseInt(items[m].querySelector("span").textContent.split("x ")[1]);
+    const quantity = parseInt(
+      items[m].querySelector("span").textContent.split("x ")[1]
+    );
     const itemTotal = item.p * quantity;
     let discount = 0;
 
