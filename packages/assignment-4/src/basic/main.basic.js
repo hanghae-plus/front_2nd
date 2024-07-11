@@ -185,20 +185,7 @@ function updateCart() {
     total += itemTotal * (1 - discount);
   }
 
-  let discountRatio = 0;
-  if (totalQuantity >= 30) {
-    const bulkDiscount = total * 0.25;
-    const individualDiscount = totalCount - total;
-    if (bulkDiscount > individualDiscount) {
-      total = totalCount * 0.75;
-      discountRatio = 0.25;
-    } else {
-      discountRatio = (totalCount - total) / totalCount;
-    }
-  } else {
-    discountRatio = (totalCount - total) / totalCount;
-  }
-
+  const discountRatio = calculateDiscountRatio(total, totalCount, totalQuantity)
   cartTotal.textContent = "총액: " + Math.round(total) + "원";
 
   if (discountRatio > 0) {
@@ -206,6 +193,19 @@ function updateCart() {
         (${discountRatio}% 할인 적용)
     </span>`;
   }
+}
+
+function calculateDiscountRatio(total, totalCount, totalQuantity){
+  const bulkDiscount = total * 0.25;
+  const individualDiscount = totalCount - total;
+
+  const discountRatio = (totalCount - total) / totalCount;
+
+  if (totalQuantity >= 30) {
+    return (bulkDiscount > individualDiscount ? 0.25 : discountRatio);
+  }
+
+  return discountRatio;
 }
 
 main();
