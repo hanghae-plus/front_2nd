@@ -28,11 +28,13 @@ function createCartHTML() {
   `;
 }
 
-function main() {
+function initializeCart() {
   const app = getElement(SELECTORS.APP);
-
   app.innerHTML = createCartHTML();
+}
 
+function main() {
+  initializeCart();
   const $productSelect = getElement(SELECTORS.PRODUCT_SELECT);
   const $addToCartButton = getElement(SELECTORS.ADD_TO_CART_BUTTON);
   const $cartItems = getElement(SELECTORS.CART_ITEMS);
