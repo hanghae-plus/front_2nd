@@ -9,7 +9,6 @@ const cart = createShoppingCart(PRODUCTS);
 document.getElementById("add-to-cart").addEventListener("click", () => {
   const productId = document.getElementById("product-select").value;
   cart.addItem(productId);
-  console.log("### getItems():",cart.getItems());
 });
 
 document.getElementById("cart-items").addEventListener("click", (event) => {

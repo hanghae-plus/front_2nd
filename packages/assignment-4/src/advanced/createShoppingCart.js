@@ -35,9 +35,6 @@ export const createShoppingCart = (products) => {
   const calculateDiscount = (quantity, id) => {
     if (quantity >= DISCOUNT_THRESHOLDS[id]) {
       return DISCOUNT_RATES[id];
-      // if (id === "p1") return 0.1;
-      // if (id === "p2") return 0.15;
-      // if (id === "p3") return 0.2;
     }
     return 0;
   };
