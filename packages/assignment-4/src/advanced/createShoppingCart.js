@@ -36,11 +36,11 @@ export const createShoppingCart = () => {
 
   const getItems = () => items;
 
-  const calculateDiscount = () => {
-    return 0;
-  };
+  // const calculateDiscount = () => {
+  //   return 0;
+  // };
 
-  const getTotalQuantity = () => 0;
+  // const getTotalQuantity = () => 0;
 
   const getTotal = () => {
     let total = 0; // 총합
