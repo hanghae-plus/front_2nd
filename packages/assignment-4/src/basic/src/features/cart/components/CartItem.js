@@ -25,12 +25,28 @@ export function createCartItemHTML(product, quantity) {
   `;
 }
 
+/**
+ * 할인율 텍스트를 생성합니다.
+ * @param {number} discountRate - 할인율 (0 ~ 1 사이의 값)
+ * @returns {string} 할인율 텍스트
+ */
+function createDiscountText(discountRate) {
+  if (Number.isNaN(discountRate) || discountRate <= 0) return '';
+  const discountPercentage = (discountRate * 100).toFixed(1);
+  return `(${discountPercentage}% 할인 적용)`;
+}
+
+/**
+ * 장바구니 총액 표시를 업데이트합니다.
+ * @param {HTMLElement} cartTotalElement - 총액을 표시할 요소
+ * @param {Object} cartResult - 장바구니 계산 결과
+ * @param {number} cartResult.finalTotal - 최종 총액
+ * @param {number} cartResult.discountRate - 할인율
+ */
 export function updateCartDisplay(cartTotal, { finalTotal, discountRate }) {
-  cartTotal.textContent = `총액: ${finalTotal}원`;
-  if (discountRate > 0) {
-    const discountSpan = document.createElement('span');
-    discountSpan.className = 'text-green-500 ml-2';
-    discountSpan.textContent = `(${(discountRate * 100).toFixed(1)}% 할인 적용)`;
-    cartTotal.appendChild(discountSpan);
-  }
+  const discountText = createDiscountText(discountRate);
+  cartTotal.innerHTML = `
+    <span>총액: ${finalTotal}원</span>
+    ${discountText ? `<span class="text-green-500 ml-2">${discountText}</span>` : ''}
+  `;
 }
