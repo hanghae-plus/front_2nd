@@ -6,7 +6,6 @@ export const createCartView = (cart, products) => {
   const render = () => {
     const cartItems = cart.getItems();
     const cartItemsElement = document.getElementById('cart-items');
-    const cartTotalElement = document.getElementById('cart-total');
 
     if (!cartItemsElement) {
       app.innerHTML = MainLayout({ items: products });

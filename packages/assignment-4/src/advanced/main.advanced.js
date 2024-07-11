@@ -14,6 +14,3 @@ const main = () => {
 };
 
 main();
-
-window.cart = createShoppingCart();
-window.PRODUCTS = PRODUCTS;

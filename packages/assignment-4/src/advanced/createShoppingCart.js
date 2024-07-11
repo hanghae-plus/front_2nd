@@ -1,6 +1,10 @@
 export const createShoppingCart = () => {
   const items = {};
 
+  const BULK_DISCOUNT_THRESHOLD = 30;
+  const BULK_DISCOUNT_RATE = 0.25;
+  const INDIVIDUAL_DISCOUNT_THRESHOLD = 10;
+
   const addItem = (product, quantity = 1) => {
     if (items[product.id]) {
       items[product.id].quantity += quantity;
@@ -29,7 +33,7 @@ export const createShoppingCart = () => {
     
     let maxDiscount = 0;
     getItems().forEach(item => {
-      if (item.quantity >= 10 && item.product.discount) {
+      if (item.quantity >= INDIVIDUAL_DISCOUNT_THRESHOLD && item.product.discount) {
         const [threshold, rate] = item.product.discount[0];
         if (item.quantity >= threshold) {
           const itemDiscount = item.product.price * item.quantity * rate;
@@ -38,8 +42,8 @@ export const createShoppingCart = () => {
       }
     });
 
-    if (totalQuantity >= 30) {
-      const bulkDiscount = totalBeforeDiscount * 0.25;
+    if (totalQuantity >= BULK_DISCOUNT_THRESHOLD) {
+      const bulkDiscount = totalBeforeDiscount * BULK_DISCOUNT_RATE;
       maxDiscount = Math.max(maxDiscount, bulkDiscount);
     }
 
