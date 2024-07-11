@@ -1,10 +1,10 @@
-function main() {
-  var p = [
-    { id: 'p1', n: '상품1', p: 10000 },
-    { id: 'p2', n: '상품2', p: 20000 },
-    { id: 'p3', n: '상품3', p: 30000 },
-  ]
+const PRODUCTS = [
+  { id: 'p1', name: '상품1', price: 10000 },
+  { id: 'p2', name: '상품2', price: 20000 },
+  { id: 'p3', name: '상품3', price: 30000 },
+]
 
+function main() {
   var a = document.getElementById('app')
   var w = document.createElement('div')
   var b = document.createElement('div')
@@ -27,10 +27,10 @@ function main() {
   h.textContent = '장바구니'
   ab.textContent = '추가'
 
-  for (var j = 0; j < p.length; j++) {
+  for (var j = 0; j < PRODUCTS.length; j++) {
     var o = document.createElement('option')
-    o.value = p[j].id
-    o.textContent = p[j].n + ' - ' + p[j].p + '원'
+    o.value = PRODUCTS[j].id
+    o.textContent = PRODUCTS[j].name + ' - ' + PRODUCTS[j].price + '원'
     s.appendChild(o)
   }
 
@@ -50,14 +50,14 @@ function main() {
 
     for (var m = 0; m < items.length; m++) {
       var item
-      for (var n = 0; n < p.length; n++) {
-        if (p[n].id === items[m].id) {
-          item = p[n]
+      for (var n = 0; n < PRODUCTS.length; n++) {
+        if (PRODUCTS[n].id === items[m].id) {
+          item = PRODUCTS[n]
           break
         }
       }
       var quantity = parseInt(items[m].querySelector('span').textContent.split('x ')[1])
-      var itemTotal = item.p * quantity
+      var itemTotal = item.price * quantity
       var disc = 0
 
       tq += quantity
@@ -96,9 +96,9 @@ function main() {
   ab.onclick = function () {
     var v = s.value
     var i
-    for (var k = 0; k < p.length; k++) {
-      if (p[k].id === v) {
-        i = p[k]
+    for (var k = 0; k < PRODUCTS.length; k++) {
+      if (PRODUCTS[k].id === v) {
+        i = PRODUCTS[k]
         break
       }
     }
@@ -106,7 +106,7 @@ function main() {
       var e = document.getElementById(i.id)
       if (e) {
         var q = parseInt(e.querySelector('span').textContent.split('x ')[1]) + 1
-        e.querySelector('span').textContent = i.n + ' - ' + i.p + '원 x ' + q
+        e.querySelector('span').textContent = i.name + ' - ' + i.price + '원 x ' + q
       } else {
         var d = document.createElement('div')
         var sp = document.createElement('span')
@@ -116,7 +116,7 @@ function main() {
         var rb = document.createElement('button')
         d.id = i.id
         d.className = 'flex justify-between items-center mb-2'
-        sp.textContent = i.n + ' - ' + i.p + '원 x 1'
+        sp.textContent = i.name + ' - ' + i.price + '원 x 1'
         mb.className = 'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1'
         mb.textContent = '-'
         mb.dataset.productId = i.id
