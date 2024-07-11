@@ -4,7 +4,7 @@ let cartState = {
   discountRatio: 0
 };
 
-const PRICES = [
+const products = [
   { id: "p1", name: "상품1", price: 10000 },
   { id: "p2", name: "상품2", price: 20000 },
   { id: "p3", name: "상품3", price: 30000 },
@@ -22,7 +22,7 @@ const updateCartState = () => {
 
 const calculateTotals = () => {
   const result = Object.entries(cartState.cart).reduce((acc, [id, quantity]) => {
-    const { price } = PRICES.find(item => item.id === id);
+    const { price } = products.find(item => item.id === id);
     const itemTotal = price * quantity;
     const discount = getDiscount(quantity, id);
 
@@ -58,7 +58,7 @@ const renderCartItems = () => {
   cartItemsElement.innerHTML = '';
 
   Object.entries(cartState.cart).forEach(([id, quantity]) => {
-    const item = PRICES.find(price => price.id === id);
+    const item = products.find(price => price.id === id);
     const itemElement = document.createElement('div');
     itemElement.id = id;
     itemElement.innerHTML = `
@@ -129,7 +129,7 @@ const main = () => {
         <div id="cart-items"></div>
         <div id="cart-total" class="text-xl font-bold my-4"></div>
         <select id="product-select" class="border rounded p-2 mr-2">
-          ${PRICES.map(({ id, name, price }) => `
+          ${products.map(({ id, name, price }) => `
             <option value="${id}">${name} - ${price}원</option>
           `).join('')}
         </select>
