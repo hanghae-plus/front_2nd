@@ -131,7 +131,7 @@ const getAddButtonElement = function (select, cartItem) {
         exitedId.querySelector("span").textContent =
           id.n + " - " + id.p + "원 x " + quantity;
       } else {
-        cartItem.innerHTML = `<div id=${id.id}>
+        cartItem.innerHTML += `<div id=${id.id}>
         <div id="product-id-${id.id}" class="flex justify-between items-center mb-2">
             <span>상품 ${id.n} - ${id.p} 원 x 1</span>
             <div>
@@ -156,6 +156,7 @@ function updateCart() {
 
   const items = cartItem.children;
   const {total, totalQuantity, totalCount} = getTotalPrice(items);
+
   const discountRatio = calculateDiscountRatio(total, totalCount, totalQuantity)
   cartTotal.textContent = "총액: " + Math.round(total) + "원";
 
@@ -173,9 +174,8 @@ function getTotalPrice(items) {
 
   Array.from(items).forEach((item) => {
     const newItem = PRICES.filter(price => price.id === item.id)
-
-    const quantity = item.querySelector("span").textContent.split("x ")[1]
-    const itemTotal = newItem.p * quantity;
+    const quantity = parseInt(item.querySelector("span").textContent.split("x ")[1]);
+    const itemTotal = newItem[0].p * quantity;
 
     totalQuantity += quantity;
     totalCount += itemTotal;
@@ -210,7 +210,7 @@ function calculateDiscountRatio(total, totalCount, totalQuantity){
   const discountRatio = (totalCount - total) / totalCount;
 
   if (totalQuantity >= 30) {
-    return (bulkDiscount > individualDiscount ? 0.25 : discountRatio);
+    return bulkDiscount > individualDiscount ? 0.25 : discountRatio;
   }
 
   return discountRatio;
