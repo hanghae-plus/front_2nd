@@ -8,7 +8,8 @@ const createTemplate = (template = ``) => {
 
   templateElement.innerHTML = template;
 
-  const $node = templateElement.content.firstElementChild;
+  // const $node = templateElement.content.firstElementChild;
+  const $node = templateElement.content.firstChild;
 
   return $node;
 };
@@ -243,50 +244,56 @@ function main() {
      * 버튼의 class에 'quantity-chagne'(+,- 버튼) 혹은
      * 'remove-item'(삭제 버튼)이 포함되어 있다면??
      */
-    if (
-      target.classList.contains('quantity-change') ||
-      target.classList.contains('remove-item')
-    ) {
-      const productId = target.dataset.productId;
+    // if (
+    //   target.classList.contains('quantity-change') ||
+    //   target.classList.contains('remove-item')
+    // ) {
+    const productId = target.dataset.productId;
 
-      /**장바구니에 있는 아이템 */
-      const item = document.getElementById(productId);
+    /**장바구니에 있는 아이템 */
+    const item = document.getElementById(productId);
 
-      // +,- 버튼일 경우
-      if (target.classList.contains('quantity-change')) {
-        /**해당 버튼의 change dataset
-         * -버튼의 경우 data property로 -1
-         * +버튼의 경우 data property로 +1
-         */
+    // +,- 버튼일 경우
+    if (target.classList.contains('quantity-change')) {
+      /**해당 버튼의 change dataset
+       * -버튼의 경우 data property로 -1
+       * +버튼의 경우 data property로 +1
+       */
 
-        // +1일수도 -1일수도 있는데 어떻게??
-        const change = parseInt(target.dataset.change);
+      // +1일수도 -1일수도 있는데 어떻게??
+      const change = parseInt(target.dataset.change);
 
-        // 해당 아이템 구조분해
-        const [targetItemInform, currentQuantity] = item
-          .querySelector('span')
-          .textContent.split('x ');
+      // 해당 아이템 구조분해
+      const [targetItemInform, currentQuantity] = item
+        .querySelector('span')
+        .textContent.split('x ');
 
-        /**해당 아이템의 총 수량 */
-        const quantity = Number(currentQuantity) + change;
+      /**해당 아이템의 총 수량 */
+      const quantity = Number(currentQuantity) + change;
 
-        // 수량이 1개이상인 경우
-        if (quantity > 0) {
-          item.querySelector(
+      // 수량이 1개이상인 경우
+      // if (quantity > 0) {
+      //   item.querySelector(
+      //     'span'
+      //   ).textContent = `${targetItemInform}x ${quantity}`;
+      // }
+      // // 수량이 없는 경우
+      // else {
+      //   item.remove();
+      // }
+
+      quantity > 0
+        ? (item.querySelector(
             'span'
-          ).textContent = `${targetItemInform}x ${quantity}`;
-        }
-        // 수량이 없는 경우
-        else {
-          item.remove();
-        }
-      }
-      // 그외(삭제 버튼)의 경우
-      else if (target.classList.contains('remove-item')) {
-        item.remove();
-      }
-      updateTotalPrice();
+          ).textContent = `${targetItemInform}x ${quantity}`)
+        : item.remove();
     }
+    // 그외(삭제 버튼)의 경우
+    if (target.classList.contains('remove-item')) {
+      item.remove();
+    }
+    updateTotalPrice();
+    // }
   }
 }
 
