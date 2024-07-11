@@ -1,71 +1,76 @@
-import { createHtmlFromLiteral } from './createCartView';
+import { reRenderCartItems } from './createCartView';
 import { createShoppingCart } from './createShoppingCart';
 import { PRODUCTS } from './product';
-import { getCartItemLiteral, getCartTotalLiteral } from './templates';
-import { CartItem, DiscountDetail, Product } from './type';
-import { replaceExistChild } from './utils/dom';
+import { isDivHTMLElement, isSelectHTMLElement } from './utils/domHelpers';
 
-//TODO 1. +, - 버튼 이벤트
-export const itemButtonsOnClick = (
-  $cartItemsContainer: HTMLElement,
-  target: HTMLElement
+export const setEvent = <K extends keyof HTMLElementEventMap>(
+  eventType: K,
+  targetElementId: string,
+  eventFunction: (event: HTMLElementEventMap[K]) => void
 ) => {
-  const { findItem, updateQuantity, getItems } = createShoppingCart();
+  const $targetElement = document.getElementById(targetElementId);
 
-  if (target.classList.contains('quantity-change')) {
-    let productId = target.dataset.productId as string;
-    if (target.classList.contains('quantity-change')) {
-      let change = parseInt(target.dataset.change);
+  if (!$targetElement) {
+    return;
+  }
 
-      const findCartItem = findItem(productId);
-      if (!findCartItem) return;
+  $targetElement.addEventListener(eventType, eventFunction);
+};
 
-      if (change === 1) {
-        updateQuantity(productId, findCartItem.quantity + 1);
-      }
-      if (change === -1) updateQuantity(productId, findCartItem.quantity - 1);
+export const itemButtonsOnClick = (targetHTMLElement: HTMLElement) => {
+  const { removeItem, findItem, updateQuantity, getCurrentCartItems } =
+    createShoppingCart();
+
+  let targetProductId = targetHTMLElement.dataset.productId;
+  if (!targetProductId) {
+    return;
+  }
+
+  if (targetHTMLElement.closest('.quantity-change')) {
+    let changeValue = parseInt(targetHTMLElement.dataset.change as string);
+    if (!changeValue) {
+      return;
     }
 
-    const cartItems = getItems();
-    const updateCartItemsLiteral = cartItems
-      .map((cartItem) => getCartItemLiteral(cartItem))
-      .join('');
+    const currentCartItem = findItem(targetProductId);
+    if (!currentCartItem) return;
 
-    const $updateCartItems = createHtmlFromLiteral(updateCartItemsLiteral);
-    replaceExistChild($cartItemsContainer, $updateCartItems);
+    const newQuantity = currentCartItem.quantity + changeValue;
+    updateQuantity(targetProductId, newQuantity);
+
+    const cartItems = getCurrentCartItems();
+    reRenderCartItems(cartItems);
+  }
+
+  if (targetHTMLElement.closest('.remove-item')) {
+    removeItem(targetProductId);
   }
 };
 
-export const reRenderTotalPrice = () => {
-  const { getTotal } = createShoppingCart();
-  const $cartTotalPrice = document.getElementById(
-    'cart-total'
-  ) as HTMLDivElement;
+export const appendCartItem = () => {
+  const $cartSelectElement = document.getElementById('product-select');
+  const $cartItemsContainer = document.getElementById('cart-items');
 
-  const discountDetail = getTotal();
-  const cartTotalLiteral = getCartTotalLiteral(discountDetail);
-  const $cartTotal = createHtmlFromLiteral(cartTotalLiteral);
-  replaceExistChild($cartTotalPrice, $cartTotal);
-};
+  if (
+    !isSelectHTMLElement($cartSelectElement) ||
+    !isDivHTMLElement($cartItemsContainer)
+  ) {
+    return;
+  }
 
-export const appendCartItem = (
-  $cartItemsContainer: HTMLDivElement,
-  $productSelect: HTMLSelectElement
-) => {
-  const { addItem, getItems } = createShoppingCart();
-  const selectedProductId = $productSelect.value;
+  const { addItem, getCurrentCartItems } = createShoppingCart();
+  const selectedProductId = $cartSelectElement.value;
 
   const selectedProduct = PRODUCTS.find(
     (product) => product.id === selectedProductId
   );
-  if (!selectedProduct) return;
+  if (!selectedProduct) {
+    return;
+  }
 
   addItem(selectedProduct);
-  const cartItems = getItems();
 
-  const updateCartItemsLiteral = cartItems
-    .map((cartItem) => getCartItemLiteral(cartItem))
-    .join('');
-  const $updateCartItems = createHtmlFromLiteral(updateCartItemsLiteral);
-  replaceExistChild($cartItemsContainer, $updateCartItems);
+  const cartItems = getCurrentCartItems();
+
+  reRenderCartItems(cartItems);
 };
