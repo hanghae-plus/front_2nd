@@ -1,4 +1,5 @@
-import { CartItem, DiscountDetail, Product } from './type';
+import { CartItem } from './entities/cartItem.ts';
+import { DiscountDetail, Product } from './types/type.ts';
 
 export const getProductOptionLiteral = (product: Product) =>
   `<option value="${product.id}">${product.name + ' - ' + product.price + '원'}</option>`;

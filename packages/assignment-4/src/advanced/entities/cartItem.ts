@@ -1,3 +1,5 @@
+import { Product } from '../types/type';
+
 const MAX_QUANTITY = 999;
 const MIN_QUANTITY = 0;
 
@@ -21,15 +23,4 @@ export class CartItem {
   equals(product: Product) {
     return this.product.id === product.id;
   }
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-}
-
-export interface DiscountDetail {
-  total: number;
-  discountRate: number;
 }

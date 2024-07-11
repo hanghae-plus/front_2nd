@@ -1,56 +1,34 @@
-import { createCartView, createHtmlFromLiteral } from './createCartView';
+import {
+  createCartView,
+  reRenderCartItems,
+  reRenderTotalPrice,
+} from './createCartView';
 import {
   appendCartItem,
   itemButtonsOnClick,
-  reRenderTotalPrice,
-} from './createEventListener';
+  setEvent,
+} from './createEventListener.ts';
 import { createShoppingCart } from './createShoppingCart';
-import { getCartItemLiteral } from './templates';
-import { replaceExistChild } from './utils/dom';
-
-type CustomElement = Element & {
-  dataset: {
-    productId: string;
-  };
-};
+import { isHTMLElement } from './utils/domHelpers.ts';
 
 function main() {
-  const { removeItem, getItems } = createShoppingCart();
+  const { getCurrentCartItems } = createShoppingCart();
   createCartView();
 
-  const $cartSelectElement = document.getElementById(
-    'product-select'
-  ) as HTMLSelectElement;
-  const $addItemBtn = document.getElementById(
-    'add-to-cart'
-  ) as HTMLButtonElement;
-  const $cartItemsContainer = document.getElementById(
-    'cart-items'
-  ) as HTMLDivElement;
+  setEvent('click', 'cart-items', (event) => {
+    if (!isHTMLElement(event.target)) {
+      return;
+    }
+    itemButtonsOnClick(event.target);
 
-  $cartItemsContainer.addEventListener('click', (event) => {
-    if (!(event.target as HTMLElement).closest('.remove-item')) return false;
-    const productId = (
-      (event.target as HTMLElement).closest('.remove-item') as CustomElement
-    ).dataset.productId;
-    removeItem(productId);
-    const cartItems = getItems();
-    const updateCartItemsLiteral = cartItems
-      .map((cartItem) => getCartItemLiteral(cartItem))
-      .join('');
-    const $updateCartItems = createHtmlFromLiteral(updateCartItemsLiteral);
-    replaceExistChild($cartItemsContainer, $updateCartItems);
+    const currentCartItems = getCurrentCartItems();
+    reRenderCartItems(currentCartItems);
+
     reRenderTotalPrice();
   });
 
-  $cartItemsContainer.addEventListener('click', (event) => {
-    itemButtonsOnClick($cartItemsContainer, event.target as HTMLElement);
-    reRenderTotalPrice();
-  });
-
-  // 추가 버튼 클릭
-  $addItemBtn.addEventListener('click', () => {
-    appendCartItem($cartItemsContainer, $cartSelectElement);
+  setEvent('click', 'add-to-cart', () => {
+    appendCartItem();
     reRenderTotalPrice();
   });
 }

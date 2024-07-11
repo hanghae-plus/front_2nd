@@ -1,12 +1,10 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 describe('basic test', () => {
-
   describe.each([
-    { type: 'origin', loadFile: () => import('../../main.js'), },
-    { type: 'basic', loadFile: () => import('../main.basic.js'), },
+    { type: 'origin', loadFile: () => import('../../main.js') },
+    { type: 'basic', loadFile: () => import('../main.basic.ts') },
   ])('$type 장바구니 시나리오 테스트', ({ loadFile }) => {
-
     beforeAll(async () => {
       // DOM 초기화
       document.body.innerHTML = '<div id="app"></div>';
@@ -74,7 +72,9 @@ describe('basic test', () => {
       });
 
       // 상품 제거
-      const removeButton = document.querySelector('.remove-item[data-product-id="p1"]');
+      const removeButton = document.querySelector(
+        '.remove-item[data-product-id="p1"]'
+      );
       removeButton.click();
 
       // 제거 후 장바구니 상태 검증
@@ -97,7 +97,9 @@ describe('basic test', () => {
       await vi.waitFor(() => {
         const cartItems = document.querySelectorAll('#cart-items > div');
         expect(cartItems.length).toBe(0);
-        expect(document.querySelector('#cart-total').textContent.trim()).toBe('총액: 0원');
+        expect(document.querySelector('#cart-total').textContent.trim()).toBe(
+          '총액: 0원'
+        );
       });
 
       // 새로운 상품 추가 - 할인 조건을 만족시키기 위해 상품3을 10개 추가
@@ -141,4 +143,4 @@ describe('basic test', () => {
       });
     });
   });
-})
+});
