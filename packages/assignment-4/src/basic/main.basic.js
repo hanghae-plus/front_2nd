@@ -1,13 +1,21 @@
+import getElement from './utils/element';
+
 const PRODUCTS = [
   { id: 'p1', name: '상품1', price: 10000 },
   { id: 'p2', name: '상품2', price: 20000 },
   { id: 'p3', name: '상품3', price: 30000 },
 ];
 
-function main() {
-  const app = document.getElementById('app');
+const SELECTORS = {
+  APP: '#app',
+  CART_ITEMS: '#cart-items',
+  CART_TOTAL: '#cart-total',
+  PRODUCT_SELECT: '#product-select',
+  ADD_TO_CART_BUTTON: '#add-to-cart',
+};
 
-  const cartHTML = `
+function createCartHTML() {
+  return `
     <div class="bg-gray-100 p-8">
       <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8">
         <h1 class="text-2xl font-bold mb-4">장바구니</h1>
@@ -18,13 +26,17 @@ function main() {
       </div>
     </div>
   `;
+}
 
-  app.innerHTML = cartHTML;
+function main() {
+  const app = getElement(SELECTORS.APP);
 
-  const $productSelect = document.getElementById('product-select');
-  const $addToCartButton = document.getElementById('add-to-cart');
-  const $cartItems = document.getElementById('cart-items');
-  const $cartTotal = document.getElementById('cart-total');
+  app.innerHTML = createCartHTML();
+
+  const $productSelect = getElement(SELECTORS.PRODUCT_SELECT);
+  const $addToCartButton = getElement(SELECTORS.ADD_TO_CART_BUTTON);
+  const $cartItems = getElement(SELECTORS.CART_ITEMS);
+  const $cartTotal = getElement(SELECTORS.CART_TOTAL);
 
   PRODUCTS.forEach((product) => {
     const $option = document.createElement('option');
