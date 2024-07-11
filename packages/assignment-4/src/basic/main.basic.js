@@ -23,7 +23,7 @@ function getContentElement() {
   const cartItemElement = getCartItemElement();
   const cartTotalElement = getCartTotalElement();
   const selectElement = getCartItemSelector();
-  const addButtonElement = getAddButtonElement();
+  const addButtonElement = getAddButtonElement(selectElement, cartItemElement);
 
   [
     titleElement,
@@ -105,14 +105,12 @@ const getCartItemSelector = function () {
   return selector;
 };
 
-const getAddButtonElement = function () {
+const getAddButtonElement = function (select, cartItem) {
   const addButton = document.createElement("button");
   addButton.id = "add-to-cart";
   addButton.className = "bg-blue-500 text-white px-4 py-2 rounded";
   addButton.textContent = "추가";
 
-  const select = document.createElement("select");
-  const cartItem = getCartItemElement();
   const handleClickAddButton = function () {
     let selectedId = select.value;
     let id;
@@ -127,13 +125,13 @@ const getAddButtonElement = function () {
     if (id) {
       const exitedId = document.getElementById(id.id);
       if (exitedId) {
-        var quantity =
+        const quantity =
           parseInt(exitedId.querySelector("span").textContent.split("x ")[1]) +
           1;
         exitedId.querySelector("span").textContent =
           id.n + " - " + id.p + "원 x " + quantity;
       } else {
-        cartItem.appendChild(`<div id=${id.id}>
+        cartItem.innerHTML = `<div id=${id.id}>
         <div id="product-id-${id.id}" class="flex justify-between items-center mb-2">
             <span>상품 ${id.n} - ${id.p} 원 x 1</span>
             <div>
@@ -143,19 +141,18 @@ const getAddButtonElement = function () {
             </div>
         </div>
     </div>
-        `);
+        `;
       }
       updateCart();
     }
   };
   addButton.onclick = handleClickAddButton;
-
   return addButton;
 };
 
 function updateCart() {
-  const cartItem = getCartItemElement();
-  const cartTotal = getCartTotalElement();
+  const cartItem = document.getElementById("cart-items");
+  const cartTotal = document.getElementById("cart-total");
 
   let total = 0;
   let totalQuantity = 0;
@@ -205,9 +202,9 @@ function updateCart() {
   cartTotal.textContent = "총액: " + Math.round(total) + "원";
 
   if (discountRatio > 0) {
-    cartTotal.appendChild(`<span className="text-green-500 ml-2">
+    cartTotal.innerHTML = `<span class="text-green-500 ml-2">
         (${discountRatio}% 할인 적용)
-    </span>`);
+    </span>`;
   }
 }
 
