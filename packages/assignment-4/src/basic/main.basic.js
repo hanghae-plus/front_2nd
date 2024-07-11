@@ -27,12 +27,12 @@ function main() {
   h.textContent = '장바구니'
   ab.textContent = '추가'
 
-  for (let j = 0; j < PRODUCTS.length; j += 1) {
+  PRODUCTS.forEach((product) => {
     const o = document.createElement('option')
-    o.value = PRODUCTS[j].id
-    o.textContent = PRODUCTS[j].name + ' - ' + PRODUCTS[j].price + '원'
+    o.value = product.id
+    o.textContent = `${product.name} - ${product.price}원`
     s.appendChild(o)
-  }
+  })
 
   b.appendChild(h)
   b.appendChild(ct)
