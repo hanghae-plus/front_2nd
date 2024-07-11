@@ -1,60 +1,68 @@
 import { createShoppingCart } from './createShoppingCart.js';
-import { MainLayout, CartItem, CartTotal } from './templates.js';
+import { createMainLayoutElement, createCartItemElement, createCartTotalElement } from './templates.js';
 
 /**
- * 장바구니 뷰를 생성
- * @param {HTMLElement} 루트 요소
- * @param {{ productId: string; productName: string; price: number; discount: [[number, number]]}[]} products
+ * 장바구니 뷰를 생성합니다.
+ * @param {HTMLElement} rootElement - 루트 요소
+ * @param {{ productId: string; productName: string; price: number; discount: [[number, number]]}[]} productList - 상품 목록
  * @returns {object} 장바구니 뷰 업데이트 메서드 (renderCartItems, renderCartTotal)
  */
-export const createCartView = (root, products) => {
-  root.innerHTML = MainLayout(products);
+export const createCartView = (rootElement, productList) => {
+  rootElement.innerHTML = createMainLayoutElement(productList);
 
   const { addItem, removeItem, updateQuantity, getTotal, getItems } = createShoppingCart();
 
   // 최초 items 등록
-  products.forEach((product) => addItem(product, 0));
+  productList.forEach((productObj) => addItem(productObj, 0));
 
-  // appRoute에 이벤트 위임
-  root.addEventListener('click', (event) => {
+  /**
+   * 장바구니 관련 이벤트를 처리합니다.
+   * @param {Event} event - 클릭 이벤트 객체
+   */
+  function handleCartEvents(event) {
     const { className, dataset, id } = event.target;
-    // +, - 버튼 : dataset.change에 -1 또는 1이 들어있음
+
     if (className.includes('quantity-change')) {
       updateQuantity(dataset.productId, Number(dataset.change));
       return;
     }
 
-    // 삭제 버튼
     if (className.includes('remove-item')) {
       removeItem(dataset.productId);
       return;
     }
 
-    // 추가 버튼
     if (id === 'add-to-cart') {
-      const productSelect = root.querySelector('#product-select');
-      const selectedProductId = productSelect.value;
-      const product = products.find(({ productId }) => productId === selectedProductId);
-      addItem(product);
+      const productSelectElement = rootElement.querySelector('#product-select');
+      const selectedProductId = productSelectElement.value;
+      const selectedProductObj = productList.find(({ productId }) => productId === selectedProductId);
+      addItem(selectedProductObj);
       return;
     }
-  });
+  }
 
-  // cartItems 렌더링
-  const cartItems = root.querySelector('#cart-items');
+  // 이벤트 위임을 통한 이벤트 처리
+  rootElement.addEventListener('click', handleCartEvents);
+
+  const cartItemsElement = rootElement.querySelector('#cart-items');
+  /**
+   * 장바구니 아이템을 렌더링합니다.
+   */
   const renderCartItems = () => {
-    const items = getItems();
-    cartItems.innerHTML = items
+    const cartItemList = getItems();
+    cartItemsElement.innerHTML = cartItemList
       .filter(({ quantity }) => quantity > 0)
-      .map(({ product, quantity }) => CartItem({ product, quantity }))
+      .map((cartItemObj) => createCartItemElement(cartItemObj))
       .join('');
   };
 
-  // cartTotal 렌더링
-  const cartTotal = root.querySelector('#cart-total');
+  const cartTotalElement = rootElement.querySelector('#cart-total');
+  /**
+   * 장바구니 총액을 렌더링합니다.
+   */
   const renderCartTotal = () => {
     const { total, discountRate } = getTotal();
-    cartTotal.innerHTML = CartTotal({ total, discountRate });
+    cartTotalElement.innerHTML = createCartTotalElement({ total, discountRate });
   };
 
   return { renderCartItems, renderCartTotal };

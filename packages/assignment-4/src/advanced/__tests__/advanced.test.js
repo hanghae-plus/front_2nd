@@ -1,11 +1,16 @@
 import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
-import { ProductOption, MainLayout, CartItem, CartTotal } from '../templates.js';
+import {
+  createProductOptionElement,
+  createMainLayoutElement,
+  createCartItemElement,
+  createCartTotalElement,
+} from '../templates.js';
 import { createShoppingCart } from '../createShoppingCart.js';
 
 describe('advanced test', () => {
   describe.each([
     { type: 'origin', loadFile: () => import('../../main.js') },
-    { type: 'advanced', loadFile: () => import('../1차 백업/main.advanced.js') },
+    { type: 'advanced', loadFile: () => import('../main.advanced.js') },
   ])('$type 장바구니 시나리오 테스트', ({ loadFile }) => {
     beforeAll(async () => {
       // DOM 초기화
@@ -143,30 +148,30 @@ describe('advanced test', () => {
   });
 
   describe('Templates > ', () => {
-    describe('ProductOption', () => {
+    describe('createProductOptionElement', () => {
       it('props를 받아서 option 태그로 표현할 수 있다.', () => {
         const product = { productId: 'p1', productName: '상품1', price: 10000 };
-        const result = ProductOption(product);
+        const result = createProductOptionElement(product);
         expect(result).toBe('<option value="p1">상품1 - 10000원</option>');
       });
     });
 
-    describe('MainLayout', () => {
+    describe('createMainLayoutElement', () => {
       it('items를 토대로 렌더링할 수 있다.', () => {
         const items = [
           { productId: 'id1', productName: '테스트 상품 1', price: 100 },
           { productId: 'id2', productName: '테스트 상품 2', price: 200 },
         ];
-        const result = MainLayout(items);
+        const result = createMainLayoutElement(items);
         expect(result).toBe(`<div class="bg-gray-100 p-8">
     <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8">
       <h1 class="text-2xl font-bold mb-4">장바구니</h1>
-        <div id="cart-items"></div>
-        <div id="cart-total" class="text-xl font-bold my-4"></div>
-        <select id="product-select" class="border rounded p-2 mr-2">
+      <div id="cart-items"></div>
+      <div id="cart-total" class="text-xl font-bold my-4"></div>
+      <select id="product-select" class="border rounded p-2 mr-2">
         <option value="id1">테스트 상품 1 - 100원</option><option value="id2">테스트 상품 2 - 200원</option>
       </select>
-        <button id="add-to-cart" class="bg-blue-500 text-white px-4 py-2 rounded">추가</button>
+      <button id="add-to-cart" class="bg-blue-500 text-white px-4 py-2 rounded">추가</button>
     </div>
   </div>`);
       });
@@ -175,7 +180,7 @@ describe('advanced test', () => {
     describe('CartItem', () => {
       it('상품 정보를 받아서 장바구니 UI로 표현한다.', () => {
         const item = { product: { productId: 'p1', productName: '상품1', price: 10000 }, quantity: 2 };
-        const result = CartItem(item);
+        const result = createCartItemElement(item);
         expect(result).toBe(`<div class="flex justify-between items-center mb-2">
     <span>상품1 - 10000원 x 2</span>
     <div>
@@ -189,29 +194,29 @@ describe('advanced test', () => {
 
     describe('CartTotal', () => {
       it('할인이 없을 때 총액만 표시해야 한다', () => {
-        const result = CartTotal({ total: 10000, discountRate: 0 });
+        const result = createCartTotalElement({ total: 10000, discountRate: 0 });
         expect(result).toContain('총액: 10000원');
         expect(result).not.toContain('할인 적용');
       });
 
       it('할인이 적용될 때 총액과 할인율을 표시해야 한다', () => {
-        const result = CartTotal({ total: 9000, discountRate: 0.1 });
+        const result = createCartTotalElement({ total: 9000, discountRate: 0.1 });
         expect(result).toContain('총액: 9000원');
         expect(result).toContain('10.0% 할인 적용');
       });
 
       it('할인율이 소수점 둘째 자리에서 반올림되어야 한다', () => {
-        const result = CartTotal({ total: 8750, discountRate: 0.125 });
+        const result = createCartTotalElement({ total: 8750, discountRate: 0.125 });
         expect(result).toContain('12.5% 할인 적용');
       });
 
       it('할인율이 0%일 때 할인 정보를 표시하지 않아야 한다', () => {
-        const result = CartTotal({ total: 10000, discountRate: 0 });
+        const result = createCartTotalElement({ total: 10000, discountRate: 0 });
         expect(result).not.toContain('할인 적용');
       });
 
       it('총액이 0원일 때도 올바르게 표시되어야 한다', () => {
-        const result = CartTotal({ total: 0, discountRate: 0 });
+        const result = createCartTotalElement({ total: 0, discountRate: 0 });
         expect(result).toContain('총액: 0원');
         expect(result).not.toContain('할인 적용');
       });
