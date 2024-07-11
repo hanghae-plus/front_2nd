@@ -47,6 +47,51 @@ export const renderCartItem = (item) => {
 };
 
 //비즈니스 로직
+
+/**총액을 계산하는 함수 */
+export const updateCart = () => {
+  const cart = document.querySelector('#cart-items');
+
+  const items = Array.from(cart.children);
+
+  const { total, totalQuantity, totalBeforeDiscount } = items.reduce(
+    (acc, currentProduct) => {
+      const product = findProductByID(currentProduct.id);
+
+      const quantity = parseInt(
+        currentProduct.querySelector('span').textContent.split('x ')[1]
+      );
+
+      const itemTotal = product.price * quantity;
+      const discountRate = caculateDiscount(product.id, quantity);
+
+      return {
+        total: acc.total + itemTotal * (1 - discountRate),
+        totalQuantity: acc.totalQuantity + quantity,
+        totalBeforeDiscount: acc.totalBeforeDiscount + itemTotal,
+      };
+    },
+    { total: 0, totalQuantity: 0, totalBeforeDiscount: 0 }
+  );
+
+  const { optimalDiscountRate, optimalTotal } = caculateOptimalTotalAndRate(
+    totalQuantity,
+    totalBeforeDiscount,
+    total
+  );
+
+  const $cartTotal = document.querySelector('#cart-total');
+  const totalRounded = Math.round(optimalTotal);
+  $cartTotal.textContent = `총액: ${totalRounded}원`;
+  if (optimalDiscountRate > 0) {
+    const discountPercentage = (optimalDiscountRate * 100).toFixed(1);
+
+    const discountTemplate = `<span class='text-green-500 ml-2'>(${discountPercentage}% 할인 적용)</span>`;
+
+    return render($cartTotal, createNode(discountTemplate));
+  }
+};
+
 /** 할인율 계산 함수(개별)
  * @param 아이템 Id
  * @quantity 아이템 수량
@@ -75,29 +120,24 @@ export const caculateOptimalTotalAndRate = (
   totalBeforeDiscount,
   individualDiscountedTotal
 ) => {
-  let newDiscountRate = 0;
-  let newTotal = individualDiscountedTotal;
+  let optimalDiscountRate = 0;
+  let optimalTotal = individualDiscountedTotal;
 
   if (quantity >= MIN_DISCOUNT_QUANTITY.bulk) {
-    //25퍼센트 할인 금액
     const bulkDiscount = totalBeforeDiscount * discountRate.bulk;
-    //개별 할인 금액
     const individualDiscount = totalBeforeDiscount - individualDiscountedTotal;
 
-    //25퍼센트 할인금액이 개별 할인 금액보다 크다면??
     if (bulkDiscount > individualDiscount) {
-      newTotal = totalBeforeDiscount * (1 - discountRate.bulk);
-      newDiscountRate = discountRate.bulk;
+      optimalTotal = totalBeforeDiscount * (1 - discountRate.bulk);
+      optimalDiscountRate = discountRate.bulk;
+    } else {
+      optimalDiscountRate =
+        (totalBeforeDiscount - optimalTotal) / totalBeforeDiscount;
     }
-    //개별할인 금액이 더 크다면??
-    else {
-      newDiscountRate = (totalBeforeDiscount - newTotal) / totalBeforeDiscount;
-    }
-  }
-  //물품의 총갯수가 30개 미만이라면??
-  else {
-    newDiscountRate = (totalBeforeDiscount - newTotal) / totalBeforeDiscount;
+  } else {
+    optimalDiscountRate =
+      (totalBeforeDiscount - optimalTotal) / totalBeforeDiscount;
   }
 
-  return { newDiscountRate, newTotal };
+  return { optimalDiscountRate, optimalTotal };
 };
