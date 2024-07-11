@@ -4,5 +4,7 @@ module.exports = {
   extends: ['eslint:recommended', 'airbnb', 'plugin:prettier/recommended'],
   ignorePatterns: ['dist', '.eslintrc.cjs', '*.test.js'],
   parser: '@typescript-eslint/parser',
-  rules: {},
-}
+  rules: {
+    'import/prefer-default-export': 'off',
+  },
+};
