@@ -1,4 +1,4 @@
-import { createCartView } from './createCartView.js';
+import { createCartView } from '/src/advanced/createCartView.js';
 
 /**
  * 상품 목록

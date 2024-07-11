@@ -1,5 +1,5 @@
-import { createShoppingCart } from './createShoppingCart.js';
-import { createMainLayoutElement, createCartItemElement, createCartTotalElement } from './templates.js';
+import { createShoppingCart } from '/src/advanced/createShoppingCart.js';
+import { createMainLayoutElement, createCartItemElement, createCartTotalElement } from '/src/advanced/templates.js';
 
 /**
  * 장바구니 뷰를 생성합니다.
