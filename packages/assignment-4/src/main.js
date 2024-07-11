@@ -1,213 +1,286 @@
-const products = [
-  { id: 'p1', name: '상품1', price: 10000 },
-  { id: 'p2', name: '상품2', price: 20000 },
-  { id: 'p3', name: '상품3', price: 30000 },
+//유틸/뷰 로직
+/**
+ * template만들기
+ * @param  template
+ */
+const createTemplate = (template = ``) => {
+  const templateElement = document.createElement('template');
+
+  templateElement.innerHTML = template;
+
+  // const $node = templateElement.content.firstElementChild;
+  const $node = templateElement.content.firstChild;
+
+  return $node;
+};
+
+//비즈니스 로직
+/** 상품목록*/
+const ITEM_LISTS = [
+  { id: 'p1', title: '상품1', price: 10000 },
+  { id: 'p2', title: '상품2', price: 20000 },
+  { id: 'p3', title: '상품3', price: 30000 },
 ];
 
-const discountRates = {
+/** 할인율 */
+const DISCOUNT_RATES = {
   p1: 0.1,
   p2: 0.15,
   p3: 0.2,
+  bulk: 0.25,
 };
 
-const BULK_QUANTITY_THRESHOLD = 30;
-const BULK_DISCOUNT_RATE = 0.25;
-const MINIMUM_QUANTITY_FOR_DISCOUNT = 10;
+/** 할인받을 수 있는 수량 */
+const MIN_DISCOUNT_QUANTITY = {
+  bulk: 30,
+  individual: 10,
+};
 
-function createTemplate(tag, className, textContent = '', attributes = {}) {
-  const element = document.createElement(tag);
-  element.className = className;
-  element.textContent = textContent;
-
-  Object.keys(attributes).forEach((key) => {
-    element.setAttribute(key, attributes[key]);
-  });
-  return element;
-}
+// 할인율 계산 함수
+const getDiscountRate = (item, quantity) => {
+  return quantity >= MIN_DISCOUNT_QUANTITY.individual
+    ? DISCOUNT_RATES[item.id] ?? 0
+    : 0;
+};
 
 function main() {
-  const app = document.getElementById('app');
-  const wrapper = createTemplate('div', 'bg-gray-100 p-8');
-  const box = createTemplate(
-    'div',
-    'max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8'
-  );
-  const header = createTemplate('h1', 'text-2xl font-bold mb-4', '장바구니');
-  const cartItems = createTemplate('div', '', '', { id: 'cart-items' });
-  const cartTotal = createTemplate('div', 'text-xl font-bold my-4', '', {
-    id: 'cart-total',
-  });
-  const productSelect = createTemplate(
-    'select',
-    'border rounded p-2 mr-2',
-    '',
-    { id: 'product-select' }
-  );
-  const addButton = createTemplate(
-    'button',
-    'bg-blue-500 text-white px-4 py-2 rounded',
-    '추가',
-    { id: 'add-to-cart' }
+  /**app root**/
+  const $app = document.getElementById('app');
+
+  /**root내부 회색 배경 */
+  const $background = createTemplate(`<div class='bg-gray-100 p-8'/>`);
+
+  /**장바구니를 감싸고 있는 card */
+  const $card = createTemplate(
+    `<div class='max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8'/>`
   );
 
-  products.forEach((product) => {
-    const option = createTemplate(
-      'option',
-      '',
-      `${product.name}-${product.price}원`,
-      { value: product.id }
+  /**card내부 title */
+  const $cardTitle = createTemplate(
+    `<h1 class='text-2xl font-bold $minusButton-4'>장바구니</h1>`
+  );
+
+  /**장바구니에 담긴 item div */
+  const $cart = createTemplate(`<div id='cart-items'/>`);
+
+  /**가격 총액을 담고 있는 div */
+  const $discountedTotalPrice = createTemplate(
+    `<div id='cart-total' class='text-xl font-bold my-4'/>`
+  );
+
+  /** 상품 목록 select*/
+  const $itemSelectbox = createTemplate(
+    `<select id='product-select' class='border rounded p-2 mr-2' />`
+  );
+
+  /**상품 추가 버튼 */
+  const $addItemButton = createTemplate(
+    `<button id='add-to-cart' class='bg-blue-500 text-white px-4 py-2 rounded'>추가</button>`
+  );
+
+  // 상품목록 select에 option을 넘어주는 반복문
+  ITEM_LISTS.forEach((item) => {
+    const $selectOption = createTemplate(
+      `<option value=${item.id}>${item.title}-${item.price}+원</option>`
     );
-    productSelect.appendChild(option);
+    $itemSelectbox.appendChild($selectOption);
   });
 
-  box.appendChild(header);
-  box.appendChild(cartItems);
-  box.appendChild(cartTotal);
-  box.appendChild(productSelect);
-  box.appendChild(addButton);
-  wrapper.appendChild(box);
-  app.appendChild(wrapper);
+  $card.appendChild($cardTitle);
+  $card.appendChild($cart);
+  $card.appendChild($discountedTotalPrice);
+  $card.appendChild($itemSelectbox);
+  $card.appendChild($addItemButton);
+  $background.appendChild($card);
+  $app.appendChild($background);
 
-  function findProductById(id) {
-    return products.find((product) => product.id === id);
-  }
+  /**총액을 계산하는 함수 */
+  function updateTotalPrice() {
+    /**장바구니에 담긴 children node */
+    let items = Array.from($cart.children);
 
-  function calculateDiscount(itemId, quantity) {
-    if (quantity < MINIMUM_QUANTITY_FOR_DISCOUNT) {
-      return 0;
-    }
+    /**
+     * totalPrice : 총 금액(할인 x)
+     * totalQuantity : 장바구니에 담긴 물품의 총 수량
+     * discountedTotalPrice : 총 금액(할인 o)
+     */
+    let { totalPrice, totalQuantity, discountedTotalPrice } = items.reduce(
+      (acc, currentItem) => {
+        const item = ITEM_LISTS.find(
+          (listItem) => listItem.id === currentItem.id
+        );
 
-    return discountRates[itemId];
-  }
+        const quantity = parseInt(
+          currentItem.querySelector('span').textContent.split('x ')[1]
+        );
+        const itemTotal = item.price * quantity;
+        const discountRate = getDiscountRate(item, quantity);
+        const discountedItemTotal = itemTotal * (1 - discountRate);
 
-  function updateCart() {
-    let total = 0;
-    let totalQuantity = 0;
-    let totalBeforeDiscount = 0;
-    let cartItems = document.getElementById('cart-items').children;
+        return {
+          totalQuantity: acc.totalQuantity + quantity,
+          totalPrice: acc.totalPrice + itemTotal,
+          discountedTotalPrice: acc.discountedTotalPrice + discountedItemTotal,
+        };
+      },
+      { totalQuantity: 0, totalPrice: 0, discountedTotalPrice: 0 }
+    );
 
-    for (let item of cartItems) {
-      const product = findProductById(item.id);
-      if (!product) continue;
-
-      const quantity = parseInt(
-        item.querySelector('span').textContent.split('x ')[1]
-      );
-      const itemTotal = product.price * quantity;
-      const discount = calculateDiscount(product.id, quantity);
-
-      totalQuantity += quantity;
-      totalBeforeDiscount += itemTotal;
-      total += itemTotal * (1 - discount);
-    }
-
+    /**할인율 */
     let discountRate = 0;
-    if (totalQuantity >= BULK_QUANTITY_THRESHOLD) {
-      var bulkDiscount = t * BULK_DISCOUNT_RATE;
-      var individualDiscount = totalBeforeDiscount - total;
+
+    //물품의 총갯수가 30개 이상이라면??
+    if (totalQuantity >= MIN_DISCOUNT_QUANTITY.bulk) {
+      //25퍼센트 할인 금액
+      const bulkDiscount = discountedTotalPrice * DISCOUNT_RATES.bulk;
+      //개별 할인 금액
+      const individualDiscount = totalPrice - discountedTotalPrice;
+
+      //25퍼센트 할인금액이 개별 할인 금액보다 크다면??
       if (bulkDiscount > individualDiscount) {
-        total = totalBeforeDiscount * (1 - BULK_DISCOUNT_RATE);
-        discountRate = BULK_DISCOUNT_RATE;
-      } else {
-        discountRate = (totalBeforeDiscount - total) / totalBeforeDiscount;
+        discountedTotalPrice = totalPrice * 0.75;
+        discountRate = DISCOUNT_RATES.bulk;
       }
-    } else {
-      discountRate = (totalBeforeDiscount - total) / totalBeforeDiscount;
+      //개별할인 금액이 더 크다면??
+      else {
+        discountRate = (totalPrice - discountedTotalPrice) / totalPrice;
+      }
+    }
+    //물품의 총갯수가 30개 미만이라면??
+    else {
+      discountRate = (totalPrice - discountedTotalPrice) / totalPrice;
     }
 
-    const discountPercentage = (discountRate * 100).toFixed(1);
-
-    cartTotal.textContent = '총액: ' + Math.round(total) + '원';
+    $discountedTotalPrice.textContent = `총액: ${Math.round(
+      discountedTotalPrice
+    )}원`;
     if (discountRate > 0) {
-      const discountSpan = createTemplate(
-        'span',
-        'text-green-500 ml-2',
-        `${discountPercentage}% 할인 적용`
+      const formattingDiscountRate = (discountRate * 100).toFixed(1);
+
+      const $discountSpan = createTemplate(
+        `<span class='text-green-500 ml-2'>(${formattingDiscountRate}% 할인 적용)</span>`
       );
-      cartTotal.appendChild(discountSpan);
+
+      $discountedTotalPrice.appendChild($discountSpan);
     }
   }
 
-  addButton.onclick = function () {
-    let selectedValue = productSelect.value;
-    let product = findProductById(selectedValue);
-    if (product) {
-      var e = document.getElementById(product.id);
-      if (e) {
-        var q =
-          parseInt(e.querySelector('span').textContent.split('x ')[1]) + 1;
-        e.querySelector('span').textContent =
-          product.name + ' - ' + product.price + '원 x ' + q;
-      } else {
-        const d = createTemplate(
-          'div',
-          'flex justify-between items-center mb-2',
-          '',
-          { id: product.id }
-        );
-        const sp = createTemplate(
-          'span',
-          '',
-          `${product.name}-${product.price}원 x 1`
-        );
-        const bd = createTemplate('div');
-        const minusButton = createTemplate(
-          'button',
-          'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1',
-          '-',
-          { 'data-product-id': product.id, 'data-change': -1 }
-        );
-        const plusButton = createTemplate(
-          'button',
-          'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1',
-          '+',
-          { 'data-product-id': product.id, 'data-chan1ge': 1 }
-        );
-        const removeButton = createTemplate(
-          'button',
-          'remove-item bg-red-500 text-white px-2 py-1 rounded',
-          '삭제',
-          { 'data-product-id': product.id }
+  $addItemButton.addEventListener('click', () => addItemHandler());
+
+  /**추가 버튼 이벤트 핸들러 */
+  function addItemHandler() {
+    /**현재 select된 item의 id값 */
+    const selectedItemId = $itemSelectbox.value;
+
+    /**클릭한 상품의 세부 목록(object) */
+    const targetItem = ITEM_LISTS.find((item) => item.id === selectedItemId);
+
+    if (targetItem) {
+      const $targetItem = document.getElementById(targetItem.id);
+
+      //선택한 상품이 이미 장바구니에 있다면??
+      if ($targetItem) {
+        const [_, currentQuantity] = $targetItem
+          .querySelector('span')
+          .textContent.split('x ');
+
+        const quantity = parseInt(currentQuantity) + 1;
+        $targetItem.querySelector(
+          'span'
+        ).textContent = `${targetItem.title} - ${targetItem.price}원 x ${quantity}`;
+      }
+      //선택한 상품이 장바구니에 없다면??
+      else {
+        /**상품의 id를 해당 태그 id로 지정 */
+        const $itemList = createTemplate(
+          `<div id=${targetItem.id} class='flex justify-between items-center $minusButton-2'/>`
         );
 
-        bd.appendChild(minusButton);
-        bd.appendChild(plusButton);
-        bd.appendChild(removeButton);
-        d.appendChild(sp);
-        d.appendChild(bd);
-        cartItems.appendChild(d);
-      }
-      updateCart();
-    }
-  };
+        /**장바구니 상품 정보 span */
+        const $itemInform = createTemplate(
+          `<span>${targetItem.title}-${targetItem.price}원 x 1</span>`
+        );
 
-  cartItems.onclick = function (event) {
-    var target = event.target;
-    if (
-      target.classList.contains('quantity-change') ||
-      target.classList.contains('remove-item')
-    ) {
-      var productId = target.dataset.productId;
-      var item = document.getElementById(productId);
-      if (target.classList.contains('quantity-change')) {
-        var change = parseInt(target.dataset.change);
-        var quantity =
-          parseInt(item.querySelector('span').textContent.split('x ')[1]) +
-          change;
-        if (quantity > 0) {
-          item.querySelector('span').textContent =
-            item.querySelector('span').textContent.split('x ')[0] +
-            'x ' +
-            quantity;
-        } else {
-          item.remove();
-        }
-      } else if (target.classList.contains('remove-item')) {
-        item.remove();
+        /**장바구니 아이템에 버튼을 grouping하는 div */
+        const $buttonGroup = createTemplate(`<div/>`);
+
+        /**상품 -버튼 */
+        const $minusButton = createTemplate(
+          `<button class='quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1'
+          data-product-id=${targetItem.id} data-change='-1'
+          >-</button>`
+        );
+
+        /**상품 +버튼 */
+
+        const $plusButton = createTemplate(
+          `<button class='quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1'
+          data-product-id=${targetItem.id} data-change='1'
+          >+</button>`
+        );
+
+        /**상품 삭제 버튼 */
+        const $removeButton = createTemplate(
+          `<button class='remove-item bg-red-500 text-white px-2 py-1 rounded'>삭제</button>`
+        );
+
+        $removeButton.dataset.productId = targetItem.id;
+        $buttonGroup.appendChild($minusButton);
+        $buttonGroup.appendChild($plusButton);
+        $buttonGroup.appendChild($removeButton);
+        $itemList.appendChild($itemInform);
+        $itemList.appendChild($buttonGroup);
+        $cart.appendChild($itemList);
       }
-      uc();
+      //금액 업데이트
+      updateTotalPrice();
     }
-  };
+  }
+
+  /**장바구니에 담긴 상품 버튼들에 대한 이벤트(+,-,삭제 버튼) */
+  $cart.addEventListener('click', (event) => cartItemButtonHandler(event));
+  function cartItemButtonHandler({ target }) {
+    /**
+     * 버튼의 class에 'quantity-chagne'(+,- 버튼) 혹은
+     * 'remove-item'(삭제 버튼)이 포함되어 있다면??
+     */
+    // if (
+    //   target.classList.contains('quantity-change') ||
+    //   target.classList.contains('remove-item')
+    // ) {
+    const productId = target.dataset.productId;
+
+    /**장바구니에 있는 아이템 */
+    const item = document.getElementById(productId);
+
+    // +,- 버튼일 경우
+    if (target.classList.contains('quantity-change')) {
+      /**해당 버튼의 change dataset
+       * -버튼의 경우 data property로 -1
+       * +버튼의 경우 data property로 +1
+       */
+
+      // +1일수도 -1일수도 있는데 어떻게??
+      const change = parseInt(target.dataset.change);
+
+      // 해당 아이템 구조분해
+      const [targetItemInform, currentQuantity] = item
+        .querySelector('span')
+        .textContent.split('x ');
+
+      /**해당 아이템의 총 수량 */
+      const quantity = Number(currentQuantity) + change;
+      quantity > 0
+        ? (item.querySelector(
+            'span'
+          ).textContent = `${targetItemInform}x ${quantity}`)
+        : item.remove();
+    }
+    // 그외(삭제 버튼)의 경우
+    if (target.classList.contains('remove-item')) {
+      item.remove();
+    }
+    updateTotalPrice();
+  }
 }
-
 main();
