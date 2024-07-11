@@ -47,32 +47,14 @@ export const renderCartItem = (item) => {
 };
 
 //비즈니스 로직
-
 /**총액을 계산하는 함수 */
 export const updateCart = () => {
   const cart = document.querySelector('#cart-items');
 
   const items = Array.from(cart.children);
 
-  const { total, totalQuantity, totalBeforeDiscount } = items.reduce(
-    (acc, currentProduct) => {
-      const product = findProductByID(currentProduct.id);
-
-      const quantity = parseInt(
-        currentProduct.querySelector('span').textContent.split('x ')[1]
-      );
-
-      const itemTotal = product.price * quantity;
-      const discountRate = caculateDiscount(product.id, quantity);
-
-      return {
-        total: acc.total + itemTotal * (1 - discountRate),
-        totalQuantity: acc.totalQuantity + quantity,
-        totalBeforeDiscount: acc.totalBeforeDiscount + itemTotal,
-      };
-    },
-    { total: 0, totalQuantity: 0, totalBeforeDiscount: 0 }
-  );
+  let { total, totalQuantity, totalBeforeDiscount } =
+    caculateTotalAndRate(items);
 
   const { optimalDiscountRate, optimalTotal } = caculateOptimalTotalAndRate(
     totalQuantity,
@@ -108,6 +90,32 @@ export const caculateDiscount = (itemId, quantity) => {
  */
 export const findProductByID = (id) => {
   return products.find((product) => product.id === id);
+};
+
+/**
+ * 총 금액, 총 수량, 총 할인 전 금액 계산(누적 계싼)
+ */
+export const caculateTotalAndRate = (items) => {
+  const { total, totalQuantity, totalBeforeDiscount } = items.reduce(
+    (acc, currentProduct) => {
+      const product = findProductByID(currentProduct.id);
+
+      const quantity = parseInt(
+        currentProduct.querySelector('span').textContent.split('x ')[1]
+      );
+
+      const itemTotal = product.price * quantity;
+      const discountRate = caculateDiscount(product.id, quantity);
+
+      return {
+        total: acc.total + itemTotal * (1 - discountRate),
+        totalQuantity: acc.totalQuantity + quantity,
+        totalBeforeDiscount: acc.totalBeforeDiscount + itemTotal,
+      };
+    },
+    { total: 0, totalQuantity: 0, totalBeforeDiscount: 0 }
+  );
+  return { total, totalQuantity, totalBeforeDiscount };
 };
 
 /** 개별할인 Or bulk할인 중 할인율이 더 큰 것으로 계산하는 함수
