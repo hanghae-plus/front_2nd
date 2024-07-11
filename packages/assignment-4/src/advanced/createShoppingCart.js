@@ -49,18 +49,25 @@ export const createShoppingCart = () => {
 
   // 원가 및 할인가 계산
   const calculatePrice = () => {
-    let originPrice = 0;
-    let individualPrice = 0;
-    let bulkPrice = 0;
+    function getIndividualPrice(price, quantity, rate) {
+      return quantity >= INDIVIDUAL_LIMIT
+        ? price * quantity * (1 - rate)
+        : price * quantity;
+    }
 
-    getItems().forEach(({ product, quantity }) => {
-      originPrice += product.price * quantity;
-      individualPrice +=
-        quantity >= INDIVIDUAL_LIMIT
-          ? product.price * quantity * (1 - INDIVIDUAL_RATE[product.id])
-          : product.price * quantity;
-    });
-    bulkPrice = originPrice * (1 - BULK_RATE);
+    const [originPrice, individualPrice] = getItems().reduce(
+      ([accOriginPrice, accIndividualPrice], { product, quantity }) => [
+        accOriginPrice + product.price * quantity,
+        accIndividualPrice +
+          getIndividualPrice(
+            product.price,
+            quantity,
+            INDIVIDUAL_RATE[product.id]
+          ),
+      ],
+      [0, 0]
+    );
+    const bulkPrice = originPrice * (1 - BULK_RATE);
 
     return { originPrice, individualPrice, bulkPrice };
   };

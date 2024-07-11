@@ -7,6 +7,12 @@ export const createCartView = (items) => {
   // 장바구니 리스트 이전 상태
   let prevCartList = null;
 
+  function copyCartList(cartList) {
+    return cartList.map((item) => {
+      return { product: { ...item.product }, quantity: item.quantity };
+    });
+  }
+
   // 장바구니 리스트 화면 업데이트
   function updateCart(cartList) {
     const $cartItems = document.getElementById('cart-items');
@@ -16,39 +22,41 @@ export const createCartView = (items) => {
         'beforeend',
         cartList.map((data) => CartItem(data)).join('')
       );
-    } else {
-      const maxlength = Math.max(prevCartList.length, cartList.length);
 
-      for (let i = 0; i < maxlength; i++) {
-        const prevItem = prevCartList[i];
-        const newItem = cartList[i];
-        const $target = $cartItems.children[i];
+      prevCartList = copyCartList(cartList);
 
-        // 이전 리스트에 없는 새로운 아이템 추가
-        if (!prevItem) {
-          $cartItems.insertAdjacentHTML('beforeend', CartItem(newItem));
-          break;
-        }
-        // 리스트에서 아이템 삭제
-        if (!newItem) {
-          $target.remove();
-          break;
-        }
-        // 아이템 정보 변경
-        if (
-          prevItem.product.id !== newItem.product.id ||
-          prevItem.quantity !== newItem.quantity
-        ) {
-          $target.insertAdjacentHTML('afterend', CartItem(newItem));
-          $target.remove();
-        }
+      return;
+    }
+
+    const maxlength = Math.max(prevCartList.length, cartList.length);
+
+    for (let i = 0; i < maxlength; i++) {
+      const prevItem = prevCartList[i];
+      const newItem = cartList[i];
+      const $target = $cartItems.children[i];
+
+      // 이전 리스트에 없는 새로운 아이템 추가
+      if (!prevItem) {
+        $cartItems.insertAdjacentHTML('beforeend', CartItem(newItem));
+        break;
+      }
+      // 리스트에서 아이템 삭제
+      if (!newItem) {
+        $target.remove();
+        break;
+      }
+      // 아이템 정보 변경
+      if (
+        prevItem.product.id !== newItem.product.id ||
+        prevItem.quantity !== newItem.quantity
+      ) {
+        $target.insertAdjacentHTML('afterend', CartItem(newItem));
+        $target.remove();
       }
     }
 
     // 신규 장바구니 리스트를 이전 장바구니 리스트에 저장
-    prevCartList = cartList.map((item) => {
-      return { product: { ...item.product }, quantity: item.quantity };
-    });
+    prevCartList = copyCartList(cartList);
   }
 
   // 장바구니 총액 화면 업데이트
