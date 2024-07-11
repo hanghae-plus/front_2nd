@@ -57,29 +57,28 @@ const getCartItemElement = function () {
     const isQuantityChange = classList.includes("quantity-change");
     const isRemoveItem = classList.includes("remove-item");
 
-    if (isQuantityChange || isRemoveItem) {
-      const productId = target.dataset.productId;
-      const item = document.getElementById(productId);
-      const itemSpan = item.querySelector("span");
+    const productId = target.dataset.productId;
+    const item = document.getElementById(productId);
+    const itemSpan = item.querySelector("span");
 
-      if (isQuantityChange) {
-        const change = parseInt(target.dataset.change); // 1 or -1
-        const quantity = getQuantity(itemSpan) + change;
+    if(!isQuantityChange && !isRemoveItem) return cartItem;
+    if (isQuantityChange) {
+      const change = parseInt(target.dataset.change); // 1 or -1
+      const quantity = getQuantity(itemSpan) + change;
 
-        if (quantity > 0) {
-          itemSpan.textContent =
-            itemSpan.textContent.split("x ")[0] + "x " + quantity;
-        } else {
-          item.remove();
-        }
-      }
-
-      if (isRemoveItem) {
+      if (quantity > 0) {
+        itemSpan.textContent =
+          itemSpan.textContent.split("x ")[0] + "x " + quantity;
+      } else {
         item.remove();
       }
-
-      updateCart();
     }
+
+    if (isRemoveItem) {
+      item.remove();
+    }
+
+    updateCart();
   };
   return cartItem;
 };
@@ -97,12 +96,12 @@ const getCartItemSelector = function () {
   selector.id = "product-select";
   selector.className = "border rounded p-2 mr-2";
 
-  for (let item = 0; item < PRICES.length; item++) {
+  PRICES.forEach((item) => {
     const option = document.createElement("option");
-    option.value = PRICES[item].id;
-    option.textContent = `${PRICES[item].n} - ${PRICES[item].p}원`;
+    option.value = item.id;
+    option.textContent = `${item.n} - ${item.p}원`;
     selector.appendChild(option);
-  }
+  });
 
   return selector;
 };
@@ -121,8 +120,8 @@ const getAddButtonElement = function (select, cartItem) {
       if (exitedId) {
         const quantity = getQuantity(exitedId) + 1;
         exitedId.querySelector("span").textContent = `${newId.n} - ${newId.p}원 x ${quantity}`;
-      }
-      cartItem.innerHTML += `<div id=${newId.id}>
+      } else {
+        cartItem.innerHTML += `<div id=${newId.id}>
     <div id="product-id-${newId.id}" class="flex justify-between items-center mb-2">
       <span>상품 ${newId.n} - ${newId.p} 원 x 1</span>
       <div>
@@ -132,9 +131,10 @@ const getAddButtonElement = function (select, cartItem) {
       </div>
     </div>
   </div>`;
-      updateCart();
       }
-    };
+      updateCart();
+    }
+  };
   return addButton;
 };
 
