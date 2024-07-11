@@ -1,125 +1,100 @@
-import { createCartItem, createAppTemplate, createCartTotalPrice, createProductOption } from './templates.js';
-import { getCurrentCartItems } from './localStorage.js';
+import {
+  createCartItemElement,
+  createAppTemplateElement,
+  createCartTotalPriceElement,
+  createProductOptionElement,
+} from './templates.js';
+import { getCartItemsObj } from './localStorage.js';
 import { addItemToCart, updateQuantity, removeItemFromCart } from './eventHandlers.js';
-import { products } from './shopInfos.js';
-import { calculateTotalPrice, calculateTotalPriceBeforeDiscount, calculateTotalQuantity } from './calculates.js';
+import { productList } from './shopInfos.js';
+import {
+  calculateTotalPrice,
+  calculateTotalPriceBeforeDiscount,
+  calculateTotalQuantity,
+  calculateAppliedDiscountRate,
+} from './calculates.js';
 
-function updateTotalPrice() {
-  const currentCartItems = getCurrentCartItems();
-  // 계산
-  const totalQuantity = calculateTotalQuantity(currentCartItems);
-  const totalPriceBeforeDiscount = calculateTotalPriceBeforeDiscount(currentCartItems);
-  const totalPrice = calculateTotalPrice({ cartItems: currentCartItems, totalQuantity, totalPriceBeforeDiscount });
+function updateTotalPriceElement() {
+  const cartItemsObj = getCartItemsObj();
+  const totalQuantity = calculateTotalQuantity(cartItemsObj);
+  const totalPriceBeforeDiscount = calculateTotalPriceBeforeDiscount(cartItemsObj);
+  const totalPrice = calculateTotalPrice({ cartItemsObj, totalQuantity, totalPriceBeforeDiscount });
 
   const cartTotalElement = document.querySelector('#cart-total');
-
-  const appliedDiscountRate = 1 - totalPrice / totalPriceBeforeDiscount;
-  cartTotalElement.innerHTML = createCartTotalPrice({ totalPrice, appliedDiscountRate });
+  const appliedDiscountRate = calculateAppliedDiscountRate(totalPrice, totalPriceBeforeDiscount);
+  cartTotalElement.innerHTML = createCartTotalPriceElement({ totalPrice, appliedDiscountRate });
 }
 
-function createCartItemElement(itemInfo) {
-  const element = document.createElement('div');
-  element.id = itemInfo.productId;
-  element.className = 'flex justify-between items-center mb-2';
-  element.innerHTML = createCartItem(itemInfo);
-  return element;
-}
-
-function updateCart() {
-  const currentCartItems = getCurrentCartItems();
+function updateCartElement() {
+  const cartItemsObj = getCartItemsObj();
   const cartItemsElement = document.querySelector('#cart-items');
   const currentCartItemElements = [...cartItemsElement.children];
   const currentRenderedProductIds = currentCartItemElements.map((cartItemElement) => cartItemElement.id);
-  const productIdsInCurrentCart = Object.keys(currentCartItems);
+  const productIdsInCurrentCart = Object.keys(cartItemsObj);
 
   // 렌더링된 프로덕트이지만 현재 카트에 없는 경우 제거
   const removedProductIds = currentRenderedProductIds.filter(
     (productId) => !productIdsInCurrentCart.includes(productId),
   );
   removedProductIds.forEach((productId) => {
-    const removedElement = currentCartItemElements.find((cartItemElement) => cartItemElement.id === productId);
-    removedElement.remove();
+    const removedElement = document.getElementById(productId);
+    if (removedElement) removedElement.remove();
   });
 
-  // Update and Insert
+  // 업데이트 및 삽입
   productIdsInCurrentCart.forEach((productId) => {
-    const elementWithProductId = currentCartItemElements.find((cartItemElement) => cartItemElement.id === productId);
-    // 새로운 프로덕트인 경우
-    if (!elementWithProductId) {
-      const newCartItemElement = createCartItemElement({
-        productId,
-        productName: currentCartItems[productId].productName,
-        price: currentCartItems[productId].price,
-        quantity: currentCartItems[productId].quantity,
-      });
+    const existingElement = document.getElementById(productId);
+    const { productName, price, quantity } = cartItemsObj[productId];
 
-      cartItemsElement.appendChild(newCartItemElement);
-      return;
+    if (!existingElement) {
+      // 새로운 프로덕트인 경우
+      const newCartItemElement = createCartItemElement({ productId, productName, price, quantity });
+      cartItemsElement.insertAdjacentHTML('beforeend', newCartItemElement);
+    } else {
+      // 수량이 변경된 경우
+      const quantityElement = existingElement.querySelector('span');
+      quantityElement.textContent = `${productName} - ${price}원 x ${quantity}`;
     }
-
-    // 수량이 변경된 경우
-    const elementSpan = elementWithProductId.querySelector('span');
-    const currentQuantity = parseInt(elementWithProductId.querySelector('span').textContent.split('x ')[1], 10);
-    const newQuantity = currentCartItems[productId].quantity;
-
-    if (currentQuantity !== newQuantity) {
-      elementSpan.textContent = `${currentCartItems[productId].productName} - ${
-        currentCartItems[productId].price
-      }원 x ${currentCartItems[productId].quantity}`;
-    }
-    return;
   });
 }
 
 function attachEventListeners() {
-  const appRoute = document.querySelector('#app');
-  // appRoute에 증감버튼과 상품추가버튼의 이벤트 위임
-  appRoute.addEventListener('click', (event) => {
-    const { className, dataset, id } = event.target;
-    // +, - 버튼
+  const appElement = document.querySelector('#app');
+  appElement.addEventListener('click', (event) => {
+    const { className, dataset } = event.target;
     if (className.includes('quantity-change')) {
       updateQuantity({ productId: dataset.productId, change: dataset.change });
     }
-    // 삭제 버튼
     if (className.includes('remove-item')) {
       removeItemFromCart(dataset.productId);
     }
-    // 추가 버튼
-    if (id === 'add-to-cart') {
+    if (event.target.id === 'add-to-cart') {
       addItemToCart();
     }
   });
 
-  // 로컬스토리지의 cartItems의 업데이트 이벤트 (커스텀)
   window.addEventListener('localStorageUpdated', () => {
-    updateCart();
-    updateTotalPrice();
+    updateCartElement();
+    updateTotalPriceElement();
   });
 }
 
 function renderProductOptions() {
-  const productSelect = document.querySelector('#product-select');
-
-  // products가 변경되면 자동으로 옵션들이 바뀔 수 있게
-  products.forEach(({ productId, productName, price }) => {
-    productSelect.innerHTML += createProductOption({ productId, productName, price });
+  const productSelectElement = document.querySelector('#product-select');
+  productList.forEach(({ productId, productName, price }) => {
+    const optionElement = createProductOptionElement({ productId, productName, price });
+    productSelectElement.insertAdjacentHTML('beforeend', optionElement);
   });
 }
 
-function main() {
-  const appRoute = document.querySelector('#app');
-  // appRoute에 정적인 템플릿을 렌더링
-  appRoute.innerHTML = createAppTemplate();
+function initializeApp() {
+  const appElement = document.querySelector('#app');
+  appElement.innerHTML = createAppTemplateElement();
 
-  // products에 따라 select의 option들을 렌더링
   renderProductOptions();
-
-  // root에 필요한 이벤트 리스너들을 추가
   attachEventListeners();
-
-  // 현재 카트에 담긴 상품들을 렌더링
-  updateCart();
-  updateTotalPrice();
+  updateCartElement();
+  updateTotalPriceElement();
 }
 
-main();
+initializeApp();

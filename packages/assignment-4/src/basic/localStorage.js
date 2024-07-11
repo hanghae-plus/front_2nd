@@ -2,15 +2,15 @@ const CART_ITEMS_STORAGE_KEY = 'cartItems';
 
 const localStorageUpdateEvent = new CustomEvent('localStorageUpdated');
 
-function updateLocalStorage() {
+function dispatchLocalStorageUpdateEvent() {
   window.dispatchEvent(localStorageUpdateEvent);
 }
 
-export function updateCartItems(newCartItems) {
-  localStorage.setItem(CART_ITEMS_STORAGE_KEY, JSON.stringify(newCartItems));
-  updateLocalStorage();
+export function updateCartItemsObj(newCartItemsObj) {
+  localStorage.setItem(CART_ITEMS_STORAGE_KEY, JSON.stringify(newCartItemsObj));
+  dispatchLocalStorageUpdateEvent();
 }
 
-export function getCurrentCartItems() {
+export function getCartItemsObj() {
   return JSON.parse(localStorage.getItem(CART_ITEMS_STORAGE_KEY)) ?? {};
 }
