@@ -1,4 +1,6 @@
-import { PRODUCTS, BULK_DISCOUNT_RATE, BULK_DISCOUNT_THRESHOLD, DISCOUNT_RATES, SELECTORS } from './constants';
+import { SELECTORS } from './constants/element';
+import { PRODUCTS } from './constants/product';
+import { DISCOUNT_RATES, BULK_DISCOUNT_RATE, BULK_DISCOUNT_THRESHOLD } from './constants/discount';
 import getElement from './utils/element';
 
 function createCartHTML() {
@@ -28,12 +30,10 @@ function createCartItemHTML(product, quantity) {
   `;
 }
 
-// 제품 옵션 생성 함수
 function createProductOption(product) {
   return `<option value="${product.id}">${product.name} - ${product.price}원</option>`;
 }
 
-// 제품 선택 옵션 채우기 함수
 function populateProductSelect(selectElement) {
   selectElement.innerHTML = PRODUCTS.map(createProductOption).join('');
 }
@@ -50,12 +50,10 @@ function extractCartItemsData(cartItemElements) {
   });
 }
 
-// 개별 상품 할인 계산 함수
 function calculateIndividualDiscount(item) {
   return item.quantity >= 10 ? DISCOUNT_RATES[item.id] || 0 : 0;
 }
 
-// 장바구니 계산 함수
 function calculateCart(items) {
   let totalQuantity = 0;
   let totalBeforeDiscount = 0;
@@ -70,7 +68,6 @@ function calculateCart(items) {
     totalAfterDiscount += itemTotal * (1 - individualDiscount);
   });
 
-  // 대량 구매 할인 적용
   if (totalQuantity >= BULK_DISCOUNT_THRESHOLD) {
     const bulkDiscountTotal = totalBeforeDiscount * (1 - BULK_DISCOUNT_RATE);
     totalAfterDiscount = Math.min(totalAfterDiscount, bulkDiscountTotal);
@@ -84,7 +81,6 @@ function calculateCart(items) {
   };
 }
 
-// DOM 업데이트 함수
 function updateCartDisplay(cartTotal, { finalTotal, discountRate }) {
   cartTotal.textContent = `총액: ${finalTotal}원`;
   if (discountRate > 0) {
@@ -116,15 +112,12 @@ function initializeCart() {
 
   function addToCart() {
     const { value } = elements.productSelect;
-
     const selectedProduct = PRODUCTS.find((product) => product.id === value);
-
     if (!selectedProduct) {
       return;
     }
 
     const existingItem = document.getElementById(selectedProduct.id);
-
     if (existingItem) {
       const quantitySpan = existingItem.querySelector('span');
       const quantity = parseInt(quantitySpan.textContent.split('x ')[1], 10) + 1;
@@ -150,15 +143,7 @@ function initializeCart() {
     item.remove();
   }
 
-  function handleQuantityChange(item, change) {
-    updateItemQuantity(item, change);
-  }
-
-  function handleRemoveItem(item) {
-    item.remove();
-  }
-
-  function handleClickCartItems(event) {
+  function handleCartItemActions(event) {
     const { target } = event;
 
     if (!target.classList.contains('quantity-change') && !target.classList.contains('remove-item')) {
@@ -175,16 +160,16 @@ function initializeCart() {
 
     if (target.classList.contains('quantity-change')) {
       const change = parseInt(target.dataset.change, 10);
-      handleQuantityChange(item, change);
+      updateItemQuantity(item, change);
     } else if (target.classList.contains('remove-item')) {
-      handleRemoveItem(item);
+      item.remove();
     }
 
     updateCart();
   }
 
   elements.addToCartButton.addEventListener('click', addToCart);
-  elements.cartItems.addEventListener('click', handleClickCartItems);
+  elements.cartItems.addEventListener('click', handleCartItemActions);
 }
 
 function main() {
