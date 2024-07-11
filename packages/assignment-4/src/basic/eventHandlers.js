@@ -2,38 +2,40 @@ import { getCurrentCartItems, updateCartItems } from './localStorage.js';
 import { products } from './shopInfos.js';
 
 export function updateQuantity({ productId, change }) {
-  const currentCartItems = getCurrentCartItems();
-  const newCartItems = structuredClone(currentCartItems);
-  newCartItems[productId].quantity += Number(change);
-  if (newCartItems[productId].quantity <= 0) {
-    delete newCartItems[productId];
+  const cartItemsObj = getCurrentCartItems();
+  const newCartItemsObj = structuredClone(cartItemsObj);
+  newCartItemsObj[productId].quantity += Number(change);
+
+  if (newCartItemsObj[productId].quantity <= 0) {
+    delete newCartItemsObj[productId];
   }
-  updateCartItems(newCartItems);
+
+  updateCartItems(newCartItemsObj);
 }
 
 export function removeItemFromCart(productId) {
-  const currentCartItems = getCurrentCartItems();
-  const newCartItems = structuredClone(currentCartItems);
-  delete newCartItems[productId];
-  updateCartItems(newCartItems);
+  const cartItemsObj = getCurrentCartItems();
+  const newCartItemsObj = structuredClone(cartItemsObj);
+  delete newCartItemsObj[productId];
+  updateCartItems(newCartItemsObj);
 }
 
 export function addItemToCart() {
-  const productSelect = document.querySelector('#product-select');
-  const selectedProductId = productSelect.value;
-  const selectedProduct = products.find(({ productId }) => productId === selectedProductId);
+  const productSelectElement = document.querySelector('#product-select');
+  const selectedProductId = productSelectElement.value;
+  const selectedProductObj = products.find(({ productId }) => productId === selectedProductId);
 
-  const currentCartItems = getCurrentCartItems();
-  const newCartItems = structuredClone(currentCartItems);
-  if (!newCartItems[selectedProductId]) {
-    // 최초 추가시
-    newCartItems[selectedProductId] = {
-      ...selectedProduct,
+  const cartItemsObj = getCurrentCartItems();
+  const newCartItemsObj = structuredClone(cartItemsObj);
+
+  if (!newCartItemsObj[selectedProductId]) {
+    newCartItemsObj[selectedProductId] = {
+      ...selectedProductObj,
       quantity: 1,
     };
   } else {
-    // 이미 추가된 상품인 경우
-    newCartItems[selectedProductId].quantity += 1;
+    newCartItemsObj[selectedProductId].quantity += 1;
   }
-  updateCartItems(newCartItems);
+
+  updateCartItems(newCartItemsObj);
 }
