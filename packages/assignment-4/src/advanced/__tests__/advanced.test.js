@@ -238,41 +238,41 @@ describe('advanced test', () => {
 
     beforeEach(() => {
       cart = createShoppingCart();
-      cart.resetCartItem();
+      cart.resetCurrentCartItems();
     });
 
     it('장바구니에 상품을 추가할 수 있다.', () => {
       const product = { id: 'p1', name: '상품1', price: 10000 };
       cart.addItem(product);
-      expect(cart.getItems()).toEqual([{ product, quantity: 1 }]);
+      expect(cart.getCurrentCartItems()).toEqual([{ product, quantity: 1 }]);
     });
 
     it('이미 존재하는 상품을 추가할 때 수량이 증가해야 한다', () => {
       const product = { id: 'p1', name: '상품1', price: 10000 };
       cart.addItem(product);
       cart.addItem(product);
-      expect(cart.getItems()).toEqual([{ product, quantity: 2 }]);
+      expect(cart.getCurrentCartItems()).toEqual([{ product, quantity: 2 }]);
     });
 
     it('장바구니에서 상품을 제거할 수 있다.', () => {
       const product = { id: 'p1', name: '상품1', price: 10000 };
       cart.addItem(product);
       cart.removeItem('p1');
-      expect(cart.getItems()).toHaveLength(0);
+      expect(cart.getCurrentCartItems()).toHaveLength(0);
     });
 
     it('상품의 수량을 업데이트할 수 있다.', () => {
       const product = { id: 'p1', name: '상품1', price: 10000 };
       cart.addItem(product);
       cart.updateQuantity('p1', 3);
-      expect(cart.getItems()[0].quantity).toBe(3);
+      expect(cart.getCurrentCartItems()[0].quantity).toBe(3);
     });
 
     it('수량이 0으로 업데이트될 때 해당 상품이 제거된다.', () => {
       const product = { id: 'p1', name: '상품1', price: 10000 };
       cart.addItem(product);
       cart.updateQuantity('p1', 0);
-      expect(cart.getItems()).toHaveLength(0);
+      expect(cart.getCurrentCartItems()).toHaveLength(0);
     });
 
     it('총액을 정확하게 계산해야 한다', () => {
