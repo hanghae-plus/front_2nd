@@ -1,8 +1,8 @@
 function main() {
   var p = [
-    {id: 'p1', n: '상품1', p: 10000 },
-    {id: 'p2', n: '상품2', p: 20000 },
-    {id: 'p3', n: '상품3', p: 30000 }
+    { id: 'p1', n: '상품1', p: 10000 },
+    { id: 'p2', n: '상품2', p: 20000 },
+    { id: 'p3', n: '상품3', p: 30000 },
   ];
 
   var a = document.getElementById('app');
@@ -41,7 +41,6 @@ function main() {
   b.appendChild(ab);
   w.appendChild(b);
   a.appendChild(w);
-
 
   function uc() {
     var t = 0;
@@ -94,7 +93,7 @@ function main() {
     }
   }
 
-  ab.onclick = function() {
+  ab.onclick = function () {
     var v = s.value;
     var i;
     for (var k = 0; k < p.length; k++) {
@@ -140,7 +139,7 @@ function main() {
     }
   };
 
-  ct.onclick = function(event) {
+  ct.onclick = function (event) {
     var target = event.target;
     if (target.classList.contains('quantity-change') || target.classList.contains('remove-item')) {
       var productId = target.dataset.productId;
@@ -149,7 +148,8 @@ function main() {
         var change = parseInt(target.dataset.change);
         var quantity = parseInt(item.querySelector('span').textContent.split('x ')[1]) + change;
         if (quantity > 0) {
-          item.querySelector('span').textContent = item.querySelector('span').textContent.split('x ')[0] + 'x ' + quantity;
+          item.querySelector('span').textContent =
+            item.querySelector('span').textContent.split('x ')[0] + 'x ' + quantity;
         } else {
           item.remove();
         }
