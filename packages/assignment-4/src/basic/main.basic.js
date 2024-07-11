@@ -159,25 +159,50 @@ function initializeCart() {
     updateCart();
   }
 
-  function handleClickCartItems(event) {
-    const target = event.target;
-    if (target.classList.contains('quantity-change') || target.classList.contains('remove-item')) {
-      const productId = target.dataset.productId;
-      const item = document.getElementById(productId);
-      if (target.classList.contains('quantity-change')) {
-        const change = parseInt(target.dataset.change);
-        const quantity = parseInt(item.querySelector('span').textContent.split('x ')[1]) + change;
-        if (quantity > 0) {
-          item.querySelector('span').textContent =
-            item.querySelector('span').textContent.split('x ')[0] + 'x ' + quantity;
-        } else {
-          item.remove();
-        }
-      } else if (target.classList.contains('remove-item')) {
-        item.remove();
-      }
-      updateCart();
+  function updateItemQuantity(item, change) {
+    const quantitySpan = item.querySelector('span');
+    const [productInfo, currentQuantity] = quantitySpan.textContent.split('x ');
+    const newQuantity = parseInt(currentQuantity, 10) + change;
+
+    if (newQuantity > 0) {
+      quantitySpan.textContent = `${productInfo}x ${newQuantity}`;
+      return;
     }
+
+    item.remove();
+  }
+
+  function handleQuantityChange(item, change) {
+    updateItemQuantity(item, change);
+  }
+
+  function handleRemoveItem(item) {
+    item.remove();
+  }
+
+  function handleClickCartItems(event) {
+    const { target } = event;
+
+    if (!target.classList.contains('quantity-change') && !target.classList.contains('remove-item')) {
+      return;
+    }
+
+    const { productId } = target.dataset;
+    const item = document.getElementById(productId);
+
+    if (!item) {
+      console.error(`상품 아이템을 찾을 수 없습니다: ${productId}`);
+      return;
+    }
+
+    if (target.classList.contains('quantity-change')) {
+      const change = parseInt(target.dataset.change, 10);
+      handleQuantityChange(item, change);
+    } else if (target.classList.contains('remove-item')) {
+      handleRemoveItem(item);
+    }
+
+    updateCart();
   }
 
   elements.addToCartButton.addEventListener('click', addToCart);
