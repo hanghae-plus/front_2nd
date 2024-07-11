@@ -37,11 +37,6 @@ export const createShoppingCart = () => {
   // 장바구니 데이터 배열로 변환
   const getItems = () => Object.values(items);
 
-  // 할인율 계산
-  const calculateDiscount = (originPrice, discountPrice) => {
-    return (originPrice - discountPrice) / originPrice;
-  };
-
   // 할인율 관련 상수
   const INDIVIDUAL_LIMIT = 10;
   const INDIVIDUAL_RATE = {
@@ -70,6 +65,11 @@ export const createShoppingCart = () => {
     return { originPrice, individualPrice, bulkPrice };
   };
 
+  // 할인율 계산
+  const calculateDiscount = (originPrice, discountPrice) => {
+    return (originPrice - discountPrice) / originPrice;
+  };
+
   // 전체 수량 계산
   const getTotalQuantity = () =>
     getItems().reduce((acc, { quantity }) => acc + quantity, 0);
@@ -80,7 +80,7 @@ export const createShoppingCart = () => {
     const totalQuantity = getTotalQuantity();
 
     let total = bulkPrice;
-    let discountRate = BULK_RATE;
+    let discountRate = totalQuantity === 0 ? 0 : BULK_RATE;
 
     if (totalQuantity < BULK_LIMIT || bulkPrice >= individualPrice) {
       total = individualPrice;
