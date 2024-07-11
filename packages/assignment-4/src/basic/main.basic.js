@@ -7,23 +7,23 @@
  */
 const PRODUCT_LIST = [
   {
-    id: "p1",
-    name: "상품1",
+    id: 'p1',
+    name: '상품1',
     price: 10000,
     discount: 0.1
   },
   {
-    id: "p2",
-    name: "상품2",
+    id: 'p2',
+    name: '상품2',
     price: 20000,
     discount: 0.15
   },
   {
-    id: "p3",
-    name: "상품3",
+    id: 'p3',
+    name: '상품3',
     price: 30000,
     discount: 0.2
-  },
+  }
 ];
 
 /**
@@ -45,7 +45,7 @@ const updateQuantity = (id, operation) => {
 
   if (!item) return;
 
-  switch(operation) {
+  switch (operation) {
     case 'increase':
       item.quantity += 1;
       break;
@@ -64,21 +64,21 @@ const updateQuantity = (id, operation) => {
 
 /**
  * 장바구니 상품 추가 함수
- * @param {{id: string, name: string, price: number, discount: number}} item 
+ * @param {{id: string, name: string, price: number, discount: number}} item
  */
-const addItem = (item) => {
+const addItem = item => {
   CART_LIST = [...CART_LIST, { ...item, quantity: 1 }];
   updateCartUI();
-}
+};
 
 /**
  * 장바구니 상품 삭제 함수
- * @param {string} id 
+ * @param {string} id
  */
-const removeItem = (id) => {
+const removeItem = id => {
   CART_LIST = CART_LIST.filter(cartItem => cartItem.id !== id);
   updateCartUI();
-}
+};
 
 /**
  * 가격 총합 및 할인율 계산 함수
@@ -92,14 +92,14 @@ function calculateTotal() {
   CART_LIST.forEach(item => {
     const itemTotal = item.price * item.quantity;
     let discount = 0;
-    
+
     totalQuantity += item.quantity;
     originalTotal += itemTotal;
 
     if (item.quantity >= 10) {
       discount = item.discount;
     }
-    
+
     total += itemTotal * (1 - discount);
   });
 
@@ -109,10 +109,10 @@ function calculateTotal() {
     const bulkDiscount = originalTotal * 0.25;
     const individualDiscount = originalTotal - total;
     if (bulkDiscount > individualDiscount) {
-        total = originalTotal * 0.75;
-        discountRate = 0.25;
+      total = originalTotal * 0.75;
+      discountRate = 0.25;
     } else {
-        discountRate = individualDiscount / originalTotal;
+      discountRate = individualDiscount / originalTotal;
     }
   } else {
     discountRate = (originalTotal - total) / originalTotal;
@@ -127,7 +127,7 @@ function calculateTotal() {
  * 장바구니 UI 업데이트 함수
  */
 function updateCartUI() {
-  const cartList = document.getElementById("cart-items");
+  const cartList = document.getElementById('cart-items');
 
   if (!cartList) return;
 
@@ -165,7 +165,7 @@ function updateCartUI() {
           </div>
       </div>
     `;
-    
+
     cartList.innerHTML += cartItem;
   });
 
@@ -176,7 +176,7 @@ function updateCartUI() {
  * 총합 UI 업데이트 함수
  */
 function updateTotalUI() {
-  const totalElement = document.getElementById("cart-total");
+  const totalElement = document.getElementById('cart-total');
 
   if (!totalElement) return;
 
@@ -185,10 +185,10 @@ function updateTotalUI() {
   totalElement.textContent = '총액: ' + Math.round(total) + '원';
 
   if (discountRate > 0) {
-    const discountSpan = document.createElement('span');
-    discountSpan.className = 'text-green-500 ml-2';
-    discountSpan.textContent = '(' + (discountRate * 100).toFixed(1) + '% 할인 적용)';
-    totalElement.appendChild(discountSpan);
+    const totalContents = `
+      <span class="text-green-500 ml-2">(${(discountRate * 100).toFixed(1)}% 할인 적용)</span>
+    `;
+    totalElement.innerHTML = totalContents;
   }
 }
 // #endregion
@@ -196,11 +196,11 @@ function updateTotalUI() {
 // #region event handler
 /**
  * 추가 버튼 클릭 이벤트 핸들러
- * @param {Event} event 
+ * @param {Event} event
  */
-const handleAddClick = (event) => {
+const handleAddClick = event => {
   // TODO: 개선 방법 생각해보기..
-  const selectElement = document.getElementById("product-select");
+  const selectElement = document.getElementById('product-select');
 
   if (!selectElement) return;
 
@@ -210,35 +210,35 @@ const handleAddClick = (event) => {
 
   if (!selectedItem) return;
 
-  const isInCart = CART_LIST.find(cartItem => cartItem.id === selectedItem.id);
+  const isInCart = CART_LIST.some(cartItem => cartItem.id === selectedItem.id);
 
   if (isInCart) {
-    updateQuantity(selectedItem.id, "increase");
+    updateQuantity(selectedItem.id, 'increase');
   } else {
     addItem(selectedItem);
   }
-}
+};
 
 /**
  * 장바구니 항목 클릭 이벤트 핸들러
- * @param {Event} event 
+ * @param {Event} event
  */
-const handleCartClick = (event) => {
+const handleCartClick = event => {
   const target = event.target;
-  
+
   if (!target) return;
 
   // @ts-ignore
   const action = target.dataset.action;
   // @ts-ignore
-  const productId = target.dataset.productId
+  const productId = target.dataset.productId;
 
-  switch(action) {
+  switch (action) {
     case 'increase':
-      updateQuantity(productId, "increase");
+      updateQuantity(productId, 'increase');
       break;
     case 'decrease':
-      updateQuantity(productId, "decrease");
+      updateQuantity(productId, 'decrease');
       break;
     case 'remove':
       removeItem(productId);
@@ -246,12 +246,12 @@ const handleCartClick = (event) => {
     default:
       return;
   }
-}
+};
 // #endregion
 
 function main() {
   // #region 기본 레이아웃 생성
-  const app = document.getElementById("app");
+  const app = document.getElementById('app');
 
   if (!app) return;
 
@@ -263,10 +263,7 @@ function main() {
         <div id="cart-items"></div>
         <div id="cart-total" class="text-xl font-bold my-4"></div>
         <select id="product-select" class="border rounded p-2 mr-2">
-          ${PRODUCT_LIST.map(
-            (product) =>
-              `<option value=${product.id}>${product.name} - ${product.price}원</option>`,
-          )}
+          ${PRODUCT_LIST.map(product => `<option value=${product.id}>${product.name} - ${product.price}원</option>`)}
         </select>
         <button id="add-to-cart" class="bg-blue-500 text-white px-4 py-2 rounded">추가</button>
       </div>
@@ -277,7 +274,7 @@ function main() {
   // #endregion
 
   // #region 추가 버튼 이벤트 핸들러 등록
-  const addToCartButton = document.getElementById("add-to-cart");
+  const addToCartButton = document.getElementById('add-to-cart');
 
   if (addToCartButton) {
     addToCartButton.onclick = handleAddClick;
