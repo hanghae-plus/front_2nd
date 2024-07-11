@@ -7,7 +7,7 @@ const INDIVIDUAL_DISCOUNT_THRESHOLD = 10;
  * @param {number} bulkDiscountThreshold - 대량 구매 할인 적용 기준 수량
  * @returns {Object} 할인 계산 함수를 포함한 객체
  */
-export function createDiscountService(discountRates, bulkDiscountRate, bulkDiscountThreshold) {
+export const createDiscountService = (discountRates, bulkDiscountRate, bulkDiscountThreshold) => {
   /**
    * 개별 상품의 할인율을 계산합니다.
    * @param {Object} item - 상품 정보
@@ -52,4 +52,4 @@ export function createDiscountService(discountRates, bulkDiscountRate, bulkDisco
   return {
     calculateCart,
   };
-}
+};

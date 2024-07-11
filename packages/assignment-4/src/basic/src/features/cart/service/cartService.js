@@ -7,7 +7,7 @@ const BUTTON_CLASSES = {
   REMOVE_ITEM: 'remove-item',
 };
 
-export function createCartService(products, discountService) {
+export const createCartService = (products, discountService) => {
   /**
    * 상품 ID로 상품을 찾습니다.
    * @param {string} productId - 상품 ID
@@ -107,7 +107,7 @@ export function createCartService(products, discountService) {
    * @param {HTMLElement} cartItemsElement - 장바구니 아이템 컨테이너
    * @param {Object} product - 상품 정보
    */
-  function addToCart(elements) {
+  const addToCart = (elements) => {
     const { value } = elements.productSelect;
     const selectedProduct = findProduct(value);
     if (!selectedProduct) return;
@@ -120,11 +120,11 @@ export function createCartService(products, discountService) {
     }
 
     updateCart(elements);
-  }
+  };
 
   return {
     addToCart,
     updateCart,
     handleCartItemActions,
   };
-}
+};

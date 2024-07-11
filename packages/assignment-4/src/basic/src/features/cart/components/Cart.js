@@ -5,7 +5,7 @@ import { createDiscountService } from '../service/discountService';
 import { createCartHTML } from './CartItem';
 import { createProductSelect } from './ProductSelect';
 
-export function initializeCart(products, discountRates, bulkDiscountRate, bulkDiscountThreshold) {
+export const initializeCart = (products, discountRates, bulkDiscountRate, bulkDiscountThreshold) => {
   const app = getElement(SELECTORS.APP);
   app.innerHTML = createCartHTML();
 
@@ -26,4 +26,4 @@ export function initializeCart(products, discountRates, bulkDiscountRate, bulkDi
   elements.cartItems.addEventListener('click', (event) => cartService.handleCartItemActions(event, elements));
 
   return elements;
-}
+};
