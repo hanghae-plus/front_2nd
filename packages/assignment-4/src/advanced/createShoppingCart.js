@@ -1,4 +1,4 @@
-import { cartChangeEvent } from './customEvent.js';
+import { cartChangeEvent } from '/src/advanced/customEvent.js';
 
 /**
  * 장바구니 관리 객체를 생성합니다.

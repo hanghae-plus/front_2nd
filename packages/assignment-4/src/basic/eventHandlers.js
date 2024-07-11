@@ -1,5 +1,5 @@
 import { updateCartItemsObj, getCartItemsObj } from '/src/basic/localStorage.js';
-import { products } from '/src/basic/shopInfos.js';
+import { productList } from '/src/basic/shopInfos.js';
 
 export function updateQuantity({ productId, change }) {
   const cartItemsObj = getCartItemsObj();
@@ -17,13 +17,13 @@ export function removeItemFromCart(productId) {
   const cartItemsObj = getCartItemsObj();
   const newCartItemsObj = structuredClone(cartItemsObj);
   delete newCartItemsObj[productId];
-  updateCartItems(newCartItemsObj);
+  updateCartItemsObj(newCartItemsObj);
 }
 
 export function addItemToCart() {
   const productSelectElement = document.querySelector('#product-select');
   const selectedProductId = productSelectElement.value;
-  const selectedProductObj = products.find(({ productId }) => productId === selectedProductId);
+  const selectedProductObj = productList.find(({ productId }) => productId === selectedProductId);
 
   const cartItemsObj = getCartItemsObj();
   const newCartItemsObj = structuredClone(cartItemsObj);
