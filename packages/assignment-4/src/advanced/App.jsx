@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import CartItem from './components/CartItem';
 import {
   ADD_QUANTITY,
   BULK_DISCOUNT_RATE,
@@ -8,6 +7,16 @@ import {
   PRODUCTS,
 } from './constants';
 import { hasItemInCart, isBulk, isNeedDiscount } from './utils';
+import { CartTotal, CartItem } from './components';
+import {
+  AddButton,
+  Background,
+  CartItemContainer,
+  Option,
+  Select,
+  Title,
+  WrapperBox,
+} from './components/UI';
 
 export default function App() {
   const [selectedProductId, setSelectedProductId] = useState(PRODUCTS[0].id);
@@ -94,48 +103,25 @@ export default function App() {
   }, [cartItemList]);
 
   return (
-    <div className="bg-gray-100 p-8">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8">
-        <h1 className="text-2xl font-bold mb-4">장바구니</h1>
-        <div id="cart-items">
+    <Background>
+      <WrapperBox>
+        <Title>장바구니</Title>
+        <CartItemContainer>
           {cartItemList.length > 0 &&
             cartItemList.map((item) => (
               <CartItem key={item.id} item={item} modifyCart={modifyCart} />
             ))}
-        </div>
+        </CartItemContainer>
         {cartItemList.length > 0 && (
-          <div id="cart-total" className="text-xl font-bold my-4">
-            {`총액: ${Math.round(
-              discountRate > DEFAULT_DISCOUNT_RATE
-                ? cartTotal * (1 - discountRate)
-                : cartTotal
-            )}원`}
-            {discountRate > DEFAULT_DISCOUNT_RATE && (
-              <span className="text-green-500 ml-2">{`(${(
-                discountRate * 100
-              ).toFixed(1)}% 할인 적용)`}</span>
-            )}
-          </div>
+          <CartTotal discountRate={discountRate} cartTotal={cartTotal} />
         )}
-        <select
-          onChange={selectProduct}
-          id="product-select"
-          className="border rounded p-2 mr-2"
-        >
+        <Select onChange={selectProduct}>
           {PRODUCTS.map((product) => (
-            <option key={product.id} value={product.id}>
-              {`${product.name} - ${product.price}원`}
-            </option>
+            <Option key={product.id} product={product} />
           ))}
-        </select>
-        <button
-          onClick={() => addToCart()}
-          id="add-to-cart"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          추가
-        </button>
-      </div>
-    </div>
+        </Select>
+        <AddButton onClick={() => addToCart()}>추가</AddButton>
+      </WrapperBox>
+    </Background>
   );
 }

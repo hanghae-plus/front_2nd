@@ -5,7 +5,6 @@ export const PRODUCTS = [
     price: 10_000,
     quantity: 0,
     discountRate: 0.1,
-    bulkDiscountRate: 0.25,
   },
   {
     id: 'p2',
@@ -13,7 +12,6 @@ export const PRODUCTS = [
     price: 20_000,
     quantity: 0,
     discountRate: 0.15,
-    bulkDiscountRate: 0.25,
   },
   {
     id: 'p3',
@@ -21,7 +19,6 @@ export const PRODUCTS = [
     price: 30_000,
     quantity: 0,
     discountRate: 0.2,
-    bulkDiscountRate: 0.25,
   },
 ];
 
