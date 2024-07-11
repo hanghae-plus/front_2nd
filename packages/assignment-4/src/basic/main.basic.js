@@ -154,37 +154,8 @@ function updateCart() {
   const cartItem = document.getElementById("cart-items");
   const cartTotal = document.getElementById("cart-total");
 
-  let total = 0;
-  let totalQuantity = 0;
   const items = cartItem.children;
-  let totalCount = 0;
-
-  for (var m = 0; m < items.length; m++) {
-    let item;
-
-    for (var n = 0; n < PRICES.length; n++) {
-      if (PRICES[n].id === items[m].id) {
-        item = PRICES[n];
-        break;
-      }
-    }
-
-    const quantity = parseInt(
-      items[m].querySelector("span").textContent.split("x ")[1]
-    );
-    const itemTotal = item.p * quantity;
-    let discount = 0;
-
-    totalQuantity += quantity;
-    totalCount += itemTotal;
-    if (quantity >= 10) {
-      if (item.id === "p1") discount = 0.1;
-      else if (item.id === "p2") discount = 0.15;
-      else if (item.id === "p3") discount = 0.2;
-    }
-    total += itemTotal * (1 - discount);
-  }
-
+  const {total, totalQuantity, totalCount} = getTotalPrice(items);
   const discountRatio = calculateDiscountRatio(total, totalCount, totalQuantity)
   cartTotal.textContent = "총액: " + Math.round(total) + "원";
 
@@ -193,6 +164,43 @@ function updateCart() {
         (${discountRatio}% 할인 적용)
     </span>`;
   }
+}
+
+function getTotalPrice(items) {
+  let total = 0;
+  let totalQuantity = 0;
+  let totalCount = 0;
+
+  Array.from(items).forEach((item) => {
+    const newItem = PRICES.filter(price => price.id === item.id)
+
+    const quantity = item.querySelector("span").textContent.split("x ")[1]
+    const itemTotal = newItem.p * quantity;
+
+    totalQuantity += quantity;
+    totalCount += itemTotal;
+
+    const discount = getDiscount(quantity, newItem)
+    total += itemTotal * (1 - discount)
+  })
+
+  return {total, totalQuantity, totalCount}
+}
+
+function getDiscount(quantity, item){
+  if (quantity >= 10) {
+    switch(item.id){
+      case "p1":
+        return 0.1
+      case "p2":
+        return 0.15
+      case "p3":
+        return 0.2
+      default:
+        return 0
+    }
+  }
+  return 0
 }
 
 function calculateDiscountRatio(total, totalCount, totalQuantity){
