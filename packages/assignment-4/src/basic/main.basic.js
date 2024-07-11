@@ -5,14 +5,14 @@ const PRODUCTS = [
 ]
 
 function main() {
-  var a = document.getElementById('app')
-  var w = document.createElement('div')
-  var b = document.createElement('div')
-  var h = document.createElement('h1')
-  var ct = document.createElement('div')
-  var tt = document.createElement('div')
-  var s = document.createElement('select')
-  var ab = document.createElement('button')
+  const a = document.getElementById('app')
+  const w = document.createElement('div')
+  const b = document.createElement('div')
+  const h = document.createElement('h1')
+  const ct = document.createElement('div')
+  const tt = document.createElement('div')
+  const s = document.createElement('select')
+  const ab = document.createElement('button')
 
   ct.id = 'cart-items'
   tt.id = 'cart-total'
@@ -27,8 +27,8 @@ function main() {
   h.textContent = '장바구니'
   ab.textContent = '추가'
 
-  for (var j = 0; j < PRODUCTS.length; j++) {
-    var o = document.createElement('option')
+  for (let j = 0; j < PRODUCTS.length; j += 1) {
+    const o = document.createElement('option')
     o.value = PRODUCTS[j].id
     o.textContent = PRODUCTS[j].name + ' - ' + PRODUCTS[j].price + '원'
     s.appendChild(o)
@@ -43,22 +43,22 @@ function main() {
   a.appendChild(w)
 
   function uc() {
-    var t = 0
-    var tq = 0
-    var items = ct.children
-    var tb = 0
+    let t = 0
+    let tq = 0
+    const items = ct.children
+    let tb = 0
 
-    for (var m = 0; m < items.length; m++) {
-      var item
-      for (var n = 0; n < PRODUCTS.length; n++) {
+    for (let m = 0; m < items.length; m += 1) {
+      let item
+      for (let n = 0; n < PRODUCTS.length; n += 1) {
         if (PRODUCTS[n].id === items[m].id) {
           item = PRODUCTS[n]
           break
         }
       }
-      var quantity = parseInt(items[m].querySelector('span').textContent.split('x ')[1])
-      var itemTotal = item.price * quantity
-      var disc = 0
+      const quantity = parseInt(items[m].querySelector('span').textContent.split('x ')[1])
+      const itemTotal = item.price * quantity
+      let disc = 0
 
       tq += quantity
       tb += itemTotal
@@ -70,10 +70,10 @@ function main() {
       t += itemTotal * (1 - disc)
     }
 
-    var dr = 0
+    let dr = 0
     if (tq >= 30) {
-      var bulkDiscount = t * 0.25
-      var individualDiscount = tb - t
+      const bulkDiscount = t * 0.25
+      const individualDiscount = tb - t
       if (bulkDiscount > individualDiscount) {
         t = tb * 0.75
         dr = 0.25
@@ -86,7 +86,7 @@ function main() {
 
     tt.textContent = '총액: ' + Math.round(t) + '원'
     if (dr > 0) {
-      var dspan = document.createElement('span')
+      const dspan = document.createElement('span')
       dspan.className = 'text-green-500 ml-2'
       dspan.textContent = '(' + (dr * 100).toFixed(1) + '% 할인 적용)'
       tt.appendChild(dspan)
@@ -94,26 +94,26 @@ function main() {
   }
 
   ab.onclick = function () {
-    var v = s.value
-    var i
-    for (var k = 0; k < PRODUCTS.length; k++) {
+    const v = s.value
+    let i
+    for (let k = 0; k < PRODUCTS.length; k += 1) {
       if (PRODUCTS[k].id === v) {
         i = PRODUCTS[k]
         break
       }
     }
     if (i) {
-      var e = document.getElementById(i.id)
+      const e = document.getElementById(i.id)
       if (e) {
-        var q = parseInt(e.querySelector('span').textContent.split('x ')[1]) + 1
+        const q = parseInt(e.querySelector('span').textContent.split('x ')[1]) + 1
         e.querySelector('span').textContent = i.name + ' - ' + i.price + '원 x ' + q
       } else {
-        var d = document.createElement('div')
-        var sp = document.createElement('span')
-        var bd = document.createElement('div')
-        var mb = document.createElement('button')
-        var pb = document.createElement('button')
-        var rb = document.createElement('button')
+        const d = document.createElement('div')
+        const sp = document.createElement('span')
+        const bd = document.createElement('div')
+        const mb = document.createElement('button')
+        const pb = document.createElement('button')
+        const rb = document.createElement('button')
         d.id = i.id
         d.className = 'flex justify-between items-center mb-2'
         sp.textContent = i.name + ' - ' + i.price + '원 x 1'
@@ -140,13 +140,13 @@ function main() {
   }
 
   ct.onclick = function (event) {
-    var target = event.target
+    const target = event.target
     if (target.classList.contains('quantity-change') || target.classList.contains('remove-item')) {
-      var productId = target.dataset.productId
-      var item = document.getElementById(productId)
+      const productId = target.dataset.productId
+      const item = document.getElementById(productId)
       if (target.classList.contains('quantity-change')) {
-        var change = parseInt(target.dataset.change)
-        var quantity = parseInt(item.querySelector('span').textContent.split('x ')[1]) + change
+        const change = parseInt(target.dataset.change)
+        const quantity = parseInt(item.querySelector('span').textContent.split('x ')[1]) + change
         if (quantity > 0) {
           item.querySelector('span').textContent =
             item.querySelector('span').textContent.split('x ')[0] + 'x ' + quantity
