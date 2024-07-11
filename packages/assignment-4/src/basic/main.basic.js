@@ -50,19 +50,11 @@ function initializeCart() {
   };
 
   populateProductSelect(elements.productSelect);
-}
-
-function main() {
-  initializeCart();
-  const $productSelect = getElement(SELECTORS.PRODUCT_SELECT);
-  const $addToCartButton = getElement(SELECTORS.ADD_TO_CART_BUTTON);
-  const $cartItems = getElement(SELECTORS.CART_ITEMS);
-  const $cartTotal = getElement(SELECTORS.CART_TOTAL);
 
   function uc() {
     let t = 0;
     let tq = 0;
-    const items = $cartItems.children;
+    const items = elements.cartItems.children;
     let tb = 0;
 
     for (let m = 0; m < items.length; m += 1) {
@@ -101,17 +93,17 @@ function main() {
       dr = (tb - t) / tb;
     }
 
-    $cartTotal.textContent = '총액: ' + Math.round(t) + '원';
+    elements.cartTotal.textContent = '총액: ' + Math.round(t) + '원';
     if (dr > 0) {
       const dspan = document.createElement('span');
       dspan.className = 'text-green-500 ml-2';
       dspan.textContent = '(' + (dr * 100).toFixed(1) + '% 할인 적용)';
-      $cartTotal.appendChild(dspan);
+      elements.cartTotal.appendChild(dspan);
     }
   }
 
-  $addToCartButton.onclick = function () {
-    const v = $productSelect.value;
+  function addToCart() {
+    const v = elements.productSelect.value;
     let i;
     for (let k = 0; k < PRODUCTS.length; k += 1) {
       if (PRODUCTS[k].id === v) {
@@ -150,13 +142,13 @@ function main() {
         bd.appendChild(rb);
         d.appendChild(sp);
         d.appendChild(bd);
-        $cartItems.appendChild(d);
+        elements.cartItems.appendChild(d);
       }
       uc();
     }
-  };
+  }
 
-  $cartItems.onclick = function (event) {
+  function handleClickCartItems(event) {
     const target = event.target;
     if (target.classList.contains('quantity-change') || target.classList.contains('remove-item')) {
       const productId = target.dataset.productId;
@@ -175,7 +167,18 @@ function main() {
       }
       uc();
     }
-  };
+  }
+
+  elements.addToCartButton.addEventListener('click', addToCart);
+  elements.cartItems.addEventListener('click', handleClickCartItems);
+}
+
+function main() {
+  try {
+    initializeCart();
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 main();
