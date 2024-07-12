@@ -10,6 +10,8 @@ export const setAttribute = ({ element, attributes }) => {
       element[key] = attribute;
     }
   });
+
+  return element;
 };
 
 export const createDOMElement = ({ name, options }) => {
@@ -26,6 +28,8 @@ export const appendChildElement = ({ parent, children }) => {
   children.forEach((child) => {
     parent.appendChild(child);
   });
+
+  return parent;
 };
 
 export const appendSelectOptions = ({ select, options }) => {
@@ -40,4 +44,6 @@ export const appendSelectOptions = ({ select, options }) => {
 
     appendChildElement({ parent: select, children: [newOption] });
   });
+
+  return select;
 };

@@ -67,7 +67,6 @@ const changeCartQuantity = ({ shoppingCart, productId, changeValue }) => {
         id: productId,
         quantity: item.quantity - 1,
       });
-
       updateCartItemText({ cartItem, updatedItem });
     } else {
       removeCartItem(shoppingCart, productId);
