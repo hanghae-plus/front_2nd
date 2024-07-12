@@ -1,0 +1,28 @@
+name: Issue PR Labeler
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+  pull_request_target: # or pull_request_target
+    types:
+      - opened
+      - reopened
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read       # 위에 작성한 설정 파일을 읽기 위해 필요
+      issues: write        # 이슈에 라벨을 추가하기 위해 필요
+      pull-requests: write # PR에 라벨을 추가하기 위해 필요
+
+    steps:
+      - name: Run Issue PR Labeler
+        uses: hoho4190/issue-pr-labeler@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          disable-bot: true
+          config-file-name: labeler-config.yml
