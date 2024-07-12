@@ -1,4 +1,4 @@
-const products = [
+const PRODUCTS = [
   { id: 'p1', name: '상품1', price: 10_000, discount: 0.1 },
   { id: 'p2', name: '상품2', price: 20_000, discount: 0.15 },
   { id: 'p3', name: '상품3', price: 30_000, discount: 0.2 },
@@ -30,7 +30,7 @@ function main() {
     className: 'bg-blue-500 text-white px-4 py-2 rounded',
     textContent: '추가',
   });
-  products.forEach((product) => {
+  PRODUCTS.forEach((product) => {
     const option = createElement('option', {
       value: product.id,
       textContent: `${product.name} - ${product.price}원`,
@@ -46,7 +46,7 @@ function main() {
   const cart = new Cart();
 
   on(addButton, 'click', () => {
-    const selectedProduct = products.find(
+    const selectedProduct = PRODUCTS.find(
       (product) => product.id === productSelect.value
     );
 
@@ -136,7 +136,7 @@ class Cart {
   }
 
   findItem(productId) {
-    return this.items.find((item) => item.product.id === productId);
+    return this.items.find(({ product }) => product.id === productId);
   }
 
   addItem(product) {
@@ -152,7 +152,7 @@ class Cart {
   }
 
   removeItem(productId) {
-    this.items = this.items.filter((item) => item.product.id !== productId);
+    this.items = this.items.filter(({ product }) => product.id !== productId);
   }
 
   updateQuantity(productId, quantityChange) {
@@ -171,12 +171,12 @@ class Cart {
 
   getTotal() {
     const totalQuantity = this.items.reduce(
-      (acc, item) => acc + item.quantity,
+      (acc, { quantity }) => acc + quantity,
       0
     );
     if (totalQuantity >= Cart.#TOTAL_DISCOUNT_THRESHOLD) {
       const total = this.items.reduce(
-        (acc, item) => acc + item.product.price * item.quantity,
+        (acc, { product, quantity }) => acc + product.price * quantity,
         0
       );
 
@@ -187,19 +187,15 @@ class Cart {
     }
 
     const totalBeforeDiscount = this.items.reduce(
-      (acc, item) => acc + item.product.price * item.quantity,
+      (acc, { product, quantity }) => acc + product.price * quantity,
       0
     );
-    const total = this.items.reduce((acc, item) => {
-      const quantity = item.quantity;
-
+    const total = this.items.reduce((acc, { product, quantity }) => {
       if (quantity >= Cart.#INDIVIDUAL_DISCOUNT_THRESHOLD) {
-        return (
-          acc + item.product.price * quantity * (1 - item.product.discount)
-        );
+        return acc + product.price * quantity * (1 - product.discount);
       }
 
-      return acc + item.product.price * quantity;
+      return acc + product.price * quantity;
     }, 0);
 
     return {
