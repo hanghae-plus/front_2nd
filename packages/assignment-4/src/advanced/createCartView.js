@@ -1,31 +1,43 @@
 import { createShoppingCart, PRODUCTS } from "./createShoppingCart";
 import { MainLayout, CartItem, CartTotal } from "./templates";
 
-const updateCartItemText = ({ cartItem, updatedItem }) => {
-  cartItem.querySelector(
-    "span",
-  ).textContent = `${updatedItem.product.name} - ${updatedItem.product.price}원 x ${updatedItem.quantity}`;
+const { addItem, removeItemById, getItemById, getTotal, updateQuantity } =
+  createShoppingCart();
+
+export const createCartView = () => {
+  const app = document.getElementById("app");
+  app.innerHTML = MainLayout({ items: PRODUCTS });
+
+  const addButton = document.getElementById("add-to-cart");
+  addButton.addEventListener("click", () => {
+    addButtonOnClick();
+  });
+
+  const cartItems = document.getElementById("cart-items");
+  cartItems.addEventListener("click", (event) => {
+    updateCartItemByClickElement(event.target);
+  });
 };
 
-const addButtonOnClick = (shoppingCart) => {
+const addButtonOnClick = () => {
   const selectedProductId = document.getElementById("product-select").value;
-  const selectedProduct = PRODUCTS.find(
-    (product) => product.id === selectedProductId,
-  );
-
   const cartItem = document.getElementById(selectedProductId);
 
   if (cartItem) {
-    const item = shoppingCart.getItemById(selectedProductId);
+    const item = getItemById(selectedProductId);
 
-    const updatedItem = shoppingCart.updateQuantity({
+    const updatedItem = updateQuantity({
       id: selectedProductId,
       quantity: item.quantity + 1,
     });
 
     updateCartItemText({ cartItem, updatedItem });
   } else {
-    shoppingCart.addItem({ product: selectedProduct });
+    const selectedProduct = PRODUCTS.find(
+      (product) => product.id === selectedProductId,
+    );
+
+    addItem({ product: selectedProduct });
 
     const cartItemsContainer = document.getElementById("cart-items");
 
@@ -36,78 +48,55 @@ const addButtonOnClick = (shoppingCart) => {
     cartItemsContainer.appendChild(cartItem);
   }
 
-  const { total, discountRate } = shoppingCart.getTotal();
+  const { total, discountRate } = getTotal();
   const cartTotal = document.getElementById("cart-total");
+
   cartTotal.innerHTML = CartTotal({ total, discountRate });
 };
 
-const removeCartItem = (shoppingCart, productId) => {
-  shoppingCart.removeItemById(productId);
+const updateCartItemText = ({ cartItem, updatedItem }) => {
+  cartItem.querySelector(
+    "span",
+  ).textContent = `${updatedItem.product.name} - ${updatedItem.product.price}원 x ${updatedItem.quantity}`;
+};
 
+const removeCartItemById = (productId) => {
   const itemById = document.getElementById(productId);
+  removeItemById(productId);
 
   itemById.remove();
 };
 
-const changeCartQuantity = ({ shoppingCart, productId, changeValue }) => {
+const changeCartQuantity = ({ productId, changeValue }) => {
   const cartItem = document.getElementById(productId);
 
-  const item = shoppingCart.getItemById(productId);
+  const item = getItemById(productId);
 
-  if (changeValue === "1") {
-    const updatedItem = shoppingCart.updateQuantity({
-      id: productId,
-      quantity: item.quantity + 1,
-    });
-
-    updateCartItemText({ cartItem, updatedItem });
-  } else {
-    if (item.quantity > 1) {
-      const updatedItem = shoppingCart.updateQuantity({
-        id: productId,
-        quantity: item.quantity - 1,
-      });
-      updateCartItemText({ cartItem, updatedItem });
-    } else {
-      removeCartItem(shoppingCart, productId);
-    }
+  if (changeValue === "-1" && item.quantity === 1) {
+    return removeCartItemById(productId);
   }
+
+  const updatedItem = updateQuantity({
+    id: productId,
+    quantity: item.quantity + Number(changeValue),
+  });
+  updateCartItemText({ cartItem, updatedItem });
 };
 
-const updateCartItem = ({ shoppingCart, clickedButton }) => {
-  const productId = clickedButton.dataset.productId;
+const updateCartItemByClickElement = (clickElement) => {
+  const productId = clickElement.dataset.productId;
 
-  if (clickedButton.classList.contains("remove-item")) {
-    removeCartItem(shoppingCart, productId);
+  if (clickElement.classList.contains("remove-item")) {
+    removeCartItemById(productId);
   }
 
-  if (clickedButton.classList.contains("quantity-change")) {
-    const changeValue = clickedButton.dataset.change;
+  if (clickElement.classList.contains("quantity-change")) {
+    const changeValue = clickElement.dataset.change;
 
-    changeCartQuantity({ shoppingCart, productId, changeValue });
+    changeCartQuantity({ productId, changeValue });
   }
 
-  const { total, discountRate } = shoppingCart.getTotal();
+  const { total, discountRate } = getTotal();
   const cartTotal = document.getElementById("cart-total");
   cartTotal.innerHTML = CartTotal({ total, discountRate });
-};
-
-export const createCartView = () => {
-  const newShoppingCart = createShoppingCart();
-
-  const app = document.getElementById("app");
-  app.innerHTML = MainLayout({ items: PRODUCTS });
-
-  const addButton = document.getElementById("add-to-cart");
-  addButton.addEventListener("click", () => {
-    addButtonOnClick(newShoppingCart);
-  });
-
-  const cartItems = document.getElementById("cart-items");
-  cartItems.addEventListener("click", (event) => {
-    updateCartItem({
-      shoppingCart: newShoppingCart,
-      clickedButton: event.target,
-    });
-  });
 };
