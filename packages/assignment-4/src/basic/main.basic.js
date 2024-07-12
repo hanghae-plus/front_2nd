@@ -3,12 +3,7 @@ import {
   createNewCartItem,
   updateExistingCartItem,
 } from './components/CartItem.js';
-import {
-  BULK_DISCOUNT_THRESHOLD,
-  PRODUCTS,
-  TOTAL_BULK_DISCOUNT_RATE,
-  TOTAL_BULK_DISCOUNT_THRESHOLD,
-} from './constants/products';
+import { PRODUCTS } from './constants/products';
 import { calculateCartTotals, createElement } from './utils/cartUtils.js';
 
 function Cart() {
@@ -41,23 +36,6 @@ function Cart() {
   cartItems.addEventListener('click', handleCartItemActions);
 
   updateCartTotal();
-}
-
-function createProductSelect() {
-  const select = createElement('select', {
-    id: 'product-select',
-    className: 'border rounded p-2 mr-2',
-  });
-
-  PRODUCTS.forEach((product) => {
-    const option = createElement('option', {
-      value: product.id,
-      textContent: `${product.name} - ${product.price}원`,
-    });
-    select.appendChild(option);
-  });
-
-  return select;
 }
 
 function addToCart(productId, cartItemsContainer) {
@@ -106,10 +84,7 @@ function updateCartTotal() {
   const cartItems = Array.from(document.getElementById('cart-items').children);
   const { totalQuantity, totalBeforeDiscount, totalAfterDiscount } = calculateCartTotals(
     cartItems,
-    PRODUCTS,
-    BULK_DISCOUNT_THRESHOLD,
-    TOTAL_BULK_DISCOUNT_THRESHOLD,
-    TOTAL_BULK_DISCOUNT_RATE
+    PRODUCTS
   );
 
   const discountRate =
@@ -125,6 +100,23 @@ function updateCartTotal() {
     });
     cartTotalElement.appendChild(discountSpan);
   }
+}
+
+function createProductSelect() {
+  const select = createElement('select', {
+    id: 'product-select',
+    className: 'border rounded p-2 mr-2',
+  });
+
+  PRODUCTS.forEach((product) => {
+    const option = createElement('option', {
+      value: product.id,
+      textContent: `${product.name} - ${product.price}원`,
+    });
+    select.appendChild(option);
+  });
+
+  return select;
 }
 
 Cart();

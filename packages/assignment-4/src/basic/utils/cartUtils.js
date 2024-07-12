@@ -1,3 +1,10 @@
+import {
+  BULK_DISCOUNT_THRESHOLD,
+  TOTAL_BULK_DISCOUNT_RATE,
+  TOTAL_BULK_DISCOUNT_THRESHOLD,
+} from '../constants/products';
+
+// DOM 요소 생성 함수
 export const createElement = (tag, attributes = {}) => {
   const element = document.createElement(tag);
   Object.entries(attributes).forEach(([key, value]) => {
@@ -12,13 +19,7 @@ export const createElement = (tag, attributes = {}) => {
   return element;
 };
 
-export function calculateCartTotals(
-  cartItems,
-  PRODUCTS,
-  BULK_DISCOUNT_THRESHOLD,
-  TOTAL_BULK_DISCOUNT_THRESHOLD,
-  TOTAL_BULK_DISCOUNT_RATE
-) {
+export function calculateCartTotals(cartItems, PRODUCTS) {
   const totals = cartItems.reduce(
     (acc, item) => {
       const [productInfo, quantityString] = item.querySelector('span').textContent.split('x ');
