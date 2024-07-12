@@ -1,9 +1,10 @@
-import { deepEquals } from "../../../assignment-2/src/basic/basic";
+import { shallowEquals } from "../../../assignment-2/src/basic/basic";
 
 export function createHooks(callback) {
-  //useMemo, useState를 관리
-  const hooks = [];
-  let currentHookIdx = 0;
+  const stateHooks = [];
+  const memoHooks = [];
+  let currentStateHookIdx = 0;
+  let currentMemoHookIdx = 0;
 
   /**
    * @NOTE
@@ -14,20 +15,22 @@ export function createHooks(callback) {
    * @returns
    */
   const useState = (initState) => {
-    let stateIdx = currentHookIdx; //현재 useState의 idx
-    hooks[stateIdx] = hooks[stateIdx] || initState; //기존 state가 사용중이면 초기화 하지 않는다.
+    let stateIdx = currentStateHookIdx;
 
-    //state값은 불변
+    stateHooks[stateIdx] = stateHooks[stateIdx] || initState;
+
     const state =
-      typeof hooks[stateIdx] === "object" ? Object.freeze(hooks[stateIdx]) : hooks[stateIdx];
+      typeof stateHooks[stateIdx] === "object"
+        ? Object.freeze(stateHooks[stateIdx])
+        : stateHooks[stateIdx];
 
     function setState(updatedState) {
-      if (deepEquals(hooks[stateIdx], updatedState)) return;
-      hooks[stateIdx] = updatedState;
+      if (shallowEquals(stateHooks[stateIdx], updatedState)) return;
+      stateHooks[stateIdx] = updatedState;
       callback();
     }
 
-    currentHookIdx++;
+    currentStateHookIdx++;
     return [state, setState];
   };
 
@@ -42,20 +45,19 @@ export function createHooks(callback) {
    * @returns
    */
   const useMemo = (fn, refs) => {
-    let memoIdx = currentHookIdx;
-    hooks[memoIdx] = hooks[memoIdx] || [fn(), refs];
+    let memoIdx = currentMemoHookIdx;
+    memoHooks[memoIdx] = memoHooks[memoIdx] || { memoizedValue: fn(), dependency: refs };
 
-    const [memoizedValue, prevDeps] = hooks[memoIdx];
+    const { memoizedValue, dependency } = memoHooks[memoIdx];
 
-    //DeepEquals
-    if (deepEquals(prevDeps, refs)) {
+    if (shallowEquals(dependency, refs)) {
       return typeof memoizedValue === "object" ? Object.freeze(memoizedValue) : memoizedValue;
     }
 
     const newValue = fn();
-    hooks[memoIdx] = [newValue, refs];
+    memoHooks[memoIdx] = { memoizedValue: newValue, dependency: refs };
 
-    currentHookIdx++;
+    currentMemoHookIdx++;
     return typeof newValue === "object" ? Object.freeze(newValue) : newValue;
   };
 
@@ -65,7 +67,8 @@ export function createHooks(callback) {
    * 새로운 hooks가 만들어지는 것을 방지
    */
   const resetContext = () => {
-    currentHookIdx = 0;
+    currentStateHookIdx = 0;
+    currentMemoHookIdx = 0;
   };
 
   return { useState, useMemo, resetContext };
