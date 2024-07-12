@@ -28,8 +28,16 @@ export function createHooks(callback) {
       queueMicrotask(() => {
         if (pendingUpdate) {
           pendingUpdate = false;
+
           callback();
         }
+
+        // if (pendingUpdate) {
+        //   return;
+        // }
+
+        // callback();
+        // pendingUpdate = false;
       });
     };
 

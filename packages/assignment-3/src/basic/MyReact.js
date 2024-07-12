@@ -22,7 +22,6 @@ function MyReact() {
   };
 
   // 사용자가 호출하는 진입점
-
   function render($root, component) {
     currentRoot = $root;
     rootComponent = component;
