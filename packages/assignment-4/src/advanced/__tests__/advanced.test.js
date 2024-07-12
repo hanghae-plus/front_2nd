@@ -13,6 +13,7 @@ describe('advanced test', () => {
       // DOM 초기화
       document.body.innerHTML = '<div id="app"></div>';
       await loadFile();
+      document.dispatchEvent(new Event('DOMContentLoaded')); // 수동으로 DOMContentLoaded 이벤트 트리거
     });
 
     it('장바구니 전체 기능 시나리오', async () => {
