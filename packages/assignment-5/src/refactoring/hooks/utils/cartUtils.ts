@@ -4,11 +4,19 @@ export const calculateItemTotal = (item: CartItem) => {
   return 0;
 };
 
+export const getRemainingStock = (product: Product) => {
+  const cartItem = cart.find((item) => item.product.id === product.id);
+  return product.stock - (cartItem?.quantity || 0);
+};
+
 export const getMaxApplicableDiscount = (item: CartItem) => {
   return 0;
 };
 
-export const calculateCartTotal = (cart: CartItem[], selectedCoupon: Coupon | null) => {
+export const calculateCartTotal = (
+  cart: CartItem[],
+  selectedCoupon: Coupon | null
+) => {
   return {
     totalBeforeDiscount: 0,
     totalAfterDiscount: 0,
@@ -16,6 +24,10 @@ export const calculateCartTotal = (cart: CartItem[], selectedCoupon: Coupon | nu
   };
 };
 
-export const updateCartItemQuantity = (cart: CartItem[], productId: string, newQuantity: number): CartItem[] => {
-  return []
+export const updateCartItemQuantity = (
+  cart: CartItem[],
+  productId: string,
+  newQuantity: number
+): CartItem[] => {
+  return [];
 };
