@@ -1,4 +1,4 @@
-import { Coupon } from "../../types.ts";
+import { Coupon } from "@/types.ts";
 
 export const useCoupons = (initialCoupons: Coupon[]) => {
   const coupons = structuredClone(initialCoupons);
