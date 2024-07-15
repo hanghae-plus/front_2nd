@@ -8,9 +8,7 @@ import { CartItem, Coupon, Product } from "../../../types";
 export const calculateItemTotal = (item: CartItem) => {
   const itemPrice = item.product.price;
 
-  const discountRate = item.product.discounts
-    .sort((a, b) => b.quantity - a.quantity)
-    .find((discount) => item.quantity >= discount.quantity);
+  const discountRate = getMaxApplicableDiscount(item);
 
   const price = itemPrice * item.quantity;
 
@@ -18,29 +16,7 @@ export const calculateItemTotal = (item: CartItem) => {
     return price;
   }
 
-  return price * (1 - discountRate.rate);
-};
-
-/**
- * 남은 잔고를 확인하는 함수
- * @param product
- * @param cart
- * @returns 할인율
- */
-export const getRemainingStock = (product: Product, cart: CartItem[]) => {
-  const cartItem = cart.find((item) => item.product.id === product.id);
-  return product.stock - (cartItem?.quantity || 0);
-};
-
-/**
- *
- * @param discounts
- * @returns
- */
-export const getMaxDiscount = (
-  discounts: { quantity: number; rate: number }[]
-) => {
-  return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
+  return price * (1 - discountRate);
 };
 
 /**
@@ -49,15 +25,17 @@ export const getMaxDiscount = (
  * @returns 개별 할인으로 얻을 수 있는 최대 할인율
  */
 export const getMaxApplicableDiscount = (item: CartItem) => {
-  const discountRate = item.product.discounts
-    .sort((a, b) => b.quantity - a.quantity)
-    .find((discount) => item.quantity >= discount.quantity);
+  const discountRate = item.product.discounts.reduce(
+    (max, discount) =>
+      item.quantity >= discount.quantity ? Math.max(max, discount.rate) : max,
+    0
+  );
 
   if (!discountRate) {
     return 0;
   }
 
-  return discountRate.rate;
+  return discountRate;
 };
 
 /**
@@ -133,4 +111,26 @@ export const updateCartItemQuantity = (
       return item;
     })
     .filter((item) => item !== null);
+};
+
+/**
+ * 남은 잔고를 확인하는 함수
+ * @param product
+ * @param cart
+ * @returns 할인율
+ */
+export const getRemainingStock = (product: Product, cart: CartItem[]) => {
+  const cartItem = cart.find((item) => item.product.id === product.id);
+  return product.stock - (cartItem?.quantity || 0);
+};
+
+/**
+ *
+ * @param discounts
+ * @returns 최대할인율
+ */
+export const getMaxDiscount = (
+  discounts: { quantity: number; rate: number }[]
+) => {
+  return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
 };
