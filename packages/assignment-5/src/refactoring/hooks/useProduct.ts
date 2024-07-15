@@ -1,4 +1,4 @@
-import { Product } from "../../types.ts";
+import { Product } from "@/types.ts";
 
 export const useProducts = (initialProducts: Product[]) => {
   const products: Product[] = structuredClone(initialProducts);
