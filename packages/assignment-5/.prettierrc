@@ -12,6 +12,5 @@
   "quoteProps": "as-needed",
   "proseWrap": "preserve",
   "htmlWhitespaceSensitivity": "css",
-  "embeddedLanguageFormatting": "auto",
-  "plugins": ["@prettier/plugin-typescript"]
+  "embeddedLanguageFormatting": "auto"
 }

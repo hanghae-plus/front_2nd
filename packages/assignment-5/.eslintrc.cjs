@@ -1,3 +1,5 @@
+const { default: eslintPluginPrettier } = require('eslint-plugin-prettier');
+
 module.exports = {
   root: true,
   env: { browser: true, es2020: true, node: true },
@@ -6,28 +8,32 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:react-hooks/recommended',
     'plugin:react/recommended',
-    'plugin:prettier/recommended'
+    'plugin:prettier/recommended',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
-      jsx: true
+      jsx: true,
     },
     ecmaVersion: 'latest',
-    sourceType: 'module'
+    sourceType: 'module',
   },
-  plugins: ['react-refresh',
+  plugins: [
+    'react-refresh',
     'react',
     '@typescript-eslint',
-    'prettier'],
+    'prettier',
+    'eslint-config-prettier',
+    'eslint-plugin-prettier',
+  ],
   rules: {
     'prettier/prettier': 'error',
     'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'no-console': 'warn',
     'no-debugger': 'warn',
-    'react/prop-types': 'off', 
+    'react/prop-types': 'off',
     'react-refresh/only-export-components': [
       'warn',
       { allowConstantExport: true },
@@ -35,7 +41,7 @@ module.exports = {
   },
   settings: {
     react: {
-      version: 'detect'
-    }
-  }
-}
+      version: 'detect',
+    },
+  },
+};
