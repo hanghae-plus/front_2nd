@@ -1,4 +1,4 @@
-import { CartItem, Coupon, Product } from "../../../types";
+import { CartItem, Coupon, Discount, Product } from "../../../types";
 
 /**
  * 할인 없는 총액 계산
@@ -131,8 +131,6 @@ export const getRemainingStock = (product: Product, cart: CartItem[]) => {
  * @param discounts
  * @returns 최대할인율
  */
-export const getMaxDiscount = (
-  discounts: { quantity: number; rate: number }[]
-) => {
+export const getMaxDiscount = (discounts: Discount[]) => {
   return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
 };
