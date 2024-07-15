@@ -1,28 +1,61 @@
-// useCart.ts
-import { useState } from 'react';
-import { CartItem, Coupon, Product } from '../../types';
-import { calculateCartTotal, updateCartItemQuantity } from './utils/cartUtils';
+import { useMemo, useState } from "react";
+import type { CartItemType, Coupon, Product } from "types";
+import {
+  calculateCartTotal,
+  updateCartItemQuantity,
+} from "hooks/utils/cartUtils";
 
 export const useCart = () => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartList, setCartList] = useState<CartItemType[]>([]);
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
 
-  const addToCart = (product: Product) => {};
+  const addToCart = (product: Product) => {
+    setCartList((prevCartList) => {
+      const existingItem = prevCartList.find(
+        (item) => item.product.id === product.id,
+      );
+      if (existingItem) {
+        return prevCartList.map((item) =>
+          item.product.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item,
+        );
+      }
+      return [...prevCartList, { product, quantity: 1 }];
+    });
+  };
 
-  const removeFromCart = (productId: string) => {};
+  const removeFromCart = (productId: string) => {
+    setCartList((prevCartList) =>
+      prevCartList.filter((cartItem) => cartItem.product.id !== productId),
+    );
+  };
 
-  const updateQuantity = (productId: string, newQuantity: number) => {};
+  const updateQuantity = (productId: string, newQuantity: number) => {
+    if (newQuantity < 0) {
+      return;
+    }
 
-  const applyCoupon = (coupon: Coupon) => {};
+    setCartList((prevCartList) =>
+      updateCartItemQuantity({
+        cartList: prevCartList,
+        productId,
+        newQuantity,
+      }),
+    );
+  };
 
-  const calculateTotal = () => ({
-    totalBeforeDiscount: 0,
-    totalAfterDiscount: 0,
-    totalDiscount: 0,
-  })
+  const applyCoupon = (coupon: Coupon) => {
+    setSelectedCoupon(coupon);
+  };
+
+  const calculateTotal = useMemo(
+    () => calculateCartTotal({ cart: cartList, selectedCoupon }),
+    [cartList, selectedCoupon],
+  );
 
   return {
-    cart,
+    cartList,
     addToCart,
     removeFromCart,
     updateQuantity,
