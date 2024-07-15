@@ -1,6 +1,11 @@
 import { Coupon } from "../../types.ts";
-import { useState } from "react";
 
 export const useCoupons = (initialCoupons: Coupon[]) => {
-  return { coupons: [], addCoupon: () => undefined };
+  const coupons = structuredClone(initialCoupons);
+
+  const addCoupon = (newCoupon: Coupon) => {
+    coupons.push(newCoupon);
+  };
+
+  return { coupons, addCoupon };
 };
