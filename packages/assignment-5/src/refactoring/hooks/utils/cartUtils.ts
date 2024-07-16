@@ -38,11 +38,23 @@ export const calculateCartTotal = (
   const totalBeforeDiscount = cart.reduce((ac, cu) => {
     return ac + cu.product.price * cu.quantity;
   }, 0);
+  let totalAfterDiscount = cart.reduce((ac, cu) => {
+    return ac + calculateItemTotal(cu);
+  }, 0);
+
+  if (selectedCoupon) {
+    totalAfterDiscount =
+      selectedCoupon?.discountType === "amount"
+        ? totalAfterDiscount - selectedCoupon.discountValue
+        : (totalAfterDiscount * (100 - selectedCoupon?.discountValue)) / 100;
+  }
+
+  const totalDiscount = totalBeforeDiscount - totalAfterDiscount;
 
   return {
     totalBeforeDiscount: totalBeforeDiscount,
-    totalAfterDiscount: 0,
-    totalDiscount: 0,
+    totalAfterDiscount: totalAfterDiscount,
+    totalDiscount: totalDiscount,
   };
 };
 
