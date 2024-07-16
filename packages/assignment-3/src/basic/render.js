@@ -2,33 +2,30 @@ export function jsx(type, props, ...children) {
   return { type, props, children: children.flat() }
 }
 
+
+// createElement 함수는 JSX 객체를 실제 DOM 요소로 변환
 export function createElement(node) {
-  // jsx를 dom으로 변환
-  // const obj = jsx(node)
-  // console.log(`\n>>`, JSON.stringify(obj, null, 2))
-  // const tagType = obj.type
-  // const propsKey = obj.props ? Object.keys(obj.props) : false
-  // const propsValue = propsKey ? obj.props(propsKey) : false
-  // const element = propsKey ? `<${tagType} ${propsKey}=${propsValue}> 
-  
-  // </${tagType}>` : `<${tagType}> </${tagType}>`
-  // return element
+  // node가 문자열이면 텍스트 노드를 생성
   if (typeof node === 'string') {
     return document.createTextNode(node);
   }
 
+  // node가 객체이면 해당 태그의 DOM 요소를 생성
   const element = document.createElement(node.type);
 
+  // node에 props가 있으면 모든 속성을 설정
   if (node.props) {
     Object.keys(node.props).forEach(key => {
       element.setAttribute(key, node.props[key]);
     });
   }
 
+  // 자식 노드들을 재귀적으로 생성하여 현재 요소에 추가
   node.children.forEach(child => {
     element.appendChild(createElement(child));
   });
 
+  // 생성된 DOM 요소를 반환합니다.
   return element;
 }
  
@@ -49,6 +46,7 @@ function updateAttributes(target, newProps = {}, oldProps = {}) {
   
 
   Object.keys(props).forEach(name => {
+    // newProps와 oldProps에서 현재 속성 값 가져오기
     const newValue = newProps[name];
     const oldValue = oldProps[name];
 

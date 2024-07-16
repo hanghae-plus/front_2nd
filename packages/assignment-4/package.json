@@ -10,7 +10,10 @@
     "test": "vitest",
     "test:basic": "vitest src/basic",
     "test:advanced": "vitest src/advanced",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "lint": "eslint 'src/**/*.{js,ts,tsx}'",
+    "lint:fix": "eslint 'src/**/*.{js,ts,tsx}' --fix",
+    "format": "prettier --write 'src/**/*.js'"
   },
   "dependencies": {
     "react": "^18.2.0",
