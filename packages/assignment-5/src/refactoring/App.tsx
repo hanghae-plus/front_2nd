@@ -65,7 +65,7 @@ const App = () => {
         </div>
       </nav>
       <main className="container mx-auto mt-6">
-        {isAdmin ? (
+        {isAdmin && (
           <AdminPage
             products={products}
             coupons={coupons}
@@ -73,9 +73,8 @@ const App = () => {
             onProductAdd={addProduct}
             onCouponAdd={addCoupon}
           />
-        ) : (
-          <CartPage products={products} coupons={coupons} />
         )}
+        {!isAdmin && <CartPage products={products} coupons={coupons} />}
       </main>
     </div>
   );
