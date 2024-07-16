@@ -10,11 +10,12 @@ export const getMaxApplicableDiscount = ({
   product: { discounts },
   quantity,
 }: CartItem) => {
-  return discounts
-    .filter((discount) => quantity >= discount.quantity)
-    .reduce((maxDiscountRate, discount) => {
+  return discounts.reduce((maxDiscountRate, discount) => {
+    if (quantity >= discount.quantity) {
       return Math.max(maxDiscountRate, discount.rate);
-    }, 0);
+    }
+    return maxDiscountRate;
+  }, 0);
 };
 
 interface CalculateCartTotal {
