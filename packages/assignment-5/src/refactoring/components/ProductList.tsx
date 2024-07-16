@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { Product } from "../../types";
 import { getMaxDiscount } from "../hooks/utils/cartUtils";
 
@@ -9,10 +8,13 @@ interface ProductListProps {
 }
 
 const ProductList = ({ product, remainStock, addToCart }: ProductListProps) => {
-  const memorizedAddToCartHandler = useCallback(
-    () => addToCart(product),
-    [product, addToCart]
-  );
+  /**
+   *
+   * @param product
+   */
+  const addToCartHandler = (product: Product) => {
+    addToCart(product);
+  };
 
   return (
     <div
@@ -51,7 +53,7 @@ const ProductList = ({ product, remainStock, addToCart }: ProductListProps) => {
         </ul>
       )}
       <button
-        onClick={memorizedAddToCartHandler}
+        onClick={() => addToCartHandler(product)}
         className={`w-full px-3 py-1 rounded ${
           remainStock > 0
             ? "bg-blue-500 text-white hover:bg-blue-600"

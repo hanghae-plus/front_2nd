@@ -1,6 +1,7 @@
 import { Coupon, Product } from "../../types.ts";
 import { useCart } from "../hooks";
 import {
+  discountCouponValue,
   getMaxApplicableDiscount,
   getRemainingStock,
 } from "../hooks/utils/cartUtils.ts";
@@ -26,21 +27,6 @@ export const CartPage = ({ products, coupons }: Props) => {
   const { totalBeforeDiscount, totalAfterDiscount, totalDiscount } =
     calculateTotal;
 
-  // const changeQuantityHandler = (productId: string, newQuantity: number) => {
-  //   updateQuantity(productId, newQuantity);
-  // };
-
-  /**
-   * discountType에 따라 %할인일지 금액할인일지 계산하는 함수
-   * @param coupon
-   * @returns 할인 value
-   */
-  const discountCouponValue = (coupon: Coupon) => {
-    return coupon.discountType === "amount"
-      ? `${coupon.discountValue}원`
-      : `${coupon.discountValue}%`;
-  };
-
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">장바구니</h1>
@@ -49,11 +35,10 @@ export const CartPage = ({ products, coupons }: Props) => {
           <h2 className="text-2xl font-semibold mb-4">상품 목록</h2>
           <div className="space-y-2">
             {products.map((product) => {
-              const remainStock = getRemainingStock(product, cart);
               return (
                 <ProductList
                   product={product}
-                  remainStock={remainStock}
+                  remainStock={getRemainingStock(product, cart)}
                   addToCart={addToCart}
                 />
               );
@@ -62,14 +47,12 @@ export const CartPage = ({ products, coupons }: Props) => {
         </div>
         <div>
           <h2 className="text-2xl font-semibold mb-4">장바구니 내역</h2>
-
           <div className="space-y-2">
             {cart.map((item) => {
-              const maxDiscountRate = getMaxApplicableDiscount(item);
               return (
                 <CartItemList
                   item={item}
-                  appliedDiscountRate={maxDiscountRate}
+                  appliedDiscountRate={getMaxApplicableDiscount(item)}
                   updateQuantity={updateQuantity}
                   removeFromCart={removeFromCart}
                 />

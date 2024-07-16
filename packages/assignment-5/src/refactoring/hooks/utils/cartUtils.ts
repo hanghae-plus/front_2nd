@@ -136,3 +136,14 @@ export const getRemainingStock = (product: Product, cart: CartItem[]) => {
 export const getMaxDiscount = (discounts: Discount[]) => {
   return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
 };
+
+/**
+ * discountType에 따라 %할인일지 금액할인일지 계산하는 함수
+ * @param coupon
+ * @returns 할인 value
+ */
+export const discountCouponValue = (coupon: Coupon) => {
+  return coupon.discountType === "amount"
+    ? `${coupon.discountValue}원`
+    : `${coupon.discountValue}%`;
+};
