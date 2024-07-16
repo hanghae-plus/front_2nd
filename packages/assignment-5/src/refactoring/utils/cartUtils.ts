@@ -69,12 +69,11 @@ export const updateCartItemQuantity = (
 
   if (newQuantity === 0) {
     newCart.splice(targetProductIndex, 1);
-  }
+  } else {
+    const { stock } = newCart[targetProductIndex].product;
 
-  newCart[targetProductIndex].quantity =
-    newQuantity > newCart[targetProductIndex].product.stock
-      ? newCart[targetProductIndex].product.stock
-      : newQuantity;
+    newCart[targetProductIndex].quantity = Math.min(stock, newQuantity);
+  }
 
   return newCart;
 };
