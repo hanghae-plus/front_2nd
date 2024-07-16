@@ -1,22 +1,19 @@
 import { Product } from "@/types.ts";
+import { useState } from "react";
 
 export const useProducts = (initialProducts: Product[]) => {
-  const products: Product[] = structuredClone(initialProducts);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
 
   const updateProduct = (newProduct: Product) => {
-    const targetIndex = products.findIndex(
-      (product) => product.id === newProduct.id
+    setProducts((prev) =>
+      prev.map((product) =>
+        product.id === newProduct.id ? newProduct : product
+      )
     );
-
-    if (targetIndex < 0) {
-      return;
-    }
-
-    products[targetIndex] = newProduct;
   };
 
   const addProduct = (newProduct: Product) => {
-    products.push(newProduct);
+    setProducts((prev) => [...prev, newProduct]);
   };
 
   return {
