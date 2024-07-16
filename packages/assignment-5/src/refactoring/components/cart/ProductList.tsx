@@ -8,10 +8,6 @@ interface ProductListProps {
 }
 
 const ProductList = ({ product, remainStock, addToCart }: ProductListProps) => {
-  /**
-   *
-   * @param product
-   */
   const addToCartHandler = (product: Product) => {
     addToCart(product);
   };
