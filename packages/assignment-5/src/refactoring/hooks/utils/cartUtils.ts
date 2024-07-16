@@ -115,6 +115,8 @@ export const updateCartItemQuantity = (
     .filter((item) => item !== null);
 };
 
+//그 외 유틸
+
 /**
  * 남은 아이템 재고를 얻는 함수
  * @param product
