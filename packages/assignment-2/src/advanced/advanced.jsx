@@ -1,23 +1,82 @@
-import { createContext, useContext, useState } from "react"; 
- 
-const cache = {};
+import { createContext, useContext, useState, useCallback } from "react";
+
+/** reference: https://velog.io/@sarang_daddy/React-Data-Caching
+ * const ONE_MINUTE_MS = 60 * 1000;
+
+const cacheManager = (cacheExpirationDuration: number = ONE_MINUTE_MS * 10) => {
+  const cache: Record<string, { data: any; expireTime: number }> = {};
+
+  return {
+    cacheData: (key: string, data?: any) => {
+      if (cache[key]) {
+        const { data: cachedData, expireTime } = cache[key];
+        if (expireTime > Date.now()) {
+          return cachedData;
+        }
+      }
+      cache[key] = { data, expireTime: Date.now() + cacheExpirationDuration };
+      return data;
+    },
+    isDataValid: (key: string) => {
+      if (!cache[key]) return false;
+      const { expireTime } = cache[key];
+      return expireTime > Date.now();
+    },
+  };
+};
+
+export default cacheManager;
+
+ */
+const cacheManager = (cacheExpirationDuration = 60 * 1000 * 10) => {
+  const cache = new Map();
+
+  return {
+    get: (key) => {
+      if (cache.has(key)) {
+        const { data, expireTime } = cache.get(key);
+        if (expireTime > Date.now()) {
+          return data;
+        } else {
+          cache.delete(key); // 만료된 데이터 삭제
+        }
+      }
+      return null;
+    },
+    set: (key, data) => {
+      cache.set(key, {
+        data,
+        expireTime: Date.now() + cacheExpirationDuration,
+      });
+    }
+  };
+};
+
+// const cache = new Map();
+const memo1Cache = cacheManager();
 
 export const memo1 = (fn) => {
-  const key = fn.toString();
-  if (!cache[key]) {
-    cache[key] = fn();
+  const cachedData = memo1Cache.get(fn);
+  if (cachedData !== null) {
+    return cachedData;
   }
-  return cache[key];
+  const result = fn();
+  memo1Cache.set(fn, result);
+  return result;
 };
 
+
+const memo2Cache = cacheManager();
 export const memo2 = (fn, args) => {
-  const key = fn.toString() + JSON.stringify(args);
-  if (!cache[key]) {
-    cache[key] = fn(...args);
+  const key = JSON.stringify(args);
+  const cachedData = memo2Cache.get(key);
+  if (cachedData !== null) {
+    return cachedData;
   }
-  return cache[key];
-};
-
+  const result = fn();
+  memo2Cache.set(key, result);
+  return result;
+}; 
 
 
 const deepEqual = (a, b) => {
@@ -38,15 +97,21 @@ const deepEqual = (a, b) => {
 };
 
 export const useCustomState = (initValue) => {
-  const [state, setState] = useState(initValue); 
-  const setCustomState = (newState) => {
-    if (!deepEqual(state, newState)) {
-      setState(newState);
-    }
-  };
+  const [state, setState] = useState(initValue);
+
+  const setCustomState = useCallback((newState) => {
+    setState((prevState) => {
+      if (!deepEqual(prevState, newState)) {
+        return newState;
+      }
+      return prevState;
+    });
+  }, []);
 
   return [state, setCustomState];
 };
+
+ 
 
 
  
@@ -128,5 +193,4 @@ export const TestContextProvider = ({ children }) => {
     </UserProvider>
   );
 };
- 
-
+  
