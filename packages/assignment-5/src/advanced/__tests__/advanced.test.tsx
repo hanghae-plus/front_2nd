@@ -1,5 +1,5 @@
-import { AdminPage } from "@/refactoring/components/AdminPage";
-import { CartPage } from "@/refactoring/components/CartPage";
+import AdminPage from "@/refactoring/components/AdminPage";
+import CartPage from "@/refactoring/components/CartPage";
 import { Coupon, Product } from "@/types";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { useState } from "react";

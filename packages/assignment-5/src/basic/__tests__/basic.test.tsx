@@ -1,5 +1,5 @@
-import { AdminPage } from "@/refactoring/components/AdminPage";
-import { CartPage } from "@/refactoring/components/CartPage";
+import AdminPage from "@/refactoring/components/AdminPage";
+import CartPage from "@/refactoring/components/CartPage";
 import { useCart, useCoupons, useProducts } from "@/refactoring/hooks";
 import * as cartUtils from "@/refactoring/utils/cartUtils";
 import { CartItem, Coupon, Product } from "@/types";

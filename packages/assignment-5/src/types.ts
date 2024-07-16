@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from "react";
+
 export interface Product {
   id: string;
   name: string;
@@ -19,6 +21,8 @@ export interface CartItem {
 export interface Coupon {
   name: string;
   code: string;
-  discountType: 'amount' | 'percentage';
+  discountType: "amount" | "percentage";
   discountValue: number;
 }
+
+export type setState<T> = Dispatch<SetStateAction<T>>;
