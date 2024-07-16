@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { CartPage } from './components/CartPage.tsx';
 import { AdminPage } from './components/AdminPage.tsx';
 
-import { useCoupons, useProducts } from "./hooks";
+import { useCoupons, useProducts } from './hooks';
 import { initialCoupons, initialProducts } from './constants';
- 
+
 const App = () => {
-  const { products, updateProduct, addProduct } = useProducts(initialProducts);
+  const { products, updateProduct, addProduct, deleteProduct } =
+    useProducts(initialProducts);
   const { coupons, addCoupon } = useCoupons(initialCoupons);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -30,10 +31,11 @@ const App = () => {
             coupons={coupons}
             onProductUpdate={updateProduct}
             onProductAdd={addProduct}
+            onProductDelete={deleteProduct}
             onCouponAdd={addCoupon}
           />
         ) : (
-          <CartPage products={products} coupons={coupons}/>
+          <CartPage products={products} coupons={coupons} />
         )}
       </main>
     </div>

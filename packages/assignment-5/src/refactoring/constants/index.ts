@@ -45,5 +45,5 @@ export const initialCoupons: Coupon[] = [
 export const INIT_QUANTITY = 0;
 export const MODIFY_QUANTITY = 1;
 
-export const AMOUNT5000 = 'AMOUNT5000';
-export const PERCENT10 = 'PERCENT10';
+export const AMOUNT = 'amount';
+export const PERCENTAGE = 'percentage';

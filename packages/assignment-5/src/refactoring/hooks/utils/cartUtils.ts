@@ -1,5 +1,5 @@
 import { CartItem, Coupon, Product } from '../../../types';
-import { AMOUNT5000, INIT_QUANTITY, PERCENT10 } from '../../constants';
+import { AMOUNT, INIT_QUANTITY, PERCENTAGE } from '../../constants';
 
 export const getCartItem = (cart: CartItem[], product: Product) => {
   const cartItem = cart.find((item) => item.product.id === product.id);
@@ -22,7 +22,7 @@ export const calculateCartTotal = (
   selectedCoupon: Coupon | null,
 ) => {
   const totalBeforeDiscount = cart.reduce(
-    (pre, cur) => pre + calculateItemTotal(cur),
+    (pre, cur) => pre + cur.product.price * cur.quantity,
     0,
   );
   let totalDiscount = cart
@@ -33,9 +33,10 @@ export const calculateCartTotal = (
     .reduce((pre, cur) => pre + cur, 0);
 
   if (selectedCoupon) {
-    if (selectedCoupon.code === AMOUNT5000)
+    if (selectedCoupon.discountType === AMOUNT) {
       totalDiscount += selectedCoupon.discountValue;
-    if (selectedCoupon.code === PERCENT10) {
+    }
+    if (selectedCoupon.discountType === PERCENTAGE) {
       totalDiscount +=
         ((totalBeforeDiscount - totalDiscount) * selectedCoupon.discountValue) /
         100;
@@ -56,10 +57,15 @@ export const updateCartItemQuantity = (
   productId: string,
   newQuantity: number,
 ): CartItem[] => {
-  return cart.map((item) => {
-    if (item.product.id === productId) {
-      item.quantity = newQuantity;
-    }
-    return item;
-  });
+  return cart
+    .map((item) => {
+      if (item.product.id === productId) {
+        item.quantity = newQuantity;
+      }
+      if (newQuantity > item.product.stock) {
+        item.quantity = item.product.stock;
+      }
+      return item;
+    })
+    .filter((item) => item.quantity > 0);
 };
