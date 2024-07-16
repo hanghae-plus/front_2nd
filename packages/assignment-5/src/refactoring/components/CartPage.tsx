@@ -25,6 +25,21 @@ export const CartPage = ({ products, coupons }: Props) => {
   const { totalBeforeDiscount, totalAfterDiscount, totalDiscount } =
     calculateTotal;
 
+  const changeQuantityHandler = (productId: string, newQuantity: number) => {
+    updateQuantity(productId, newQuantity);
+  };
+
+  /**
+   * discountType에 따라 %할인일지 금액할인일지 계산하는 함수
+   * @param coupon
+   * @returns 할인 value
+   */
+  const discountCouponValue = (coupon: Coupon) => {
+    return coupon.discountType === "amount"
+      ? `${coupon.discountValue}원`
+      : `${coupon.discountValue}%`;
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">장바구니</h1>
@@ -122,7 +137,10 @@ export const CartPage = ({ products, coupons }: Props) => {
                     </button>
                     <button
                       onClick={() =>
-                        updateQuantity(item.product.id, item.quantity + 1)
+                        changeQuantityHandler(
+                          item.product.id,
+                          item.quantity + 1
+                        )
                       }
                       className="bg-gray-300 text-gray-800 px-2 py-1 rounded mr-1 hover:bg-gray-400"
                     >
@@ -149,20 +167,14 @@ export const CartPage = ({ products, coupons }: Props) => {
               <option value="">쿠폰 선택</option>
               {coupons.map((coupon, index) => (
                 <option key={coupon.code} value={index}>
-                  {coupon.name} -{" "}
-                  {coupon.discountType === "amount"
-                    ? `${coupon.discountValue}원`
-                    : `${coupon.discountValue}%`}
+                  {coupon.name} - {discountCouponValue(coupon)}
                 </option>
               ))}
             </select>
             {selectedCoupon && (
               <p className="text-green-600">
                 적용된 쿠폰: {selectedCoupon.name}(
-                {selectedCoupon.discountType === "amount"
-                  ? `${selectedCoupon.discountValue}원`
-                  : `${selectedCoupon.discountValue}%`}{" "}
-                할인)
+                {discountCouponValue(selectedCoupon)} 할인)
               </p>
             )}
           </div>
