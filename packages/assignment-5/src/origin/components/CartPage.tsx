@@ -10,7 +10,9 @@ export const CartPage = ({ products, coupons }: Props) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
 
-
+  // 상품을 장바구니에 추가하는 함수
+  // 재고가 남아있지 않으면 추가하지 않음
+  // 장바구니에 이미 존재하는 상품이면 수량 증가, 그렇지 않으면 새로 추가
   const addToCart = (product: Product) => {
     const remainingStock = getRemainingStock(product);
     if (remainingStock <= 0) return;
@@ -28,10 +30,13 @@ export const CartPage = ({ products, coupons }: Props) => {
     });
   };
 
+  // 상품 ID를 받아 장바구니에서 해당 상품을 제거하는 함수
   const removeFromCart = (productId: string) => {
     setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
   };
 
+  // 상품 ID와 새 수량을 받아 장바구니의 상품 수량을 업데이트하는 함수
+  // 수량이 0 이하가 되면 장바구니에서 제거
   const updateQuantity = (productId: string, newQuantity: number) => {
     setCart(prevCart =>
       prevCart.map(item => {
@@ -45,6 +50,8 @@ export const CartPage = ({ products, coupons }: Props) => {
     );
   };
 
+  // 장바구니의 총 금액을 계산하는 함수
+  // 할인 전 금액과 할인 후 금액을 계산하고, 쿠폰을 적용하여 최종 금액을 계산
   const calculateTotal = () => {
     let totalBeforeDiscount = 0;
     let totalAfterDiscount = 0;
@@ -80,11 +87,12 @@ export const CartPage = ({ products, coupons }: Props) => {
     };
   };
 
-
+  // 할인 목록에서 최대 할인율을 반환하는 함수
   const getMaxDiscount = (discounts: { quantity: number; rate: number }[]) => {
     return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
   };
 
+  // 장바구니에 있는 상품의 남은 재고를 계산하는 함수
   const getRemainingStock = (product: Product) => {
     const cartItem = cart.find(item => item.product.id === product.id);
     return product.stock - (cartItem?.quantity || 0);
@@ -92,6 +100,7 @@ export const CartPage = ({ products, coupons }: Props) => {
 
   const { totalBeforeDiscount, totalAfterDiscount, totalDiscount } = calculateTotal()
 
+  // 장바구니 아이템에 적용된 할인율 계산하는 함수
   const getAppliedDiscount = (item: CartItem) => {
     const { discounts } = item.product;
     const { quantity } = item;
@@ -104,6 +113,7 @@ export const CartPage = ({ products, coupons }: Props) => {
     return appliedDiscount;
   };
 
+  // 쿠폰을 선택하여 상태에 저장하는 함수
   const applyCoupon = (coupon: Coupon) => {
     setSelectedCoupon(coupon);
   };
