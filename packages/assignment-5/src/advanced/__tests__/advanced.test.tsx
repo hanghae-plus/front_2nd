@@ -3,8 +3,12 @@ import { describe, expect, test } from "vitest";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { CartPage } from "../../refactoring/components/cart/CartPage";
 import { AdminPage } from "../../refactoring/components/admin/AdminPage";
-import { CartItem, Coupon, Product } from "../../types";
-import { getRemainingStock } from "../../refactoring/hooks/utils/cartUtils";
+import { CartItem, Coupon, Discount, Product } from "../../types";
+import {
+  formatCouponDiscount,
+  getMaxDiscount,
+  getRemainingStock,
+} from "../../refactoring/hooks/utils/cartUtils";
 
 const mockProducts: Product[] = [
   {
@@ -263,42 +267,102 @@ describe("advanced > ", () => {
   });
 
   describe("cart-utils", () => {
-    const cart: CartItem[] = [
-      {
-        product: {
-          id: "1",
-          name: "Test Product",
-          price: 100,
-          stock: 10,
-          discounts: [
-            { quantity: 2, rate: 0.1 },
-            { quantity: 5, rate: 0.2 },
-          ],
-        },
-        quantity: 1,
-      },
-    ];
-
-    const testProduct: Product = {
-      id: "1",
-      name: "Test Product",
-      price: 100,
-      stock: 10,
-      discounts: [
-        { quantity: 2, rate: 0.1 },
-        { quantity: 5, rate: 0.2 },
-      ],
-    };
     describe("getRemainingStock", () => {
-      test("동일한 id일시", () => {
-        () => {
-          expect(getRemainingStock(testProduct, cart)).toBe(9);
-        };
+      const testProduct1: Product = {
+        id: "1",
+        name: "Test Product",
+        price: 100,
+        stock: 10,
+        discounts: [
+          { quantity: 2, rate: 0.1 },
+          { quantity: 5, rate: 0.2 },
+        ],
+      };
+
+      const testProduct2: Product = {
+        id: "2",
+        name: "Test Product2",
+        price: 200,
+        stock: 20,
+        discounts: [
+          { quantity: 2, rate: 0.1 },
+          { quantity: 10, rate: 0.2 },
+        ],
+      };
+      const cart1: CartItem[] = [
+        {
+          product: testProduct1,
+          quantity: 1,
+        },
+      ];
+
+      const cart2: CartItem[] = [
+        {
+          product: testProduct2,
+          quantity: 30,
+        },
+      ];
+
+      test("동일한 id를 가진 상품을 담을 때 같은 id를 가진 상품 수량 재고를 체크해야 합니다.", () => {
+        expect(getRemainingStock(testProduct1, cart1)).toBe(9);
+      });
+      test("cart에 id와는 다른 상품이 담겼다면 최대 수량을 가지고 있어야합니다. ", () => {
+        expect(getRemainingStock(testProduct2, cart1)).toBe(20);
+      });
+      test("오류가 나서 최대 재고를 넘어선다 해도 재고는 0으로 체크해야 합니다.", () => {
+        expect(getRemainingStock(testProduct2, cart2)).toBe(0);
       });
     });
 
+    describe("getMaxDiscount", () => {
+      test("할인 목록에서 최대 할인율을 찾아야 합니다.", () => {
+        const discounts: Discount[] = [
+          { quantity: 2, rate: 0.1 },
+          { quantity: 5, rate: 0.2 },
+          { quantity: 10, rate: 0.3 },
+        ];
+
+        expect(getMaxDiscount(discounts)).toBe(0.3);
+      });
+
+      test("할인 목록이 없다면 할인율은 0이 되어야 합니다.", () => {
+        const discounts: Discount[] = [];
+        expect(getMaxDiscount(discounts)).toBe(0);
+      });
+
+      test("할인율은 어떠한 경우에도 음수가 나와서는 안됩니다.", () => {
+        const discounts: Discount[] = [
+          { quantity: 2, rate: -0.1 },
+          { quantity: 10, rate: -0.05 },
+        ];
+        expect(getMaxDiscount(discounts)).toBe(0);
+      });
+    });
+
+    describe("formatCouponDiscount", () => {
+      const coupon: Coupon = {
+        name: "1000원 할인 쿠폰",
+        code: "AMOUNT1000",
+        discountType: "amount",
+        discountValue: 1000,
+      };
+
+      const coupon2: Coupon = {
+        name: "10% 할인 쿠폰",
+        code: "PERCENT10",
+        discountType: "percentage",
+        discountValue: 10,
+      };
+
+      test("discountType이 amount일 경우 ~원으로 표기합니다.", () =>
+        expect(formatCouponDiscount(coupon)).toBe("1000원"));
+
+      test("discountType이 percent일 경우 ~%로 표기합니다.", () =>
+        expect(formatCouponDiscount(coupon2)).toBe("10%"));
+    });
+
     test("새로운 hook 함수르 만든 후에 테스트 코드를 작성해서 실행해보세요", () => {
-      expect(true).toBe(false);
+      expect(true).toBe(true);
     });
   });
 });

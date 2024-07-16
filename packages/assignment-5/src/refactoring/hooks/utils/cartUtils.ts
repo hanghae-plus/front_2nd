@@ -125,7 +125,9 @@ export const updateCartItemQuantity = (
  */
 export const getRemainingStock = (product: Product, cart: CartItem[]) => {
   const cartItem = cart.find((item) => item.product.id === product.id);
-  return product.stock - (cartItem?.quantity || 0);
+
+  const remainingStock = product.stock - (cartItem?.quantity || 0);
+  return Math.max(remainingStock, 0);
 };
 
 /**
@@ -142,7 +144,7 @@ export const getMaxDiscount = (discounts: Discount[]) => {
  * @param coupon
  * @returns 할인 value
  */
-export const discountCouponValue = (coupon: Coupon) => {
+export const formatCouponDiscount = (coupon: Coupon) => {
   return coupon.discountType === "amount"
     ? `${coupon.discountValue}원`
     : `${coupon.discountValue}%`;

@@ -1,7 +1,7 @@
 import { Coupon, Product } from "../../../types.ts";
 import { useCart } from "../../hooks/index.ts";
 import {
-  discountCouponValue,
+  formatCouponDiscount,
   getMaxApplicableDiscount,
   getRemainingStock,
 } from "../../hooks/utils/cartUtils.ts";
@@ -71,14 +71,14 @@ export const CartPage = ({ products, coupons }: Props) => {
               <option value="">쿠폰 선택</option>
               {coupons.map((coupon, index) => (
                 <option key={coupon.code} value={index}>
-                  {coupon.name} - {discountCouponValue(coupon)}
+                  {coupon.name} - {formatCouponDiscount(coupon)}
                 </option>
               ))}
             </select>
             {selectedCoupon && (
               <p className="text-green-600">
                 적용된 쿠폰: {selectedCoupon.name}(
-                {discountCouponValue(selectedCoupon)} 할인)
+                {formatCouponDiscount(selectedCoupon)} 할인)
               </p>
             )}
           </div>
