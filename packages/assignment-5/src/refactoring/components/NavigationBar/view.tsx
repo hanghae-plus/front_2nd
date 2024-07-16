@@ -1,8 +1,12 @@
-interface HeaderViewProps {
+interface NavigationBarViewProps {
   isAdmin: boolean;
   onClickSwitchPage: () => void;
 }
-const HeaderView = ({ isAdmin, onClickSwitchPage }: HeaderViewProps) => {
+
+const NavigationBarView = ({
+  isAdmin,
+  onClickSwitchPage,
+}: NavigationBarViewProps) => {
   return (
     <nav className="bg-blue-600 text-white p-4">
       <div className="container mx-auto flex justify-between items-center">
@@ -18,4 +22,4 @@ const HeaderView = ({ isAdmin, onClickSwitchPage }: HeaderViewProps) => {
   );
 };
 
-export default HeaderView;
+export default NavigationBarView;
