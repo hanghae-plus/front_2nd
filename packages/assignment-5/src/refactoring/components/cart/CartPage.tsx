@@ -1,10 +1,10 @@
-import { Coupon, Product } from "../../types.ts";
-import { useCart } from "../hooks";
+import { Coupon, Product } from "../../../types.ts";
+import { useCart } from "../../hooks/index.ts";
 import {
   discountCouponValue,
   getMaxApplicableDiscount,
   getRemainingStock,
-} from "../hooks/utils/cartUtils.ts";
+} from "../../hooks/utils/cartUtils.ts";
 import CartItemList from "./CartItemList.tsx";
 import ProductList from "./ProductList.tsx";
 

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Coupon, Discount, Product } from "../../types.ts";
-import { useProductAccordion } from "../hooks/useProductAccordion.ts";
-import { useNewProduct } from "../hooks/useNewProduct.ts";
-import { useProductEdit } from "../hooks/useProductEdit.ts";
+import { Coupon, Discount, Product } from "../../../types.ts";
+import { useProductAccordion } from "../../hooks/useProductAccordion.ts";
+import { useNewProduct } from "../../hooks/useNewProduct.ts";
+import { useProductEdit } from "../../hooks/useProductEdit.ts";
 
 interface Props {
   products: Product[];
@@ -50,7 +50,6 @@ export const AdminPage = ({
   /**
    * 상품 수정 관심사
    */
-
   const {
     editingProduct,
     updateProductName,

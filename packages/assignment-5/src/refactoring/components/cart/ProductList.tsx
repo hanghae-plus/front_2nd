@@ -1,5 +1,5 @@
-import { Product } from "../../types";
-import { getMaxDiscount } from "../hooks/utils/cartUtils";
+import { Product } from "../../../types";
+import { getMaxDiscount } from "../../hooks/utils/cartUtils";
 
 interface ProductListProps {
   product: Product;
