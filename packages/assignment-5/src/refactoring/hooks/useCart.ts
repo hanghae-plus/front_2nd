@@ -40,6 +40,7 @@ export const useCart = () => {
 
   return {
     cart,
+    getRemainingStock,
     addToCart,
     removeFromCart,
     updateQuantity,

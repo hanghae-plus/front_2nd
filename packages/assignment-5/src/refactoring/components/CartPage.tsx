@@ -9,6 +9,7 @@ interface Props {
 export const CartPage = ({ products, coupons }: Props) => {
   const {
     cart,
+    getRemainingStock,
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -19,11 +20,6 @@ export const CartPage = ({ products, coupons }: Props) => {
 
   const getMaxDiscount = (discounts: { quantity: number; rate: number }[]) => {
     return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
-  };
-
-  const getRemainingStock = (product: Product) => {
-    const cartItem = cart.find(item => item.product.id === product.id);
-    return product.stock - (cartItem?.quantity || 0);
   };
 
   const { totalBeforeDiscount, totalAfterDiscount, totalDiscount } = calculateTotal()
