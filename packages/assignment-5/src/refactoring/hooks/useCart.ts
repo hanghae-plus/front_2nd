@@ -27,17 +27,13 @@ export const useCart = () => {
   };
 
   const removeFromCart = (productId: string) => {
-    const targetProductIndex = cart.findIndex(
-      (item) => item.product.id === productId
+    setCart((prev) =>
+      prev
+        .map((cartItem) =>
+          cartItem.product.id === productId ? null : cartItem
+        )
+        .filter((cartItem) => cartItem !== null)
     );
-
-    if (targetProductIndex < 0) {
-      setCart((prev) => {
-        const temp = [...prev];
-        temp.splice(targetProductIndex, 1);
-        return temp;
-      });
-    }
   };
 
   const updateQuantity = (productId: string, newQuantity: number) => {
