@@ -18,8 +18,8 @@ export const useCart = () => {
   const calculateTotal = () => ({
     totalBeforeDiscount: 0,
     totalAfterDiscount: 0,
-    totalDiscount: 0,
-  })
+    totalDiscount: 0
+  });
 
   return {
     cart,
@@ -28,6 +28,6 @@ export const useCart = () => {
     updateQuantity,
     applyCoupon,
     calculateTotal,
-    selectedCoupon,
+    selectedCoupon
   };
 };
