@@ -74,9 +74,9 @@ const TestAdminPage = () => {
     <AdminPage
       products={products}
       coupons={coupons}
-      onProductUpdate={handleProductUpdate}
-      onProductAdd={handleProductAdd}
-      onCouponAdd={handleCouponAdd}
+      updateProduct={handleProductUpdate}
+      addProduct={handleProductAdd}
+      addCoupon={handleCouponAdd}
     />
   );
 };

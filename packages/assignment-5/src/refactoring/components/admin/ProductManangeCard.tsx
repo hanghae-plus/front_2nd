@@ -8,14 +8,14 @@ import {
 
 interface ProductManangeCardProps {
   products: Product[];
-  onProductUpdate: (updatedProduct: Product) => void;
-  onProductAdd: (newProduct: Product) => void;
+  addProduct: (newProduct: Product) => void;
+  updateProduct: (updatedProduct: Product) => void;
 }
 
 const ProductManangeCard = ({
   products,
-  onProductAdd,
-  onProductUpdate,
+  addProduct,
+  updateProduct,
 }: ProductManangeCardProps) => {
   /**
    * 새 상품 추가 관심사
@@ -26,7 +26,7 @@ const ProductManangeCard = ({
     setShowNewProductForm,
     setNewProduct,
     handleAddNewProduct,
-  } = useNewProduct(onProductAdd);
+  } = useNewProduct(addProduct);
 
   const setShowNewProductHandler = (isShow: boolean) => {
     setShowNewProductForm(isShow);
@@ -56,7 +56,7 @@ const ProductManangeCard = ({
     updateStock,
     removeDiscount,
     setEditingProduct,
-  } = useProductEdit(onProductUpdate, products);
+  } = useProductEdit(updateProduct, products);
 
   const editProductHandler = (product: Product) => {
     setEditingProduct(product);
@@ -97,7 +97,7 @@ const ProductManangeCard = ({
         ...updatedProduct,
         discounts: [...updatedProduct.discounts, newDiscount],
       };
-      onProductUpdate(newProduct);
+      updateProduct(newProduct);
       setEditingProduct(newProduct);
       setNewDiscount({ quantity: 0, rate: 0 });
     }

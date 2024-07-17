@@ -11,8 +11,6 @@ import { useLocalStorage } from "./useLocalStorage";
 export const useCart = () => {
   const [cart, setCart] = useLocalStorage<CartItem[]>("cart-item", []);
 
-  console.log(cart);
-
   /**
    * cart에 product를 추가하는 함수
    * @param product

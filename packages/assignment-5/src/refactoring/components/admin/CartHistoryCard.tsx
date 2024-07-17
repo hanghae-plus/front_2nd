@@ -3,10 +3,10 @@ import { Coupon } from "../../../types";
 
 interface CartHistoryCardProps {
   coupons: Coupon[];
-  onCouponAdd: (newCoupon: Coupon) => void;
+  addCoupon: (newCoupon: Coupon) => void;
 }
 
-const CartHistoryCard = ({ coupons, onCouponAdd }: CartHistoryCardProps) => {
+const CartHistoryCard = ({ coupons, addCoupon }: CartHistoryCardProps) => {
   /**
    * 쿠폰 추가 관련 관심사
    */
@@ -18,7 +18,7 @@ const CartHistoryCard = ({ coupons, onCouponAdd }: CartHistoryCardProps) => {
   });
 
   const addCouponHandler = () => {
-    onCouponAdd(newCoupon);
+    addCoupon(newCoupon);
     setNewCoupon({
       name: "",
       code: "",

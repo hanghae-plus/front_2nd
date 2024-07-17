@@ -69,8 +69,8 @@ const App = () => {
           <AdminPage
             products={products}
             coupons={coupons}
-            onProductUpdate={updateProduct}
-            onProductAdd={addProduct}
+            updateProduct={updateProduct}
+            addProduct={addProduct}
             onCouponAdd={addCoupon}
           />
         )}

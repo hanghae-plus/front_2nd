@@ -6,17 +6,17 @@ import CartHistoryCard from "./CartHistoryCard.tsx";
 interface Props {
   products: Product[];
   coupons: Coupon[];
-  onProductUpdate: (updatedProduct: Product) => void;
-  onProductAdd: (newProduct: Product) => void;
-  onCouponAdd: (newCoupon: Coupon) => void;
+  updateProduct: (updatedProduct: Product) => void;
+  addProduct: (newProduct: Product) => void;
+  addCoupon: (newCoupon: Coupon) => void;
 }
 
 export const AdminPage = ({
   products,
   coupons,
-  onProductUpdate,
-  onProductAdd,
-  onCouponAdd,
+  updateProduct,
+  addProduct,
+  addCoupon,
 }: Props) => {
   return (
     <div className="container mx-auto p-4">
@@ -24,10 +24,10 @@ export const AdminPage = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ProductManangeCard
           products={products}
-          onProductAdd={onProductAdd}
-          onProductUpdate={onProductUpdate}
+          addProduct={addProduct}
+          updateProduct={updateProduct}
         />
-        <CartHistoryCard coupons={coupons} onCouponAdd={onCouponAdd} />
+        <CartHistoryCard coupons={coupons} addCoupon={addCoupon} />
       </div>
     </div>
   );
