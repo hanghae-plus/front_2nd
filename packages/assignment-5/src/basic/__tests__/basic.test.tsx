@@ -440,6 +440,10 @@ describe("basic > ", () => {
   });
 
   describe("useCart > ", () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
     const testProduct: Product = {
       id: "1",
       name: "Test Product",
