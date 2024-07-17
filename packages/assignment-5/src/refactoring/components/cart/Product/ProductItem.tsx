@@ -1,7 +1,6 @@
-// components/cart/ProductItem.tsx
-import React from "react";
-import { Product } from "types";
+import type { Product } from "types";
 import { useCartContext } from "provider/cart/useCartContext";
+import { getMaxDiscount, getRemainingStock } from "hooks/utils/cartUtils";
 
 interface ProductItemProps {
   product: Product;
@@ -10,16 +9,7 @@ interface ProductItemProps {
 const ProductItem = ({ product }: ProductItemProps): JSX.Element => {
   const { cartList, addToCart } = useCartContext();
 
-  const getMaxDiscount = (discounts: { quantity: number; rate: number }[]) => {
-    return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
-  };
-
-  const getRemainingStock = (product: Product) => {
-    const cartItem = cartList?.find((item) => item.product.id === product.id);
-    return product.stock - (cartItem?.quantity || 0);
-  };
-
-  const remainingStock = getRemainingStock(product);
+  const remainingStock = getRemainingStock({product, cartList});
 
   return (
     <div

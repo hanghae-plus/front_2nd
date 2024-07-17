@@ -1,15 +1,14 @@
 import { useState } from "react";
+import { useProductContext } from "refactoring/components/provider/product/useProductContext";
 import type { Product } from "types";
 
 interface AddNewProductProps {
-  onAddProduct: (newProduct: Product) => void;
   setShowNewProductForm: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const AddNewProduct = ({
-  onAddProduct,
-  setShowNewProductForm,
-}: AddNewProductProps) => {
+const AddNewProduct = ({ setShowNewProductForm }: AddNewProductProps) => {
+  const { addProduct } = useProductContext();
+  
   const [newProduct, setNewProduct] = useState<Omit<Product, "id">>({
     name: "",
     price: 0,
@@ -19,7 +18,7 @@ const AddNewProduct = ({
 
   const handleAddNewProduct = () => {
     const productWithId = { ...newProduct, id: Date.now().toString() };
-    onAddProduct(productWithId);
+    addProduct(productWithId);
     setNewProduct({
       name: "",
       price: 0,

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Product } from "types";
 
-export const useProducts = (initialProducts: Product[]) => {
+export const useProduct = (initialProducts: Product[]) => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
 
   const updateProduct = (updatedProduct: Product) => {
@@ -16,8 +16,13 @@ export const useProducts = (initialProducts: Product[]) => {
     setProducts([...products, addedProduct]);
   };
 
+  const findProductById = (productId: string) => {
+    return products.find((product) => product.id === productId);
+  };
+
   return {
     products,
+    findProductById,
     updateProduct,
     addProduct,
   };

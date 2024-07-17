@@ -1,26 +1,15 @@
 import { useState } from "react";
-import type { Discount, Product } from "types";
+
 import AddNewProduct from "./AddNewProduct";
 import ProductItem from "./ProductItem";
 
-interface ManageProductProps {
-  products: Product[];
-  onProductUpdate: (updatedProduct: Product) => void;
-  onAddProduct: (newProduct: Product) => void;
-}
+import { useProductContext } from "provider/product/useProductContext";
 
-const ManageProduct = ({
-  products,
-  onProductUpdate,
-  onAddProduct,
-}: ManageProductProps) => {
+const ManageProduct = () => {
+  const { products } = useProductContext();
+
   const [showNewProductForm, setShowNewProductForm] = useState(false);
-  const [openProductIds, setOpenProductIds] = useState<Set<string>>(new Set());
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [newDiscount, setNewDiscount] = useState<Discount>({
-    rate: 0,
-    quantity: 0,
-  });
+
   // 상품 추가 페이지
 
   return (
@@ -35,28 +24,13 @@ const ManageProduct = ({
       </button>
 
       {showNewProductForm && (
-        <AddNewProduct
-          onAddProduct={onAddProduct}
-          setShowNewProductForm={setShowNewProductForm}
-        />
+        <AddNewProduct setShowNewProductForm={setShowNewProductForm} />
       )}
 
       {/* 상품 정보 */}
       <div className="space-y-2">
         {products.map((product, index) => (
-          <ProductItem
-            key={product.id}
-            products={products}
-            onProductUpdate={onProductUpdate}
-            product={product}
-            index={index}
-            openProductIds={openProductIds}
-            setOpenProductIds={setOpenProductIds}
-            editingProduct={editingProduct}
-            setEditingProduct={setEditingProduct}
-            newDiscount={newDiscount}
-            setNewDiscount={setNewDiscount}
-          />
+          <ProductItem key={product.id} product={product} index={index} />
         ))}
       </div>
     </div>

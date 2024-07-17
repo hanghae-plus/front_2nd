@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { useCart } from "./useCart";
+import { useCart } from "../useCart";
 import { act, renderHook } from "@testing-library/react";
 import { Coupon, Product } from "types";
 
