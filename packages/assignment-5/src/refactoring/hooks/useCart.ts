@@ -27,8 +27,13 @@ export const useCart = () => {
 
   const updateQuantity = (productId: string, newQuantity: number) => {
     setCart((prevCart) => {
+      if (newQuantity < 0) {
+        return prevCart;
+      }
+
       return prevCart.map((cartItem) => {
-        return cartItem.product.id === productId
+        return cartItem.product.id === productId &&
+          newQuantity <= cartItem.product.stock
           ? { ...cartItem, quantity: newQuantity }
           : cartItem;
       });

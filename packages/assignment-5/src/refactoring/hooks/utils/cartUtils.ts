@@ -13,17 +13,15 @@ export const calculateItemTotal = (item: CartItem) => {
 };
 
 export const getMaxApplicableDiscount = (item: CartItem) => {
-  const { product, quantity } = item;
-  const maxApplicableDiscount = product.discounts.reduce(
-    (maxDiscount, currentDiscount) => {
-      return quantity >= currentDiscount.quantity
-        ? Math.max(maxDiscount, currentDiscount.rate)
-        : maxDiscount;
-    },
-    0 // 초기값
-  );
-
-  return maxApplicableDiscount;
+  const { discounts } = item.product;
+  const { quantity } = item;
+  let appliedDiscount = 0;
+  for (const discount of discounts) {
+    if (quantity >= discount.quantity) {
+      appliedDiscount = Math.max(appliedDiscount, discount.rate);
+    }
+  }
+  return appliedDiscount;
 };
 
 export const calculateCartTotal = (
