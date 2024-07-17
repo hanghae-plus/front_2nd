@@ -1,3 +1,4 @@
+import useEditProductInform from "@/refactoring/hooks/useEditProductInform";
 import { Discount, InputEventHandler, Product, setState } from "@/types";
 import { useState } from "react";
 import ProductEditingFormView from "./view";
@@ -12,41 +13,12 @@ const ProductEditingForm = ({
   product,
   setIsEditing,
 }: Props) => {
-  const [editingProduct, setEditingProduct] = useState<Product>({ ...product });
+  const editProductInform = useEditProductInform(product);
+
   const [newDiscount, setNewDiscount] = useState<Discount>({
     quantity: 0,
     rate: 0,
   });
-
-  const onChangeName: InputEventHandler = (event) => {
-    const updatedProduct = { ...editingProduct, name: event.target.value };
-    setEditingProduct(updatedProduct);
-  };
-
-  const onChangePrice: InputEventHandler = (event) => {
-    const updatedProduct = {
-      ...editingProduct,
-      price: parseInt(event.target.value),
-    };
-    setEditingProduct(updatedProduct);
-  };
-
-  const onChangeStock: InputEventHandler = (event) => {
-    const updatedProduct = {
-      ...editingProduct,
-      stock: parseInt(event.target.value),
-    };
-    setEditingProduct(updatedProduct);
-  };
-
-  const onClickRemoveDiscount = (index: number) => {
-    const updatedProduct = {
-      ...editingProduct,
-      discounts: editingProduct.discounts.filter((_, i) => i !== index),
-    };
-    onProductUpdate(updatedProduct);
-    setEditingProduct(updatedProduct);
-  };
 
   const onChangeDiscountQuantity: InputEventHandler = (event) => {
     const updatedDiscount = {
@@ -64,27 +36,35 @@ const ProductEditingForm = ({
     setNewDiscount(updatedDiscount);
   };
 
-  const onClickAddDiscount = () => {
+  const onClickRemoveDiscount = (index: number) => {
     const updatedProduct = {
-      ...editingProduct,
-      discounts: [...editingProduct.discounts, newDiscount],
+      ...editProductInform.editingProduct,
+      discounts: editProductInform.editingProduct.discounts.filter(
+        (_, i) => i !== index
+      ),
     };
     onProductUpdate(updatedProduct);
-    setEditingProduct(updatedProduct);
+    editProductInform.setEditingProduct(updatedProduct);
+  };
+
+  const onClickAddDiscount = () => {
+    const updatedProduct = {
+      ...editProductInform.editingProduct,
+      discounts: [...editProductInform.editingProduct.discounts, newDiscount],
+    };
+    onProductUpdate(updatedProduct);
+    editProductInform.setEditingProduct(updatedProduct);
     setNewDiscount({ quantity: 0, rate: 0 });
   };
 
   const onClickEditComplete = () => {
-    onProductUpdate(editingProduct);
+    onProductUpdate(editProductInform.editingProduct);
     setIsEditing(false);
   };
 
   const props = {
-    editingProduct,
+    ...editProductInform,
     newDiscount,
-    onChangeName,
-    onChangePrice,
-    onChangeStock,
     onClickRemoveDiscount,
     onChangeDiscountQuantity,
     onChangeDiscountRate,
