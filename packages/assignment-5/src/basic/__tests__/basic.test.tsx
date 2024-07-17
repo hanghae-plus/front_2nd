@@ -4,8 +4,8 @@ import { act, fireEvent, render, renderHook } from '@testing-library/react';
 import { screen, within } from '@testing-library/dom';
 
 import cartUtils from '../../refactoring/hooks/utils/cartUtils.ts';
-import { CartPage } from '../../refactoring/components/CartPage.tsx';
-import { AdminPage } from '../../refactoring/components/AdminPage.tsx';
+import { CartPage } from '../../refactoring/pages/CartPage.tsx';
+import { AdminPage } from '../../refactoring/pages/AdminPage.tsx';
 import type { CartItem, Coupon, Product } from '../../types';
 import { useProducts } from '../../refactoring/hooks/useProduct.ts';
 import { useCoupons } from '../../refactoring/hooks/useCoupon.ts';
