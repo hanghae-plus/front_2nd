@@ -1,10 +1,11 @@
 import { Coupon } from "@/types.ts";
+import { useState } from "react";
 
 export const useCoupons = (initialCoupons: Coupon[]) => {
-  const coupons = structuredClone(initialCoupons);
+  const [coupons, setCoupons] = useState<Coupon[]>(initialCoupons);
 
   const addCoupon = (newCoupon: Coupon) => {
-    coupons.push(newCoupon);
+    setCoupons((prev) => [...prev, newCoupon]);
   };
 
   return { coupons, addCoupon };
