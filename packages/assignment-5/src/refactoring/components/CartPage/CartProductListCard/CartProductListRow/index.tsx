@@ -1,3 +1,4 @@
+import { getAppliedDiscountRate } from "@/refactoring/utils/cartUtils";
 import { CartItem } from "@/types";
 import { useMemo } from "react";
 import CartProductListRowView from "./view";
@@ -12,17 +13,10 @@ const CartProductListRow = ({
   removeFromCart,
   updateQuantity,
 }: Props) => {
-  const appliedDiscount = useMemo(() => {
-    const { discounts } = item.product;
-    const { quantity } = item;
-    let appliedDiscount = 0;
-    for (const discount of discounts) {
-      if (quantity >= discount.quantity) {
-        appliedDiscount = Math.max(appliedDiscount, discount.rate);
-      }
-    }
-    return appliedDiscount;
-  }, [item]);
+  const appliedDiscount = useMemo(
+    () => getAppliedDiscountRate(item),
+    [item.product.discounts, item.quantity]
+  );
 
   const onClickPlusButton = () =>
     updateQuantity(item.product.id, item.quantity + 1);
