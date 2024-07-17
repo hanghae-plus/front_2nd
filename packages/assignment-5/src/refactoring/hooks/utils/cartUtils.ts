@@ -17,12 +17,27 @@ export const getMaxApplicableDiscount = (item: CartItem) => {
   );
 };
 
+const calculateCouponDiscount = (
+  selectedCoupon: Coupon,
+  totalBeforeDiscount: number,
+  QuantityDiscount: number,
+) => {
+  const { discountType, discountValue } = selectedCoupon;
+  if (discountType === AMOUNT) {
+    return discountValue;
+  }
+  if (discountType === PERCENTAGE) {
+    return ((totalBeforeDiscount - QuantityDiscount) * discountValue) / 100;
+  }
+  return 0;
+};
+
 export const calculateCartTotal = (
   cart: CartItem[],
   selectedCoupon: Coupon | null,
 ) => {
   const totalBeforeDiscount = cart.reduce(
-    (pre, cur) => pre + cur.product.price * cur.quantity,
+    (pre, cur) => pre + calculateItemTotal(cur),
     0,
   );
   let totalDiscount = cart
@@ -33,14 +48,11 @@ export const calculateCartTotal = (
     .reduce((pre, cur) => pre + cur, 0);
 
   if (selectedCoupon) {
-    if (selectedCoupon.discountType === AMOUNT) {
-      totalDiscount += selectedCoupon.discountValue;
-    }
-    if (selectedCoupon.discountType === PERCENTAGE) {
-      totalDiscount +=
-        ((totalBeforeDiscount - totalDiscount) * selectedCoupon.discountValue) /
-        100;
-    }
+    totalDiscount += calculateCouponDiscount(
+      selectedCoupon,
+      totalBeforeDiscount,
+      totalDiscount,
+    );
   }
 
   const totalAfterDiscount = totalBeforeDiscount - totalDiscount;

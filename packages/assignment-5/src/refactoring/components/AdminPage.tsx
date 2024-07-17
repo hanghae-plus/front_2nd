@@ -1,42 +1,52 @@
 import { useState } from 'react';
 import { Coupon, Discount, Product } from '../../types.ts';
+import { Title } from './UI/common/Title.tsx';
+import { Subtitle } from './UI/common/Subtitle.tsx';
 
 interface Props {
   products: Product[];
   coupons: Coupon[];
-  onProductUpdate: (updatedProduct: Product) => void;
-  onProductAdd: (newProduct: Product) => void;
-  onProductDelete: (product: Product) => void;
-  onCouponAdd: (newCoupon: Coupon) => void;
+  updateProduct: (updatedProduct: Product) => void;
+  addProduct: (newProduct: Product) => void;
+  deleteProduct: (product: Product) => void;
+  addCoupon: (newCoupon: Coupon) => void;
 }
 
-export const AdminPage = ({
-  products,
-  coupons,
-  onProductUpdate,
-  onProductAdd,
-  onProductDelete,
-  onCouponAdd,
-}: Props) => {
+const INITIAL_DISCOUNT: Discount = {
+  quantity: 0,
+  rate: 0,
+};
+
+const INITIAL_COUPON: Coupon = {
+  name: '',
+  code: '',
+  discountType: 'percentage',
+  discountValue: 0,
+};
+
+const INITIAL_PRODUCT: Omit<Product, 'id'> = {
+  name: '',
+  price: 0,
+  stock: 0,
+  discounts: [],
+};
+
+export const AdminPage = (props: Props) => {
+  const {
+    products,
+    coupons,
+    updateProduct,
+    addProduct,
+    deleteProduct,
+    addCoupon,
+  } = props;
   const [openProductIds, setOpenProductIds] = useState<Set<string>>(new Set());
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [newDiscount, setNewDiscount] = useState<Discount>({
-    quantity: 0,
-    rate: 0,
-  });
-  const [newCoupon, setNewCoupon] = useState<Coupon>({
-    name: '',
-    code: '',
-    discountType: 'percentage',
-    discountValue: 0,
-  });
+  const [newDiscount, setNewDiscount] = useState<Discount>(INITIAL_DISCOUNT);
+  const [newCoupon, setNewCoupon] = useState<Coupon>(INITIAL_COUPON);
   const [showNewProductForm, setShowNewProductForm] = useState(false);
-  const [newProduct, setNewProduct] = useState<Omit<Product, 'id'>>({
-    name: '',
-    price: 0,
-    stock: 0,
-    discounts: [],
-  });
+  const [newProduct, setNewProduct] =
+    useState<Omit<Product, 'id'>>(INITIAL_PRODUCT);
 
   const toggleProductAccordion = (productId: string) => {
     setOpenProductIds((prev) => {
@@ -50,101 +60,83 @@ export const AdminPage = ({
     });
   };
 
-  // handleEditProduct 함수 수정
-  const handleEditProduct = (product: Product) => {
+  const editProduct = (product: Product) => {
     setEditingProduct({ ...product });
   };
 
-  const handleDeleteProduct = (product: Product) => {
-    onProductDelete(product);
-  };
-
-  // 새로운 핸들러 함수 추가
-  const handleProductNameUpdate = (productId: string, newName: string) => {
+  const updateProductName = (productId: string, newName: string) => {
     if (editingProduct && editingProduct.id === productId) {
       const updatedProduct = { ...editingProduct, name: newName };
       setEditingProduct(updatedProduct);
     }
   };
 
-  // 새로운 핸들러 함수 추가
-  const handlePriceUpdate = (productId: string, newPrice: number) => {
+  const updatePrice = (productId: string, newPrice: number) => {
     if (editingProduct && editingProduct.id === productId) {
       const updatedProduct = { ...editingProduct, price: newPrice };
       setEditingProduct(updatedProduct);
     }
   };
 
-  // 수정 완료 핸들러 함수 추가
   const handleEditComplete = () => {
     if (editingProduct) {
-      onProductUpdate(editingProduct);
+      updateProduct(editingProduct);
       setEditingProduct(null);
     }
   };
 
-  const handleStockUpdate = (productId: string, newStock: number) => {
+  const updateStock = (productId: string, newStock: number) => {
     const updatedProduct = products.find((p) => p.id === productId);
     if (updatedProduct) {
       const newProduct = { ...updatedProduct, stock: newStock };
-      onProductUpdate(newProduct);
+      updateProduct(newProduct);
       setEditingProduct(newProduct);
     }
   };
 
-  const handleAddDiscount = (productId: string) => {
+  const addDiscount = (productId: string) => {
     const updatedProduct = products.find((p) => p.id === productId);
     if (updatedProduct && editingProduct) {
       const newProduct = {
         ...updatedProduct,
         discounts: [...updatedProduct.discounts, newDiscount],
       };
-      onProductUpdate(newProduct);
+      updateProduct(newProduct);
       setEditingProduct(newProduct);
-      setNewDiscount({ quantity: 0, rate: 0 });
+      setNewDiscount(INITIAL_DISCOUNT);
     }
   };
 
-  const handleRemoveDiscount = (productId: string, index: number) => {
+  const removeDiscount = (productId: string, index: number) => {
     const updatedProduct = products.find((p) => p.id === productId);
     if (updatedProduct) {
       const newProduct = {
         ...updatedProduct,
         discounts: updatedProduct.discounts.filter((_, i) => i !== index),
       };
-      onProductUpdate(newProduct);
+      updateProduct(newProduct);
       setEditingProduct(newProduct);
     }
   };
 
-  const handleAddCoupon = () => {
-    onCouponAdd(newCoupon);
-    setNewCoupon({
-      name: '',
-      code: '',
-      discountType: 'percentage',
-      discountValue: 0,
-    });
+  const addNewCoupon = () => {
+    addCoupon(newCoupon);
+    setNewCoupon(INITIAL_COUPON);
   };
 
-  const handleAddNewProduct = () => {
+  const addNewProduct = () => {
     const productWithId = { ...newProduct, id: Date.now().toString() };
-    onProductAdd(productWithId);
-    setNewProduct({
-      name: '',
-      price: 0,
-      stock: 0,
-      discounts: [],
-    });
+    addProduct(productWithId);
+    setNewProduct(INITIAL_PRODUCT);
     setShowNewProductForm(false);
   };
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">관리자 페이지</h1>
+      <Title>관리자 페이지</Title>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h2 className="text-2xl font-semibold mb-4">상품 관리</h2>
+          <Subtitle>상품 관리</Subtitle>
           <button
             onClick={() => setShowNewProductForm(!showNewProductForm)}
             className="bg-green-500 text-white px-4 py-2 rounded mb-4 hover:bg-green-600"
@@ -212,7 +204,7 @@ export const AdminPage = ({
                 />
               </div>
               <button
-                onClick={handleAddNewProduct}
+                onClick={addNewProduct}
                 className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
               >
                 추가
@@ -243,10 +235,7 @@ export const AdminPage = ({
                             type="text"
                             value={editingProduct.name}
                             onChange={(e) =>
-                              handleProductNameUpdate(
-                                product.id,
-                                e.target.value,
-                              )
+                              updateProductName(product.id, e.target.value)
                             }
                             className="w-full p-2 border rounded"
                           />
@@ -257,10 +246,7 @@ export const AdminPage = ({
                             type="number"
                             value={editingProduct.price}
                             onChange={(e) =>
-                              handlePriceUpdate(
-                                product.id,
-                                parseInt(e.target.value),
-                              )
+                              updatePrice(product.id, parseInt(e.target.value))
                             }
                             className="w-full p-2 border rounded"
                           />
@@ -271,10 +257,7 @@ export const AdminPage = ({
                             type="number"
                             value={editingProduct.stock}
                             onChange={(e) =>
-                              handleStockUpdate(
-                                product.id,
-                                parseInt(e.target.value),
-                              )
+                              updateStock(product.id, parseInt(e.target.value))
                             }
                             className="w-full p-2 border rounded"
                           />
@@ -295,7 +278,7 @@ export const AdminPage = ({
                               </span>
                               <button
                                 onClick={() =>
-                                  handleRemoveDiscount(product.id, index)
+                                  removeDiscount(product.id, index)
                                 }
                                 className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                               >
@@ -329,7 +312,7 @@ export const AdminPage = ({
                               className="w-1/3 p-2 border rounded"
                             />
                             <button
-                              onClick={() => handleAddDiscount(product.id)}
+                              onClick={() => addDiscount(product.id)}
                               className="w-1/3 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
                             >
                               할인 추가
@@ -355,13 +338,13 @@ export const AdminPage = ({
                         ))}
                         <button
                           data-testid="modify-button"
-                          onClick={() => handleEditProduct(product)}
+                          onClick={() => editProduct(product)}
                           className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 mt-2"
                         >
                           수정
                         </button>
                         <button
-                          onClick={() => handleDeleteProduct(product)}
+                          onClick={() => deleteProduct(product)}
                           className="bg-red-500 text-white px-2 py-1 ml-2 rounded hover:bg-red-600 mt-2"
                         >
                           삭제
@@ -375,7 +358,7 @@ export const AdminPage = ({
           </div>
         </div>
         <div>
-          <h2 className="text-2xl font-semibold mb-4">쿠폰 관리</h2>
+          <Subtitle>쿠폰 관리</Subtitle>
           <div className="bg-white p-4 rounded shadow">
             <div className="space-y-2 mb-4">
               <input
@@ -424,7 +407,7 @@ export const AdminPage = ({
                 />
               </div>
               <button
-                onClick={handleAddCoupon}
+                onClick={addNewCoupon}
                 className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
               >
                 쿠폰 추가
