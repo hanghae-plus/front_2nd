@@ -1,25 +1,6 @@
 import { CartItem, Coupon, Discount, Product } from "../../../types";
 
 /**
- * 할인 없는 총액 계산
- * @param item
- * @returns 할인 전 가격
- */
-export const calculateItemTotal = (item: CartItem) => {
-  const itemPrice = item.product.price;
-
-  const discountRate = getMaxApplicableDiscount(item);
-
-  const price = itemPrice * item.quantity;
-
-  if (!discountRate) {
-    return price;
-  }
-
-  return price * (1 - discountRate);
-};
-
-/**
  *
  * @param item
  * @returns 개별 할인으로 얻을 수 있는 최대 할인율
@@ -39,6 +20,25 @@ export const getMaxApplicableDiscount = (item: CartItem) => {
 };
 
 /**
+ * 할인 없는 총액 계산
+ * @param item
+ * @returns 할인 전 가격
+ */
+export const calculateItemTotal = (item: CartItem) => {
+  const itemPrice = item.product.price;
+
+  const discountRate = getMaxApplicableDiscount(item);
+
+  const price = itemPrice * item.quantity;
+
+  if (!discountRate) {
+    return price;
+  }
+
+  return price * (1 - discountRate);
+};
+
+/**
  * 할인 전 합계 금액, 할인 후 합계 금액, 총 할인금액 계산 함수
  * @param cart
  * @param selectedCoupon
@@ -48,44 +48,38 @@ export const calculateCartTotal = (
   cart: CartItem[],
   selectedCoupon: Coupon | null
 ) => {
+  if (cart.length === 0) {
+    return { totalBeforeDiscount: 0, totalAfterDiscount: 0, totalDiscount: 0 };
+  }
+
   const { totalBeforeDiscount, totalAfterDiscount } = cart.reduce(
     (acc, item) => {
-      const { price } = item.product;
-      const { quantity } = item;
-
-      acc.totalBeforeDiscount += price * quantity;
-
-      const discount = item.product.discounts.reduce(
-        (maxDiscount, d) =>
-          quantity >= d.quantity && d.rate > maxDiscount ? d.rate : maxDiscount,
-        0
-      );
-
-      acc.totalAfterDiscount += price * quantity * (1 - discount);
-
+      const itemTotal = item.product.price * item.quantity;
+      acc.totalBeforeDiscount += itemTotal;
+      acc.totalAfterDiscount += calculateItemTotal(item);
       return acc;
     },
     { totalBeforeDiscount: 0, totalAfterDiscount: 0 }
   );
 
-  let totalDiscount = totalAfterDiscount;
-
-  // 쿠폰 적용
-  if (selectedCoupon) {
-    if (selectedCoupon.discountType === "amount") {
-      totalDiscount = Math.max(
-        0,
-        totalAfterDiscount - selectedCoupon.discountValue
-      );
-    } else {
-      totalDiscount *= 1 - selectedCoupon.discountValue / 100;
-    }
+  if (!selectedCoupon) {
+    return {
+      totalBeforeDiscount: Math.round(totalBeforeDiscount),
+      totalAfterDiscount: Math.round(totalAfterDiscount),
+      totalDiscount: Math.round(totalBeforeDiscount - totalAfterDiscount),
+    };
   }
+
+  let discountRate = totalAfterDiscount;
+
+  selectedCoupon.discountType === "amount"
+    ? (discountRate = Math.max(0, discountRate - selectedCoupon.discountValue))
+    : (discountRate *= 1 - selectedCoupon.discountValue / 100);
 
   return {
     totalBeforeDiscount: Math.round(totalBeforeDiscount),
-    totalAfterDiscount: Math.round(totalDiscount),
-    totalDiscount: Math.round(totalBeforeDiscount - totalDiscount),
+    totalAfterDiscount: Math.round(discountRate),
+    totalDiscount: Math.round(totalBeforeDiscount - discountRate),
   };
 };
 

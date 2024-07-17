@@ -275,6 +275,7 @@ describe("advanced > ", () => {
     });
   });
 
+  //cart-util
   describe("cart-utils", () => {
     describe("getRemainingStock", () => {
       const testProduct1: Product = {
@@ -370,7 +371,10 @@ describe("advanced > ", () => {
         expect(formatCouponDiscount(coupon2)).toBe("10%"));
     });
   });
+
+  //커스텀 훅 테스트
   describe("새로운 hook 함수르 만든 후에 테스트 코드를 작성해서 실행해보세요", () => {
+    //useLocalStorage
     describe("useLocalStorage", () => {
       const initialValue: CartItem[] = [];
       const testKey = "cart";
@@ -423,9 +427,7 @@ describe("advanced > ", () => {
 
         expect(result.current[0]).toEqual(initialValue);
 
-        /**
-         * cartItem 상태 변경
-         */
+        // cartItem 상태 변경
         await waitFor(() => act(() => result.current[1](() => testCartItem)));
 
         expect(result.current[0]).toEqual(testCartItem);
