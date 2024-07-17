@@ -32,7 +32,6 @@ export function createElement(node) {
 function updateAttributes(target, newProps, oldProps) {
   // newProps들을 반복하여 각 속성과 값을 확인
   if (newProps !== null && newProps instanceof Object) {
-    console.log('이거냐?');
     Object.entries(newProps).forEach(([key, value]) => {
       //   만약 oldProps에 같은 속성이 있고 값이 동일하다면
       //     다음 속성으로 넘어감 (변경 불필요)
@@ -98,8 +97,6 @@ export function render(parent, newNode, oldNode, index = 0) {
     newChildren?.length || 0,
     oldChildren?.length || 0
   );
-  // console.log('new', newChildren.length);
-  console.log('old', oldChildren);
   //   각 자식노드에 대해 재귀적으로 render 함수 호출
   for (let i = 0; i < maxLength; i++) {
     render(parent.children[index], newChildren[i], oldChildren[i], i);
