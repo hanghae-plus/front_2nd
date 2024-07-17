@@ -17,6 +17,7 @@ const ProductListCard = ({ products, cart, addToCart }: Props) => {
           products.map((product) => {
             return (
               <ProductListRow
+                key={`product-${product.id}`}
                 product={product}
                 cart={cart}
                 addToCart={addToCart}

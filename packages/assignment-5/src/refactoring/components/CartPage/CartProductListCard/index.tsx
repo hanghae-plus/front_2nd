@@ -19,6 +19,7 @@ const CartProductListCard = ({
       <div className="space-y-2">
         {cart.map((item) => (
           <CartProductListRow
+            key={item.product.id}
             item={item}
             removeFromCart={removeFromCart}
             updateQuantity={updateQuantity}

@@ -38,7 +38,7 @@ const CouponSelect = ({ onChangeCouponSelect, coupons }: CouponSelectProps) => {
     >
       <option value="">쿠폰 선택</option>
       {coupons.map((coupon, index) => (
-        <CouponOption coupon={coupon} index={index} />
+        <CouponOption key={coupon.code} coupon={coupon} index={index} />
       ))}
     </select>
   );
@@ -50,7 +50,7 @@ interface CouponOptionProps {
 }
 const CouponOption = ({ coupon, index }: CouponOptionProps) => {
   return (
-    <option key={coupon.code} value={index}>
+    <option value={index}>
       {coupon.name} -{" "}
       {coupon.discountType === "amount"
         ? `${coupon.discountValue}원`
