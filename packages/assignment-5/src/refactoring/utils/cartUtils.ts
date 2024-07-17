@@ -1,4 +1,12 @@
-import { CartItem, Coupon } from "@/types";
+import { CartItem, Coupon, Product } from "@/types";
+
+export const getMaxDiscount = (product: Product) =>
+  product.discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
+
+export const getRemainingStock = (cart: CartItem[], product: Product) => {
+  const cartItem = cart.find((item) => item.product.id === product.id);
+  return product.stock - (cartItem?.quantity || 0);
+};
 
 export const calculateItemTotal = (item: CartItem) => {
   const discountRate = getMaxApplicableDiscount(item);
