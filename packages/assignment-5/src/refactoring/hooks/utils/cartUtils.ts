@@ -2,8 +2,11 @@ import { CartItem, Coupon } from '../../../types';
 
 export const calculateItemTotal = (item: CartItem) => {
   const { product, quantity } = item;
+  const { price, discounts } = product;
 
-  return 0;
+  const discountRateForQuantity = discounts.find((discount) => discount.quantity === quantity)?.rate;
+
+  return price * (1 - (discountRateForQuantity ?? 0)) * quantity;
 };
 
 export const getMaxApplicableDiscount = (item: CartItem) => {
@@ -19,5 +22,10 @@ export const calculateCartTotal = (cart: CartItem[], selectedCoupon: Coupon | nu
 };
 
 export const updateCartItemQuantity = (cart: CartItem[], productId: string, newQuantity: number): CartItem[] => {
-  return [];
+  return cart.map((item) => {
+    if (item.product.id === productId) {
+      item.quantity = newQuantity;
+    }
+    return item;
+  });
 };
