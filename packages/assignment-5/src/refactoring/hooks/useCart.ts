@@ -1,5 +1,5 @@
 // useCart.ts
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CartItem, Coupon, Product } from "../../types";
 import {
   calculateCartTotal,
@@ -9,17 +9,7 @@ import {
 import { useLocalStorage } from "./useLocalStorage";
 
 export const useCart = () => {
-  const { getStorageByKey, setStorageByKey } = useLocalStorage("cart-item", []);
-
-  //게으른 초기화
-  const [cart, setCart] = useState<CartItem[]>(() =>
-    getStorageByKey("cart-item", [])
-  );
-
-  /**
-   * cart내부 값이 변경될 때 마다 localStorage 갱신
-   */
-  useEffect(() => setStorageByKey("cart-item", cart), [cart, setStorageByKey]);
+  const [cart, setCart] = useLocalStorage<CartItem[]>("cart-item", []);
 
   /**
    * cart에 product를 추가하는 함수

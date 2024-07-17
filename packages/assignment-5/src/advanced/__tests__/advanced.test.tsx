@@ -1,6 +1,14 @@
 import { useState } from "react";
-import { describe, expect, test } from "vitest";
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { describe, expect, test, vi } from "vitest";
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { CartPage } from "../../refactoring/components/cart/CartPage";
 import { AdminPage } from "../../refactoring/components/admin/AdminPage";
 import { CartItem, Coupon, Discount, Product } from "../../types";
@@ -9,6 +17,7 @@ import {
   getMaxDiscount,
   getRemainingStock,
 } from "../../refactoring/hooks/utils/cartUtils";
+import { useLocalStorage } from "../../refactoring/hooks";
 
 const mockProducts: Product[] = [
   {
@@ -360,9 +369,73 @@ describe("advanced > ", () => {
       test("discountType이 percent일 경우 ~%로 표기합니다.", () =>
         expect(formatCouponDiscount(coupon2)).toBe("10%"));
     });
+  });
+  describe("새로운 hook 함수르 만든 후에 테스트 코드를 작성해서 실행해보세요", () => {
+    describe("useLocalStorage", () => {
+      const initialValue: CartItem[] = [];
+      const testKey = "cart";
 
-    test("새로운 hook 함수르 만든 후에 테스트 코드를 작성해서 실행해보세요", () => {
-      expect(true).toBe(true);
+      beforeEach(() => {
+        // localStorage 모킹
+        vi.spyOn(Storage.prototype, "getItem");
+        vi.spyOn(Storage.prototype, "setItem");
+        vi.spyOn(Storage.prototype, "removeItem");
+      });
+
+      afterEach(() => {
+        vi.restoreAllMocks();
+      });
+
+      it("storedValue는 초기 값을 가져와야하며, localstorage에 key로 매핑된 데이터가 있어야합니다.", () => {
+        const { result } = renderHook(() =>
+          useLocalStorage<CartItem[]>(testKey, initialValue)
+        );
+
+        expect(result.current[0]).toEqual(initialValue);
+
+        const localStorageData = JSON.parse(
+          localStorage.getItem(testKey) as string
+        );
+
+        expect(localStorageData).toEqual(initialValue);
+      });
+
+      it("setStoredValue로 값을 변경합니다.", async () => {
+        const { result } = renderHook(() =>
+          useLocalStorage<CartItem[]>(testKey, initialValue)
+        );
+
+        const testCartItem: CartItem[] = [
+          {
+            product: {
+              id: "p1",
+              name: "상품1",
+              price: 10000,
+              stock: 20,
+              discounts: [
+                { quantity: 10, rate: 0.1 },
+                { quantity: 20, rate: 0.2 },
+              ],
+            },
+            quantity: 10,
+          },
+        ];
+
+        expect(result.current[0]).toEqual(initialValue);
+
+        /**
+         * cartItem 상태 변경
+         */
+        await waitFor(() => act(() => result.current[1](() => testCartItem)));
+
+        expect(result.current[0]).toEqual(testCartItem);
+
+        const localStorageData = JSON.parse(
+          localStorage.getItem(testKey) as string
+        );
+
+        expect(localStorageData).toEqual(testCartItem);
+      });
     });
   });
 });
