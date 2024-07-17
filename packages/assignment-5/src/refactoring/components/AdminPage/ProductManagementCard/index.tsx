@@ -35,6 +35,7 @@ const ProductManagementCard = ({
       <div className="space-y-2">
         {products.map((product, index) => (
           <ProductAccordianCard
+            key={product.id}
             product={product}
             index={index}
             onProductUpdate={onProductUpdate}

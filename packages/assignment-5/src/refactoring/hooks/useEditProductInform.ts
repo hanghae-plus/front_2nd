@@ -6,26 +6,20 @@ const useEditProductInform = (initProduct: Product) => {
     ...initProduct,
   });
 
-  const onChangeName: InputEventHandler = (event) => {
-    const updatedProduct = { ...editingProduct, name: event.target.value };
-    setEditingProduct(updatedProduct);
-  };
+  const onChangeName: InputEventHandler = (event) =>
+    setEditingProduct((prev) => ({ ...prev, name: event.target.value }));
 
-  const onChangePrice: InputEventHandler = (event) => {
-    const updatedProduct = {
-      ...editingProduct,
-      price: parseInt(event.target.value),
-    };
-    setEditingProduct(updatedProduct);
-  };
-
-  const onChangeStock: InputEventHandler = (event) => {
-    const updatedProduct = {
-      ...editingProduct,
+  const onChangeStock: InputEventHandler = (event) =>
+    setEditingProduct((prev) => ({
+      ...prev,
       stock: parseInt(event.target.value),
-    };
-    setEditingProduct(updatedProduct);
-  };
+    }));
+
+  const onChangePrice: InputEventHandler = (event) =>
+    setEditingProduct((prev) => ({
+      ...prev,
+      price: parseInt(event.target.value),
+    }));
 
   return {
     onChangeName,

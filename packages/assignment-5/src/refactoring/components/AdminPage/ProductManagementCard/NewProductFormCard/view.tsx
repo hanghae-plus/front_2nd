@@ -1,14 +1,14 @@
 import { InputEventHandler, Product } from "@/types";
 
 interface Props {
-  newProduct: Omit<Product, "id">;
+  editingProduct: Omit<Product, "id">;
   onChangeName: InputEventHandler;
   onChangeStock: InputEventHandler;
   onChangePrice: InputEventHandler;
   onClickAddNewProduct: () => void;
 }
 const NewProductFormCardView = ({
-  newProduct,
+  editingProduct,
   onChangeName,
   onChangePrice,
   onChangeStock,
@@ -27,7 +27,7 @@ const NewProductFormCardView = ({
         <input
           id="productName"
           type="text"
-          value={newProduct.name}
+          value={editingProduct.name}
           onChange={onChangeName}
           className="w-full p-2 border rounded"
         />
@@ -42,7 +42,7 @@ const NewProductFormCardView = ({
         <input
           id="productPrice"
           type="number"
-          value={newProduct.price}
+          value={editingProduct.price}
           onChange={onChangePrice}
           className="w-full p-2 border rounded"
         />
@@ -57,7 +57,7 @@ const NewProductFormCardView = ({
         <input
           id="productStock"
           type="number"
-          value={newProduct.stock}
+          value={editingProduct.stock}
           onChange={onChangeStock}
           className="w-full p-2 border rounded"
         />
