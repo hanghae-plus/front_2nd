@@ -1,9 +1,9 @@
-import { Coupon } from "@/types";
+import { Coupon, SelectEventHandler } from "@/types";
 
 interface Props {
   coupons: Coupon[];
   selectedCoupon: Coupon | null;
-  onChangeCouponSelect: React.ChangeEventHandler<HTMLSelectElement>;
+  onChangeCouponSelect: SelectEventHandler;
 }
 
 const ApplyCouponCardView = ({
@@ -27,7 +27,7 @@ const ApplyCouponCardView = ({
 // TODO: selectedCoupon이 "쿠폰 선택"으로 옵션을 바꾸면 null이 아니라 string이 됨. 타입 변경 필요
 
 interface CouponSelectProps {
-  onChangeCouponSelect: React.ChangeEventHandler<HTMLSelectElement>;
+  onChangeCouponSelect: SelectEventHandler;
   coupons: Coupon[];
 }
 const CouponSelect = ({ onChangeCouponSelect, coupons }: CouponSelectProps) => {

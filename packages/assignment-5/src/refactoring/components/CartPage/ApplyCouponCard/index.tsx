@@ -1,4 +1,4 @@
-import { Coupon } from "@/types";
+import { Coupon, SelectEventHandler } from "@/types";
 import ApplyCouponCardView from "./view";
 
 interface Props {
@@ -8,9 +8,8 @@ interface Props {
 }
 
 const ApplyCouponCard = ({ coupons, applyCoupon, selectedCoupon }: Props) => {
-  const onChangeCouponSelect: React.ChangeEventHandler<HTMLSelectElement> = (
-    event
-  ) => applyCoupon(coupons[parseInt(event.target.value)]);
+  const onChangeCouponSelect: SelectEventHandler = (event) =>
+    applyCoupon(coupons[parseInt(event.target.value)]);
 
   const props = {
     coupons,

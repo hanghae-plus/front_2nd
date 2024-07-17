@@ -26,3 +26,5 @@ export interface Coupon {
 }
 
 export type setState<T> = Dispatch<SetStateAction<T>>;
+export type InputEventHandler = React.ChangeEventHandler<HTMLInputElement>;
+export type SelectEventHandler = React.ChangeEventHandler<HTMLSelectElement>;
