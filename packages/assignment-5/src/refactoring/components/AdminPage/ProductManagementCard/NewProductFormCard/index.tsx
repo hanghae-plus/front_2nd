@@ -1,18 +1,18 @@
 import useEditProductInform from "@/refactoring/hooks/useEditProductInform";
 import { generateNewDefaultProduct } from "@/refactoring/utils/generateNewDefaultProduct";
-import { Product, setState } from "@/types";
+import { Product } from "@/types";
 import NewProductFormCardView from "./view";
 interface Props {
   onProductAdd: (newProduct: Product) => void;
-  setShowNewProductForm: setState<boolean>;
+  toggleNewProductForm: () => void;
 }
-const NewProductFormCard = ({ onProductAdd, setShowNewProductForm }: Props) => {
+const NewProductFormCard = ({ onProductAdd, toggleNewProductForm }: Props) => {
   const editProductInform = useEditProductInform(generateNewDefaultProduct());
 
   const onClickAddNewProduct = () => {
     onProductAdd(editProductInform.editingProduct);
     editProductInform.setEditingProduct(generateNewDefaultProduct());
-    setShowNewProductForm(false);
+    toggleNewProductForm();
   };
 
   const props = {

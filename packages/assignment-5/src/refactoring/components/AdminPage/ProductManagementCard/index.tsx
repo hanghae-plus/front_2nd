@@ -1,5 +1,5 @@
+import useToggle from "@/refactoring/hooks/useToggle";
 import { Product } from "@/types";
-import { useState } from "react";
 import NewProductFormCard from "./NewProductFormCard";
 import ProductAccordianCard from "./ProductAccordianCard";
 
@@ -14,14 +14,12 @@ const ProductManagementCard = ({
   onProductUpdate,
   onProductAdd,
 }: Props) => {
-  const [showNewProductForm, setShowNewProductForm] = useState(false);
-  const onClickToggleNewProductForm = () =>
-    setShowNewProductForm((prev) => !prev);
+  const [showNewProductForm, toggleNewProductForm] = useToggle(false);
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">상품 관리</h2>
       <button
-        onClick={onClickToggleNewProductForm}
+        onClick={toggleNewProductForm}
         className="bg-green-500 text-white px-4 py-2 rounded mb-4 hover:bg-green-600"
       >
         {showNewProductForm ? "취소" : "새 상품 추가"}
@@ -29,7 +27,7 @@ const ProductManagementCard = ({
       {showNewProductForm && (
         <NewProductFormCard
           onProductAdd={onProductAdd}
-          setShowNewProductForm={setShowNewProductForm}
+          toggleNewProductForm={toggleNewProductForm}
         />
       )}
       <div className="space-y-2">

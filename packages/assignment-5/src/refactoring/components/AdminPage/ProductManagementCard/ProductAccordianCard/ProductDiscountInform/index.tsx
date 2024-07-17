@@ -1,12 +1,10 @@
-import { Product, setState } from "@/types";
+import { Product } from "@/types";
 
 interface Props {
   product: Product;
-  setIsEditing: setState<boolean>;
+  toggleIsEditing: () => void;
 }
-const ProductDiscountInform = ({ product, setIsEditing }: Props) => {
-  const onClickEdit = () => setIsEditing(true);
-
+const ProductDiscountInform = ({ product, toggleIsEditing }: Props) => {
   return (
     <div>
       {product.discounts.map((discount, index) => (
@@ -18,7 +16,7 @@ const ProductDiscountInform = ({ product, setIsEditing }: Props) => {
       ))}
       <button
         data-testid="modify-button"
-        onClick={onClickEdit}
+        onClick={toggleIsEditing}
         className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 mt-2"
       >
         수정

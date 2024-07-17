@@ -1,4 +1,4 @@
-import { Coupon, Product, setState } from "@/types";
+import { Coupon, Product } from "@/types";
 import AdminPage from "../components/AdminPage";
 import CartPage from "../components/CartPage";
 import NavigationBar from "../components/NavigationBar";
@@ -10,7 +10,7 @@ interface AppViewProps {
   coupons: Coupon[];
   addCoupon: (newCoupon: Coupon) => void;
   isAdmin: boolean;
-  setIsAdmin: setState<boolean>;
+  toggleIsAdmin: () => void;
 }
 const AppView = ({
   products,
@@ -19,11 +19,11 @@ const AppView = ({
   coupons,
   addCoupon,
   isAdmin,
-  setIsAdmin,
+  toggleIsAdmin,
 }: AppViewProps) => {
   return (
     <div className="min-h-screen bg-gray-100">
-      <NavigationBar isAdmin={isAdmin} setIsAdmin={setIsAdmin} />
+      <NavigationBar isAdmin={isAdmin} toggleIsAdmin={toggleIsAdmin} />
       <main className="container mx-auto mt-6">
         {isAdmin ? (
           <AdminPage

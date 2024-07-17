@@ -1,5 +1,5 @@
+import useToggle from "@/refactoring/hooks/useToggle";
 import { Product } from "@/types";
-import { useState } from "react";
 import ProductDiscountInform from "./ProductDiscountInform";
 import ProductEditingForm from "./ProductEditingForm";
 
@@ -9,12 +9,9 @@ interface Props {
   onProductUpdate: (updatedProduct: Product) => void;
 }
 const ProductAccordianCard = ({ product, index, onProductUpdate }: Props) => {
-  const [isAccordianOpen, setIsAccordianOpen] = useState<boolean>(false);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isAccordianOpen, toggleProductAccordion] = useToggle(false);
+  const [isEditing, toggleIsEditing] = useToggle(false);
 
-  const toggleProductAccordion = () => {
-    setIsAccordianOpen((prev) => !prev);
-  };
   return (
     <div
       key={product.id}
@@ -34,12 +31,12 @@ const ProductAccordianCard = ({ product, index, onProductUpdate }: Props) => {
             <ProductEditingForm
               product={product}
               onProductUpdate={onProductUpdate}
-              setIsEditing={setIsEditing}
+              toggleIsEditing={toggleIsEditing}
             />
           ) : (
             <ProductDiscountInform
               product={product}
-              setIsEditing={setIsEditing}
+              toggleIsEditing={toggleIsEditing}
             />
           )}
         </div>

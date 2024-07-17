@@ -1,17 +1,17 @@
 import useEditProductInform from "@/refactoring/hooks/useEditProductInform";
-import { Discount, InputEventHandler, Product, setState } from "@/types";
+import { Discount, InputEventHandler, Product } from "@/types";
 import { useState } from "react";
 import ProductEditingFormView from "./view";
 
 interface Props {
   onProductUpdate: (updatedProduct: Product) => void;
   product: Product;
-  setIsEditing: setState<boolean>;
+  toggleIsEditing: () => void;
 }
 const ProductEditingForm = ({
   onProductUpdate,
   product,
-  setIsEditing,
+  toggleIsEditing,
 }: Props) => {
   const editProductInform = useEditProductInform(product);
 
@@ -59,7 +59,7 @@ const ProductEditingForm = ({
 
   const onClickEditComplete = () => {
     onProductUpdate(editProductInform.editingProduct);
-    setIsEditing(false);
+    toggleIsEditing();
   };
 
   const props = {

@@ -2,7 +2,7 @@ import { useCoupons, useProducts } from "@/refactoring/hooks";
 import { data as COUPONS } from "@/refactoring/mocks/coupons.json";
 import { data as PRODUCTS } from "@/refactoring/mocks/products.json";
 import { Coupon, Product } from "@/types.ts";
-import { useState } from "react";
+import useToggle from "../hooks/useToggle";
 import AppView from "./view";
 
 const App = () => {
@@ -10,7 +10,7 @@ const App = () => {
     PRODUCTS as Product[]
   );
   const { coupons, addCoupon } = useCoupons(COUPONS as Coupon[]);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, toggleIsAdmin] = useToggle(false);
 
   const props = {
     products,
@@ -19,7 +19,7 @@ const App = () => {
     coupons,
     addCoupon,
     isAdmin,
-    setIsAdmin,
+    toggleIsAdmin,
   };
 
   return <AppView {...props} />;

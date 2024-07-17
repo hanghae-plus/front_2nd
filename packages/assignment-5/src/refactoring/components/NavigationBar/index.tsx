@@ -1,19 +1,13 @@
-import { setState } from "@/types";
-import { useCallback } from "react";
 import NavigationBarView from "./view";
 
 interface NavigationBarProps {
   isAdmin: boolean;
-  setIsAdmin: setState<boolean>;
+  toggleIsAdmin: () => void;
 }
-const NavigationBar = ({ isAdmin, setIsAdmin }: NavigationBarProps) => {
-  const onClickSwitchPage = useCallback(() => {
-    setIsAdmin((prev) => !prev);
-  }, [setIsAdmin]);
-
+const NavigationBar = ({ isAdmin, toggleIsAdmin }: NavigationBarProps) => {
   const props = {
     isAdmin,
-    onClickSwitchPage,
+    toggleIsAdmin,
   };
   return <NavigationBarView {...props} />;
 };
