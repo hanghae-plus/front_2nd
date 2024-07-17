@@ -4,9 +4,9 @@ export const calculateItemTotal = (item: CartItem) => {
   const { product, quantity } = item;
   const { price, discounts } = product;
 
-  const discountRateForQuantity = discounts.find((discount) => discount.quantity === quantity)?.rate;
+  const discountRateForQuantity = discounts.find((discount) => discount.quantity === quantity)?.rate ?? 0;
 
-  return price * (1 - (discountRateForQuantity ?? 0)) * quantity;
+  return price * (1 - discountRateForQuantity) * quantity;
 };
 
 export const getMaxApplicableDiscount = (item: CartItem) => {
@@ -24,7 +24,10 @@ export const calculateCartTotal = (cart: CartItem[], selectedCoupon: Coupon | nu
 export const updateCartItemQuantity = (cart: CartItem[], productId: string, newQuantity: number): CartItem[] => {
   return cart.map((item) => {
     if (item.product.id === productId) {
-      item.quantity = newQuantity;
+      return {
+        ...item,
+        quantity: newQuantity
+      };
     }
     return item;
   });
