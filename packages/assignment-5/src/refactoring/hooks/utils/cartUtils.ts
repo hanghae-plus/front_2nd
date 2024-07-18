@@ -15,7 +15,7 @@ export const getMaxApplicableDiscount = (item: CartItem) => {
     .reduce((maxRate, discount) => Math.max(maxRate, discount.rate), 0);
 };
 
-const appliedDiscount = (cart: CartItem[], selectedCoupon: Coupon | null) => {
+const appliedCoupon = (cart: CartItem[], selectedCoupon: Coupon | null) => {
   const totalPrices = cart.reduce((total, item) => total + calculateItemTotal(item), 0);
 
   if (!selectedCoupon) {
@@ -29,7 +29,7 @@ const appliedDiscount = (cart: CartItem[], selectedCoupon: Coupon | null) => {
 
 export const calculateCartTotal = (cart: CartItem[], selectedCoupon: Coupon | null) => {
   const totalBeforeDiscount = cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
-  const totalAfterDiscount = appliedDiscount(cart, selectedCoupon);
+  const totalAfterDiscount = appliedCoupon(cart, selectedCoupon);
   const totalDiscount = totalBeforeDiscount - totalAfterDiscount;
 
   return {
