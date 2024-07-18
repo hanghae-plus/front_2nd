@@ -28,12 +28,6 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
   
 
   const [openProductIds, setOpenProductIds] = useState<Set<string>>(new Set());
-  // const [newCoupon, setNewCoupon] = useState<Coupon>({
-  //   name: '',
-  //   code: '',
-  //   discountType: 'percentage',
-  //   discountValue: 0
-  // });
   const { coupon, updateCouponField, handleAddCoupon } = useCouponForm(onCouponAdd);
   
   
@@ -57,17 +51,6 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
     });
   };
 
-
-  // const handleAddCoupon = () => {
-  //   onCouponAdd(newCoupon);
-  //   setNewCoupon({
-  //     name: '',
-  //     code: '',
-  //     discountType: 'percentage',
-  //     discountValue: 0
-  //   });
-  // };
-
   const handleAddNewProduct = () => {
     const productWithId = { ...newProduct, id: Date.now().toString() };
     onProductAdd(productWithId);
@@ -84,7 +67,6 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
    const handleEditComplete = () => {
     if (editingProduct) {
       onProductUpdate(editingProduct);
-      // setEditingProduct(null);
       clearEditingProduct();
     }
   };
@@ -257,7 +239,6 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
                 type="text"
                 placeholder="쿠폰 이름"
                 value={coupon.name}
-                // onChange={(e) => setNewCoupon({ ...newCoupon, name: e.target.value })}
                 onChange={(e) => updateCouponField('name', e.target.value)}
                 className="w-full p-2 border rounded"
               />
@@ -265,14 +246,12 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
                 type="text"
                 placeholder="쿠폰 코드"
                 value={coupon.code}
-                // onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
                 onChange={(e) => updateCouponField('code', e.target.value)}
                 className="w-full p-2 border rounded"
               />
               <div className="flex gap-2">
                 <select
                   value={coupon.discountType}
-                  // onChange={(e) => setNewCoupon({ ...newCoupon, discountType: e.target.value as 'amount' | 'percentage' })}
                   onChange={(e) => updateCouponField('discountType', e.target.value as 'amount' | 'percentage')}
                   className="w-full p-2 border rounded"
                 >
@@ -283,7 +262,6 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
                   type="number"
                   placeholder="할인 값"
                   value={coupon.discountValue}
-                  // onChange={(e) => setNewCoupon({ ...newCoupon, discountValue: parseInt(e.target.value) })}
                   onChange={(e) => updateCouponField('discountValue', parseInt(e.target.value))}
                   className="w-full p-2 border rounded"
                 />
