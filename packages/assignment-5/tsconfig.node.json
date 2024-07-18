@@ -7,7 +7,17 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "noEmit": true
+    "noEmit": true,
+    /* Custom */
+    "types": ["node"],
+    "baseUrl": "./src/fsd",
+    "paths": {
+      "~app": ["./app"],
+      "~pages": ["./pages"],
+      "~features": ["./features"],
+      "~entities": ["./entities"],
+      "~shared": ["./shared"]
+    }
   },
   "include": ["vite.config.ts"]
 }
