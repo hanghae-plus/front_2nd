@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 export const VALIDATION_CONDITIONS = {
   isNotEmpty: (value: string) => {
-    return !!value;
+    return !!value && value.trim().length > 0;
   },
   isPositiveNumber: (value: string) => {
     return !!value && parseInt(value) > 0;
