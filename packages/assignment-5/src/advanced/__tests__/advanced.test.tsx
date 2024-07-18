@@ -5,6 +5,7 @@ import { CartPage } from '../../refactoring/components/CartPage';
 import { AdminPage } from '../../refactoring/components/AdminPage';
 import { Coupon, Product } from '../../types';
 import { clamp } from '../../refactoring/utils/number';
+import { cn } from '../../refactoring/utils';
 
 const mockProducts: Product[] = [
   {
@@ -257,6 +258,20 @@ describe('advanced > ', () => {
       const max = 3;
       const value = 1;
       expect(clamp(value, min, max)).toBe(min);
+    });
+  });
+
+  describe('cn 함수테스트', () => {
+    test('두 개의 클래스를 전달하면 두 개의 클래스를 반환한다.', () => {
+      expect(cn('a', 'b')).toBe('a b');
+    });
+
+    test('여러 개의 클래스를 전달하면 하나의 클래스로 반환한다.', () => {
+      expect(cn('a', 'b', 'c')).toBe('a b c');
+    });
+
+    test('undefined 값은 무시된다.', () => {
+      expect(cn('a', undefined, 'c')).toBe('a c');
     });
   });
 });
