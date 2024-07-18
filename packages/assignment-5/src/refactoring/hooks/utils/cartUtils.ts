@@ -1,4 +1,5 @@
 import { CartItem, Coupon, Product } from '../../../types';
+import { clamp } from '../../utils/number';
 
 export const calculateItemTotal = (item: CartItem) => {
   const { quantity } = item;
@@ -48,7 +49,7 @@ export const updateCartItemQuantity = (cart: CartItem[], productId: string, newQ
     .map((item) => {
       if (item.product.id === productId) {
         const maxQuantity = item.product.stock;
-        const updatedQuantity = Math.max(0, Math.min(newQuantity, maxQuantity));
+        const updatedQuantity = clamp(newQuantity, 0, maxQuantity);
         return updatedQuantity > 0 ? { ...item, quantity: updatedQuantity } : null;
       }
       return item;
