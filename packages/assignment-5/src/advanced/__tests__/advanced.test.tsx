@@ -79,9 +79,9 @@ const TestAdminPage = () => {
     <AdminPage
       products={products}
       coupons={coupons}
-      onProductUpdate={handleProductUpdate}
-      onProductAdd={handleProductAdd}
-      onCouponAdd={handleCouponAdd}
+      updateProduct={handleProductUpdate}
+      addProduct={handleProductAdd}
+      addCoupon={handleCouponAdd}
     />
   );
 };
@@ -275,8 +275,8 @@ describe("advanced > ", () => {
     });
   });
 
-  //cart-util
-  describe("cart-utils", () => {
+  // util
+  describe("새로운 util함수를 만들어 보세요.", () => {
     describe("getRemainingStock", () => {
       const testProduct1: Product = {
         id: "1",
@@ -380,7 +380,6 @@ describe("advanced > ", () => {
       const testKey = "cart";
 
       beforeEach(() => {
-        // localStorage 모킹
         vi.spyOn(Storage.prototype, "getItem");
         vi.spyOn(Storage.prototype, "setItem");
         vi.spyOn(Storage.prototype, "removeItem");
@@ -427,7 +426,6 @@ describe("advanced > ", () => {
 
         expect(result.current[0]).toEqual(initialValue);
 
-        // cartItem 상태 변경
         await waitFor(() => act(() => result.current[1](() => testCartItem)));
 
         expect(result.current[0]).toEqual(testCartItem);

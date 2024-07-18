@@ -71,7 +71,7 @@ const App = () => {
             coupons={coupons}
             updateProduct={updateProduct}
             addProduct={addProduct}
-            onCouponAdd={addCoupon}
+            addCoupon={addCoupon}
           />
         )}
         {!isAdmin && <CartPage products={products} coupons={coupons} />}

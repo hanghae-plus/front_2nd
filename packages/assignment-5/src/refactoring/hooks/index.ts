@@ -5,3 +5,4 @@ export * from "./useProductAccordion.ts";
 export * from "./useNewProduct.ts";
 export * from "./useProductEdit.ts";
 export * from "./useLocalStorage.ts";
+export * from "./useForm.ts";

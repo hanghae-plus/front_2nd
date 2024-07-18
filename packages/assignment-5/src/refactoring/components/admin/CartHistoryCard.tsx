@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { Coupon } from "../../../types";
+import { useForm } from "../../hooks";
 
 interface CartHistoryCardProps {
   coupons: Coupon[];
   addCoupon: (newCoupon: Coupon) => void;
+}
+
+interface CouponForm {
+  couponName: string;
+  couponCode: string;
+  discountType: string;
+  discountValue: number;
 }
 
 const CartHistoryCard = ({ coupons, addCoupon }: CartHistoryCardProps) => {
@@ -27,11 +35,18 @@ const CartHistoryCard = ({ coupons, addCoupon }: CartHistoryCardProps) => {
     });
   };
 
+  const { formState } = useForm<CouponForm>({
+    couponName: "",
+    couponCode: "",
+    discountType: "",
+    discountValue: 0,
+  });
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">쿠폰 관리</h2>
       <div className="bg-white p-4 rounded shadow">
-        <div className="space-y-2 mb-4">
+        <form className="space-y-2 mb-4">
           <input
             type="text"
             placeholder="쿠폰 이름"
@@ -83,7 +98,7 @@ const CartHistoryCard = ({ coupons, addCoupon }: CartHistoryCardProps) => {
           >
             쿠폰 추가
           </button>
-        </div>
+        </form>
         <div>
           <h3 className="text-lg font-semibold mb-2">현재 쿠폰 목록</h3>
           <div className="space-y-2">
