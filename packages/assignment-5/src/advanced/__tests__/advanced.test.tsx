@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { describe, expect, test, vi } from 'vitest';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, renderHook, screen, within } from '@testing-library/react';
 import { CartPage } from '../../refactoring/components/CartPage';
 import { AdminPage } from '../../refactoring/components/AdminPage';
 import { Coupon, Product } from '../../types';
 import { clamp } from '../../refactoring/utils/number';
 import { cn } from '../../refactoring/utils';
 import { Accordion, Select } from '../../refactoring/components/shared';
+import { useForm } from '../../refactoring/hooks/useForm';
 
 const mockProducts: Product[] = [
   {
@@ -376,6 +377,61 @@ describe('advanced > ', () => {
 
     test('undefined 값은 무시된다.', () => {
       expect(cn('a', undefined, 'c')).toBe('a c');
+    });
+  });
+
+  describe('useForm 훅', () => {
+    test('초기값이 올바르게 설정되는지 확인', () => {
+      const initialValues = { name: '', age: 0 };
+      const { result } = renderHook(() => useForm(initialValues));
+
+      expect(result.current.values).toEqual(initialValues);
+    });
+
+    test('handleChange 함수가 값을 올바르게 업데이트하는지 확인', () => {
+      const initialValues = { name: '', age: 0 };
+      const { result } = renderHook(() => useForm(initialValues));
+
+      act(() => {
+        result.current.handleChange({
+          target: { name: 'name', value: '감자' },
+        } as unknown as ChangeEvent<HTMLInputElement>);
+      });
+
+      expect(result.current.values.name).toBe('감자');
+    });
+
+    test('transform 함수가 올바르게 적용되는지 확인', () => {
+      const initialValues = { name: '', age: 0 };
+      const { result } = renderHook(() => useForm(initialValues));
+
+      act(() => {
+        result.current.handleChange(
+          {
+            target: { name: 'age', value: '25' },
+          } as unknown as ChangeEvent<HTMLInputElement>,
+          (value) => parseInt(value, 10)
+        );
+      });
+
+      expect(result.current.values.age).toBe(25);
+    });
+
+    test('reset 함수가 초기값으로 되돌리는지 확인', () => {
+      const initialValues = { name: '', age: 0 };
+      const { result } = renderHook(() => useForm(initialValues));
+
+      act(() => {
+        result.current.handleChange({
+          target: { name: 'name', value: '감자' },
+        } as unknown as ChangeEvent<HTMLInputElement>);
+      });
+
+      act(() => {
+        result.current.reset();
+      });
+
+      expect(result.current.values).toEqual(initialValues);
     });
   });
 });
