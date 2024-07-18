@@ -1,11 +1,5 @@
-import { useCallback, useState } from 'react';
-
 import type { Coupon } from '../../../types';
-
-interface UpdateNewCoupon<K extends keyof Coupon> {
-  key: K;
-  value: Coupon[K];
-}
+import { useCouponForm } from '../../hooks/useCouponForm.ts';
 
 interface CouponManage {
   coupons: Coupon[];
@@ -13,30 +7,7 @@ interface CouponManage {
 }
 
 export default function CouponManage({ coupons, onCouponAdd }: CouponManage) {
-  const [newCoupon, setNewCoupon] = useState<Coupon>({
-    name: '',
-    code: '',
-    discountType: 'amount',
-    discountValue: 0,
-  });
-
-  const updateNewCoupon = useCallback(
-    <K extends keyof Coupon>({ key, value }: UpdateNewCoupon<K>) => {
-      setNewCoupon((prev) => ({
-        ...prev,
-        [key]: value,
-      }));
-    },
-    [],
-  );
-
-  const handleAddCoupon = () => {
-    if (!newCoupon.name || !newCoupon.code || newCoupon.discountValue === 0) {
-      alert('쿠폰 정보를 입력해주세요.');
-      return;
-    }
-    onCouponAdd(newCoupon);
-  };
+  const { newCoupon, editProperty, submit } = useCouponForm(onCouponAdd);
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">쿠폰 관리</h2>
@@ -46,28 +17,24 @@ export default function CouponManage({ coupons, onCouponAdd }: CouponManage) {
             type="text"
             placeholder="쿠폰 이름"
             value={newCoupon.name}
-            onChange={(e) =>
-              updateNewCoupon({ key: 'name', value: e.target.value })
-            }
+            onChange={(e) => editProperty('name', e.target.value)}
             className="w-full p-2 border rounded"
           />
           <input
             type="text"
             placeholder="쿠폰 코드"
             value={newCoupon.code}
-            onChange={(e) =>
-              updateNewCoupon({ key: 'code', value: e.target.value })
-            }
+            onChange={(e) => editProperty('code', e.target.value)}
             className="w-full p-2 border rounded"
           />
           <div className="flex gap-2">
             <select
               value={newCoupon.discountType}
               onChange={(e) =>
-                updateNewCoupon({
-                  key: 'discountType',
-                  value: e.target.value as Coupon['discountType'],
-                })
+                editProperty(
+                  'discountType',
+                  e.target.value as Coupon['discountType'],
+                )
               }
               className="w-full p-2 border rounded"
             >
@@ -79,16 +46,13 @@ export default function CouponManage({ coupons, onCouponAdd }: CouponManage) {
               placeholder="할인 값"
               value={newCoupon.discountValue}
               onChange={(e) =>
-                updateNewCoupon({
-                  key: 'discountValue',
-                  value: e.target.valueAsNumber,
-                })
+                editProperty('discountValue', e.target.valueAsNumber)
               }
               className="w-full p-2 border rounded"
             />
           </div>
           <button
-            onClick={handleAddCoupon}
+            onClick={submit}
             className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
           >
             쿠폰 추가
