@@ -1,33 +1,30 @@
-import { useState } from "react";
-import { Product } from "../../../types.ts";
+import { ChangeEvent } from "react";
+import { Product } from "../../types.ts";
+import { useProductForm } from "../hooks";
 
 export interface Props {
   addNewProduct: (newProduct: Omit<Product, "id">) => void;
 }
 
 export function ProductForm({ addNewProduct }: Props) {
-  const [newProduct, setNewProduct] = useState<Omit<Product, "id">>({
-    name: "",
-    price: 0,
-    stock: 0,
-    discounts: [],
-  });
+  const { productForm, updateProductFormField, resetProductForm } =
+    useProductForm();
 
-  const handleNewProductUpdate = <F extends keyof Product>(
-    field: F,
-    value: Product[F],
-  ) => {
-    setNewProduct((prev) => ({ ...prev, [field]: value }));
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateProductFormField("name", e.target.value);
+  };
+
+  const handlePriceChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateProductFormField("price", parseInt(e.target.value));
+  };
+
+  const handleStockChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateProductFormField("stock", parseInt(e.target.value));
   };
 
   const handleAddButtonClick = () => {
-    addNewProduct(newProduct);
-    setNewProduct({
-      name: "",
-      price: 0,
-      stock: 0,
-      discounts: [],
-    });
+    addNewProduct(productForm);
+    resetProductForm();
   };
 
   return (
@@ -43,8 +40,8 @@ export function ProductForm({ addNewProduct }: Props) {
         <input
           id="productName"
           type="text"
-          value={newProduct.name}
-          onChange={(e) => handleNewProductUpdate("name", e.target.value)}
+          value={productForm.name}
+          onChange={handleNameChange}
           className="w-full p-2 border rounded"
         />
       </div>
@@ -58,10 +55,8 @@ export function ProductForm({ addNewProduct }: Props) {
         <input
           id="productPrice"
           type="number"
-          value={newProduct.price}
-          onChange={(e) =>
-            handleNewProductUpdate("price", parseInt(e.target.value))
-          }
+          value={productForm.price}
+          onChange={handlePriceChange}
           className="w-full p-2 border rounded"
         />
       </div>
@@ -75,10 +70,8 @@ export function ProductForm({ addNewProduct }: Props) {
         <input
           id="productStock"
           type="number"
-          value={newProduct.stock}
-          onChange={(e) =>
-            handleNewProductUpdate("stock", parseInt(e.target.value))
-          }
+          value={productForm.stock}
+          onChange={handleStockChange}
           className="w-full p-2 border rounded"
         />
       </div>

@@ -1,7 +1,13 @@
-export { CartItem } from "./cart-item/CartItem.tsx";
+export { CartItem } from "./CartItem.tsx";
 
-export { ProductItem } from "./product-item/ProductItem.tsx";
+export { CouponForm } from "./CouponForm.tsx";
 
-export { ProductInfo } from "./product-info/ProductInfo.tsx";
+export { DiscountForm } from "./DiscountForm.tsx";
 
-export { ProductForm } from "./product-form/ProductForm.tsx";
+export { EditingProduct } from "./EditingProduct.tsx";
+
+export { ProductForm } from "./ProductForm.tsx";
+
+export { ProductInfo } from "./ProductInfo.tsx";
+
+export { ProductItem } from "./ProductItem.tsx";

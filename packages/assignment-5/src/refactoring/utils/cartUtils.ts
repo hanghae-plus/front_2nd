@@ -1,4 +1,4 @@
-import { CartItem, Coupon } from "../../../types";
+import { CartItem, Coupon } from "../../types.ts";
 
 export const calculateItemTotal = (item: CartItem) => {
   return (

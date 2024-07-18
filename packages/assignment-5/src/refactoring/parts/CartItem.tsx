@@ -1,31 +1,21 @@
-import { type CartItem } from "../../../types.ts";
+import { type CartItem } from "../../types.ts";
+import { getMaxApplicableDiscount } from "../utils/cartUtils.ts";
+import { MouseEventHandler } from "react";
 
 export interface Props {
   cartItem: CartItem;
-  onClickMinusButtonClick: () => void;
-  onClickPlusButtonClick: () => void;
-  onClickRemoveButtonClick: () => void;
+  onClickMinusButton: MouseEventHandler<HTMLButtonElement>;
+  onClickPlusButton: MouseEventHandler<HTMLButtonElement>;
+  onClickRemoveButton: MouseEventHandler<HTMLButtonElement>;
 }
-
-const getAppliedDiscount = (cartItem: CartItem) => {
-  const { discounts } = cartItem.product;
-  const { quantity } = cartItem;
-  let appliedDiscount = 0;
-  for (const discount of discounts) {
-    if (quantity >= discount.quantity) {
-      appliedDiscount = Math.max(appliedDiscount, discount.rate);
-    }
-  }
-  return appliedDiscount;
-};
 
 export function CartItem({
   cartItem,
-  onClickMinusButtonClick,
-  onClickPlusButtonClick,
-  onClickRemoveButtonClick,
+  onClickMinusButton,
+  onClickPlusButton,
+  onClickRemoveButton,
 }: Props) {
-  const appliedDiscount = getAppliedDiscount(cartItem);
+  const appliedDiscount = getMaxApplicableDiscount(cartItem);
   return (
     <div
       key={cartItem.product.id}
@@ -45,19 +35,19 @@ export function CartItem({
       </div>
       <div>
         <button
-          onClick={onClickMinusButtonClick}
+          onClick={onClickMinusButton}
           className="bg-gray-300 text-gray-800 px-2 py-1 rounded mr-1 hover:bg-gray-400"
         >
           -
         </button>
         <button
-          onClick={onClickPlusButtonClick}
+          onClick={onClickPlusButton}
           className="bg-gray-300 text-gray-800 px-2 py-1 rounded mr-1 hover:bg-gray-400"
         >
           +
         </button>
         <button
-          onClick={onClickRemoveButtonClick}
+          onClick={onClickRemoveButton}
           className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
         >
           삭제

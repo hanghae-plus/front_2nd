@@ -10,7 +10,7 @@ export const useProducts = (initialProducts: Product[]) => {
     );
 
     if (targetProductIndex !== -1) {
-      // splice는 안될까?
+      // splice는 왜 안될까?
       // setProducts((prev) => prev.splice(targetProductIndex, 1, productData));
       setProducts((prev) =>
         prev.map((item, index) =>

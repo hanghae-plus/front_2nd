@@ -1,11 +1,16 @@
 import { Coupon, Product } from "../../types.ts";
 import { useCart } from "../hooks";
 import { ProductItem, CartItem } from "../parts";
+import { ChangeEvent, MouseEventHandler } from "react";
 
 interface Props {
   products: Product[];
   coupons: Coupon[];
 }
+
+type CartItemButtonClickHandler = (
+  productId: string,
+) => MouseEventHandler<HTMLButtonElement>;
 
 export const CartPage = ({ products, coupons }: Props) => {
   const {
@@ -18,13 +23,32 @@ export const CartPage = ({ products, coupons }: Props) => {
     selectedCoupon,
   } = useCart();
 
+  const { totalBeforeDiscount, totalAfterDiscount, totalDiscount } =
+    calculateTotal();
+
   const getRemainingStock = (product: Product) => {
     const cartItem = cart.find((item) => item.product.id === product.id);
     return product.stock - (cartItem?.quantity || 0);
   };
 
-  const { totalBeforeDiscount, totalAfterDiscount, totalDiscount } =
-    calculateTotal();
+  const handleMinusButtonClick: CartItemButtonClickHandler =
+    (productId) => () => {
+      updateQuantity(productId, (currentQuantity) => currentQuantity - 1);
+    };
+
+  const handlePlusButtonClick: CartItemButtonClickHandler =
+    (productId) => () => {
+      updateQuantity(productId, (currentQuantity) => currentQuantity + 1);
+    };
+
+  const handleRemoveButtonClick: CartItemButtonClickHandler =
+    (productId) => () => {
+      removeFromCart(productId);
+    };
+
+  const handleCouponSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    applyCoupon(coupons[parseInt(e.target.value)]);
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -51,15 +75,11 @@ export const CartPage = ({ products, coupons }: Props) => {
             {cart.map((cartItem) =>
               CartItem({
                 cartItem,
-                onClickMinusButtonClick() {
-                  updateQuantity(cartItem.product.id, cartItem.quantity - 1);
-                },
-                onClickPlusButtonClick() {
-                  updateQuantity(cartItem.product.id, cartItem.quantity + 1);
-                },
-                onClickRemoveButtonClick() {
-                  removeFromCart(cartItem.product.id);
-                },
+                onClickMinusButton: handleMinusButtonClick(cartItem.product.id),
+                onClickPlusButton: handlePlusButtonClick(cartItem.product.id),
+                onClickRemoveButton: handleRemoveButtonClick(
+                  cartItem.product.id,
+                ),
               }),
             )}
           </div>
@@ -67,7 +87,7 @@ export const CartPage = ({ products, coupons }: Props) => {
           <div className="mt-6 bg-white p-4 rounded shadow">
             <h2 className="text-2xl font-semibold mb-2">쿠폰 적용</h2>
             <select
-              onChange={(e) => applyCoupon(coupons[parseInt(e.target.value)])}
+              onChange={handleCouponSelect}
               className="w-full p-2 border rounded mb-2"
             >
               <option value="">쿠폰 선택</option>

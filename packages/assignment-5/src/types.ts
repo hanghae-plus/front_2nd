@@ -16,9 +16,11 @@ export interface CartItem {
   quantity: number;
 }
 
+export type DiscountType = "amount" | "percentage";
+
 export interface Coupon {
   name: string;
   code: string;
-  discountType: 'amount' | 'percentage';
+  discountType: DiscountType;
   discountValue: number;
 }
