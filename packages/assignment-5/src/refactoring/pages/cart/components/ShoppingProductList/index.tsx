@@ -1,4 +1,3 @@
-import React from 'react';
 import { Product, CartItem } from '../../../../../types';
 
 interface ShoppingProductListProps {
@@ -7,7 +6,7 @@ interface ShoppingProductListProps {
   addToCart: (product: Product) => void;
 }
 
-const ShoppingProductList: React.FC<ShoppingProductListProps> = ({ products, cart, addToCart }) => {
+const ShoppingProductList = ({ products, cart, addToCart }: ShoppingProductListProps) => {
   const getMaxDiscount = (discounts: { quantity: number; rate: number }[]) => {
     return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
   };

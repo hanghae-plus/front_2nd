@@ -1,4 +1,3 @@
-import React from 'react';
 import { CartItem } from '../../../../../types';
 
 interface CartItemListProps {
@@ -7,7 +6,7 @@ interface CartItemListProps {
   removeFromCart: (productId: string) => void;
 }
 
-const CartItemList: React.FC<CartItemListProps> = ({ cartItems, updateQuantity, removeFromCart }) => {
+const CartItemList = ({ cartItems, updateQuantity, removeFromCart }: CartItemListProps) => {
   const getAppliedDiscount = (item: CartItem) => {
     const { discounts } = item.product;
     const { quantity } = item;

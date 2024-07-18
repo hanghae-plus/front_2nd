@@ -7,7 +7,7 @@ interface CouponFormProps {
   handleAddCoupon: () => void;
 }
 
-const CouponForm: React.FC<CouponFormProps> = ({ newCoupon, setNewCoupon, handleAddCoupon }) => {
+const CouponForm = ({ newCoupon, setNewCoupon, handleAddCoupon }: CouponFormProps) => {
   return (
     <div className="space-y-2 mb-4">
       <input

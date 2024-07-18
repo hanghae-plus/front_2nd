@@ -1,4 +1,3 @@
-import React from 'react';
 import { useCart } from './hooks/useCart';
 import { useProducts, useCoupons } from '../../common/hooks';
 import ShoppingProductList from './components/ShoppingProductList';
@@ -6,7 +5,7 @@ import CartItemList from './components/CartItemList';
 import CouponSelector from './components/CouponSelector';
 import CartSummary from './components/CartSummary';
 
-export const CartPage: React.FC = () => {
+export const CartPage = () => {
   const { products } = useProducts();
   const { coupons } = useCoupons();
   const { cart, addToCart, removeFromCart, updateQuantity, applyCoupon, calculateTotal, selectedCoupon } = useCart();

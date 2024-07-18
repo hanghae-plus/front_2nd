@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from 'react';
+import { ChangeEvent } from 'react';
 import { Coupon } from '../../../../../types';
 
 interface CouponSelectorProps {
@@ -7,7 +7,7 @@ interface CouponSelectorProps {
   selectedCoupon: Coupon | null;
 }
 
-const CouponSelector: React.FC<CouponSelectorProps> = ({ coupons, applyCoupon, selectedCoupon }) => {
+const CouponSelector = ({ coupons, applyCoupon, selectedCoupon }: CouponSelectorProps) => {
   const handleChangeCoupon = (event: ChangeEvent<HTMLSelectElement>) => {
     const selectedIndex = parseInt(event.target.value);
     if (selectedIndex >= 0) {

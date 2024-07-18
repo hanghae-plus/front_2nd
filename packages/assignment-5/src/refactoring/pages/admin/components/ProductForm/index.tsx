@@ -7,7 +7,7 @@ interface ProductFormProps {
   handleAddNewProduct: () => void;
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({ newProduct, setNewProduct, handleAddNewProduct }) => {
+const ProductForm = ({ newProduct, setNewProduct, handleAddNewProduct }: ProductFormProps) => {
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
       <h3 className="text-xl font-semibold mb-2">새 상품 추가</h3>

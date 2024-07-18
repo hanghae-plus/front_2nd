@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface CartSummaryProps {
   calculateTotal: () => {
     totalBeforeDiscount: number;
@@ -8,7 +6,7 @@ interface CartSummaryProps {
   };
 }
 
-const CartSummary: React.FC<CartSummaryProps> = ({ calculateTotal }) => {
+const CartSummary = ({ calculateTotal }: CartSummaryProps) => {
   const { totalBeforeDiscount, totalAfterDiscount, totalDiscount } = calculateTotal();
 
   return (

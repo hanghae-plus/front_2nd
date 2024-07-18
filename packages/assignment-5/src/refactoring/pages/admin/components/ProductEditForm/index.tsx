@@ -13,7 +13,7 @@ interface ProductEditFormProps {
   setNewDiscount: React.Dispatch<React.SetStateAction<Discount>>;
 }
 
-const ProductEditForm: React.FC<ProductEditFormProps> = ({
+const ProductEditForm = ({
   editingProduct,
   newDiscount,
   handleProductNameUpdate,
@@ -23,7 +23,7 @@ const ProductEditForm: React.FC<ProductEditFormProps> = ({
   handleRemoveDiscount,
   handleEditComplete,
   setNewDiscount
-}) => {
+}: ProductEditFormProps) => {
   return (
     <div className="bg-white p-4 rounded shadow mt-4">
       <h3 className="text-xl font-semibold mb-4">상품 수정</h3>

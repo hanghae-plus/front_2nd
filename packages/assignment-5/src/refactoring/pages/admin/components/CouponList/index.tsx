@@ -1,11 +1,10 @@
-import React from 'react';
 import { Coupon } from '../../../../../types';
 
 interface CouponListProps {
   coupons: Coupon[];
 }
 
-const CouponList: React.FC<CouponListProps> = ({ coupons }) => {
+const CouponList = ({ coupons }: CouponListProps) => {
   return (
     <div>
       <h3 className="text-lg font-semibold mb-2">현재 쿠폰 목록</h3>

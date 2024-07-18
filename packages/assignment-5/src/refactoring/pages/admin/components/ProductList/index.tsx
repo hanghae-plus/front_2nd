@@ -20,7 +20,7 @@ interface ProductListProps {
   };
 }
 
-const ProductList: React.FC<ProductListProps> = ({
+const ProductList = ({
   products,
   openProductIds,
   editingProduct,
@@ -28,7 +28,7 @@ const ProductList: React.FC<ProductListProps> = ({
   toggleProductAccordion,
   handleEditProduct,
   productEditHandlers
-}) => {
+}: ProductListProps) => {
   return (
     <div className="space-y-2">
       {products.map((product, index) => (
