@@ -541,7 +541,7 @@ describe('basic > ', () => {
         result.current.applyCoupon(testCoupon);
       });
 
-      const total = result.current.calculateTotal();
+      const total = result.current.calculateTotal;
       expect(total.totalBeforeDiscount).toBe(200);
       expect(total.totalAfterDiscount).toBe(180);
       expect(total.totalDiscount).toBe(20);

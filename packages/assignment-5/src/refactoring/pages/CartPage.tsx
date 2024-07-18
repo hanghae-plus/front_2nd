@@ -21,7 +21,7 @@ export const CartPage = ({ products, coupons }: Props) => {
   } = useCart();
 
   const { totalBeforeDiscount, totalAfterDiscount, totalDiscount } =
-    calculateTotal();
+    calculateTotal;
 
   return (
     <div className="container mx-auto p-4">
