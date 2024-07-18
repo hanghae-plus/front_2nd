@@ -11,5 +11,5 @@ export const isZeroLengthArray = (arg: unknown[]): boolean => {
 };
 
 export const isEmptyString = (arg: string): boolean => {
-  return arg === '';
+  return arg === "";
 };
