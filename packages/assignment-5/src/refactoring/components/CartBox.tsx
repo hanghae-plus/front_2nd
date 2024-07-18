@@ -1,27 +1,20 @@
-import { CartItem, Coupon } from '../../types.ts';
+import { Coupon } from '../../types.ts';
 import { useState } from 'react';
-import { useCartCalculator } from '../hooks';
-import CartProduct from './CartProduct.tsx';
+import { useCartCalculator } from '../hooks/index.ts';
+import CartItem from './CartItem.tsx';
+import { formatCurrency } from '../hooks/utils/formatCurrency.ts';
 
-export default function CartList({
+export default function CartBox({
   coupons,
   cart,
   updateQuantity,
   removeFromCart,
 }) {
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
-  const { calculateTotal } = useCartCalculator(cart, selectedCoupon);
-  const getAppliedDiscount = (item: CartItem) => {
-    const { discounts } = item.product;
-    const { quantity } = item;
-    let appliedDiscount = 0;
-    for (const discount of discounts) {
-      if (quantity >= discount.quantity) {
-        appliedDiscount = Math.max(appliedDiscount, discount.rate);
-      }
-    }
-    return appliedDiscount;
-  };
+  const { calculateTotal, getMaxDiscount } = useCartCalculator(
+    cart,
+    selectedCoupon
+  );
   const { totalBeforeDiscount, totalAfterDiscount, totalDiscount } =
     calculateTotal();
 
@@ -31,10 +24,10 @@ export default function CartList({
 
       <div className='space-y-2'>
         {cart.map((item) => (
-          <CartProduct
+          <CartItem
             key={item.product.id}
             item={item}
-            appliedDiscount={getAppliedDiscount(item)}
+            appliedDiscount={getMaxDiscount(item)}
             updateQuantity={updateQuantity}
             removeFromCart={removeFromCart}
           />
@@ -71,12 +64,12 @@ export default function CartList({
       <div className='mt-6 bg-white p-4 rounded shadow'>
         <h2 className='text-2xl font-semibold mb-2'>주문 요약</h2>
         <div className='space-y-1'>
-          <p>상품 금액: {totalBeforeDiscount.toLocaleString()}원</p>
+          <p>상품 금액: {formatCurrency(totalBeforeDiscount)}원</p>
           <p className='text-green-600'>
-            할인 금액: {totalDiscount.toLocaleString()}원
+            할인 금액: {formatCurrency(totalDiscount)}원
           </p>
           <p className='text-xl font-bold'>
-            최종 결제 금액: {totalAfterDiscount.toLocaleString()}원
+            최종 결제 금액: {formatCurrency(totalAfterDiscount)}원
           </p>
         </div>
       </div>

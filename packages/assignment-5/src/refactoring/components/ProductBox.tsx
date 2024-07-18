@@ -3,7 +3,7 @@ import { useProductSearch } from '../hooks/index.js';
 import ProductSearch from './ProductSearch.tsx';
 import ProductItem from './ProductItem.tsx';
 
-export default function ProductList({ products, cart, addToCart }) {
+export default function ProductBox({ products, cart, addToCart }) {
   const { setSearchValue, filteredData } = useProductSearch(products);
 
   const getMaxDiscount = (discounts: { quantity: number; rate: number }[]) => {

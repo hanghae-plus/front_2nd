@@ -1,7 +1,7 @@
 import { Coupon, Product } from '../../types.ts';
 import { useCart, useLocalStorage } from '../hooks';
-import ProductList from './ProductList.tsx';
-import CartList from './CartList.tsx';
+import ProductBox from './ProductBox.tsx';
+import CartBox from './CartBox.tsx';
 
 interface Props {
   products: Product[];
@@ -17,8 +17,8 @@ export const CartPage = ({ products, coupons }: Props) => {
     <div className='container mx-auto p-4'>
       <h1 className='text-3xl font-bold mb-6'>장바구니</h1>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-        <ProductList products={products} cart={cart} addToCart={addToCart} />
-        <CartList
+        <ProductBox products={products} cart={cart} addToCart={addToCart} />
+        <CartBox
           coupons={coupons}
           cart={cart}
           updateQuantity={updateQuantity}
