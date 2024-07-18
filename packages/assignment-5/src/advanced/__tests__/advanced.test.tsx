@@ -4,6 +4,7 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { CartPage } from '../../refactoring/components/CartPage';
 import { AdminPage } from '../../refactoring/components/AdminPage';
 import { Coupon, Product } from '../../types';
+import { CouponsContext, ProductsContext } from '../../refactoring/contexts';
 
 const mockProducts: Product[] = [
   {
@@ -64,20 +65,40 @@ const TestAdminPage = () => {
   };
 
   return (
-    <AdminPage
-      products={products}
-      coupons={coupons}
-      updateProduct={handleProductUpdate}
-      addProduct={handleProductAdd}
-      addCoupon={handleCouponAdd}
-    />
+    <CouponsContext.Provider value={{ coupons, addCoupon: handleCouponAdd }}>
+      <ProductsContext.Provider
+        value={{
+          products,
+          addProduct: handleProductAdd,
+          updateProduct: handleProductUpdate,
+          deleteProduct: () => {},
+        }}
+      >
+        <AdminPage />
+      </ProductsContext.Provider>
+    </CouponsContext.Provider>
   );
 };
 
 describe('advanced > ', () => {
   describe('시나리오 테스트 > ', () => {
     test('장바구니 페이지 테스트 > ', async () => {
-      render(<CartPage products={mockProducts} coupons={mockCoupons} />);
+      render(
+        <CouponsContext.Provider
+          value={{ coupons: mockCoupons, addCoupon: () => {} }}
+        >
+          <ProductsContext.Provider
+            value={{
+              products: mockProducts,
+              updateProduct: () => {},
+              addProduct: () => {},
+              deleteProduct: () => {},
+            }}
+          >
+            <CartPage />
+          </ProductsContext.Provider>
+        </CouponsContext.Provider>,
+      );
       const product1 = screen.getByTestId('product-p1');
       const product2 = screen.getByTestId('product-p2');
       const product3 = screen.getByTestId('product-p3');
