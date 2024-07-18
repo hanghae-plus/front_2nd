@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import { CartPage } from './components/CartPage.tsx';
-import { AdminPage } from './components/AdminPage.tsx';
 import { Coupon, Product } from '../types.ts';
-import { useCoupons, useProducts } from "./hooks";
+import { AdminPage } from './components/AdminPage.tsx';
+import { CartPage } from './components/CartPage.tsx';
+import { useCoupons, useProducts, useToggle } from './hooks';
 
 const initialProducts: Product[] = [
   {
@@ -10,7 +9,10 @@ const initialProducts: Product[] = [
     name: '상품1',
     price: 10000,
     stock: 20,
-    discounts: [{ quantity: 10, rate: 0.1 }, { quantity: 20, rate: 0.2 }]
+    discounts: [
+      { quantity: 10, rate: 0.1 },
+      { quantity: 20, rate: 0.2 }
+    ]
   },
   {
     id: 'p2',
@@ -46,7 +48,7 @@ const initialCoupons: Coupon[] = [
 const App = () => {
   const { products, updateProduct, addProduct } = useProducts(initialProducts);
   const { coupons, addCoupon } = useCoupons(initialCoupons);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, toggleIsAdmin] = useToggle();
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -54,7 +56,7 @@ const App = () => {
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">쇼핑몰 관리 시스템</h1>
           <button
-            onClick={() => setIsAdmin(!isAdmin)}
+            onClick={() => toggleIsAdmin()}
             className="bg-white text-blue-600 px-4 py-2 rounded hover:bg-blue-100"
           >
             {isAdmin ? '장바구니 페이지로' : '관리자 페이지로'}
@@ -71,7 +73,7 @@ const App = () => {
             onCouponAdd={addCoupon}
           />
         ) : (
-          <CartPage products={products} coupons={coupons}/>
+          <CartPage products={products} coupons={coupons} />
         )}
       </main>
     </div>
