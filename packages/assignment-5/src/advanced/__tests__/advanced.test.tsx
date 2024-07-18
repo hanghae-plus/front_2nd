@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { afterEach, beforeEach, describe, expect, it, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import {
   act,
   fireEvent,
@@ -17,7 +17,12 @@ import {
   getMaxDiscount,
   getRemainingStock,
 } from "../../refactoring/hooks/utils/cartUtils";
-import { FormElement, useForm, useLocalStorage } from "../../refactoring/hooks";
+import {
+  FormElement,
+  useAccordion,
+  useForm,
+  useLocalStorage,
+} from "../../refactoring/hooks";
 
 const mockProducts: Product[] = [
   {
@@ -389,7 +394,7 @@ describe("advanced > ", () => {
         vi.restoreAllMocks();
       });
 
-      it("storedValue는 초기 값을 가져와야하며, localstorage에 key로 매핑된 데이터가 있어야합니다.", () => {
+      test("storedValue는 초기 값을 가져와야하며, localstorage에 key로 매핑된 데이터가 있어야합니다.", () => {
         const { result } = renderHook(() =>
           useLocalStorage<CartItem[]>(testKey, initialValue)
         );
@@ -403,7 +408,7 @@ describe("advanced > ", () => {
         expect(localStorageData).toEqual(initialValue);
       });
 
-      it("setStoredValue로 값을 변경합니다.", async () => {
+      test("setStoredValue로 값을 변경합니다.", async () => {
         const { result } = renderHook(() =>
           useLocalStorage<CartItem[]>(testKey, initialValue)
         );
@@ -439,93 +444,128 @@ describe("advanced > ", () => {
     });
 
     describe("useForm", () => {
-      describe("초기 데이터 테스트", () => {
-        const initialCoupon: Coupon = {
-          name: "",
-          code: "",
-          discountType: "percentage",
-          discountValue: 0,
-        };
+      const initialCoupon: Coupon = {
+        name: "",
+        code: "",
+        discountType: "percentage",
+        discountValue: 0,
+      };
 
-        const newCoupon: Coupon = {
-          name: "Summer Sale",
-          code: "SUMMER20",
-          discountType: "amount",
-          discountValue: 20,
-        };
+      const newCoupon: Coupon = {
+        name: "Summer Sale",
+        code: "SUMMER20",
+        discountType: "amount",
+        discountValue: 20,
+      };
 
-        it("주어진 초기 쿠폰 값으로 초기화해야 한다", () => {
-          const {
-            result: {
-              current: { formState },
-            },
-          } = renderHook(() => useForm<Coupon>(initialCoupon));
+      test("주어진 초기 쿠폰 값으로 초기화해야 한다", () => {
+        const {
+          result: {
+            current: { formState },
+          },
+        } = renderHook(() => useForm<Coupon>(initialCoupon));
 
-          expect(formState).toEqual(initialCoupon);
-        });
-
-        it("태그에 매핑된 resgiter를 통해 formState 업데이트되어야 합니다.", () => {
-          const { result } = renderHook(() => useForm<Coupon>(initialCoupon));
-
-          const { register } = result.current;
-
-          act(() => {
-            register("name").onChange({
-              target: { value: newCoupon.name },
-            } as React.ChangeEvent<FormElement>);
-
-            register("code").onChange({
-              target: { value: newCoupon.code },
-            } as React.ChangeEvent<FormElement>);
-
-            register("discountType").onChange({
-              target: { value: newCoupon.discountType },
-            } as React.ChangeEvent<FormElement>);
-
-            register("discountValue").onChange({
-              target: { value: "20" },
-            } as React.ChangeEvent<FormElement>);
-          });
-
-          expect(result.current.formState).toEqual(newCoupon);
-        });
-        it("form을 제출하면 initialData로 초기화해야 합니다.", () => {
-          const { result } = renderHook(() => useForm<Coupon>(initialCoupon));
-
-          const { register } = result.current;
-
-          act(() => {
-            register("name").onChange({
-              target: { value: newCoupon.name },
-            } as React.ChangeEvent<FormElement>);
-
-            register("code").onChange({
-              target: { value: newCoupon.code },
-            } as React.ChangeEvent<FormElement>);
-
-            register("discountType").onChange({
-              target: { value: newCoupon.discountType },
-            } as React.ChangeEvent<FormElement>);
-
-            register("discountValue").onChange({
-              target: { value: "20" },
-            } as React.ChangeEvent<FormElement>);
-          });
-
-          expect(result.current.formState).toEqual(newCoupon);
-
-          act(() => {
-            result.current.submitForm({
-              preventDefault: vi.fn(),
-            } as unknown as React.FormEvent);
-          });
-
-          expect(result.current.formState).toEqual(initialCoupon);
-        });
+        expect(formState).toEqual(initialCoupon);
       });
 
-      describe("useAccordion", () => {
-        it("test");
+      test("태그에 매핑된 resgiter를 통해 formState 업데이트되어야 합니다.", () => {
+        const { result } = renderHook(() => useForm<Coupon>(initialCoupon));
+
+        const { register } = result.current;
+
+        act(() => {
+          register("name").onChange({
+            target: { value: newCoupon.name },
+          } as React.ChangeEvent<FormElement>);
+
+          register("code").onChange({
+            target: { value: newCoupon.code },
+          } as React.ChangeEvent<FormElement>);
+
+          register("discountType").onChange({
+            target: { value: newCoupon.discountType },
+          } as React.ChangeEvent<FormElement>);
+
+          register("discountValue").onChange({
+            target: { value: "20" },
+          } as React.ChangeEvent<FormElement>);
+        });
+
+        expect(result.current.formState).toEqual(newCoupon);
+      });
+      test("form을 제출하면 initialData로 초기화해야 합니다.", () => {
+        const { result } = renderHook(() => useForm<Coupon>(initialCoupon));
+
+        const { register } = result.current;
+
+        act(() => {
+          register("name").onChange({
+            target: { value: newCoupon.name },
+          } as React.ChangeEvent<FormElement>);
+
+          register("code").onChange({
+            target: { value: newCoupon.code },
+          } as React.ChangeEvent<FormElement>);
+
+          register("discountType").onChange({
+            target: { value: newCoupon.discountType },
+          } as React.ChangeEvent<FormElement>);
+
+          register("discountValue").onChange({
+            target: { value: "20" },
+          } as React.ChangeEvent<FormElement>);
+        });
+
+        expect(result.current.formState).toEqual(newCoupon);
+
+        act(() => {
+          result.current.submitForm({
+            preventDefault: vi.fn(),
+          } as unknown as React.FormEvent);
+        });
+
+        expect(result.current.formState).toEqual(initialCoupon);
+      });
+    });
+    describe("useAccordion", () => {
+      test("초기 데이터 사이즈는 0이여야 합니다.", () => {
+        const { result } = renderHook(() => useAccordion());
+        expect(result.current.openedAccordionId.size).toBe(0);
+      });
+
+      test("id를 추가하면 데이터set에 id를 가지고 있어야 합니다.", () => {
+        const { result } = renderHook(() => useAccordion());
+        act(() => {
+          result.current.setAccordionId("test1");
+        });
+        expect(result.current.openedAccordionId.has("test1")).toBe(true);
+      });
+
+      test("기존 id를 삭제하면 데이터set에 id를 가지고 있지 않아야 합니다.", () => {
+        const { result } = renderHook(() => useAccordion());
+        act(() => {
+          result.current.setAccordionId("test1");
+        });
+        expect(result.current.openedAccordionId.has("test1")).toBe(true);
+        act(() => {
+          result.current.setAccordionId("test1");
+        });
+        expect(result.current.openedAccordionId.has("test1")).toBe(false);
+      });
+
+      test("여러개의 id를 가지고 있을 수 있습니다.", () => {
+        const { result } = renderHook(() => useAccordion());
+        act(() => {
+          result.current.setAccordionId("test1");
+          result.current.setAccordionId("test2");
+        });
+        expect(result.current.openedAccordionId.has("test1")).toBe(true);
+        expect(result.current.openedAccordionId.has("test2")).toBe(true);
+        act(() => {
+          result.current.setAccordionId("test1");
+        });
+        expect(result.current.openedAccordionId.has("test1")).toBe(false);
+        expect(result.current.openedAccordionId.has("test2")).toBe(true);
       });
     });
   });
