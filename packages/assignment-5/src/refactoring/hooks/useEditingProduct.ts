@@ -34,12 +34,12 @@ export const useEditingProduct = (
     [],
   );
 
-  const submit = () => {
+  const submit = useCallback(() => {
     if (editingProduct) {
       onProductUpdate(editingProduct);
       setEditingProductId(null);
     }
-  };
+  }, [editingProduct, onProductUpdate]);
 
   return { editingProduct, edit, editProperty, submit };
 };

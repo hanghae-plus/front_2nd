@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 export const useProductAccordion = () => {
   const [openProductIds, setOpenProductIds] = useState<Set<string>>(new Set());
 
-  const toggleProductAccordion = (productId: string) => {
+  const toggleProductAccordion = useCallback((productId: string) => {
     setOpenProductIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(productId)) {
@@ -13,7 +13,7 @@ export const useProductAccordion = () => {
       }
       return newSet;
     });
-  };
+  }, []);
 
   return { openProductIds, toggleProductAccordion };
 };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { Discount, Product } from '../../types';
 
@@ -8,19 +8,19 @@ export const useDiscountForm = (
 ) => {
   const [discount, setDiscount] = useState<Discount>({ quantity: 0, rate: 0 });
 
-  const editProperty = <K extends keyof Discount>(
-    key: K,
-    value: Discount[K],
-  ) => {
-    if (discount) {
-      setDiscount({
-        ...discount,
-        [key]: value,
-      });
-    }
-  };
+  const editProperty = useCallback(
+    <K extends keyof Discount>(key: K, value: Discount[K]) => {
+      if (discount) {
+        setDiscount({
+          ...discount,
+          [key]: value,
+        });
+      }
+    },
+    [discount],
+  );
 
-  const add = () => {
+  const add = useCallback(() => {
     if (discount.quantity === 0 || discount.rate === 0) {
       return;
     }
@@ -30,17 +30,20 @@ export const useDiscountForm = (
     };
     onProductUpdate(updatedProduct);
     setDiscount({ quantity: 0, rate: 0 });
-  };
+  }, [discount, onProductUpdate, product]);
 
-  const remove = (discountIndex: number) => {
-    const updatedProduct = {
-      ...product,
-      discounts: product.discounts.filter(
-        (_, index) => index !== discountIndex,
-      ),
-    };
-    onProductUpdate(updatedProduct);
-  };
+  const remove = useCallback(
+    (discountIndex: number) => {
+      const updatedProduct = {
+        ...product,
+        discounts: product.discounts.filter(
+          (_, index) => index !== discountIndex,
+        ),
+      };
+      onProductUpdate(updatedProduct);
+    },
+    [onProductUpdate, product],
+  );
 
   return { discount, editProperty, add, remove };
 };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { Product } from '../../types';
 import { createNewId } from './utils/newId.ts';
@@ -12,7 +12,7 @@ export const useProductForm = (onProductAdd: (newProduct: Product) => void) => {
     discounts: [],
   });
 
-  const submit = () => {
+  const submit = useCallback(() => {
     onProductAdd(newProduct);
     setNewProduct({
       id: createNewId(),
@@ -21,16 +21,19 @@ export const useProductForm = (onProductAdd: (newProduct: Product) => void) => {
       stock: 0,
       discounts: [],
     });
-  };
+  }, [newProduct, onProductAdd]);
 
-  const editProperty = <K extends keyof Product>(key: K, value: Product[K]) => {
-    if (newProduct) {
-      setNewProduct({
-        ...newProduct,
-        [key]: value,
-      });
-    }
-  };
+  const editProperty = useCallback(
+    <K extends keyof Product>(key: K, value: Product[K]) => {
+      if (newProduct) {
+        setNewProduct({
+          ...newProduct,
+          [key]: value,
+        });
+      }
+    },
+    [newProduct],
+  );
 
   return { newProduct, editProperty, submit };
 };
