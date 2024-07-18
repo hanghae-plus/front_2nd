@@ -21,7 +21,15 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "baseUrl": ".", // 이 경우는 tsconfig.json이 존재하는 루트 디렉토리를 기준으로 삼는다.
+    "paths": {
+      "refactoring/*": ["src/refactoring/*"],
+      "cart/*": ["./src/refactoring/components/cart/*"],
+      "hooks/*": ["src/refactoring/hooks/*"],
+      "types": ["src/types.ts"]
+    }
   },
   "include": ["src"]
 }

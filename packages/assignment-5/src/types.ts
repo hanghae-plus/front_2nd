@@ -11,7 +11,7 @@ export interface Discount {
   rate: number;
 }
 
-export interface CartItem {
+export interface CartItemType {
   product: Product;
   quantity: number;
 }
