@@ -4,6 +4,6 @@
  * @param {...string} classes - 결합할 클래스 이름들
  * @returns {string} 결합된 클래스 이름 문자열
  */
-export function cn(...classes: (string | undefined)[]): string {
+export const cn = (...classes: (string | undefined)[]): string => {
   return classes.filter(Boolean).join(' ');
-}
+};

@@ -10,14 +10,14 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   }[];
 }
 
-export function Select({
+export const Select = ({
   options,
   className,
   onChange,
   onValueChange,
   disabled: disabledFromProps,
   ...props
-}: SelectProps) {
+}: SelectProps) => {
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
     onValueChange(e.target.value);
     onChange?.(e);
@@ -32,4 +32,4 @@ export function Select({
       ))}
     </select>
   );
-}
+};
