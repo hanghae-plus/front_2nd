@@ -8,7 +8,7 @@ export const calculateItemTotal = (item: CartItem) => {
 
   const discountRateForQuantity = discounts.find((discount) => discount.quantity === quantity)?.rate ?? 0;
 
-  return price * (1 - discountRateForQuantity) * quantity;
+  return getPrice(price, quantity) * (1 - discountRateForQuantity);
 };
 
 export const getMaxApplicableDiscount = (item: CartItem) => {
