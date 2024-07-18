@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState } from 'react';
 import { describe, expect, test } from 'vitest';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { CartPage } from '../../refactoring/components/CartPage';
-import { AdminPage } from "../../refactoring/components/AdminPage";
+import { AdminPage } from '../../refactoring/components/AdminPage';
 import { Coupon, Product } from '../../types';
+import { clamp } from '../../refactoring/utils/number';
 
 const mockProducts: Product[] = [
   {
@@ -11,55 +12,52 @@ const mockProducts: Product[] = [
     name: '상품1',
     price: 10000,
     stock: 20,
-    discounts: [{ quantity: 10, rate: 0.1 }]
+    discounts: [{ quantity: 10, rate: 0.1 }],
   },
   {
     id: 'p2',
     name: '상품2',
     price: 20000,
     stock: 20,
-    discounts: [{ quantity: 10, rate: 0.15 }]
+    discounts: [{ quantity: 10, rate: 0.15 }],
   },
   {
     id: 'p3',
     name: '상품3',
     price: 30000,
     stock: 20,
-    discounts: [{ quantity: 10, rate: 0.2 }]
-  }
+    discounts: [{ quantity: 10, rate: 0.2 }],
+  },
 ];
 const mockCoupons: Coupon[] = [
   {
     name: '5000원 할인 쿠폰',
     code: 'AMOUNT5000',
     discountType: 'amount',
-    discountValue: 5000
+    discountValue: 5000,
   },
   {
     name: '10% 할인 쿠폰',
     code: 'PERCENT10',
     discountType: 'percentage',
-    discountValue: 10
-  }
+    discountValue: 10,
+  },
 ];
 
 const TestAdminPage = () => {
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [coupons, setCoupons] = useState<Coupon[]>(mockCoupons);
 
-
   const handleProductUpdate = (updatedProduct: Product) => {
-    setProducts(prevProducts =>
-      prevProducts.map(p => p.id === updatedProduct.id ? updatedProduct : p)
-    );
+    setProducts((prevProducts) => prevProducts.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)));
   };
 
   const handleProductAdd = (newProduct: Product) => {
-    setProducts(prevProducts => [...prevProducts, newProduct]);
+    setProducts((prevProducts) => [...prevProducts, newProduct]);
   };
 
   const handleCouponAdd = (newCoupon: Coupon) => {
-    setCoupons(prevCoupons => [...prevCoupons, newCoupon]);
+    setCoupons((prevCoupons) => [...prevCoupons, newCoupon]);
   };
 
   return (
@@ -74,12 +72,9 @@ const TestAdminPage = () => {
 };
 
 describe('advanced > ', () => {
-
   describe('시나리오 테스트 > ', () => {
-
     test('장바구니 페이지 테스트 > ', async () => {
-
-      render(<CartPage products={mockProducts} coupons={mockCoupons}/>);
+      render(<CartPage products={mockProducts} coupons={mockCoupons} />);
       const product1 = screen.getByTestId('product-p1');
       const product2 = screen.getByTestId('product-p2');
       const product3 = screen.getByTestId('product-p3');
@@ -97,7 +92,6 @@ describe('advanced > ', () => {
       expect(product3).toHaveTextContent('상품3');
       expect(product3).toHaveTextContent('30,000원');
       expect(product3).toHaveTextContent('재고: 20개');
-
 
       // 2. 할인 정보 표시
       expect(screen.getByText('10개 이상: 10% 할인')).toBeInTheDocument();
@@ -157,8 +151,7 @@ describe('advanced > ', () => {
     });
 
     test('관리자 페이지 테스트 > ', async () => {
-      render(<TestAdminPage/>);
-
+      render(<TestAdminPage />);
 
       const $product1 = screen.getByTestId('product-1');
 
@@ -182,12 +175,11 @@ describe('advanced > ', () => {
       fireEvent.click(within($product1).getByTestId('toggle-button'));
       fireEvent.click(within($product1).getByTestId('modify-button'));
 
-
       act(() => {
         fireEvent.change(within($product1).getByDisplayValue('20'), { target: { value: '25' } });
         fireEvent.change(within($product1).getByDisplayValue('10000'), { target: { value: '12000' } });
         fireEvent.change(within($product1).getByDisplayValue('상품1'), { target: { value: '수정된 상품1' } });
-      })
+      });
 
       fireEvent.click(within($product1).getByText('수정 완료'));
 
@@ -203,7 +195,7 @@ describe('advanced > ', () => {
       act(() => {
         fireEvent.change(screen.getByPlaceholderText('수량'), { target: { value: '5' } });
         fireEvent.change(screen.getByPlaceholderText('할인율 (%)'), { target: { value: '5' } });
-      })
+      });
       fireEvent.click(screen.getByText('할인 추가'));
 
       expect(screen.queryByText('5개 이상 구매 시 5% 할인')).toBeInTheDocument();
@@ -228,17 +220,43 @@ describe('advanced > ', () => {
       const $newCoupon = screen.getByTestId('coupon-3');
 
       expect($newCoupon).toHaveTextContent('새 쿠폰 (NEW10):10% 할인');
-    })
-  })
+    });
+  });
 
-  describe('자유롭게 작성해보세요.', () => {
-    test('새로운 유틸 함수를 만든 후에 테스트 코드를 작성해서 실행해보세요', () => {
-      expect(true).toBe(false);
-    })
+  describe('clamp 함수 테스트', () => {
+    test('주어진 값이 최소값보다 작으면 최소값을 반환한다.', () => {
+      const min = 2;
+      const max = 3;
+      const value = 1;
+      expect(clamp(value, min, max)).toBe(min);
+    });
 
-    test('새로운 hook 함수르 만든 후에 테스트 코드를 작성해서 실행해보세요', () => {
-      expect(true).toBe(false);
-    })
-  })
-})
+    test('주어진 값이 최대값보다 크면 최대값을 반환한다.', () => {
+      const min = 2;
+      const max = 3;
+      const value = 4;
+      expect(clamp(value, min, max)).toBe(max);
+    });
 
+    test('주어진 값이 최소값과 최대값 범위 내로 있으면 그대로 반환한다.', () => {
+      const min = 2;
+      const max = 3;
+      const value = 2;
+      expect(clamp(value, min, max)).toBe(value);
+    });
+
+    test('주어진 값이 최소값과 최대값이 같은 경우 최소값을 반환한다.', () => {
+      const min = 2;
+      const max = 2;
+      const value = 2;
+      expect(clamp(value, min, max)).toBe(value);
+    });
+
+    test('주어진 값이 최소값보다 작으면 최소값을 반환한다.', () => {
+      const min = 2;
+      const max = 3;
+      const value = 1;
+      expect(clamp(value, min, max)).toBe(min);
+    });
+  });
+});
