@@ -283,14 +283,4 @@ describe('advanced > ', () => {
       expect($newCoupon).toHaveTextContent('새 쿠폰 (NEW10):10% 할인');
     });
   });
-
-  describe('자유롭게 작성해보세요.', () => {
-    test('새로운 유틸 함수를 만든 후에 테스트 코드를 작성해서 실행해보세요', () => {
-      expect(true).toBe(false);
-    });
-
-    test('새로운 hook 함수르 만든 후에 테스트 코드를 작성해서 실행해보세요', () => {
-      expect(true).toBe(false);
-    });
-  });
 });
