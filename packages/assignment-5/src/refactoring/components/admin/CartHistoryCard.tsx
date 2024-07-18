@@ -23,10 +23,7 @@ const CartHistoryCard = ({ coupons, addCoupon }: CartHistoryCardProps) => {
     <div>
       <h2 className="text-2xl font-semibold mb-4">쿠폰 관리</h2>
       <div className="bg-white p-4 rounded shadow">
-        <form
-          className="space-y-2 mb-4"
-          onSubmit={(e) => handleCouponAddFormSubmit(e)}
-        >
+        <form className="space-y-2 mb-4" onSubmit={handleCouponAddFormSubmit}>
           <input
             type="text"
             placeholder="쿠폰 이름"
@@ -63,7 +60,6 @@ const CartHistoryCard = ({ coupons, addCoupon }: CartHistoryCardProps) => {
             />
           </div>
           <button
-            onClick={handleCouponAddFormSubmit}
             type="submit"
             className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
           >

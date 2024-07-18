@@ -10,6 +10,7 @@ interface UseForm<T> {
 
 export const useForm = <T>(initialValue: T): UseForm<T> => {
   const [formState, setFormState] = useState(initialValue);
+  const [validation, setValidation] = useState(false);
 
   /**
    * form을 초기 상태로 reset
@@ -37,11 +38,14 @@ export const useForm = <T>(initialValue: T): UseForm<T> => {
 
   const submitForm = useCallback(
     (event: React.FormEvent) => {
+      if (!validation) {
+        return;
+      }
       event.preventDefault();
-      console.log("submit!");
+
       resetForm();
     },
-    [resetForm]
+    [resetForm, validation]
   );
 
   return { formState, resetForm, submitForm, handleChangeElement };
