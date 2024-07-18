@@ -6,6 +6,6 @@
  * @param {number} max - 허용되는 최대값
  * @returns {number} 주어진 범위 내로 제한된 값
  */
-export function clamp(value: number, min: number, max: number): number {
+export const clamp = (value: number, min: number, max: number): number => {
   return Math.min(max, Math.max(min, value));
-}
+};
