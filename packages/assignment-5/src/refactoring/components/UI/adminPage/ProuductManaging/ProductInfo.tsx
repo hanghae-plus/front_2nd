@@ -12,8 +12,7 @@ const INITIAL_DISCOUNT: Discount = {
   rate: 0,
 };
 
-export const ProductInfo = (props: Props) => {
-  const { product, index } = props;
+export const ProductInfo = ({ product, index }: Props) => {
   const { products, updateProduct, deleteProduct } =
     useContext(ProductsContext);
 
@@ -33,41 +32,17 @@ export const ProductInfo = (props: Props) => {
     });
   };
 
-  const editProduct = (product: Product) => {
+  const handleEditProduct = (product: Product) => {
     setEditingProduct({ ...product });
   };
 
-  const updateProductName = (productId: string, newName: string) => {
-    if (editingProduct && editingProduct.id === productId) {
-      const updatedProduct = { ...editingProduct, name: newName };
-      setEditingProduct(updatedProduct);
-    }
-  };
-
-  const updatePrice = (productId: string, newPrice: number) => {
-    if (editingProduct && editingProduct.id === productId) {
-      const updatedProduct = { ...editingProduct, price: newPrice };
-      setEditingProduct(updatedProduct);
-    }
-  };
-
-  const handleEditComplete = () => {
+  const handleChange = (field: keyof Product, value: string | number) => {
     if (editingProduct) {
-      updateProduct(editingProduct);
-      setEditingProduct(null);
+      setEditingProduct({ ...editingProduct, [field]: value });
     }
   };
 
-  const updateStock = (productId: string, newStock: number) => {
-    const updatedProduct = products.find((p) => p.id === productId);
-    if (updatedProduct) {
-      const newProduct = { ...updatedProduct, stock: newStock };
-      updateProduct(newProduct);
-      setEditingProduct(newProduct);
-    }
-  };
-
-  const addDiscount = (productId: string) => {
+  const handleAddDiscount = (productId: string) => {
     const updatedProduct = products.find((p) => p.id === productId);
     if (updatedProduct && editingProduct) {
       const newProduct = {
@@ -80,7 +55,7 @@ export const ProductInfo = (props: Props) => {
     }
   };
 
-  const removeDiscount = (productId: string, index: number) => {
+  const handleRemoveDiscount = (productId: string, index: number) => {
     const updatedProduct = products.find((p) => p.id === productId);
     if (updatedProduct) {
       const newProduct = {
@@ -89,6 +64,13 @@ export const ProductInfo = (props: Props) => {
       };
       updateProduct(newProduct);
       setEditingProduct(newProduct);
+    }
+  };
+
+  const handleEditComplete = () => {
+    if (editingProduct) {
+      updateProduct(editingProduct);
+      setEditingProduct(null);
     }
   };
 
@@ -102,7 +84,7 @@ export const ProductInfo = (props: Props) => {
         onClick={() => toggleProductAccordion(product.id)}
         className="w-full text-left font-semibold"
       >
-        {product.name} - {product.price}원 (재고: {product.stock})
+        {`${product.name} - ${product.price}원 (재고: ${product.stock})`}
       </button>
       {openProductIds.has(product.id) && (
         <div className="mt-2">
@@ -113,9 +95,7 @@ export const ProductInfo = (props: Props) => {
                 <input
                   type="text"
                   value={editingProduct.name}
-                  onChange={(e) =>
-                    updateProductName(product.id, e.target.value)
-                  }
+                  onChange={(e) => handleChange('name', e.target.value)}
                   className="w-full p-2 border rounded"
                 />
               </div>
@@ -125,7 +105,7 @@ export const ProductInfo = (props: Props) => {
                   type="number"
                   value={editingProduct.price}
                   onChange={(e) =>
-                    updatePrice(product.id, parseInt(e.target.value))
+                    handleChange('price', parseInt(e.target.value))
                   }
                   className="w-full p-2 border rounded"
                 />
@@ -136,7 +116,7 @@ export const ProductInfo = (props: Props) => {
                   type="number"
                   value={editingProduct.stock}
                   onChange={(e) =>
-                    updateStock(product.id, parseInt(e.target.value))
+                    handleChange('stock', parseInt(e.target.value))
                   }
                   className="w-full p-2 border rounded"
                 />
@@ -152,7 +132,7 @@ export const ProductInfo = (props: Props) => {
                       {`${discount.quantity}개 이상 구매 시 ${discount.rate * 100}% 할인`}
                     </span>
                     <button
-                      onClick={() => removeDiscount(product.id, index)}
+                      onClick={() => handleRemoveDiscount(product.id, index)}
                       className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                     >
                       삭제
@@ -185,7 +165,7 @@ export const ProductInfo = (props: Props) => {
                     className="w-1/3 p-2 border rounded"
                   />
                   <button
-                    onClick={() => addDiscount(product.id)}
+                    onClick={() => handleAddDiscount(product.id)}
                     className="w-1/3 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
                   >
                     할인 추가
@@ -211,7 +191,7 @@ export const ProductInfo = (props: Props) => {
               ))}
               <button
                 data-testid="modify-button"
-                onClick={() => editProduct(product)}
+                onClick={() => handleEditProduct(product)}
                 className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 mt-2"
               >
                 수정
