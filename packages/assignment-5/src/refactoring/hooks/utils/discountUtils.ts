@@ -1,5 +1,6 @@
 import type { CartItem, Discount } from '../../../types';
 
+// 할인 기준 중 가장 높은 할인율을 반환합니다.
 export const getMaxDiscount = (discounts: Discount[]) => {
   return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
 };

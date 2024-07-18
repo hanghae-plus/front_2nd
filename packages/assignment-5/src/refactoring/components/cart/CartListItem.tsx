@@ -2,6 +2,7 @@ import type { CartItem, Product } from '../../../types';
 import type { useCart } from '../../hooks/useCart';
 import { getRemainingStock } from '../../hooks/utils/cartUtils.ts';
 import { getMaxDiscount } from '../../hooks/utils/discountUtils.ts';
+import { convertToPercentage } from '../../hooks/utils/formatNumber.ts';
 
 interface CartListItem {
   product: Product;
@@ -31,7 +32,8 @@ export const CartListItem = ({ product, cart, addToCart }: CartListItem) => {
         </span>
         {product.discounts.length > 0 && (
           <span className="ml-2 font-medium text-blue-600">
-            최대 {(getMaxDiscount(product.discounts) * 100).toFixed(0)}% 할인
+            최대 {convertToPercentage(getMaxDiscount(product.discounts), 0)}%
+            할인
           </span>
         )}
       </div>
@@ -39,8 +41,8 @@ export const CartListItem = ({ product, cart, addToCart }: CartListItem) => {
         <ul className="list-disc list-inside text-sm text-gray-500 mb-2">
           {product.discounts.map((discount, index) => (
             <li key={index}>
-              {discount.quantity}개 이상: {(discount.rate * 100).toFixed(0)}%
-              할인
+              {discount.quantity}개 이상:{' '}
+              {convertToPercentage(discount.rate, 0)}% 할인
             </li>
           ))}
         </ul>

@@ -1,5 +1,6 @@
 import type { CartItem } from '../../../types';
 import { getAppliedDiscount } from '../../hooks/utils/discountUtils.ts';
+import { convertToPercentage } from '../../hooks/utils/formatNumber.ts';
 
 interface CartWithCoupon {
   item: CartItem;
@@ -25,7 +26,7 @@ export const CartWithCoupon = ({
           {item.product.price}원 x {item.quantity}
           {appliedDiscount > 0 && (
             <span className="text-green-600 ml-1">
-              ({(appliedDiscount * 100).toFixed(0)}% 할인 적용)
+              ({convertToPercentage(appliedDiscount, 0)}% 할인 적용)
             </span>
           )}
         </span>

@@ -6,6 +6,7 @@ import { useProductAccordion } from '../hooks/useProductAccordion.ts';
 import { useEditingProduct } from '../hooks/useEditingProduct.ts';
 import { EditingProductForm } from '../components/admin/EditingProductForm.tsx';
 import { DiscountForm } from '../components/admin/DiscountForm.tsx';
+import { convertToPercentage } from '../hooks/utils/formatNumber.ts';
 
 interface Props {
   products: Product[];
@@ -22,7 +23,7 @@ export const AdminPage = ({
   onProductAdd,
   onCouponAdd,
 }: Props) => {
-  const newProductFormOpenStatus = useOpenStatus();
+  const { isOpen, onToggle } = useOpenStatus();
   const { openProductIds, toggleProductAccordion } = useProductAccordion();
   const {
     edit,
@@ -36,14 +37,14 @@ export const AdminPage = ({
       <div>
         <h2 className="text-2xl font-semibold mb-4">상품 관리</h2>
         <button
-          onClick={newProductFormOpenStatus.onToggle}
+          onClick={onToggle}
           className="bg-green-500 text-white px-4 py-2 rounded mb-4 hover:bg-green-600"
         >
-          {newProductFormOpenStatus.isOpen ? '취소' : '새 상품 추가'}
+          {isOpen ? '취소' : '새 상품 추가'}
         </button>
-        {newProductFormOpenStatus.isOpen && (
-          <NewProductForm onAddNewProduct={onProductAdd} />
-        )}
+
+        {isOpen && <NewProductForm onAddNewProduct={onProductAdd} />}
+
         <div className="space-y-2">
           {products.map((product, index) => (
             <div
@@ -80,7 +81,7 @@ export const AdminPage = ({
                         <div key={index} className="mb-2">
                           <span>
                             {discount.quantity}개 이상 구매 시{' '}
-                            {discount.rate * 100}% 할인
+                            {convertToPercentage(discount.rate, 0)}% 할인
                           </span>
                         </div>
                       ))}
