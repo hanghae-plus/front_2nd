@@ -4,20 +4,17 @@ const getPrice = (price: number, quantity: number) => price * quantity;
 
 export const calculateItemTotal = (item: CartItem) => {
   const { product, quantity } = item;
-  const { price, discounts } = product;
+  const { price } = product;
 
-  const discountRateForQuantity = discounts.find((discount) => discount.quantity === quantity)?.rate ?? 0;
+  const maxDiscountRate = getMaxApplicableDiscount(item);
 
-  return getPrice(price, quantity) * (1 - discountRateForQuantity);
+  return price * quantity * (1 - maxDiscountRate);
 };
 
 export const getMaxApplicableDiscount = (item: CartItem) => {
-  const filteredItem = item.product.discounts.filter((discount) => discount.quantity === item.quantity);
-  if (filteredItem.length === 0) {
-    return 0;
-  }
-
-  return filteredItem.reduce((max, discount) => (discount.rate > max.rate ? discount : max), filteredItem[0]).rate;
+  return item.product.discounts
+    .filter((discount) => item.quantity >= discount.quantity)
+    .reduce((maxRate, discount) => Math.max(maxRate, discount.rate), 0);
 };
 
 const appliedDiscount = (cart: CartItem[], selectedCoupon: Coupon | null) => {
