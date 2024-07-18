@@ -1,6 +1,20 @@
 import { useState } from 'react';
+
 import { Product } from '../../types.ts';
 
 export const useProducts = (initialProducts: Product[]) => {
-  return { products: [], updateProduct: () => undefined, addProduct: () => undefined };
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+
+  const addProduct = (newProduct: Product) => {
+    setProducts((prevProducts) => [...prevProducts, newProduct]);
+  };
+
+  const removeProduct = (productId: string) => {
+    setProducts((prevProducts) => prevProducts.filter((product) => product.id !== productId));
+  };
+
+  const updateProduct = (productId: string, updatedProduct: Product) => {
+    setProducts((prevProducts) => prevProducts.map((product) => (product.id === productId ? updatedProduct : product)));
+  };
+  return { products, addProduct, removeProduct, updateProduct };
 };
