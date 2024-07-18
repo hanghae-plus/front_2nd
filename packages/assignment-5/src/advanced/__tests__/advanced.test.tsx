@@ -451,7 +451,7 @@ describe("advanced > ", () => {
           name: "Summer Sale",
           code: "SUMMER20",
           discountType: "amount",
-          discountValue: "20",
+          discountValue: 20,
         };
 
         it("주어진 초기 쿠폰 값으로 초기화해야 한다", () => {
@@ -471,15 +471,15 @@ describe("advanced > ", () => {
 
           act(() => {
             register("name").onChange({
-              target: { value: "Summer Sale" },
+              target: { value: newCoupon.name },
             } as React.ChangeEvent<FormElement>);
 
             register("code").onChange({
-              target: { value: "SUMMER20" },
+              target: { value: newCoupon.code },
             } as React.ChangeEvent<FormElement>);
 
             register("discountType").onChange({
-              target: { value: "amount" },
+              target: { value: newCoupon.discountType },
             } as React.ChangeEvent<FormElement>);
 
             register("discountValue").onChange({
@@ -487,12 +487,40 @@ describe("advanced > ", () => {
             } as React.ChangeEvent<FormElement>);
           });
 
-          expect(result.current.formState).toEqual({
-            name: "Summer Sale",
-            code: "SUMMER20",
-            discountType: "amount",
-            discountValue: 20,
+          expect(result.current.formState).toEqual(newCoupon);
+        });
+        it("form을 제출하면 initialData로 초기화해야 합니다.", () => {
+          const { result } = renderHook(() => useForm<Coupon>(initialCoupon));
+
+          const { register } = result.current;
+
+          act(() => {
+            register("name").onChange({
+              target: { value: newCoupon.name },
+            } as React.ChangeEvent<FormElement>);
+
+            register("code").onChange({
+              target: { value: newCoupon.code },
+            } as React.ChangeEvent<FormElement>);
+
+            register("discountType").onChange({
+              target: { value: newCoupon.discountType },
+            } as React.ChangeEvent<FormElement>);
+
+            register("discountValue").onChange({
+              target: { value: "20" },
+            } as React.ChangeEvent<FormElement>);
           });
+
+          expect(result.current.formState).toEqual(newCoupon);
+
+          act(() => {
+            result.current.submitForm({
+              preventDefault: vi.fn(),
+            } as unknown as React.FormEvent);
+          });
+
+          expect(result.current.formState).toEqual(initialCoupon);
         });
       });
     });
