@@ -2,7 +2,7 @@ import { ChangeEvent, SelectHTMLAttributes } from 'react';
 import { cn } from '../../utils';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
-  onValueChange: (value: string) => void;
+  onValueChange?: (value: string) => void;
   options: {
     label: string;
     value: string;
@@ -19,7 +19,7 @@ export const Select = ({
   ...props
 }: SelectProps) => {
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    onValueChange(e.target.value);
+    onValueChange?.(e.target.value);
     onChange?.(e);
   };
 
