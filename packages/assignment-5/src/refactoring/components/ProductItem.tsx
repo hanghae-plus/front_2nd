@@ -1,3 +1,5 @@
+import { formatCurrency } from '../hooks/utils/formatCurrency';
+
 export default function ProductItem({
   product,
   maxDiscount,
@@ -11,9 +13,7 @@ export default function ProductItem({
     >
       <div className='flex justify-between items-center mb-2'>
         <span className='font-semibold'>{product.name}</span>
-        <span className='text-gray-600'>
-          {product.price.toLocaleString()}원
-        </span>
+        <span className='text-gray-600'>{formatCurrency(product.price)}원</span>
       </div>
       <div className='text-sm text-gray-500 mb-2'>
         <span

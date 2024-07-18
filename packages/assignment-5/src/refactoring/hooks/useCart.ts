@@ -5,7 +5,6 @@ import { calculateCartTotal, updateCartItemQuantity } from './utils/cartUtils';
 
 export const useCart = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
 
   const addToCart = (product: Product) => {
     const productId = product.id;
@@ -34,6 +33,9 @@ export const useCart = () => {
       updateCartItemQuantity(prevCart, productId, newQuantity)
     );
   };
+
+  // basic test
+  const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
 
   const applyCoupon = (coupon: Coupon) => {
     setSelectedCoupon(coupon);

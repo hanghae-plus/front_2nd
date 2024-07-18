@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
 
 export const useLocalStorage = (id, state, setState) => {
-  const localData = JSON.parse(localStorage.getItem(id));
+  const getLocalStorage = () => {
+    return JSON.parse(localStorage.getItem(id) || 'false');
+  };
+  const localData = getLocalStorage();
 
   useEffect(() => {
     if (localData) {
@@ -12,4 +15,8 @@ export const useLocalStorage = (id, state, setState) => {
   useEffect(() => {
     localStorage.setItem(id, JSON.stringify(state));
   }, [id, state]);
+
+  return {
+    getLocalStorage,
+  };
 };
