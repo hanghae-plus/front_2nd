@@ -1,7 +1,17 @@
 import AdminPage from "@/refactoring/components/AdminPage";
 import CartPage from "@/refactoring/components/CartPage";
+import useFormValidation, {
+  VALIDATION_CONDITIONS,
+} from "@/refactoring/hooks/useFormValidation";
 import { Coupon, Product } from "@/types";
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  within,
+} from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, test } from "vitest";
 
@@ -261,13 +271,119 @@ describe("advanced > ", () => {
     });
   });
 
-  describe("자유롭게 작성해보세요.", () => {
-    test("새로운 유틸 함수를 만든 후에 테스트 코드를 작성해서 실행해보세요", () => {
-      expect(true).toBe(false);
+  describe("Custom Hook 테스트 >", () => {
+    describe("useFormValidation Hook 테스트 >", () => {
+      test("isNotEmpty", () => {
+        const { result, rerender } = renderHook(
+          ({ value }) =>
+            useFormValidation(VALIDATION_CONDITIONS.isNotEmpty, value),
+          {
+            initialProps: { value: "test" },
+          }
+        );
+
+        expect(result.current[0]).toBe(true);
+
+        rerender({ value: "" });
+        expect(result.current[0]).toBe(false);
+      });
+
+      test("isPositiveNumber", () => {
+        const { result, rerender } = renderHook(
+          ({ value }) =>
+            useFormValidation(VALIDATION_CONDITIONS.isPositiveNumber, value),
+          {
+            initialProps: { value: "5" },
+          }
+        );
+
+        expect(result.current[0]).toBe(true);
+
+        rerender({ value: "-5" });
+        expect(result.current[0]).toBe(false);
+
+        rerender({ value: "0" });
+        expect(result.current[0]).toBe(false);
+
+        rerender({ value: "abc" });
+        expect(result.current[0]).toBe(false);
+      });
+      test("isRate", () => {
+        const { result, rerender } = renderHook(
+          ({ value }) => useFormValidation(VALIDATION_CONDITIONS.isRate, value),
+          {
+            initialProps: { value: "50" },
+          }
+        );
+
+        expect(result.current[0]).toBe(true);
+
+        rerender({ value: "-1" });
+        expect(result.current[0]).toBe(false);
+
+        rerender({ value: "101" });
+        expect(result.current[0]).toBe(false);
+
+        rerender({ value: "100" });
+        expect(result.current[0]).toBe(true);
+
+        rerender({ value: "0" });
+        expect(result.current[0]).toBe(true);
+      });
+      test("HTML Input Element에서의 작동 테스트", () => {
+        const { result } = renderHook(() => {
+          const [inputString, setInputString] = useState("");
+          const [isValidString] = useFormValidation(
+            VALIDATION_CONDITIONS.isNotEmpty,
+            inputString
+          );
+          return {
+            isValidString,
+            setInputString,
+          };
+        });
+
+        const { getByTestId } = render(
+          <input
+            data-testid="input"
+            onChange={(e) => {
+              result.current.setInputString(e.target.value);
+            }}
+          />
+        );
+
+        const input = getByTestId("input");
+
+        expect(result.current.isValidString).toBe(false);
+
+        fireEvent.change(input, { target: { value: "test" } });
+        expect(result.current.isValidString).toBe(true);
+
+        fireEvent.change(input, { target: { value: "" } });
+        expect(result.current.isValidString).toBe(false);
+      });
     });
 
-    test("새로운 hook 함수르 만든 후에 테스트 코드를 작성해서 실행해보세요", () => {
-      expect(true).toBe(false);
+    describe("use~~ 테스트 >", () => {
+      test("hi", () => {
+        expect(true).toBe(false);
+      });
+    });
+  });
+
+  describe("Util 함수 테스트 >", () => {
+    describe("~~ 테스트 >", () => {
+      test("hi", () => {
+        expect(true).toBe(false);
+      });
+    });
+  });
+
+  describe("추가 기능 테스트 >", () => {
+    describe("~~ 테스트 >", () => {
+      test("hi", () => {
+        expect(true).toBe(false);
+      });
     });
   });
 });

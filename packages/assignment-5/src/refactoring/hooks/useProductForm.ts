@@ -1,8 +1,7 @@
 import { InputEventHandler, Product, ProductForm } from "@/types";
 import { useState } from "react";
 import generateErrorMessage from "../utils/generateErrorMessage";
-import { VALIDATION_CONDITIONS } from "../utils/validation";
-import useFormValidation from "./useFormValidation";
+import useFormValidation, { VALIDATION_CONDITIONS } from "./useFormValidation";
 
 const useProductForm = (
   initProduct: Product,

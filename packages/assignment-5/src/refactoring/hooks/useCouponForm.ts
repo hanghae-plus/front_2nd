@@ -6,8 +6,7 @@ import {
 } from "@/types";
 import { useState } from "react";
 import generateErrorMessage from "../utils/generateErrorMessage";
-import { VALIDATION_CONDITIONS } from "../utils/validation";
-import useFormValidation from "./useFormValidation";
+import useFormValidation, { VALIDATION_CONDITIONS } from "./useFormValidation";
 
 const useCouponForm = (callback: (coupon: Coupon) => void) => {
   const [couponForm, setCouponForm] = useState<CouponForm>({
