@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { CartPage } from '../../refactoring/components/CartPage';
 import { AdminPage } from '../../refactoring/components/AdminPage';
 import { Coupon, Product } from '../../types';
 import { clamp } from '../../refactoring/utils/number';
 import { cn } from '../../refactoring/utils';
+import { Select } from '../../refactoring/components/shared';
 
 const mockProducts: Product[] = [
   {
@@ -221,6 +222,47 @@ describe('advanced > ', () => {
       const $newCoupon = screen.getByTestId('coupon-3');
 
       expect($newCoupon).toHaveTextContent('새 쿠폰 (NEW10):10% 할인');
+    });
+  });
+
+  describe('Select 컴포넌트 테스트', () => {
+    const options = [
+      { label: '옵션1', value: '1' },
+      { label: '옵션2', value: '2' },
+      { label: '옵션3', value: '3' },
+    ];
+
+    test('옵션을 선택하면 onValueChange 함수가 호출된다.', () => {
+      const onValueChange = vi.fn();
+      render(<Select options={options} onValueChange={onValueChange} />);
+      const selectElement = screen.getByRole('combobox');
+
+      fireEvent.change(selectElement, { target: { value: '2' } });
+      expect(onValueChange).toHaveBeenCalledWith('2');
+
+      fireEvent.change(selectElement, { target: { value: '1' } });
+      expect(onValueChange).toHaveBeenCalledWith('1');
+
+      expect(onValueChange).toHaveBeenCalledTimes(2);
+    });
+
+    test('모든 옵션이 올바르게 렌더링된다.', () => {
+      render(<Select options={options} onValueChange={() => {}} />);
+      const optionElements = screen.getAllByRole('option');
+
+      expect(optionElements).toHaveLength(options.length);
+      options.forEach((option, index) => {
+        expect(optionElements[index]).toHaveTextContent(option.label);
+        expect(optionElements[index]).toHaveValue(option.value);
+      });
+    });
+
+    test('기본값이 설정되면 해당 옵션이 선택된다.', () => {
+      const defaultValue = '2';
+      render(<Select options={options} onValueChange={() => {}} defaultValue={defaultValue} />);
+      const selectElement = screen.getByRole('combobox') as HTMLSelectElement;
+
+      expect(selectElement.value).toBe(defaultValue);
     });
   });
 
