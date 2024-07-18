@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, test, vi } from "vitest";
 import {
   act,
   fireEvent,
@@ -17,7 +17,7 @@ import {
   getMaxDiscount,
   getRemainingStock,
 } from "../../refactoring/hooks/utils/cartUtils";
-import { useLocalStorage } from "../../refactoring/hooks";
+import { FormElement, useForm, useLocalStorage } from "../../refactoring/hooks";
 
 const mockProducts: Product[] = [
   {
@@ -435,6 +435,65 @@ describe("advanced > ", () => {
         );
 
         expect(localStorageData).toEqual(testCartItem);
+      });
+    });
+
+    describe("useForm", () => {
+      describe("초기 데이터 테스트", () => {
+        const initialCoupon: Coupon = {
+          name: "",
+          code: "",
+          discountType: "percentage",
+          discountValue: 0,
+        };
+
+        const newCoupon: Coupon = {
+          name: "Summer Sale",
+          code: "SUMMER20",
+          discountType: "amount",
+          discountValue: "20",
+        };
+
+        it("주어진 초기 쿠폰 값으로 초기화해야 한다", () => {
+          const {
+            result: {
+              current: { formState },
+            },
+          } = renderHook(() => useForm<Coupon>(initialCoupon));
+
+          expect(formState).toEqual(initialCoupon);
+        });
+
+        it("태그에 매핑된 resgiter를 통해 formState 업데이트되어야 합니다.", () => {
+          const { result } = renderHook(() => useForm<Coupon>(initialCoupon));
+
+          const { register } = result.current;
+
+          act(() => {
+            register("name").onChange({
+              target: { value: "Summer Sale" },
+            } as React.ChangeEvent<FormElement>);
+
+            register("code").onChange({
+              target: { value: "SUMMER20" },
+            } as React.ChangeEvent<FormElement>);
+
+            register("discountType").onChange({
+              target: { value: "amount" },
+            } as React.ChangeEvent<FormElement>);
+
+            register("discountValue").onChange({
+              target: { value: "20" },
+            } as React.ChangeEvent<FormElement>);
+          });
+
+          expect(result.current.formState).toEqual({
+            name: "Summer Sale",
+            code: "SUMMER20",
+            discountType: "amount",
+            discountValue: 20,
+          });
+        });
       });
     });
   });

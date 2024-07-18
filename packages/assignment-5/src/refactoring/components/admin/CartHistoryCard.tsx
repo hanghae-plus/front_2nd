@@ -7,7 +7,7 @@ interface CartHistoryCardProps {
 }
 
 const CartHistoryCard = ({ coupons, addCoupon }: CartHistoryCardProps) => {
-  const { formState, handleChangeElement, submitForm } = useForm<Coupon>({
+  const { formState, submitForm, register } = useForm<Coupon>({
     name: "",
     code: "",
     discountType: "percentage",
@@ -27,24 +27,23 @@ const CartHistoryCard = ({ coupons, addCoupon }: CartHistoryCardProps) => {
           <input
             type="text"
             placeholder="쿠폰 이름"
-            name="name"
             value={formState.name}
-            onChange={handleChangeElement}
+            {...register("name")}
+            required
             className="w-full p-2 border rounded"
           />
           <input
             type="text"
             placeholder="쿠폰 코드"
-            name="code"
             value={formState.code}
-            onChange={handleChangeElement}
+            {...register("code")}
+            required
             className="w-full p-2 border rounded"
           />
           <div className="flex gap-2">
             <select
-              name="discountType"
               value={formState.discountType}
-              onChange={handleChangeElement}
+              {...register("discountType")}
               className="w-full p-2 border rounded"
             >
               <option value="amount">금액(원)</option>
@@ -53,9 +52,9 @@ const CartHistoryCard = ({ coupons, addCoupon }: CartHistoryCardProps) => {
             <input
               type="number"
               placeholder="할인 값"
-              name="discountValue"
               value={formState.discountValue}
-              onChange={handleChangeElement}
+              {...register("discountValue")}
+              required
               className="w-full p-2 border rounded"
             />
           </div>
