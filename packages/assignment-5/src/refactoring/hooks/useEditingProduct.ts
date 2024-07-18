@@ -1,9 +1,9 @@
-// advanced에서 useEditingProduct를 test를 위해 hook으로 분리
 import { useState } from 'react';
-import { Product } from '../types';
+import { Product, Discount } from '../types';
 
 export const useEditingProduct = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [newDiscount, setNewDiscount] = useState<Discount>({ quantity: 0, rate: 0 });
 
   const edit = (product: Product) => {
     setEditingProduct({...product});
@@ -27,16 +27,39 @@ export const useEditingProduct = () => {
     }
   };
 
+  const addDiscount = () => {
+    if (editingProduct) {
+      setEditingProduct({
+        ...editingProduct,
+        discounts: [...editingProduct.discounts, newDiscount]
+      });
+      setNewDiscount({ quantity: 0, rate: 0 });
+    }
+  };
+
+  const removeDiscount = (index: number) => {
+    if (editingProduct) {
+      setEditingProduct({
+        ...editingProduct,
+        discounts: editingProduct.discounts.filter((_, i) => i !== index)
+      });
+    }
+  };
+
   const clearEditingProduct = () => {
     setEditingProduct(null);
   };
 
   return {
     editingProduct,
+    newDiscount,
+    setNewDiscount,
     edit,
     updateName,
     updatePrice,
     updateStock,
-    clearEditingProduct
+    addDiscount,
+    removeDiscount,
+    clearEditingProduct,
   };
 };

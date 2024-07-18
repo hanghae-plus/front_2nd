@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CartItem, Coupon, Product } from '../../types';
 import { calculateCartTotal, updateCartItemQuantity } from './utils/cartUtils';
+import { useLocalStorage } from './useLocalStorage';
 
 // 순수 함수로 분리
 export const calculateRemainingStock = (product: Product, cartItems: CartItem[]) => {
@@ -10,7 +11,7 @@ export const calculateRemainingStock = (product: Product, cartItems: CartItem[])
 
 export const useCart = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
+  const [selectedCoupon, setSelectedCoupon] = useLocalStorage<Coupon | null>('selectedCoupon', null)
 
   const getRemainingStock = (product: Product) => {
     return calculateRemainingStock(product, cart);
