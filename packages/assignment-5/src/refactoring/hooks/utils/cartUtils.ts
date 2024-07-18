@@ -1,7 +1,5 @@
 import { CartItem, Coupon } from '../../../types';
 
-const getPrice = (price: number, quantity: number) => price * quantity;
-
 export const calculateItemTotal = (item: CartItem) => {
   const { product, quantity } = item;
   const { price } = product;
@@ -30,7 +28,7 @@ const appliedDiscount = (cart: CartItem[], selectedCoupon: Coupon | null) => {
 };
 
 export const calculateCartTotal = (cart: CartItem[], selectedCoupon: Coupon | null) => {
-  const totalBeforeDiscount = cart.reduce((total, item) => total + getPrice(item.product.price, item.quantity), 0);
+  const totalBeforeDiscount = cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
   const totalAfterDiscount = appliedDiscount(cart, selectedCoupon);
   const totalDiscount = totalBeforeDiscount - totalAfterDiscount;
 
