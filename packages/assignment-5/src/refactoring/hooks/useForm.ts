@@ -1,13 +1,10 @@
-import { ChangeEvent, useState } from 'react';
-
-type Event = ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
+import { useState } from 'react';
 
 export const useForm = <T>(initialValues: T) => {
   const [values, setValues] = useState<T>(initialValues);
 
-  const handleChange = (event: Event, transform?: (value: string) => number | string) => {
-    const { name, value } = event.target;
-    setValues({ ...values, [name]: transform ? transform(value) : value });
+  const handleChange = (name: keyof T, value: any) => {
+    setValues({ ...values, [name]: value });
   };
 
   const reset = () => {
