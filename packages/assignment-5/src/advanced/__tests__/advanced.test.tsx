@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, it } from 'vitest';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { CartPage } from '../../refactoring/components/CartPage';
+import { CartPage, getMaxDiscount, getAppliedDiscount } from '../../refactoring/components/CartPage';
 import { AdminPage } from "../../refactoring/components/AdminPage";
+import { calculateRemainingStock } from '../../refactoring/hooks/useCart';
 import { Coupon, Product } from '../../types';
 
 const mockProducts: Product[] = [
@@ -231,14 +232,79 @@ describe('advanced > ', () => {
     })
   })
 
-  describe('자유롭게 작성해보세요.', () => {
-    test('새로운 유틸 함수를 만든 후에 테스트 코드를 작성해서 실행해보세요', () => {
-      expect(true).toBe(false);
-    })
+  describe('getMaxDiscount', () => {
+    it('빈 배열에 대해 0을 반환해야 합니다', () => {
+      expect(getMaxDiscount([])).toBe(0);
+    });
+  
+    it('가장 높은 할인율을 반환해야 합니다', () => {
+      const discounts = [
+        { quantity: 2, rate: 0.1 },
+        { quantity: 3, rate: 0.15 },
+        { quantity: 5, rate: 0.2 }
+      ];
+      expect(getMaxDiscount(discounts)).toBe(0.2);
+    });
+  });
 
-    test('새로운 hook 함수르 만든 후에 테스트 코드를 작성해서 실행해보세요', () => {
-      expect(true).toBe(false);
-    })
-  })
+  describe('calculateRemainingStock', () => {
+    it('카트에 상품이 없을 때 전체 재고를 반환해야 합니다', () => {
+      const product: Product = { id: '1', name: 'Test Product', price: 1000, stock: 10, discounts: [] };
+      const cart: CartItem[] = [];
+      expect(calculateRemainingStock(product, cart)).toBe(10);
+    });
+  
+    it('카트에 상품이 있을 때 남은 재고를 정확히 계산해야 합니다', () => {
+      const product: Product = { id: '1', name: 'Test Product', price: 1000, stock: 10, discounts: [] };
+      const cart: CartItem[] = [{ product: product, quantity: 3 }];
+      expect(calculateRemainingStock(product, cart)).toBe(7);
+    });
+  });
+  
+  describe('getAppliedDiscount', () => {
+    it('수량이 할인 기준에 미치지 못할 때 0을 반환해야 합니다', () => {
+      const product: Product = {
+        id: '1',
+        name: 'Test Product',
+        price: 1000,
+        stock: 10,
+        discounts: [{ quantity: 3, rate: 0.1 }]
+      };
+      const cartItem: CartItem = { product, quantity: 2 };
+      expect(getAppliedDiscount(cartItem)).toBe(0);
+    });
+  
+    it('수량에 따라 적용 가능한 최대 할인율을 반환해야 합니다', () => {
+      const product: Product = {
+        id: '1',
+        name: 'Test Product',
+        price: 1000,
+        stock: 10,
+        discounts: [
+          { quantity: 3, rate: 0.1 },
+          { quantity: 5, rate: 0.15 }
+        ]
+      };
+      const cartItem: CartItem = { product, quantity: 4 };
+      expect(getAppliedDiscount(cartItem)).toBe(0.1);
+    });
+  
+    it('수량이 가장 높은 할인 기준을 초과할 때도 최대 할인율을 반환해야 합니다', () => {
+      const product: Product = {
+        id: '1',
+        name: 'Test Product',
+        price: 1000,
+        stock: 10,
+        discounts: [
+          { quantity: 3, rate: 0.1 },
+          { quantity: 5, rate: 0.15 }
+        ]
+      };
+      const cartItem: CartItem = { product, quantity: 6 };
+      expect(getAppliedDiscount(cartItem)).toBe(0.15);
+    });
+  });
+
+
 })
 
