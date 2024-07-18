@@ -1,4 +1,5 @@
 import useCouponForm from "@/refactoring/hooks/useCouponForm";
+import { wonFormatter } from "@/refactoring/utils/currencyFormatter";
 import { Coupon } from "@/types";
 
 interface Props {
@@ -63,7 +64,7 @@ const CouponManagementCardView = ({ couponForm, coupons }: Props) => {
               >
                 {coupon.name} ({coupon.code}):
                 {coupon.discountType === "amount"
-                  ? `${coupon.discountValue}원`
+                  ? `${wonFormatter(coupon.discountValue)}`
                   : `${coupon.discountValue}%`}{" "}
                 할인
               </div>

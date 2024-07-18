@@ -28,7 +28,7 @@ const mockProducts: Product[] = [
 ];
 const mockCoupons: Coupon[] = [
   {
-    name: "5000원 할인 쿠폰",
+    name: "₩ 5,000 할인 쿠폰",
     code: "AMOUNT5000",
     discountType: "amount",
     discountValue: 5000,
@@ -56,13 +56,13 @@ const CartPageTest = async () => {
 
   // 1. 상품 정보 표시
   expect(product1).toHaveTextContent("상품1");
-  expect(product1).toHaveTextContent("10,000원");
+  expect(product1).toHaveTextContent("₩ 10,000");
   expect(product1).toHaveTextContent("재고: 20개");
   expect(product2).toHaveTextContent("상품2");
-  expect(product2).toHaveTextContent("20,000원");
+  expect(product2).toHaveTextContent("₩ 20,000");
   expect(product2).toHaveTextContent("재고: 20개");
   expect(product3).toHaveTextContent("상품3");
-  expect(product3).toHaveTextContent("30,000원");
+  expect(product3).toHaveTextContent("₩ 30,000");
   expect(product3).toHaveTextContent("재고: 20개");
 
   // 2. 할인 정보 표시
@@ -72,9 +72,9 @@ const CartPageTest = async () => {
   fireEvent.click(addToCartButtonsAtProduct1); // 상품1 추가
 
   // 4. 할인율 계산
-  expect(screen.getByText("상품 금액: 10,000원")).toBeInTheDocument();
-  expect(screen.getByText("할인 금액: 0원")).toBeInTheDocument();
-  expect(screen.getByText("최종 결제 금액: 10,000원")).toBeInTheDocument();
+  expect(screen.getByText("상품 금액: ₩ 10,000")).toBeInTheDocument();
+  expect(screen.getByText("할인 금액: ₩ 0")).toBeInTheDocument();
+  expect(screen.getByText("최종 결제 금액: ₩ 10,000")).toBeInTheDocument();
 
   // 5. 상품 품절 상태로 만들기
   for (let i = 0; i < 19; i++) {
@@ -87,9 +87,9 @@ const CartPageTest = async () => {
   expect(product1).toHaveTextContent("재고: 0개");
 
   // 7. 할인율 계산
-  expect(screen.getByText("상품 금액: 200,000원")).toBeInTheDocument();
-  expect(screen.getByText("할인 금액: 20,000원")).toBeInTheDocument();
-  expect(screen.getByText("최종 결제 금액: 180,000원")).toBeInTheDocument();
+  expect(screen.getByText("상품 금액: ₩ 200,000")).toBeInTheDocument();
+  expect(screen.getByText("할인 금액: ₩ 20,000")).toBeInTheDocument();
+  expect(screen.getByText("최종 결제 금액: ₩ 180,000")).toBeInTheDocument();
 
   // 8. 상품을 각각 10개씩 추가하기
   fireEvent.click(addToCartButtonsAtProduct2); // 상품2 추가
@@ -102,24 +102,24 @@ const CartPageTest = async () => {
   }
 
   // 9. 할인율 계산
-  expect(screen.getByText("상품 금액: 700,000원")).toBeInTheDocument();
-  expect(screen.getByText("할인 금액: 110,000원")).toBeInTheDocument();
-  expect(screen.getByText("최종 결제 금액: 590,000원")).toBeInTheDocument();
+  expect(screen.getByText("상품 금액: ₩ 700,000")).toBeInTheDocument();
+  expect(screen.getByText("할인 금액: ₩ 110,000")).toBeInTheDocument();
+  expect(screen.getByText("최종 결제 금액: ₩ 590,000")).toBeInTheDocument();
 
   // 10. 쿠폰 적용하기
   const couponSelect = screen.getByRole("combobox");
   fireEvent.change(couponSelect, { target: { value: "1" } }); // 10% 할인 쿠폰 선택
 
   // 11. 할인율 계산
-  expect(screen.getByText("상품 금액: 700,000원")).toBeInTheDocument();
-  expect(screen.getByText("할인 금액: 169,000원")).toBeInTheDocument();
-  expect(screen.getByText("최종 결제 금액: 531,000원")).toBeInTheDocument();
+  expect(screen.getByText("상품 금액: ₩ 700,000")).toBeInTheDocument();
+  expect(screen.getByText("할인 금액: ₩ 169,000")).toBeInTheDocument();
+  expect(screen.getByText("최종 결제 금액: ₩ 531,000")).toBeInTheDocument();
 
   // 12. 다른 할인 쿠폰 적용하기
   fireEvent.change(couponSelect, { target: { value: "0" } }); // 5000원 할인 쿠폰
-  expect(screen.getByText("상품 금액: 700,000원")).toBeInTheDocument();
-  expect(screen.getByText("할인 금액: 115,000원")).toBeInTheDocument();
-  expect(screen.getByText("최종 결제 금액: 585,000원")).toBeInTheDocument();
+  expect(screen.getByText("상품 금액: ₩ 700,000")).toBeInTheDocument();
+  expect(screen.getByText("할인 금액: ₩ 115,000")).toBeInTheDocument();
+  expect(screen.getByText("최종 결제 금액: ₩ 585,000")).toBeInTheDocument();
 };
 
 export default CartPageTest;

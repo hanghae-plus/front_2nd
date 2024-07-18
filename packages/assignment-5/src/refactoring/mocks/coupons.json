@@ -1,7 +1,7 @@
 {
   "data": [
     {
-      "name": "5000원 할인 쿠폰",
+      "name": "₩ 5,000 할인 쿠폰",
       "code": "AMOUNT5000",
       "discountType": "amount",
       "discountValue": 5000

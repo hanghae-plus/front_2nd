@@ -1,3 +1,4 @@
+import { wonFormatter } from "@/refactoring/utils/currencyFormatter";
 import { CartItem } from "@/types";
 
 interface Props {
@@ -23,7 +24,7 @@ const CartProductListRowView = ({
         <span className="font-semibold">{item.product.name}</span>
         <br />
         <span className="text-sm text-gray-600">
-          {item.product.price}원 x {item.quantity}
+          {wonFormatter(item.product.price)} x {item.quantity}
           {appliedDiscount > 0 && (
             <span className="text-green-600 ml-1">
               ({(appliedDiscount * 100).toFixed(0)}% 할인 적용)

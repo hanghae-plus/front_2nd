@@ -1,4 +1,5 @@
 import useToggle from "@/refactoring/hooks/useToggle";
+import { wonFormatter } from "@/refactoring/utils/currencyFormatter";
 import { Product } from "@/types";
 import ProductDiscountInform from "./ProductDiscountInform";
 import ProductEditingForm from "./ProductEditingForm";
@@ -23,7 +24,7 @@ const ProductAccordianCard = ({ product, index, onProductUpdate }: Props) => {
         onClick={toggleProductAccordion}
         className="w-full text-left font-semibold"
       >
-        {product.name} - {product.price}원 (재고: {product.stock})
+        {product.name} - {wonFormatter(product.price)} (재고: {product.stock})
       </button>
       {isAccordianOpen && (
         <div className="mt-2">

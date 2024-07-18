@@ -1,3 +1,4 @@
+import { wonFormatter } from "@/refactoring/utils/currencyFormatter";
 import { Coupon, SelectEventHandler } from "@/types";
 
 interface Props {
@@ -53,7 +54,7 @@ const CouponOption = ({ coupon, index }: CouponOptionProps) => {
     <option value={index}>
       {coupon.name} -{" "}
       {coupon.discountType === "amount"
-        ? `${coupon.discountValue}원`
+        ? `${wonFormatter(coupon.discountValue)}`
         : `${coupon.discountValue}%`}
     </option>
   );
@@ -68,7 +69,9 @@ const AppliedCouponInform = ({
   return (
     <p className="text-green-600">
       적용된 쿠폰: {name}(
-      {discountType === "amount" ? `${discountValue}원` : `${discountValue}%`}{" "}
+      {discountType === "amount"
+        ? `${wonFormatter(discountValue)}`
+        : `${discountValue}%`}{" "}
       할인)
     </p>
   );

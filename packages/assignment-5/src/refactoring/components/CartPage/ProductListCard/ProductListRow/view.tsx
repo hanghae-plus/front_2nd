@@ -1,3 +1,4 @@
+import { wonFormatter } from "@/refactoring/utils/currencyFormatter";
 import { isZeroLengthArray } from "@/refactoring/utils/typeNarrowFunctions";
 import { Product } from "@/types";
 
@@ -24,7 +25,7 @@ const ProductListRowView = ({
     >
       <div className="flex justify-between items-center mb-2">
         <span className="font-semibold">{name}</span>
-        <span className="text-gray-600">{price.toLocaleString()}원</span>
+        <span className="text-gray-600">{wonFormatter(price)}</span>
       </div>
       <div className="text-sm text-gray-500 mb-2">
         <span
