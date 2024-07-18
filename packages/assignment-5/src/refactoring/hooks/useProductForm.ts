@@ -1,5 +1,6 @@
 import { InputEventHandler, Product, ProductForm } from "@/types";
 import { useState } from "react";
+import generateErrorMessage from "../utils/generateErrorMessage";
 import { VALIDATION_CONDITIONS } from "../utils/validation";
 import useFormValidation from "./useFormValidation";
 
@@ -45,17 +46,17 @@ const useProductForm = (
 
   const submitEditingProduct = () => {
     if (!isValidName) {
-      setErrorMessage("상품명을 입력해주세요");
+      setErrorMessage(generateErrorMessage.formError("상품명"));
 
       return;
     }
     if (!isValidPrice) {
-      setErrorMessage("가격을 0 이상의 숫자로 입력해주세요.");
+      setErrorMessage(generateErrorMessage.formError("상품 가격", "0 이상의"));
 
       return;
     }
     if (!isValidStock) {
-      setErrorMessage("재고를 0 이상의 숫자로 입력해주세요.");
+      setErrorMessage(generateErrorMessage.formError("상품 재고", "0 이상의"));
 
       return;
     }

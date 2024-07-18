@@ -1,5 +1,6 @@
 import { DiscountForm, InputEventHandler, Product } from "@/types";
 import { useState } from "react";
+import generateErrorMessage from "../utils/generateErrorMessage";
 import { VALIDATION_CONDITIONS } from "../utils/validation";
 import useFormValidation from "./useFormValidation";
 import useProductForm from "./useProductForm";
@@ -48,12 +49,14 @@ const useDiscountForm = (
 
   const onClickAddDiscount = () => {
     if (!isValidQuantity) {
-      setErrorMessage("할인 수량은 0 이상의 숫자여야 합니다.");
+      setErrorMessage(generateErrorMessage.formError("할인 수량", "0 이상의"));
 
       return;
     }
     if (!isValidRate) {
-      setErrorMessage("할인율은 0~100 사이의 숫자여야 합니다.");
+      setErrorMessage(
+        generateErrorMessage.formError("할인율", "0 이상 100 이하의")
+      );
 
       return;
     }

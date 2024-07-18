@@ -5,6 +5,7 @@ import {
   SelectEventHandler,
 } from "@/types";
 import { useState } from "react";
+import generateErrorMessage from "../utils/generateErrorMessage";
 import { VALIDATION_CONDITIONS } from "../utils/validation";
 import useFormValidation from "./useFormValidation";
 
@@ -54,22 +55,28 @@ const useCouponForm = (callback: (coupon: Coupon) => void) => {
 
   const onClickAddCoupon = () => {
     if (!isValidName) {
-      setErrorMessage("쿠폰 이름을 입력해주세요");
+      setErrorMessage(generateErrorMessage.formError("쿠폰 이름"));
+
       return;
     }
     if (!isValidCode) {
-      setErrorMessage("쿠폰 코드를 입력해주세요");
+      setErrorMessage(generateErrorMessage.formError("쿠폰 코드"));
+
       return;
     }
     if (
       couponForm.discountType === "percentage" &&
       !isValidDIscountPercentage
     ) {
-      setErrorMessage("할인율을 0이상 100 이하의 값으로 입력해주세요.");
+      setErrorMessage(
+        generateErrorMessage.formError("할인율", "0 이상 100 이하의")
+      );
+
       return;
     }
     if (couponForm.discountType === "amount" && !isValidDiscountAmount) {
-      setErrorMessage("할인 금액을 입력해주세요");
+      setErrorMessage(generateErrorMessage.formError("할인 금액"));
+
       return;
     }
 
@@ -84,6 +91,7 @@ const useCouponForm = (callback: (coupon: Coupon) => void) => {
       discountType: "percentage",
       discountValue: "",
     });
+    setErrorMessage("");
   };
 
   return {

@@ -14,12 +14,17 @@ const ProductEditingFormView = ({ productForm, discountForm }: Props) => {
         editingProduct={productForm.editingProduct}
         discountForm={discountForm}
       />
-      <button
-        onClick={productForm.submitEditingProduct}
-        className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mt-2"
-      >
-        수정 완료
-      </button>
+      <div className="flex flex-col">
+        {productForm.errorMessage && (
+          <span className="text-red-500">{productForm.errorMessage}</span>
+        )}
+        <button
+          onClick={productForm.submitEditingProduct}
+          className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mt-2"
+        >
+          수정 완료
+        </button>
+      </div>
     </div>
   );
 };
