@@ -13,8 +13,8 @@ export const useProducts = (initialProducts: Product[]) => {
     setProducts((prevProducts) => prevProducts.filter((product) => product.id !== productId));
   };
 
-  const updateProduct = (productId: string, updatedProduct: Product) => {
-    setProducts((prevProducts) => prevProducts.map((product) => (product.id === productId ? updatedProduct : product)));
+  const updateProduct = (updatedProduct: Product) => {
+    setProducts((prevProducts) => prevProducts.map((product) => (product.id === updatedProduct.id ? updatedProduct : product)));
   };
   return { products, addProduct, removeProduct, updateProduct };
 };
