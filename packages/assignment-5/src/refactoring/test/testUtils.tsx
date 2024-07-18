@@ -1,11 +1,12 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
+/* eslint-disable react-refresh/only-export-components */
+import { PropsWithChildren, ReactElement } from "react";
+import { RenderOptions, render } from "@testing-library/react";
 
-import type { Coupon, Product } from "types";
-import { CouponProvider } from "provider/coupon";
-import { CartProvider } from "provider/cart";
-import { ProductProvider } from "provider/product";
+import { CartProvider } from "refactoring/components/provider/cart";
+import { CouponProvider } from "refactoring/components/provider/coupon";
+import { ProductProvider } from "refactoring/components/provider/product";
+
+import { Coupon, Product } from "types";
 
 const initialProducts: Product[] = [
   {
@@ -49,14 +50,17 @@ const initialCoupons: Coupon[] = [
   },
 ];
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+const AllTheProviders = ({ children }: PropsWithChildren) => {
+  return (
     <ProductProvider initialProducts={initialProducts}>
       <CouponProvider initialCoupons={initialCoupons}>
-        <CartProvider>
-          <App />
-        </CartProvider>
+        <CartProvider>{children}</CartProvider>
       </CouponProvider>
     </ProductProvider>
-  </React.StrictMode>,
-);
+  );
+};
+
+export const renderWithProvider = (
+  ui: ReactElement,
+  options?: Omit<RenderOptions, "wrapper">,
+) => render(ui, { wrapper: AllTheProviders, ...options });

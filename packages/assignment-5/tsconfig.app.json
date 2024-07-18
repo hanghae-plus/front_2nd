@@ -8,7 +8,6 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -17,11 +16,23 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "refactoring/*": ["./src/refactoring/*"],
+      "cart/*": ["src/refactoring/components/cart/*"],
+      "admin/*": ["src/refactoring/components/admin/*"],
+      "provider/*": ["src/refactoring/components/provider/*"],
+      "pages/*": ["src/refactoring/pages/*"],
+      "components/*": ["src/refactoring/components/*"],
+      "hooks": ["src/refactoring/hooks/index.ts"],
+      "hooks/*": ["src/refactoring/hooks/*"],
+      "types": ["./src/types.ts"]
+    }
   },
   "include": ["src"]
 }
