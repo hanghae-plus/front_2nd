@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Coupon, Discount, Product } from '../../types.ts';
 import { Accordion, Select } from './shared';
+import { useForm } from '../hooks/useForm.ts';
 
 interface Props {
   products: Product[];
@@ -12,15 +13,27 @@ interface Props {
 
 export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, onCouponAdd }: Props) => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [newDiscount, setNewDiscount] = useState<Discount>({ quantity: 0, rate: 0 });
-  const [newCoupon, setNewCoupon] = useState<Coupon>({
+  const [showNewProductForm, setShowNewProductForm] = useState(false);
+  const {
+    values: newDiscount,
+    handleChange: handleNewDiscountChange,
+    reset: resetNewDiscount,
+  } = useForm<Discount>({ quantity: 0, rate: 0 });
+  const {
+    values: newCoupon,
+    handleChange: handleNewCouponChange,
+    reset: resetNewCoupon,
+  } = useForm<Coupon>({
     name: '',
     code: '',
     discountType: 'percentage',
     discountValue: 0,
   });
-  const [showNewProductForm, setShowNewProductForm] = useState(false);
-  const [newProduct, setNewProduct] = useState<Omit<Product, 'id'>>({
+  const {
+    values: newProduct,
+    handleChange: handleNewProductChange,
+    reset: resetNewProduct,
+  } = useForm<Omit<Product, 'id'>>({
     name: '',
     price: 0,
     stock: 0,
@@ -74,7 +87,7 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
       };
       onProductUpdate(newProduct);
       setEditingProduct(newProduct);
-      setNewDiscount({ quantity: 0, rate: 0 });
+      resetNewDiscount();
     }
   };
 
@@ -92,23 +105,13 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
 
   const handleAddCoupon = () => {
     onCouponAdd(newCoupon);
-    setNewCoupon({
-      name: '',
-      code: '',
-      discountType: 'percentage',
-      discountValue: 0,
-    });
+    resetNewCoupon();
   };
 
   const handleAddNewProduct = () => {
     const productWithId = { ...newProduct, id: Date.now().toString() };
     onProductAdd(productWithId);
-    setNewProduct({
-      name: '',
-      price: 0,
-      stock: 0,
-      discounts: [],
-    });
+    resetNewProduct();
     setShowNewProductForm(false);
   };
 
@@ -135,7 +138,7 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
                   id="productName"
                   type="text"
                   value={newProduct.name}
-                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                  onChange={(e) => handleNewProductChange('name', e.target.value)}
                   className="w-full p-2 border rounded"
                 />
               </div>
@@ -147,7 +150,7 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
                   id="productPrice"
                   type="number"
                   value={newProduct.price}
-                  onChange={(e) => setNewProduct({ ...newProduct, price: parseInt(e.target.value) })}
+                  onChange={(e) => handleNewProductChange('price', e.target.value)}
                   className="w-full p-2 border rounded"
                 />
               </div>
@@ -159,7 +162,7 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
                   id="productStock"
                   type="number"
                   value={newProduct.stock}
-                  onChange={(e) => setNewProduct({ ...newProduct, stock: parseInt(e.target.value) })}
+                  onChange={(e) => handleNewProductChange('stock', parseInt(e.target.value))}
                   className="w-full p-2 border rounded"
                 />
               </div>
@@ -230,14 +233,14 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
                               type="number"
                               placeholder="수량"
                               value={newDiscount.quantity}
-                              onChange={(e) => setNewDiscount({ ...newDiscount, quantity: parseInt(e.target.value) })}
+                              onChange={(e) => handleNewDiscountChange('quantity', parseInt(e.target.value))}
                               className="w-1/3 p-2 border rounded"
                             />
                             <input
                               type="number"
                               placeholder="할인율 (%)"
                               value={newDiscount.rate * 100}
-                              onChange={(e) => setNewDiscount({ ...newDiscount, rate: parseInt(e.target.value) / 100 })}
+                              onChange={(e) => handleNewDiscountChange('rate', parseInt(e.target.value) / 100)}
                               className="w-1/3 p-2 border rounded"
                             />
                             <button
@@ -287,14 +290,15 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
                 type="text"
                 placeholder="쿠폰 이름"
                 value={newCoupon.name}
-                onChange={(e) => setNewCoupon({ ...newCoupon, name: e.target.value })}
+                onChange={(e) => handleNewCouponChange('name', e.target.value)}
                 className="w-full p-2 border rounded"
               />
               <input
                 type="text"
+                name="code"
                 placeholder="쿠폰 코드"
                 value={newCoupon.code}
-                onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
+                onChange={(e) => handleNewCouponChange('code', e.target.value)}
                 className="w-full p-2 border rounded"
               />
               <div className="flex gap-2">
@@ -304,15 +308,13 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
                     { label: '할인율(%)', value: 'percentage' },
                   ]}
                   value={newCoupon.discountType}
-                  onValueChange={(value) =>
-                    setNewCoupon({ ...newCoupon, discountType: value as 'amount' | 'percentage' })
-                  }
+                  onValueChange={(value) => handleNewCouponChange('discountType', value)}
                 />
                 <input
                   type="number"
                   placeholder="할인 값"
                   value={newCoupon.discountValue}
-                  onChange={(e) => setNewCoupon({ ...newCoupon, discountValue: parseInt(e.target.value) })}
+                  onChange={(e) => handleNewCouponChange('discountValue', parseInt(e.target.value))}
                   className="w-full p-2 border rounded"
                 />
               </div>
