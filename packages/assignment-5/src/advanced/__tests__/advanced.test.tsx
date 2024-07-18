@@ -1,13 +1,13 @@
-import { ChangeEvent, useState } from 'react';
-import { describe, expect, test, vi } from 'vitest';
 import { act, fireEvent, render, renderHook, screen, within } from '@testing-library/react';
-import { CartPage } from '../../refactoring/components/CartPage';
+import { useState } from 'react';
+import { describe, expect, test, vi } from 'vitest';
 import { AdminPage } from '../../refactoring/components/AdminPage';
-import { Coupon, Product } from '../../types';
-import { clamp } from '../../refactoring/utils/number';
-import { cn } from '../../refactoring/utils';
+import { CartPage } from '../../refactoring/components/CartPage';
 import { Accordion, Select } from '../../refactoring/components/shared';
 import { useForm } from '../../refactoring/hooks/useForm';
+import { cn } from '../../refactoring/utils';
+import { clamp } from '../../refactoring/utils/number';
+import { Coupon, Product } from '../../types';
 
 const mockProducts: Product[] = [
   {
@@ -393,28 +393,10 @@ describe('advanced > ', () => {
       const { result } = renderHook(() => useForm(initialValues));
 
       act(() => {
-        result.current.handleChange({
-          target: { name: 'name', value: '감자' },
-        } as unknown as ChangeEvent<HTMLInputElement>);
+        result.current.handleChange('name', '감자');
       });
 
       expect(result.current.values.name).toBe('감자');
-    });
-
-    test('transform 함수가 올바르게 적용되는지 확인', () => {
-      const initialValues = { name: '', age: 0 };
-      const { result } = renderHook(() => useForm(initialValues));
-
-      act(() => {
-        result.current.handleChange(
-          {
-            target: { name: 'age', value: '25' },
-          } as unknown as ChangeEvent<HTMLInputElement>,
-          (value) => parseInt(value, 10)
-        );
-      });
-
-      expect(result.current.values.age).toBe(25);
     });
 
     test('reset 함수가 초기값으로 되돌리는지 확인', () => {
@@ -422,9 +404,7 @@ describe('advanced > ', () => {
       const { result } = renderHook(() => useForm(initialValues));
 
       act(() => {
-        result.current.handleChange({
-          target: { name: 'name', value: '감자' },
-        } as unknown as ChangeEvent<HTMLInputElement>);
+        result.current.handleChange('name', '감자');
       });
 
       act(() => {
