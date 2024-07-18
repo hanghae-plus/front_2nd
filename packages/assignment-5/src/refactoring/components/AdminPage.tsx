@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Coupon, Discount, Product } from '../../types.ts';
+import { Accordion, Select } from './shared';
 
 interface Props {
   products: Product[];
@@ -10,7 +11,6 @@ interface Props {
 }
 
 export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, onCouponAdd }: Props) => {
-  const [openProductIds, setOpenProductIds] = useState<Set<string>>(new Set());
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newDiscount, setNewDiscount] = useState<Discount>({ quantity: 0, rate: 0 });
   const [newCoupon, setNewCoupon] = useState<Coupon>({
@@ -26,18 +26,6 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
     stock: 0,
     discounts: [],
   });
-
-  const toggleProductAccordion = (productId: string) => {
-    setOpenProductIds((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(productId)) {
-        newSet.delete(productId);
-      } else {
-        newSet.add(productId);
-      }
-      return newSet;
-    });
-  };
 
   // handleEditProduct 함수 수정
   const handleEditProduct = (product: Product) => {
@@ -185,15 +173,12 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
           )}
           <div className="space-y-2">
             {products.map((product, index) => (
-              <div key={product.id} data-testid={`product-${index + 1}`} className="bg-white p-4 rounded shadow">
-                <button
-                  data-testid="toggle-button"
-                  onClick={() => toggleProductAccordion(product.id)}
-                  className="w-full text-left font-semibold"
-                >
+              <Accordion key={product.id} data-testid={`product-${index + 1}`} className="bg-white p-4 rounded shadow">
+                <Accordion.Trigger data-testid="toggle-button" className="w-full text-left font-semibold">
                   {product.name} - {product.price}원 (재고: {product.stock})
-                </button>
-                {openProductIds.has(product.id) && (
+                </Accordion.Trigger>
+
+                <Accordion.Content>
                   <div className="mt-2">
                     {editingProduct && editingProduct.id === product.id ? (
                       <div>
@@ -289,8 +274,8 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
                       </div>
                     )}
                   </div>
-                )}
-              </div>
+                </Accordion.Content>
+              </Accordion>
             ))}
           </div>
         </div>
@@ -313,16 +298,16 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
                 className="w-full p-2 border rounded"
               />
               <div className="flex gap-2">
-                <select
+                <Select
+                  options={[
+                    { label: '금액(원)', value: 'amount' },
+                    { label: '할인율(%)', value: 'percentage' },
+                  ]}
                   value={newCoupon.discountType}
-                  onChange={(e) =>
-                    setNewCoupon({ ...newCoupon, discountType: e.target.value as 'amount' | 'percentage' })
+                  onValueChange={(value) =>
+                    setNewCoupon({ ...newCoupon, discountType: value as 'amount' | 'percentage' })
                   }
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="amount">금액(원)</option>
-                  <option value="percentage">할인율(%)</option>
-                </select>
+                />
                 <input
                   type="number"
                   placeholder="할인 값"
