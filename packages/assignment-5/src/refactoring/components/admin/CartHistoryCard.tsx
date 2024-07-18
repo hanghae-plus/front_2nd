@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Coupon } from "../../../types";
 import { useForm } from "../../hooks";
 
@@ -7,73 +6,48 @@ interface CartHistoryCardProps {
   addCoupon: (newCoupon: Coupon) => void;
 }
 
-interface CouponForm {
-  couponName: string;
-  couponCode: string;
-  discountType: string;
-  discountValue: number;
-}
-
 const CartHistoryCard = ({ coupons, addCoupon }: CartHistoryCardProps) => {
-  /**
-   * 쿠폰 추가 관련 관심사
-   */
-  const [newCoupon, setNewCoupon] = useState<Coupon>({
+  const { formState, handleChangeElement, submitForm } = useForm<Coupon>({
     name: "",
     code: "",
     discountType: "percentage",
     discountValue: 0,
   });
 
-  const addCouponHandler = () => {
-    addCoupon(newCoupon);
-    setNewCoupon({
-      name: "",
-      code: "",
-      discountType: "percentage",
-      discountValue: 0,
-    });
+  const handleCouponAddFormSubmit = (event: React.FormEvent) => {
+    submitForm(event);
+    addCoupon(formState);
   };
-
-  const { formState } = useForm<CouponForm>({
-    couponName: "",
-    couponCode: "",
-    discountType: "",
-    discountValue: 0,
-  });
 
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">쿠폰 관리</h2>
       <div className="bg-white p-4 rounded shadow">
-        <form className="space-y-2 mb-4">
+        <form
+          className="space-y-2 mb-4"
+          onSubmit={(e) => handleCouponAddFormSubmit(e)}
+        >
           <input
             type="text"
             placeholder="쿠폰 이름"
-            value={newCoupon.name}
-            onChange={(e) =>
-              setNewCoupon({ ...newCoupon, name: e.target.value })
-            }
+            name="name"
+            value={formState.name}
+            onChange={handleChangeElement}
             className="w-full p-2 border rounded"
           />
           <input
             type="text"
             placeholder="쿠폰 코드"
-            value={newCoupon.code}
-            onChange={(e) =>
-              setNewCoupon({ ...newCoupon, code: e.target.value })
-            }
+            name="code"
+            value={formState.code}
+            onChange={handleChangeElement}
             className="w-full p-2 border rounded"
           />
           <div className="flex gap-2">
             <select
-              value={newCoupon.discountType}
-              onChange={(e) =>
-                setNewCoupon({
-                  ...newCoupon,
-                  discountType: e.target.value as "amount" | "percentage",
-                })
-              }
+              name="discountType"
+              value={formState.discountType}
+              onChange={handleChangeElement}
               className="w-full p-2 border rounded"
             >
               <option value="amount">금액(원)</option>
@@ -82,18 +56,15 @@ const CartHistoryCard = ({ coupons, addCoupon }: CartHistoryCardProps) => {
             <input
               type="number"
               placeholder="할인 값"
-              value={newCoupon.discountValue}
-              onChange={(e) =>
-                setNewCoupon({
-                  ...newCoupon,
-                  discountValue: parseInt(e.target.value),
-                })
-              }
+              name="discountValue"
+              value={formState.discountValue}
+              onChange={handleChangeElement}
               className="w-full p-2 border rounded"
             />
           </div>
           <button
-            onClick={addCouponHandler}
+            onClick={handleCouponAddFormSubmit}
+            type="submit"
             className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
           >
             쿠폰 추가

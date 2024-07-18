@@ -1,8 +1,14 @@
 import { useCallback, useState } from "react";
 
-interface useForm {}
+type FormElement = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+interface UseForm<T> {
+  formState: T;
+  resetForm: () => void;
+  submitForm: (event: React.FormEvent) => void;
+  handleChangeElement: ({ target }: React.ChangeEvent<FormElement>) => void;
+}
 
-export const useForm = <T>(initialValue: T) => {
+export const useForm = <T>(initialValue: T): UseForm<T> => {
   const [formState, setFormState] = useState(initialValue);
 
   /**
@@ -12,8 +18,11 @@ export const useForm = <T>(initialValue: T) => {
     setFormState(initialValue);
   }, [initialValue]);
 
-  const handleInput = useCallback(
-    ({ target }: { target: HTMLInputElement }) => {
+  /**
+   *
+   */
+  const handleChangeElement = useCallback(
+    ({ target }: React.ChangeEvent<FormElement>) => {
       const { name, value } = target;
 
       setFormState((prevState) => {
@@ -35,5 +44,5 @@ export const useForm = <T>(initialValue: T) => {
     [resetForm]
   );
 
-  return { formState, resetForm, submitForm, handleInput };
+  return { formState, resetForm, submitForm, handleChangeElement };
 };
