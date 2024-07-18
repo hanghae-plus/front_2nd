@@ -1,13 +1,13 @@
 import { ChangeEvent } from 'react';
-import { CartItem, Coupon, Product } from '../../types.ts';
-import { useCart } from '../hooks';
+import { CartItem, Product } from '../../../types.ts';
+// import { useProducts, useCoupons } from '../../common/hooks/';
+import { useCart } from './hooks/useCart.ts';
+import { useCoupons, useProducts } from '../../common/hooks';
 
-interface Props {
-  products: Product[];
-  coupons: Coupon[];
-}
+export const CartPage = () => {
+  const { products } = useProducts();
+  const { coupons } = useCoupons();
 
-export const CartPage = ({ products, coupons }: Props) => {
   const { cart, addToCart, removeFromCart, updateQuantity, applyCoupon, calculateTotal, selectedCoupon } = useCart();
 
   const getMaxDiscount = (discounts: { quantity: number; rate: number }[]) => {

@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { CartPage } from './components/CartPage.tsx';
-import { AdminPage } from './components/AdminPage.tsx';
+import { useEffect, useState } from 'react';
+import { CartPage } from './pages/cart';
+import { AdminPage } from './pages/admin';
 import { Coupon, Product } from '../types.ts';
-import { useCoupons, useProducts } from "./hooks";
+import Navbar from './common/components/Navbar/index.tsx';
+import { useLocalStorage } from './common/hooks';
 
 const initialProducts: Product[] = [
   {
@@ -10,7 +11,10 @@ const initialProducts: Product[] = [
     name: '상품1',
     price: 10000,
     stock: 20,
-    discounts: [{ quantity: 10, rate: 0.1 }, { quantity: 20, rate: 0.2 }]
+    discounts: [
+      { quantity: 10, rate: 0.1 },
+      { quantity: 20, rate: 0.2 }
+    ]
   },
   {
     id: 'p2',
@@ -44,36 +48,26 @@ const initialCoupons: Coupon[] = [
 ];
 
 const App = () => {
-  const { products, updateProduct, addProduct } = useProducts(initialProducts);
-  const { coupons, addCoupon } = useCoupons(initialCoupons);
+  // TODO: Navbar 메뉴 확장성 고려해 변경해보기..
   const [isAdmin, setIsAdmin] = useState(false);
+  const [products, setProducts] = useLocalStorage<Product[]>('products', []);
+  const [coupons, setCoupons] = useLocalStorage<Coupon[]>('coupons', []);
+
+  useEffect(() => {
+    // 로컬 스토리지가 비어있을 때만 초기 데이터를 설정합니다
+    if (products.length === 0) {
+      setProducts(initialProducts);
+    }
+
+    if (coupons.length === 0) {
+      setCoupons(initialCoupons);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-blue-600 text-white p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">쇼핑몰 관리 시스템</h1>
-          <button
-            onClick={() => setIsAdmin(!isAdmin)}
-            className="bg-white text-blue-600 px-4 py-2 rounded hover:bg-blue-100"
-          >
-            {isAdmin ? '장바구니 페이지로' : '관리자 페이지로'}
-          </button>
-        </div>
-      </nav>
-      <main className="container mx-auto mt-6">
-        {isAdmin ? (
-          <AdminPage
-            products={products}
-            coupons={coupons}
-            onProductUpdate={updateProduct}
-            onProductAdd={addProduct}
-            onCouponAdd={addCoupon}
-          />
-        ) : (
-          <CartPage products={products} coupons={coupons}/>
-        )}
-      </main>
+      <Navbar isAdmin={isAdmin} setIsAdmin={setIsAdmin} />
+      <main className="container mx-auto mt-6">{isAdmin ? <AdminPage /> : <CartPage />}</main>
     </div>
   );
 };
