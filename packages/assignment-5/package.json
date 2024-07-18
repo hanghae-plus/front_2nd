@@ -6,6 +6,7 @@
   "scripts": {
     "start:origin": "vite serve --open ./index.origin.html",
     "start:refactoring": "vite serve --open ./index.refactoring.html",
+    "start:fsd": "vite serve --open ./index.fsd.html",
     "test": "vitest",
     "test:origin": "vitest src/origin",
     "test:basic": "vitest src/basic",
@@ -15,13 +16,16 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "immer": "^10.1.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.5",
     "@testing-library/react": "^15.0.7",
     "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.13.1",
