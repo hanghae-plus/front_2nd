@@ -1,21 +1,9 @@
-import type { CartItem, Coupon } from '../../../types';
+import type { CartItem, Coupon, Product } from '../../../types';
+import { getMaxApplicableDiscount } from './discountUtils.ts';
 
 export const calculateItemTotal = ({ product, quantity }: CartItem) => {
   const discountRate = getMaxApplicableDiscount({ product, quantity });
   return product.price * quantity * (1 - discountRate);
-};
-
-// 할인 적용 가능한 최대 할인율을 반환하되, 할인이 적용되지 않는 경우 0을 반환합니다.
-export const getMaxApplicableDiscount = ({
-  product: { discounts },
-  quantity,
-}: CartItem) => {
-  return discounts.reduce((maxDiscountRate, discount) => {
-    if (quantity >= discount.quantity) {
-      return Math.max(maxDiscountRate, discount.rate);
-    }
-    return maxDiscountRate;
-  }, 0);
 };
 
 interface CalculateCartTotal {
@@ -81,9 +69,14 @@ export const updateCartItemQuantity = ({
   return updatedCart.filter((cartItem) => cartItem.quantity > 0);
 };
 
+export const getRemainingStock = (product: Product, cart: CartItem[]) => {
+  const cartItem = cart.find((item) => item.product.id === product.id);
+  return product.stock - (cartItem?.quantity || 0);
+};
+
 export default {
   calculateItemTotal,
   calculateCartTotal,
-  getMaxApplicableDiscount,
   updateCartItemQuantity,
+  getRemainingStock,
 };

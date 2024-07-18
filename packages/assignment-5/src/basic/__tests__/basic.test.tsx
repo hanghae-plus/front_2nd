@@ -4,6 +4,7 @@ import { act, fireEvent, render, renderHook } from '@testing-library/react';
 import { screen, within } from '@testing-library/dom';
 
 import cartUtils from '../../refactoring/hooks/utils/cartUtils.ts';
+import { getMaxApplicableDiscount } from '../../refactoring/hooks/utils/discountUtils.ts';
 import { CartPage } from '../../refactoring/pages/CartPage.tsx';
 import { AdminPage } from '../../refactoring/pages/AdminPage.tsx';
 import type { CartItem, Coupon, Product } from '../../types';
@@ -366,12 +367,12 @@ describe('basic > ', () => {
     describe('getMaxApplicableDiscount', () => {
       test('할인이 적용되지 않으면 0을 반환해야 합니다.', () => {
         const item: CartItem = { product: testProduct, quantity: 1 };
-        expect(cartUtils.getMaxApplicableDiscount(item)).toBe(0);
+        expect(getMaxApplicableDiscount(item)).toBe(0);
       });
 
       test('적용 가능한 가장 높은 할인율을 반환해야 합니다.', () => {
         const item: CartItem = { product: testProduct, quantity: 5 };
-        expect(cartUtils.getMaxApplicableDiscount(item)).toBe(0.2);
+        expect(getMaxApplicableDiscount(item)).toBe(0.2);
       });
     });
 
