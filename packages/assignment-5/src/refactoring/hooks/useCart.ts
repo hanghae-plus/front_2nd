@@ -2,10 +2,9 @@
 import { useState } from 'react';
 import { CartItem, Coupon, Product } from '../../types';
 import { calculateCartTotal, updateCartItemQuantity } from './utils/cartUtils';
-import { getLocalStorage } from './utils/storageUtils';
 
 export const useCart = () => {
-  const [cart, setCart] = useState<CartItem[]>(getLocalStorage('myCart') || []);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
 
   const addToCart = (product: Product) => {
@@ -46,6 +45,7 @@ export const useCart = () => {
 
   return {
     cart,
+    setCart,
     addToCart,
     removeFromCart,
     updateQuantity,
