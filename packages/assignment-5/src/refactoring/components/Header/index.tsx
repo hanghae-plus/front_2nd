@@ -1,15 +1,9 @@
-import HeaderView from "./view";
-
-interface HeaderProps {
-  isAdmin: boolean;
-  onClickSwitchPage: () => void;
+interface Props {
+  title: string;
 }
-const Header = ({ isAdmin, onClickSwitchPage }: HeaderProps) => {
-  const props = {
-    isAdmin,
-    onClickSwitchPage,
-  };
-  return <HeaderView {...props} />;
+
+const Header = ({ title }: Props) => {
+  return <h1 className="text-3xl font-bold mb-6">{title}</h1>;
 };
 
 export default Header;

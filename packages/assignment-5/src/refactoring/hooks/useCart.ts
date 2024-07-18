@@ -10,41 +10,31 @@ export const useCart = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
 
-  const addToCart = (product: Product) => {
-    const targetProductIndex = cart.findIndex(
-      (item) => item.product.id === product.id
-    );
-
-    const newCart = [...cart];
-
-    if (targetProductIndex < 0) {
-      newCart.push({ product, quantity: 1 });
-    } else {
-      newCart[targetProductIndex].quantity += 1;
-    }
-
-    setCart(newCart);
-  };
-
-  const removeFromCart = (productId: string) => {
-    setCart((prev) =>
-      prev
-        .map((cartItem) =>
-          cartItem.product.id === productId ? null : cartItem
-        )
-        .filter((cartItem) => cartItem !== null)
-    );
-  };
-
-  const updateQuantity = (productId: string, newQuantity: number) => {
+  const addToCart = (product: Product) =>
     setCart((prev) => {
-      return updateCartItemQuantity(prev, productId, newQuantity);
-    });
-  };
+      const productIndex = prev.findIndex(
+        (item) => item.product.id === product.id
+      );
 
-  const applyCoupon = (coupon: Coupon) => {
-    setSelectedCoupon(coupon);
-  };
+      const newCart = [...prev];
+
+      if (productIndex < 0) {
+        return [...newCart, { product, quantity: 1 }];
+      }
+
+      newCart[productIndex].quantity++;
+      return newCart;
+    });
+
+  const removeFromCart = (productId: string) =>
+    setCart((prev) =>
+      prev.filter((cartItem) => cartItem.product.id !== productId)
+    );
+
+  const updateQuantity = (productId: string, newQuantity: number) =>
+    setCart((prev) => updateCartItemQuantity(prev, productId, newQuantity));
+
+  const applyCoupon = (coupon: Coupon) => setSelectedCoupon(coupon);
 
   const calculateTotal = () => calculateCartTotal(cart, selectedCoupon);
 
