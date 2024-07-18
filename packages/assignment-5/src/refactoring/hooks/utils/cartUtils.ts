@@ -1,4 +1,9 @@
 import { CartItem, Coupon, Product } from "../../types";
+import {
+  DISCOUNT_TYPES,
+  MIN_QUANTITY,
+  PERCENTAGE_BASE,
+} from "../../components/constants";
 
 export const calculateItemTotal = (item: CartItem): number => {
   const { product, quantity } = item;
@@ -32,12 +37,13 @@ export const calculateCartTotal = (
 
   let couponDiscount = 0;
   if (selectedCoupon) {
-    if (selectedCoupon.discountType === "amount") {
+    if (selectedCoupon.discountType === DISCOUNT_TYPES.AMOUNT) {
       couponDiscount = selectedCoupon.discountValue;
     } else {
       const totalAfterItemDiscounts = totalBeforeDiscount - totalDiscount;
       couponDiscount = Math.floor(
-        totalAfterItemDiscounts * (selectedCoupon.discountValue / 100)
+        totalAfterItemDiscounts *
+          (selectedCoupon.discountValue / PERCENTAGE_BASE)
       );
     }
   }
@@ -61,7 +67,7 @@ export const updateCartItemQuantity = (
     .map((item) => {
       if (item.product.id === productId) {
         const updatedQuantity = Math.min(newQuantity, item.product.stock);
-        return updatedQuantity > 0
+        return updatedQuantity > MIN_QUANTITY
           ? { ...item, quantity: updatedQuantity }
           : null;
       }

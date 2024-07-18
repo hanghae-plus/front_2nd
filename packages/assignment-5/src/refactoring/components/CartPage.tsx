@@ -2,6 +2,7 @@ import React from "react";
 import { Product, Coupon } from "../../types";
 import { useCart } from "../hooks/useCart";
 import { getMaxApplicableDiscount } from "../hooks/utils/cartUtils";
+import { DISCOUNT_TYPES, PERCENTAGE_BASE } from "./constants";
 
 interface Props {
   products: Product[];
@@ -144,7 +145,7 @@ export const CartPage: React.FC<Props> = ({ products, coupons }) => {
               {coupons.map((coupon, index) => (
                 <option key={coupon.code} value={index}>
                   {coupon.name} -{" "}
-                  {coupon.discountType === "amount"
+                  {coupon.discountType === DISCOUNT_TYPES.AMOUNT
                     ? `${coupon.discountValue}원`
                     : `${coupon.discountValue}%`}
                 </option>
@@ -153,7 +154,7 @@ export const CartPage: React.FC<Props> = ({ products, coupons }) => {
             {selectedCoupon && (
               <p className="text-green-600">
                 적용된 쿠폰: {selectedCoupon.name}(
-                {selectedCoupon.discountType === "amount"
+                {selectedCoupon.discountType === DISCOUNT_TYPES.AMOUNT
                   ? `${selectedCoupon.discountValue}원`
                   : `${selectedCoupon.discountValue}%`}{" "}
                 할인)
