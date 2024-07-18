@@ -42,13 +42,14 @@ const ProductList = ({
           </button>
           {openProductIds.has(product.id) && (
             <div className="mt-2">
-              {product.discounts.map((discount, index) => (
-                <div key={index} className="mb-2">
-                  <span>
-                    {discount.quantity}개 이상 구매 시 {discount.rate * 100}% 할인
-                  </span>
-                </div>
-              ))}
+              {!editingProduct &&
+                product.discounts.map((discount, index) => (
+                  <div key={index} className="mb-2">
+                    <span>
+                      {discount.quantity}개 이상 구매 시 {discount.rate * 100}% 할인
+                    </span>
+                  </div>
+                ))}
               {editingProduct && editingProduct.id === product.id ? (
                 <ProductEditForm editingProduct={editingProduct} newDiscount={newDiscount} {...productEditHandlers} />
               ) : (

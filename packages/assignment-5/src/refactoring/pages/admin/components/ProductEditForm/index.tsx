@@ -25,8 +25,7 @@ const ProductEditForm = ({
   setNewDiscount
 }: ProductEditFormProps) => {
   return (
-    <div className="bg-white p-4 rounded shadow mt-4">
-      <h3 className="text-xl font-semibold mb-4">상품 수정</h3>
+    <div>
       <div className="mb-4">
         <label className="block mb-1">상품명: </label>
         <input
@@ -94,7 +93,7 @@ const ProductEditForm = ({
       </div>
       <button
         onClick={handleEditComplete}
-        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mt-4"
+        className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mt-2"
       >
         수정 완료
       </button>
