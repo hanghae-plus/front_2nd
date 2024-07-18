@@ -27,7 +27,7 @@ export const useCart = () => {
     setCart((prevCart) => updateCartItemQuantity(prevCart, productId, newQuantity));
   };
 
-  const applyCoupon = (coupon: Coupon) => {
+  const applyCoupon = (coupon: Coupon | null) => {
     setSelectedCoupon(coupon);
   };
 
