@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Product } from '../../types.ts';
+import { Product } from '../../../types.ts';
 
 export const useProducts = (initialProducts: Product[]) => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -14,7 +14,9 @@ export const useProducts = (initialProducts: Product[]) => {
   };
 
   const updateProduct = (updatedProduct: Product) => {
-    setProducts((prevProducts) => prevProducts.map((product) => (product.id === updatedProduct.id ? updatedProduct : product)));
+    setProducts((prevProducts) =>
+      prevProducts.map((product) => (product.id === updatedProduct.id ? updatedProduct : product))
+    );
   };
   return { products, addProduct, removeProduct, updateProduct };
 };
