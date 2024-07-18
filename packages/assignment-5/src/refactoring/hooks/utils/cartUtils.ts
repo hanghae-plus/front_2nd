@@ -19,10 +19,21 @@ export const getMaxApplicableDiscount = (item: CartItem) => {
 };
 
 export const calculateCartTotal = (cart: CartItem[], selectedCoupon: Coupon | null) => {
+  const calculateDiscountCoupon = (selectedCoupon: Coupon | null) => {
+    if (selectedCoupon) {
+      return selectedCoupon.discountType === 'amount' ? selectedCoupon.discountValue : selectedCoupon.discountValue * 100;
+    }
+    return 0;
+  };
+
+  const totalBeforeDiscount = cart.reduce((total, item) => total + calculateItemTotal(item), 0);
+  const totalAfterDiscount = totalBeforeDiscount - (totalBeforeDiscount * calculateDiscountCoupon(selectedCoupon));
+  const totalDiscount = totalBeforeDiscount - totalAfterDiscount;
+
   return {
-    totalBeforeDiscount: 0,
-    totalAfterDiscount: 0,
-    totalDiscount: 0
+    totalBeforeDiscount,
+    totalAfterDiscount,
+    totalDiscount
   };
 };
 
