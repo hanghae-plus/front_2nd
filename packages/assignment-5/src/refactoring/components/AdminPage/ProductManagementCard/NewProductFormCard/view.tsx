@@ -1,19 +1,9 @@
-import { InputEventHandler, Product } from "@/types";
+import useProductForm from "@/refactoring/hooks/useProductForm";
 
 interface Props {
-  editingProduct: Omit<Product, "id">;
-  onChangeName: InputEventHandler;
-  onChangeStock: InputEventHandler;
-  onChangePrice: InputEventHandler;
-  onClickAddNewProduct: () => void;
+  productForm: ReturnType<typeof useProductForm>;
 }
-const NewProductFormCardView = ({
-  editingProduct,
-  onChangeName,
-  onChangePrice,
-  onChangeStock,
-  onClickAddNewProduct,
-}: Props) => {
+const NewProductFormCardView = ({ productForm }: Props) => {
   return (
     <div className="bg-white p-4 rounded shadow mb-4">
       <h3 className="text-xl font-semibold mb-2">새 상품 추가</h3>
@@ -27,8 +17,8 @@ const NewProductFormCardView = ({
         <input
           id="productName"
           type="text"
-          value={editingProduct.name}
-          onChange={onChangeName}
+          value={productForm.productForm.name}
+          onChange={productForm.onChangeName}
           className="w-full p-2 border rounded"
         />
       </div>
@@ -42,8 +32,8 @@ const NewProductFormCardView = ({
         <input
           id="productPrice"
           type="number"
-          value={editingProduct.price}
-          onChange={onChangePrice}
+          value={productForm.productForm.price}
+          onChange={productForm.onChangePrice}
           className="w-full p-2 border rounded"
         />
       </div>
@@ -57,13 +47,18 @@ const NewProductFormCardView = ({
         <input
           id="productStock"
           type="number"
-          value={editingProduct.stock}
-          onChange={onChangeStock}
+          value={productForm.productForm.stock}
+          onChange={productForm.onChangeStock}
           className="w-full p-2 border rounded"
         />
       </div>
+      {productForm.errorMessage && (
+        <div className="text-red-500 text-sm mb-2">
+          {productForm.errorMessage}
+        </div>
+      )}
       <button
-        onClick={onClickAddNewProduct}
+        onClick={productForm.submitEditingProduct}
         className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
       >
         추가

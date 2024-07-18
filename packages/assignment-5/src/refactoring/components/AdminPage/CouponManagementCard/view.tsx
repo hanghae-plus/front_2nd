@@ -1,23 +1,11 @@
-import { Coupon, InputEventHandler, SelectEventHandler } from "@/types";
+import useCouponForm from "@/refactoring/hooks/useCouponForm";
+import { Coupon } from "@/types";
 
 interface Props {
-  newCoupon: Coupon;
-  onChangeNewCouponName: InputEventHandler;
-  onChangeNewCouponCode: InputEventHandler;
-  onChangeNewCouponType: SelectEventHandler;
-  onChangeNewCouponValue: InputEventHandler;
-  onClickAddCoupon: () => void;
+  couponForm: ReturnType<typeof useCouponForm>;
   coupons: Coupon[];
 }
-const CouponManagementCardView = ({
-  newCoupon,
-  onChangeNewCouponName,
-  onChangeNewCouponCode,
-  onChangeNewCouponType,
-  onChangeNewCouponValue,
-  onClickAddCoupon,
-  coupons,
-}: Props) => {
+const CouponManagementCardView = ({ couponForm, coupons }: Props) => {
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">쿠폰 관리</h2>
@@ -26,21 +14,21 @@ const CouponManagementCardView = ({
           <input
             type="text"
             placeholder="쿠폰 이름"
-            value={newCoupon.name}
-            onChange={onChangeNewCouponName}
+            value={couponForm.couponForm.name}
+            onChange={couponForm.onChangeNewCouponName}
             className="w-full p-2 border rounded"
           />
           <input
             type="text"
             placeholder="쿠폰 코드"
-            value={newCoupon.code}
-            onChange={onChangeNewCouponCode}
+            value={couponForm.couponForm.code}
+            onChange={couponForm.onChangeNewCouponCode}
             className="w-full p-2 border rounded"
           />
           <div className="flex gap-2">
             <select
-              value={newCoupon.discountType}
-              onChange={onChangeNewCouponType}
+              value={couponForm.couponForm.discountType}
+              onChange={couponForm.onChangeNewCouponType}
               className="w-full p-2 border rounded"
             >
               <option value="amount">금액(원)</option>
@@ -49,13 +37,16 @@ const CouponManagementCardView = ({
             <input
               type="number"
               placeholder="할인 값"
-              value={newCoupon.discountValue}
-              onChange={onChangeNewCouponValue}
+              value={couponForm.couponForm.discountValue}
+              onChange={couponForm.onChangeNewCouponValue}
               className="w-full p-2 border rounded"
             />
           </div>
+          {couponForm.errorMessage && (
+            <div className="text-red-500">{couponForm.errorMessage}</div>
+          )}
           <button
-            onClick={onClickAddCoupon}
+            onClick={couponForm.onClickAddCoupon}
             className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
           >
             쿠폰 추가

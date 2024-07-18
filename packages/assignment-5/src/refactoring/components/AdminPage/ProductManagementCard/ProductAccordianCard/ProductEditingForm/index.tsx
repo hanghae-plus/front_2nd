@@ -1,6 +1,6 @@
-import useEditProductInform from "@/refactoring/hooks/useEditProductInform";
-import { Discount, InputEventHandler, Product } from "@/types";
-import { useState } from "react";
+import useDiscountForm from "@/refactoring/hooks/useDiscountForm";
+import useProductForm from "@/refactoring/hooks/useProductForm";
+import { Product } from "@/types";
 import ProductEditingFormView from "./view";
 
 interface Props {
@@ -13,63 +13,17 @@ const ProductEditingForm = ({
   product,
   toggleIsEditing,
 }: Props) => {
-  const editProductInform = useEditProductInform(product);
-
-  const [newDiscount, setNewDiscount] = useState<Discount>({
-    quantity: 0,
-    rate: 0,
-  });
-
-  const onChangeDiscountQuantity: InputEventHandler = (event) => {
-    const updatedDiscount = {
-      ...newDiscount,
-      quantity: parseInt(event.target.value),
-    };
-    setNewDiscount(updatedDiscount);
-  };
-
-  const onChangeDiscountRate: InputEventHandler = (event) => {
-    const updatedDiscount = {
-      ...newDiscount,
-      rate: parseInt(event.target.value) / 100,
-    };
-    setNewDiscount(updatedDiscount);
-  };
-
-  const onClickRemoveDiscount = (index: number) => {
-    const updatedProduct = {
-      ...editProductInform.editingProduct,
-      discounts: editProductInform.editingProduct.discounts.filter(
-        (_, i) => i !== index
-      ),
-    };
-    onProductUpdate(updatedProduct);
-    editProductInform.setEditingProduct(updatedProduct);
-  };
-
-  const onClickAddDiscount = () => {
-    const updatedProduct = {
-      ...editProductInform.editingProduct,
-      discounts: [...editProductInform.editingProduct.discounts, newDiscount],
-    };
-    onProductUpdate(updatedProduct);
-    editProductInform.setEditingProduct(updatedProduct);
-    setNewDiscount({ quantity: 0, rate: 0 });
-  };
-
-  const onClickEditComplete = () => {
-    onProductUpdate(editProductInform.editingProduct);
+  const productFormCallback = (product: Product) => {
+    onProductUpdate(product);
     toggleIsEditing();
   };
 
+  const productForm = useProductForm(product, productFormCallback);
+  const discountForm = useDiscountForm(productForm, onProductUpdate);
+
   const props = {
-    ...editProductInform,
-    newDiscount,
-    onClickRemoveDiscount,
-    onChangeDiscountQuantity,
-    onChangeDiscountRate,
-    onClickAddDiscount,
-    onClickEditComplete,
+    productForm,
+    discountForm,
   };
   return <ProductEditingFormView {...props} />;
 };

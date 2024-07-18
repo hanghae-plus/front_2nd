@@ -1,47 +1,21 @@
-import { Discount, InputEventHandler, Product } from "@/types";
+import useDiscountForm from "@/refactoring/hooks/useDiscountForm";
+import useProductForm from "@/refactoring/hooks/useProductForm";
+import { Product } from "@/types";
 
 interface Props {
-  editingProduct: Product;
-  newDiscount: Discount;
-  onChangeName: InputEventHandler;
-  onChangePrice: InputEventHandler;
-  onChangeStock: InputEventHandler;
-  onClickRemoveDiscount: (index: number) => void;
-  onChangeDiscountQuantity: InputEventHandler;
-  onChangeDiscountRate: InputEventHandler;
-  onClickAddDiscount: () => void;
-  onClickEditComplete: () => void;
+  productForm: ReturnType<typeof useProductForm>;
+  discountForm: ReturnType<typeof useDiscountForm>;
 }
-const ProductEditingFormView = ({
-  editingProduct,
-  newDiscount,
-  onChangeName,
-  onChangePrice,
-  onChangeStock,
-  onClickRemoveDiscount,
-  onChangeDiscountQuantity,
-  onChangeDiscountRate,
-  onClickAddDiscount,
-  onClickEditComplete,
-}: Props) => {
+const ProductEditingFormView = ({ productForm, discountForm }: Props) => {
   return (
     <div>
-      <ProductInformEditingForm
-        editingProduct={editingProduct}
-        onChangeName={onChangeName}
-        onChangePrice={onChangePrice}
-        onChangeStock={onChangeStock}
-      />
+      <ProductInformEditingForm productForm={productForm} />
       <ProductDiscountInformEditingForm
-        editingProduct={editingProduct}
-        newDiscount={newDiscount}
-        onClickRemoveDiscount={onClickRemoveDiscount}
-        onChangeDiscountQuantity={onChangeDiscountQuantity}
-        onChangeDiscountRate={onChangeDiscountRate}
-        onClickAddDiscount={onClickAddDiscount}
+        editingProduct={productForm.editingProduct}
+        discountForm={discountForm}
       />
       <button
-        onClick={onClickEditComplete}
+        onClick={productForm.submitEditingProduct}
         className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mt-2"
       >
         수정 완료
@@ -51,16 +25,10 @@ const ProductEditingFormView = ({
 };
 
 interface ProductInformEditingFormProps {
-  editingProduct: Product;
-  onChangeName: InputEventHandler;
-  onChangePrice: InputEventHandler;
-  onChangeStock: InputEventHandler;
+  productForm: ReturnType<typeof useProductForm>;
 }
 const ProductInformEditingForm = ({
-  editingProduct,
-  onChangeName,
-  onChangePrice,
-  onChangeStock,
+  productForm,
 }: ProductInformEditingFormProps) => {
   return (
     <>
@@ -68,8 +36,8 @@ const ProductInformEditingForm = ({
         <label className="block mb-1">상품명: </label>
         <input
           type="text"
-          value={editingProduct.name}
-          onChange={onChangeName}
+          value={productForm.productForm.name}
+          onChange={productForm.onChangeName}
           className="w-full p-2 border rounded"
         />
       </div>
@@ -77,8 +45,8 @@ const ProductInformEditingForm = ({
         <label className="block mb-1">가격: </label>
         <input
           type="number"
-          value={editingProduct.price}
-          onChange={onChangePrice}
+          value={productForm.productForm.price}
+          onChange={productForm.onChangePrice}
           className="w-full p-2 border rounded"
         />
       </div>
@@ -86,8 +54,8 @@ const ProductInformEditingForm = ({
         <label className="block mb-1">재고: </label>
         <input
           type="number"
-          value={editingProduct.stock}
-          onChange={onChangeStock}
+          value={productForm.productForm.stock}
+          onChange={productForm.onChangeStock}
           className="w-full p-2 border rounded"
         />
       </div>
@@ -97,19 +65,11 @@ const ProductInformEditingForm = ({
 
 interface ProductDiscountInformEditingFormProps {
   editingProduct: Product;
-  newDiscount: Discount;
-  onClickRemoveDiscount: (index: number) => void;
-  onChangeDiscountQuantity: InputEventHandler;
-  onChangeDiscountRate: InputEventHandler;
-  onClickAddDiscount: () => void;
+  discountForm: ReturnType<typeof useDiscountForm>;
 }
 const ProductDiscountInformEditingForm = ({
   editingProduct,
-  newDiscount,
-  onClickRemoveDiscount,
-  onChangeDiscountQuantity,
-  onChangeDiscountRate,
-  onClickAddDiscount,
+  discountForm,
 }: ProductDiscountInformEditingFormProps) => {
   return (
     <div>
@@ -120,7 +80,7 @@ const ProductDiscountInformEditingForm = ({
             {discount.quantity}개 이상 구매 시 {discount.rate * 100}% 할인
           </span>
           <button
-            onClick={() => onClickRemoveDiscount(index)}
+            onClick={() => discountForm.onClickRemoveDiscount(index)}
             className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
           >
             삭제
@@ -131,24 +91,29 @@ const ProductDiscountInformEditingForm = ({
         <input
           type="number"
           placeholder="수량"
-          value={newDiscount.quantity}
-          onChange={onChangeDiscountQuantity}
+          value={discountForm.discountForm.quantity}
+          onChange={discountForm.onChangeDiscountQuantity}
           className="w-1/3 p-2 border rounded"
         />
         <input
           type="number"
           placeholder="할인율 (%)"
-          value={newDiscount.rate * 100}
-          onChange={onChangeDiscountRate}
+          value={discountForm.discountForm.rate}
+          onChange={discountForm.onChangeDiscountRate}
           className="w-1/3 p-2 border rounded"
         />
         <button
-          onClick={onClickAddDiscount}
+          onClick={discountForm.onClickAddDiscount}
           className="w-1/3 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
         >
           할인 추가
         </button>
       </div>
+      {discountForm.errorMessage && (
+        <span className="text-red-500 text-sm">
+          {discountForm.errorMessage}
+        </span>
+      )}
     </div>
   );
 };
