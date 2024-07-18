@@ -6,7 +6,7 @@ import { AdminPage } from '../../refactoring/components/AdminPage';
 import { Coupon, Product } from '../../types';
 import { clamp } from '../../refactoring/utils/number';
 import { cn } from '../../refactoring/utils';
-import { Select } from '../../refactoring/components/shared';
+import { Accordion, Select } from '../../refactoring/components/shared';
 
 const mockProducts: Product[] = [
   {
@@ -222,6 +222,68 @@ describe('advanced > ', () => {
       const $newCoupon = screen.getByTestId('coupon-3');
 
       expect($newCoupon).toHaveTextContent('새 쿠폰 (NEW10):10% 할인');
+    });
+  });
+
+  describe('Accordion 컴포넌트 테스트', () => {
+    test('기본 렌더링 및 동작 테스트', () => {
+      render(
+        <Accordion>
+          <Accordion.Trigger>제목</Accordion.Trigger>
+          <Accordion.Content>내용</Accordion.Content>
+        </Accordion>
+      );
+
+      const trigger = screen.getByText('제목');
+      expect(trigger).toBeInTheDocument();
+      expect(screen.queryByText('내용')).not.toBeInTheDocument();
+
+      fireEvent.click(trigger);
+      expect(screen.getByText('내용')).toBeInTheDocument();
+
+      fireEvent.click(trigger);
+      expect(screen.queryByText('내용')).not.toBeInTheDocument();
+    });
+
+    test('defaultOpen prop 테스트', () => {
+      render(
+        <Accordion defaultOpen>
+          <Accordion.Trigger>제목</Accordion.Trigger>
+          <Accordion.Content>내용</Accordion.Content>
+        </Accordion>
+      );
+
+      expect(screen.getByText('내용')).toBeInTheDocument();
+    });
+
+    test('disabled prop 테스트', () => {
+      render(
+        <Accordion disabled>
+          <Accordion.Trigger>제목</Accordion.Trigger>
+          <Accordion.Content>내용</Accordion.Content>
+        </Accordion>
+      );
+
+      const trigger = screen.getByText('제목');
+      fireEvent.click(trigger);
+      expect(screen.queryByText('내용')).not.toBeInTheDocument();
+    });
+
+    test('onOpenChange 콜백 테스트', () => {
+      const onOpenChange = vi.fn();
+      render(
+        <Accordion onOpenChange={onOpenChange}>
+          <Accordion.Trigger>제목</Accordion.Trigger>
+          <Accordion.Content>내용</Accordion.Content>
+        </Accordion>
+      );
+
+      const trigger = screen.getByText('제목');
+      fireEvent.click(trigger);
+      expect(onOpenChange).toHaveBeenCalledWith(true);
+
+      fireEvent.click(trigger);
+      expect(onOpenChange).toHaveBeenCalledWith(false);
     });
   });
 
