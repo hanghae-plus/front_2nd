@@ -74,13 +74,38 @@ export const useProductEdit = (
     }
   };
 
+  const onClickEditProduct = (product: Product) => {
+    setEditingProduct(product);
+  };
+
+  const onChangeProductNameUpdate = (productId: string, newName: string) => {
+    updateProductName(productId, newName);
+  };
+
+  const onChangeUpdatePrice = (productId: string, newPrice: number) => {
+    updatePrice(productId, newPrice);
+  };
+
+  const onClickCompleteEdit = () => {
+    completeEdit();
+  };
+
+  const onChangeUpdateStock = (productId: string, newStock: number) => {
+    updateStock(productId, newStock);
+  };
+
+  const onClickRemoveDiscount = (productId: string, index: number) => {
+    removeDiscount(productId, index);
+  };
+
   return {
     editingProduct,
-    updateProductName,
-    updatePrice,
-    completeEdit,
-    updateStock,
-    removeDiscount,
+    onClickEditProduct,
+    onChangeProductNameUpdate,
+    onChangeUpdatePrice,
+    onClickCompleteEdit,
+    onChangeUpdateStock,
+    onClickRemoveDiscount,
     setEditingProduct,
   };
 };

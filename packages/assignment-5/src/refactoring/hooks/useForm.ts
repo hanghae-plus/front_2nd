@@ -19,7 +19,6 @@ export const useForm = <T>(initialValue: T): UseForm<T> => {
   const [formState, setFormState] = useState<T>(initialValue);
 
   const handleChangeElement = useCallback((name: keyof T, value: unknown) => {
-    console.log(value, 20);
     setFormState((prevState) => ({
       ...prevState,
       [name]: !isNaN(Number(value)) ? Number(value) : value,

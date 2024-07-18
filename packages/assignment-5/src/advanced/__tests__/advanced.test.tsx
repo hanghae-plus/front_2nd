@@ -523,6 +523,10 @@ describe("advanced > ", () => {
           expect(result.current.formState).toEqual(initialCoupon);
         });
       });
+
+      describe("useAccordion", () => {
+        it("test");
+      });
     });
   });
 });

@@ -11,7 +11,7 @@ export const useNewProduct = (onProductAdd: (newProduct: Product) => void) => {
     discounts: [],
   });
 
-  const handleAddNewProduct = () => {
+  const onClickAddNewProduct = () => {
     const productWithId = { ...newProduct, id: Date.now().toString() };
     onProductAdd(productWithId);
     setNewProduct({
@@ -23,11 +23,19 @@ export const useNewProduct = (onProductAdd: (newProduct: Product) => void) => {
     setShowNewProductForm(false);
   };
 
+  const onClickSetShowNewProduct = (isShow: boolean) => {
+    setShowNewProductForm(isShow);
+  };
+
+  const onChangeSetNewProduct = (product: Omit<Product, "id">) => {
+    setNewProduct(product);
+  };
+
   return {
     showNewProductForm,
     newProduct,
-    setShowNewProductForm,
-    setNewProduct,
-    handleAddNewProduct,
+    onClickAddNewProduct,
+    onClickSetShowNewProduct,
+    onChangeSetNewProduct,
   };
 };
