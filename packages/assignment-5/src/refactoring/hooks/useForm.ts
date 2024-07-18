@@ -3,7 +3,7 @@ import { useState } from 'react';
 export const useForm = <T>(initialValues: T) => {
   const [values, setValues] = useState<T>(initialValues);
 
-  const handleChange = (name: keyof T, value: any) => {
+  const updateValue = (name: keyof T, value: any) => {
     setValues({ ...values, [name]: value });
   };
 
@@ -11,5 +11,5 @@ export const useForm = <T>(initialValues: T) => {
     setValues(initialValues);
   };
 
-  return { values, handleChange, reset };
+  return { values, updateValue, reset };
 };

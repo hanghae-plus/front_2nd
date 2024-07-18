@@ -393,7 +393,7 @@ describe('advanced > ', () => {
       const { result } = renderHook(() => useForm(initialValues));
 
       act(() => {
-        result.current.handleChange('name', '감자');
+        result.current.updateValue('name', '감자');
       });
 
       expect(result.current.values.name).toBe('감자');
@@ -404,7 +404,7 @@ describe('advanced > ', () => {
       const { result } = renderHook(() => useForm(initialValues));
 
       act(() => {
-        result.current.handleChange('name', '감자');
+        result.current.updateValue('name', '감자');
       });
 
       act(() => {
