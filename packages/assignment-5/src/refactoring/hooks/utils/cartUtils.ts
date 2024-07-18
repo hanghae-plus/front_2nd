@@ -45,11 +45,15 @@ export const calculateCartTotal = (cart: CartItem[], selectedCoupon: Coupon | nu
 };
 
 export const updateCartItemQuantity = (cart: CartItem[], productId: string, newQuantity: number): CartItem[] => {
+  if (newQuantity === 0) {
+    return cart.filter((item) => item.product.id !== productId);
+  }
+
   return cart.map((item) => {
     if (item.product.id === productId) {
       return {
         ...item,
-        quantity: newQuantity
+        quantity: newQuantity > item.product.stock ? item.product.stock : newQuantity
       };
     }
     return item;
