@@ -1,8 +1,7 @@
 import { CartItem, Coupon, Product } from '../../types.ts';
-import { useCart, useLocalStorage, useProductSearch } from '../hooks';
-import ProductSearch from './ProductSearch.jsx';
-import ProductItem from './ProductItem.jsx';
-import CartProduct from './CartProduct.jsx';
+import { useCart, useLocalStorage } from '../hooks';
+import ProductList from './ProductList.tsx';
+import CartProduct from './CartProduct.tsx';
 
 interface Props {
   products: Product[];
@@ -22,18 +21,8 @@ export const CartPage = ({ products, coupons }: Props) => {
     applyMember,
     selectedMember,
   } = useCart();
-  const { setSearchValue, filteredData } = useProductSearch(products);
 
   useLocalStorage('myCart', cart, setCart);
-
-  const getMaxDiscount = (discounts: { quantity: number; rate: number }[]) => {
-    return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
-  };
-
-  const getRemainingStock = (product: Product) => {
-    const cartItem = cart.find((item) => item.product.id === product.id);
-    return product.stock - (cartItem?.quantity || 0);
-  };
 
   const { totalBeforeDiscount, totalAfterDiscount, totalDiscount } =
     calculateTotal();
@@ -54,25 +43,7 @@ export const CartPage = ({ products, coupons }: Props) => {
     <div className='container mx-auto p-4'>
       <h1 className='text-3xl font-bold mb-6'>장바구니</h1>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-        <div>
-          <ProductSearch setSearchValue={setSearchValue} />
-          <h2 className='text-2xl font-semibold mb-4'>상품 목록</h2>
-          <div className='space-y-2'>
-            {filteredData.length === 0 ? (
-              <p>요청하신 제품을 찾을 수 없습니다.</p>
-            ) : (
-              filteredData.map((product) => (
-                <ProductItem
-                  key={product.id}
-                  product={product}
-                  maxDiscount={getMaxDiscount(product.discounts)}
-                  remainingStock={getRemainingStock(product)}
-                  addToCart={addToCart}
-                />
-              ))
-            )}
-          </div>
-        </div>
+        <ProductList products={products} cart={cart} addToCart={addToCart} />
         <div>
           <h2 className='text-2xl font-semibold mb-4'>장바구니 내역</h2>
 
