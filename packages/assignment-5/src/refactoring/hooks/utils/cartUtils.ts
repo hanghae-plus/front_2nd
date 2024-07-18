@@ -14,6 +14,21 @@ export const getMaxApplicableDiscount = (item: CartItem) => {
   return discountInfo?.rate || 0;
 };
 
+export const getCouponDiscount = (selectedCoupon, afterPrice) => {
+  if (selectedCoupon === null) {
+    return 0;
+  }
+
+  if (selectedCoupon.discountType === 'amount') {
+    return selectedCoupon.discountValue;
+  }
+  if (selectedCoupon.discountType === 'percentage') {
+    const rate = selectedCoupon.discountValue / 100;
+
+    return afterPrice * rate;
+  }
+};
+
 export const calculateCartTotal = (
   cart: CartItem[],
   selectedCoupon: Coupon | null
@@ -26,34 +41,13 @@ export const calculateCartTotal = (
     [0, 0]
   );
   const discount = beforePrice - afterPrice;
+  const couponDiscount = getCouponDiscount(selectedCoupon, afterPrice);
 
-  if (selectedCoupon === null) {
-    return {
-      totalBeforeDiscount: Math.round(beforePrice),
-      totalAfterDiscount: Math.round(afterPrice),
-      totalDiscount: Math.round(discount),
-    };
-  }
-
-  if (selectedCoupon.discountType === 'amount') {
-    const discountAmount = selectedCoupon.discountValue;
-
-    return {
-      totalBeforeDiscount: Math.round(beforePrice),
-      totalAfterDiscount: Math.round(afterPrice - discountAmount),
-      totalDiscount: Math.round(discount + discountAmount),
-    };
-  }
-
-  if (selectedCoupon.discountType === 'percentage') {
-    const rate = selectedCoupon.discountValue / 100;
-
-    return {
-      totalBeforeDiscount: Math.round(beforePrice),
-      totalAfterDiscount: Math.round(afterPrice * (1 - rate)),
-      totalDiscount: Math.round(beforePrice - afterPrice * (1 - rate)),
-    };
-  }
+  return {
+    totalBeforeDiscount: Math.round(beforePrice),
+    totalAfterDiscount: Math.round(afterPrice - couponDiscount),
+    totalDiscount: Math.round(discount + couponDiscount),
+  };
 };
 
 export const updateCartItemQuantity = (
