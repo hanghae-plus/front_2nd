@@ -7,8 +7,11 @@ import { Coupon, Product } from '../../types';
 import useLocalStorage from '../../refactoring/hooks/useLocalStorage';
 import useDiscountCalculator from '../../refactoring/hooks/useDiscountCalculator';
 import useProductSearch from '../../refactoring/hooks/useProductSearch';
+import { setupServer } from 'msw/node';
+import { rest } from 'msw';
+import { worker } from '../../mocks/browser';
 
-const mockProducts: Product[] = [
+let mockProducts: Product[] = [
   {
     id: 'p1',
     name: '상품1',
@@ -45,6 +48,32 @@ const mockCoupons: Coupon[] = [
     discountValue: 10
   }
 ];
+
+const server = setupServer(
+  rest.get('/api/products', (req, res, ctx) => {
+    return res(ctx.json(mockProducts));
+  }),
+  rest.post('/api/products', (req, res, ctx) => {
+    const newProduct = req.body;
+    mockProducts.push(newProduct);
+    return res(ctx.status(201));
+  }),
+  rest.put('/api/products/:id', (req, res, ctx) => {
+    const { id } = req.params;
+    const updatedProduct = req.body;
+    mockProducts = mockProducts.map(product => product.id === id ? updatedProduct : product);
+    return res(ctx.status(200));
+  }),
+  rest.delete('/api/products/:id', (req, res, ctx) => {
+    const { id } = req.params;
+    mockProducts = mockProducts.filter(product => product.id !== id);
+    return res(ctx.status(204));
+  })
+);
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 const TestAdminPage = () => {
   const [products, setProducts] = useState<Product[]>(mockProducts);
@@ -278,35 +307,34 @@ describe('advanced > ', () => {
     describe('useDiscountCalculator 훅', () => {
       test('할인 없이 총 가격을 올바르게 계산하는지 확인', () => {
         const cartItems = [{ product: { price: 1000, discounts: [] }, quantity: 2 }];
-        const { result } = renderHook(() => useDiscountCalculator(cartItems));
+        const { result } = renderHook(() => useDiscountCalculator(cartItems, '일반'));
 
         expect(result.current.totalBeforeDiscount).toBe(2000);
-        expect(result.current.totalAfterDiscount).toBe(2000);
-        expect(result.current.totalDiscount).toBe(0);
+        expect(result.current.totalAfterDiscount).toBe(1940); // 일반 회원 3% 할인
+        expect(result.current.totalDiscount).toBe(60);
       });
 
       test('단일 할인으로 총 가격을 올바르게 계산하는지 확인', () => {
         const cartItems = [
           { product: { price: 1000, discounts: [{ quantity: 2, rate: 0.1 }] }, quantity: 2 }
         ];
-        const { result } = renderHook(() => useDiscountCalculator(cartItems));
+        const { result } = renderHook(() => useDiscountCalculator(cartItems, '일반'));
 
         expect(result.current.totalBeforeDiscount).toBe(2000);
-        expect(result.current.totalAfterDiscount).toBe(1800);
-        expect(result.current.totalDiscount).toBe(200);
+        expect(result.current.totalAfterDiscount).toBe(1750);  
+        expect(result.current.totalDiscount).toBe(250);
       });
 
       test('여러 할인으로 총 가격을 올바르게 계산하는지 확인', () => {
         const cartItems = [
           { product: { price: 1000, discounts: [{ quantity: 2, rate: 0.1 }, { quantity: 5, rate: 0.2 }] }, quantity: 5 }
         ];
-        const { result } = renderHook(() => useDiscountCalculator(cartItems));
+        const { result } = renderHook(() => useDiscountCalculator(cartItems, 'VIP'));
 
         expect(result.current.totalBeforeDiscount).toBe(5000);
-        expect(result.current.totalAfterDiscount).toBe(4000);
-        expect(result.current.totalDiscount).toBe(1000);
+        expect(result.current.totalAfterDiscount).toBe(3600); // 20% + 10% 할인
+        expect(result.current.totalDiscount).toBe(1400);
       });
- 
     })
 
     describe('useProductSearch 훅', () => {
@@ -338,7 +366,7 @@ describe('advanced > ', () => {
         const { result } = renderHook(() => useProductSearch(products, 'Non-existent'));
         expect(result.current).toEqual([]);
       });
- 
     })
   })
 })
+
