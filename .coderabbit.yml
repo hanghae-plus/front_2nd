@@ -14,16 +14,16 @@ reviews:
   sequence_diagrams: true
   path_filters:
     exclude:
-    - packages/assignment-1
-    - packages/assignment-2
-    - packages/assignment-3
-    - packages/assignment-4
-    - packages/assignment-5/src/origin
-    - .github
-    - public
-    - pnpm-lock.yaml
-    - **/*.html
-    - tsconfig*
+      - packages/assignment-1
+      - packages/assignment-2
+      - packages/assignment-3
+      - packages/assignment-4
+      - packages/assignment-5/src/origin
+      - .github
+      - public
+      - pnpm-lock.yaml
+      - packages/**/*.html
+      - tsconfig*
   path_instructions: []
   abort_on_close: true
   auto_review:
