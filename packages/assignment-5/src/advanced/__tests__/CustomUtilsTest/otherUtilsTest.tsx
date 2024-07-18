@@ -1,26 +1,26 @@
 import { wonFormatter } from "@/refactoring/utils/currencyFormatter";
 import generateErrorMessage from "@/refactoring/utils/generateErrorMessage";
 import { generateNewDefaultProduct } from "@/refactoring/utils/generateNewDefaultProduct";
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 
 const otherUtilsTest = () => {
   describe("generateNewDefaultProduct >", () => {
     test("1. 생성과 Default 값으로의 초기화 기능", () => {
-      const product = generateNewDefaultProduct();
+      const product = generateNewDefaultProduct("new ID");
       expect(product).toHaveProperty("id");
-      expect(typeof product.id).toBe("string");
+      expect(product.id).toBe("new ID");
       expect(product.name).toBe("");
       expect(product.price).toBe(0);
       expect(product.stock).toBe(0);
       expect(product.discounts).toEqual([]);
     });
 
-    test("2. 생성시마다 생성시각을 식별자로 하는 새로운 객체 생성", async () => {
-      vi.useFakeTimers();
-      const product1 = generateNewDefaultProduct();
-      vi.advanceTimersByTime(1);
-      const product2 = generateNewDefaultProduct();
-      expect(product1.id).not.toBe(product2.id);
+    test("2. 파라미터를 식별자로 하는 새로운 객체 생성, 식별자가 같아도 참조는 다름", () => {
+      const productA = generateNewDefaultProduct("A");
+      const productB = generateNewDefaultProduct("B");
+      const productC = generateNewDefaultProduct("A");
+      expect(productA).not.toBe(productB);
+      expect(productA).not.toBe(productC);
     });
   });
 

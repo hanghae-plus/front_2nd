@@ -1,6 +1,6 @@
-export const generateNewDefaultProduct = () => {
+export const generateNewDefaultProduct = (id: string) => {
   return {
-    id: Date.now().toString(),
+    id,
     name: "",
     price: 0,
     stock: 0,

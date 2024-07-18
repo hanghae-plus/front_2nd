@@ -12,7 +12,10 @@ const NewProductFormCard = ({ onProductAdd, toggleNewProductForm }: Props) => {
     toggleNewProductForm();
   };
 
-  const productForm = useProductForm(generateNewDefaultProduct(), formCallback);
+  const productForm = useProductForm(
+    generateNewDefaultProduct(new Date().toString()),
+    formCallback
+  );
 
   const props = {
     productForm,
