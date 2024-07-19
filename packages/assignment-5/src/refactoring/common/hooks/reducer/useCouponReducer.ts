@@ -35,7 +35,7 @@ const couponReducer = (state: Coupon[], action: CouponAction) => {
   }
 };
 
-export const useCoupon = () => {
+export const useCouponReducer = () => {
   const [coupons, dispatch] = useReducer(couponReducer, initialCoupons);
 
   const addCoupon = (newCoupon: Coupon) => {

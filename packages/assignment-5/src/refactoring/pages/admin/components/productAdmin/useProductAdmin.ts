@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
-import { useProduct } from '../../../../common/hooks/reducer/useProduct';
+import { useProductReducer } from '../../../../common/hooks/reducer/useProductReducer';
 import { Product } from '../../../../common/models';
 
 export const useProductAdmin = () => {
-  const { products, addProduct, updateProduct } = useProduct();
+  const { products, addProduct, updateProduct } = useProductReducer();
   const [openProductIds, setOpenProductIds] = useState<Set<string>>(new Set());
   const [showNewProductForm, setShowNewProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);

@@ -47,7 +47,7 @@ const productReducer = (state: Product[], action: ProductAction) => {
   }
 };
 
-export const useProduct = () => {
+export const useProductReducer = () => {
   const [products, dispatch] = useReducer(productReducer, initialProducts);
 
   const addProduct = (newProduct: Product) => {
