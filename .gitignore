@@ -1,3 +1,7 @@
 .idea
 .vscode
 node_modules
+assignment-1-ci.yml
+assignment-2-ci.yml
+assignment-3-ci.yml
+assignment-4-ci.yml

@@ -12,5 +12,8 @@
   "private": true,
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "vite-tsconfig-paths": "^4.3.2"
+  }
 }

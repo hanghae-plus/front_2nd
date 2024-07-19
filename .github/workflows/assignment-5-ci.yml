@@ -1,4 +1,4 @@
-name: CI Assignment 4
+name: CI Assignment 5
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
       - opened
       - reopened
     paths:
-      - 'packages/assignment-4/**'
+      - 'packages/assignment-5/**'
 
   workflow_dispatch:
 
@@ -23,10 +23,10 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - name: assignment-4-basic
+      - name: assignment-5-basic
         run: |
           pnpm install
-          pnpm -F assignment-4 test:basic
+          pnpm -F assignment-5 test:basic
   advacned:
     runs-on: ubuntu-latest
     steps:
@@ -38,7 +38,7 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - name: assignment-4-advanced
+      - name: assignment-5-advanced
         run: |
           pnpm install
-          pnpm -F assignment-4 test:advanced
+          pnpm -F assignment-5 test:advanced
