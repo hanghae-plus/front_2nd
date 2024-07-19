@@ -1,6 +1,5 @@
-import { useState } from 'react';
-
-import { Discount, Product } from '../../../types.ts';
+import { Product } from '../../../types.ts';
+import { useProductManage } from '../../hooks/admin/useProductManage';
 
 interface Props {
   products: Product[];
@@ -9,84 +8,20 @@ interface Props {
 }
 
 export const ProductsList = ({ products, onProductUpdate }: Props) => {
-  const [openProductIds, setOpenProductIds] = useState<Set<string>>(new Set());
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [newDiscount, setNewDiscount] = useState<Discount>({ quantity: 0, rate: 0 });
-
-  const toggleProductAccordion = (productId: string) => {
-    setOpenProductIds((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(productId)) {
-        newSet.delete(productId);
-      } else {
-        newSet.add(productId);
-      }
-      return newSet;
-    });
-  };
-
-  // handleEditProduct 함수 수정
-  const handleEditProduct = (product: Product) => {
-    setEditingProduct({ ...product });
-  };
-
-  // 새로운 핸들러 함수 추가
-  const handleProductNameUpdate = (productId: string, newName: string) => {
-    if (editingProduct && editingProduct.id === productId) {
-      const updatedProduct = { ...editingProduct, name: newName };
-      setEditingProduct(updatedProduct);
-    }
-  };
-
-  // 새로운 핸들러 함수 추가
-  const handlePriceUpdate = (productId: string, newPrice: number) => {
-    if (editingProduct && editingProduct.id === productId) {
-      const updatedProduct = { ...editingProduct, price: newPrice };
-      setEditingProduct(updatedProduct);
-    }
-  };
-
-  // 수정 완료 핸들러 함수 추가
-  const handleEditComplete = () => {
-    if (editingProduct) {
-      onProductUpdate(editingProduct);
-      setEditingProduct(null);
-    }
-  };
-
-  const handleStockUpdate = (productId: string, newStock: number) => {
-    const updatedProduct = products.find((p) => p.id === productId);
-    if (updatedProduct) {
-      const newProduct = { ...updatedProduct, stock: newStock };
-      onProductUpdate(newProduct);
-      setEditingProduct(newProduct);
-    }
-  };
-
-  const handleAddDiscount = (productId: string) => {
-    const updatedProduct = products.find((p) => p.id === productId);
-    if (updatedProduct && editingProduct) {
-      const newProduct = {
-        ...updatedProduct,
-        discounts: [...updatedProduct.discounts, newDiscount],
-      };
-      onProductUpdate(newProduct);
-      setEditingProduct(newProduct);
-      setNewDiscount({ quantity: 0, rate: 0 });
-    }
-  };
-
-  const handleRemoveDiscount = (productId: string, index: number) => {
-    const updatedProduct = products.find((p) => p.id === productId);
-    if (updatedProduct) {
-      const newProduct = {
-        ...updatedProduct,
-        discounts: updatedProduct.discounts.filter((_, i) => i !== index),
-      };
-      onProductUpdate(newProduct);
-      setEditingProduct(newProduct);
-    }
-  };
+  const {
+    openProductIds,
+    toggleProductAccordion,
+    editingProduct,
+    updateEditingProduct,
+    updateProductName,
+    updatePrice,
+    completeEdit,
+    newDiscount,
+    updateNewDiscount,
+    updateStock,
+    addDiscount,
+    removeDiscount,
+  } = useProductManage();
 
   return (
     <div className="space-y-2">
@@ -108,7 +43,7 @@ export const ProductsList = ({ products, onProductUpdate }: Props) => {
                     <input
                       type="text"
                       value={editingProduct.name}
-                      onChange={(e) => handleProductNameUpdate(product.id, e.target.value)}
+                      onChange={(e) => updateProductName(editingProduct, product.id, e.target.value)}
                       className="w-full p-2 border rounded"
                     />
                   </div>
@@ -117,7 +52,7 @@ export const ProductsList = ({ products, onProductUpdate }: Props) => {
                     <input
                       type="number"
                       value={editingProduct.price}
-                      onChange={(e) => handlePriceUpdate(product.id, parseInt(e.target.value))}
+                      onChange={(e) => updatePrice(editingProduct, product.id, parseInt(e.target.value))}
                       className="w-full p-2 border rounded"
                     />
                   </div>
@@ -126,7 +61,7 @@ export const ProductsList = ({ products, onProductUpdate }: Props) => {
                     <input
                       type="number"
                       value={editingProduct.stock}
-                      onChange={(e) => handleStockUpdate(product.id, parseInt(e.target.value))}
+                      onChange={(e) => updateStock(products, product.id, parseInt(e.target.value), onProductUpdate)}
                       className="w-full p-2 border rounded"
                     />
                   </div>
@@ -139,7 +74,7 @@ export const ProductsList = ({ products, onProductUpdate }: Props) => {
                           {discount.quantity}개 이상 구매 시 {discount.rate * 100}% 할인
                         </span>
                         <button
-                          onClick={() => handleRemoveDiscount(product.id, index)}
+                          onClick={() => removeDiscount(products, product.id, index, onProductUpdate)}
                           className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                         >
                           삭제
@@ -151,18 +86,18 @@ export const ProductsList = ({ products, onProductUpdate }: Props) => {
                         type="number"
                         placeholder="수량"
                         value={newDiscount.quantity}
-                        onChange={(e) => setNewDiscount({ ...newDiscount, quantity: parseInt(e.target.value) })}
+                        onChange={(e) => updateNewDiscount({ ...newDiscount, quantity: parseInt(e.target.value) })}
                         className="w-1/3 p-2 border rounded"
                       />
                       <input
                         type="number"
                         placeholder="할인율 (%)"
                         value={newDiscount.rate * 100}
-                        onChange={(e) => setNewDiscount({ ...newDiscount, rate: parseInt(e.target.value) / 100 })}
+                        onChange={(e) => updateNewDiscount({ ...newDiscount, rate: parseInt(e.target.value) / 100 })}
                         className="w-1/3 p-2 border rounded"
                       />
                       <button
-                        onClick={() => handleAddDiscount(product.id)}
+                        onClick={() => addDiscount(products, product.id, onProductUpdate)}
                         className="w-1/3 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
                       >
                         할인 추가
@@ -170,7 +105,7 @@ export const ProductsList = ({ products, onProductUpdate }: Props) => {
                     </div>
                   </div>
                   <button
-                    onClick={handleEditComplete}
+                    onClick={() => completeEdit(editingProduct, onProductUpdate)}
                     className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mt-2"
                   >
                     수정 완료
@@ -187,7 +122,7 @@ export const ProductsList = ({ products, onProductUpdate }: Props) => {
                   ))}
                   <button
                     data-testid="modify-button"
-                    onClick={() => handleEditProduct(product)}
+                    onClick={() => updateEditingProduct(product)}
                     className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 mt-2"
                   >
                     수정
