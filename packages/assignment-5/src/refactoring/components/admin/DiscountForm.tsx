@@ -22,7 +22,10 @@ export const DiscountForm = ({
     <div>
       <h4 className="text-lg font-semibold mb-2">할인 정보</h4>
       {product.discounts.map((discount, index) => (
-        <div key={index} className="flex justify-between items-center mb-2">
+        <div
+          key={`${discount.quantity}-${discount.rate}`}
+          className="flex justify-between items-center mb-2"
+        >
           <span>
             {discount.quantity}개 이상 구매 시 {discount.rate * 100}% 할인
           </span>
