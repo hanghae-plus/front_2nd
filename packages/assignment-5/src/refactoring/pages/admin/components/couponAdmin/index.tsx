@@ -1,6 +1,8 @@
-import React from 'react';
+import { useCouponAdmin } from './useCouponAdmin';
 
 const CouponAdmin = () => {
+  const { coupons, newCoupon, handleChangeCoupon, handleAddCoupon } = useCouponAdmin();
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">쿠폰 관리</h2>
@@ -10,20 +12,20 @@ const CouponAdmin = () => {
             type="text"
             placeholder="쿠폰 이름"
             value={newCoupon.name}
-            onChange={(e) => setNewCoupon({ ...newCoupon, name: e.target.value })}
+            onChange={(e) => handleChangeCoupon(e)('name')}
             className="w-full p-2 border rounded"
           />
           <input
             type="text"
             placeholder="쿠폰 코드"
             value={newCoupon.code}
-            onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
+            onChange={(e) => handleChangeCoupon(e)('code')}
             className="w-full p-2 border rounded"
           />
           <div className="flex gap-2">
             <select
               value={newCoupon.discountType}
-              onChange={(e) => setNewCoupon({ ...newCoupon, discountType: e.target.value as 'amount' | 'percentage' })}
+              onChange={(e) => handleChangeCoupon(e)('discountType')}
               className="w-full p-2 border rounded"
             >
               <option value="amount">금액(원)</option>
@@ -33,7 +35,7 @@ const CouponAdmin = () => {
               type="number"
               placeholder="할인 값"
               value={newCoupon.discountValue}
-              onChange={(e) => setNewCoupon({ ...newCoupon, discountValue: parseInt(e.target.value) })}
+              onChange={(e) => handleChangeCoupon(e)('discountValue')}
               className="w-full p-2 border rounded"
             />
           </div>
