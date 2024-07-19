@@ -7,6 +7,7 @@ const ProductAdmin = () => {
     openProductIds,
     showNewProductForm,
     editingProduct,
+    setEditingProduct,
     newProduct,
     handleToggleShowNewProductForm,
     handleChangeNewProduct,
@@ -114,7 +115,11 @@ const ProductAdmin = () => {
                       />
                     </div>
                     {/* 할인 정보 수정 부분 */}
-                    <Discount editingProduct={editingProduct} />
+                    <Discount
+                      productId={product.id}
+                      editingProduct={editingProduct}
+                      setEditingProduct={setEditingProduct}
+                    />
                     <button
                       onClick={handleEditComplete}
                       className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mt-2"

@@ -89,6 +89,7 @@ export const useProductAdmin = () => {
     openProductIds,
     showNewProductForm,
     editingProduct,
+    setEditingProduct,
     newProduct,
     handleToggleShowNewProductForm,
     handleChangeNewProduct,
