@@ -1,0 +1,44 @@
+name: CI Assignment 5
+
+on:
+  pull_request:
+    types:
+      - synchronize
+      - opened
+      - reopened
+    paths:
+      - 'packages/assignment-5/**'
+
+  workflow_dispatch:
+
+jobs:
+  basic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: assignment-5-basic
+        run: |
+          pnpm install
+          pnpm -F assignment-5 test:basic
+  advacned:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: assignment-5-advanced
+        run: |
+          pnpm install
+          pnpm -F assignment-5 test:advanced
