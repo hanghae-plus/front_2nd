@@ -9,21 +9,21 @@ import {
   within,
 } from '@testing-library/react';
 
-import { CartPage } from '../../refactoring/pages/CartPage.tsx';
-import { AdminPage } from '../../refactoring/pages/AdminPage.tsx';
+import { CartPage } from '../../refactoring/pages/CartPage';
+import { AdminPage } from '../../refactoring/pages/AdminPage';
 import type { CartItem, Coupon, Product } from '../../types';
-import { useProducts } from '../../refactoring/hooks/useProduct.ts';
-import { useCart } from '../../refactoring/hooks/useCart.ts';
+import { useProducts } from '../../refactoring/hooks/useProduct';
+import { useCart } from '../../refactoring/hooks/useCart';
 import {
   getAppliedDiscount,
   getMaxDiscount,
-} from '../../refactoring/hooks/utils/discountUtils.ts';
-import { getRemainingStock } from '../../refactoring/hooks/utils/cartUtils.ts';
-import { useEditingProduct } from '../../refactoring/hooks/useEditingProduct.ts';
-import { useProductForm } from '../../refactoring/hooks/useProductForm.ts';
-import { useDiscountForm } from '../../refactoring/hooks/useDiscountForm.ts';
-import { useCouponForm } from '../../refactoring/hooks/useCouponForm.ts';
-import { useProductAccordion } from '../../refactoring/hooks/useProductAccordion.ts';
+} from '../../refactoring/hooks/utils/discountUtils';
+import { getRemainingStock } from '../../refactoring/hooks/utils/cartUtils';
+import { useEditingProduct } from '../../refactoring/hooks/useEditingProduct';
+import { useProductForm } from '../../refactoring/hooks/useProductForm';
+import { useDiscountForm } from '../../refactoring/hooks/useDiscountForm';
+import { useCouponForm } from '../../refactoring/hooks/useCouponForm';
+import { useProductAccordion } from '../../refactoring/hooks/useProductAccordion';
 
 const mockProducts: Product[] = [
   {

@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 
-import type { useEditingProduct } from '../../hooks/useEditingProduct.ts';
-import type { Product } from '../../../types.ts';
+import type { useEditingProduct } from '../../hooks/useEditingProduct';
+import type { Product } from '../../../types';
 
 type EditingProduct = Omit<ReturnType<typeof useEditingProduct>, 'edit'> & {
   products: Product[];

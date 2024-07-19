@@ -3,14 +3,14 @@ import { describe, expect, test } from 'vitest';
 import { act, fireEvent, render, renderHook } from '@testing-library/react';
 import { screen, within } from '@testing-library/dom';
 
-import cartUtils from '../../refactoring/hooks/utils/cartUtils.ts';
-import { getMaxApplicableDiscount } from '../../refactoring/hooks/utils/discountUtils.ts';
-import { CartPage } from '../../refactoring/pages/CartPage.tsx';
-import { AdminPage } from '../../refactoring/pages/AdminPage.tsx';
+import cartUtils from '../../refactoring/hooks/utils/cartUtils';
+import { getMaxApplicableDiscount } from '../../refactoring/hooks/utils/discountUtils';
+import { CartPage } from '../../refactoring/pages/CartPage';
+import { AdminPage } from '../../refactoring/pages/AdminPage';
 import type { CartItem, Coupon, Product } from '../../types';
-import { useProducts } from '../../refactoring/hooks/useProduct.ts';
-import { useCoupons } from '../../refactoring/hooks/useCoupon.ts';
-import { useCart } from '../../refactoring/hooks/useCart.ts';
+import { useProducts } from '../../refactoring/hooks/useProduct';
+import { useCoupons } from '../../refactoring/hooks/useCoupon';
+import { useCart } from '../../refactoring/hooks/useCart';
 
 const mockProducts: Product[] = [
   {

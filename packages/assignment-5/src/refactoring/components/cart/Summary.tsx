@@ -1,5 +1,5 @@
 import type { useCart } from '../../hooks/useCart';
-import { localeString } from '../../hooks/utils/formatNumber.ts';
+import { localeString } from '../../hooks/utils/formatNumber';
 
 export const Summary = ({
   totalBeforeDiscount,

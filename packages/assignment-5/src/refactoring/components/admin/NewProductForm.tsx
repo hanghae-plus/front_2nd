@@ -1,7 +1,7 @@
 import type { ChangeEvent } from 'react';
 
 import type { Product } from '../../../types';
-import { useProductForm } from '../../hooks/useProductForm.ts';
+import { useProductForm } from '../../hooks/useProductForm';
 
 interface NewProductForm {
   onAddNewProduct: (newProduct: Product) => void;

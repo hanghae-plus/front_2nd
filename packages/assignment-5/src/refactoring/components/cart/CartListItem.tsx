@@ -2,9 +2,9 @@ import { memo } from 'react';
 
 import type { CartItem, Product } from '../../../types';
 import type { useCart } from '../../hooks/useCart';
-import { getRemainingStock } from '../../hooks/utils/cartUtils.ts';
-import { getMaxDiscount } from '../../hooks/utils/discountUtils.ts';
-import { convertToPercentage } from '../../hooks/utils/formatNumber.ts';
+import { getRemainingStock } from '../../hooks/utils/cartUtils';
+import { getMaxDiscount } from '../../hooks/utils/discountUtils';
+import { convertToPercentage } from '../../hooks/utils/formatNumber';
 
 interface CartListItem {
   product: Product;

@@ -1,5 +1,5 @@
 import type { Coupon } from '../../../types';
-import { useCouponForm } from '../../hooks/useCouponForm.ts';
+import { useCouponForm } from '../../hooks/useCouponForm';
 
 interface CouponManage {
   coupons: Coupon[];

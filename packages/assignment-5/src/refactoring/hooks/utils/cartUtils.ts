@@ -1,5 +1,5 @@
 import type { CartItem, Coupon, Product } from '../../../types';
-import { getMaxApplicableDiscount } from './discountUtils.ts';
+import { getMaxApplicableDiscount } from './discountUtils';
 
 export const calculateItemTotal = ({ product, quantity }: CartItem) => {
   const discountRate = getMaxApplicableDiscount({ product, quantity });

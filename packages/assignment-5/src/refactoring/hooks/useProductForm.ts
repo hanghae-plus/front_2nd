@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import type { Product } from '../../types';
-import { createNewId } from './utils/newId.ts';
+import { createNewId } from './utils/newId';
 
 export const useProductForm = (onProductAdd: (newProduct: Product) => void) => {
   const createInitialState = () => {

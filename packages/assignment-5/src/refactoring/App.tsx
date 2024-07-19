@@ -1,10 +1,10 @@
-import { CartPage } from './pages/CartPage.tsx';
-import { AdminPage } from './pages/AdminPage.tsx';
-import type { Coupon, Product } from '../types.ts';
-import { useCoupons } from './hooks/useCoupon.ts';
-import { useProducts } from './hooks/useProduct.ts';
-import { useAdmin } from './hooks/useAdmin.ts';
-import { PageLayout } from './components/layout/PageLayout.tsx';
+import { CartPage } from './pages/CartPage';
+import { AdminPage } from './pages/AdminPage';
+import type { Coupon, Product } from '../types';
+import { useCoupons } from './hooks/useCoupon';
+import { useProducts } from './hooks/useProduct';
+import { useAdmin } from './hooks/useAdmin';
+import { PageLayout } from './components/layout/PageLayout';
 
 const initialProducts: Product[] = [
   {

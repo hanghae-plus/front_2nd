@@ -1,8 +1,8 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 interface PageLayout {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const PageLayout = ({ title, children }: PageLayout) => {

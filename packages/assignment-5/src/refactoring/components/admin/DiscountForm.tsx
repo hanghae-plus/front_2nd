@@ -1,5 +1,5 @@
 import type { Product } from '../../../types';
-import { useDiscountForm } from '../../hooks/useDiscountForm.ts';
+import { useDiscountForm } from '../../hooks/useDiscountForm';
 
 interface DiscountForm {
   products: Product[];

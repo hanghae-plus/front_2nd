@@ -1,8 +1,8 @@
 import { memo } from 'react';
 
 import type { CartItem } from '../../../types';
-import { getAppliedDiscount } from '../../hooks/utils/discountUtils.ts';
-import { convertToPercentage } from '../../hooks/utils/formatNumber.ts';
+import { getAppliedDiscount } from '../../hooks/utils/discountUtils';
+import { convertToPercentage } from '../../hooks/utils/formatNumber';
 
 interface CartWithCoupon {
   item: CartItem;

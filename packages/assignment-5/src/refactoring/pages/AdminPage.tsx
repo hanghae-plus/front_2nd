@@ -1,12 +1,12 @@
-import type { Coupon, Product } from '../../types.ts';
-import NewProductForm from '../components/admin/NewProductForm.tsx';
-import { useOpenStatus } from '../hooks/useOpenStatus.ts';
-import CouponManage from '../components/admin/CouponManage.tsx';
-import { useProductAccordion } from '../hooks/useProductAccordion.ts';
-import { useEditingProduct } from '../hooks/useEditingProduct.ts';
-import { EditingProductForm } from '../components/admin/EditingProductForm.tsx';
-import { DiscountForm } from '../components/admin/DiscountForm.tsx';
-import { convertToPercentage } from '../hooks/utils/formatNumber.ts';
+import type { Coupon, Product } from '../../types';
+import NewProductForm from '../components/admin/NewProductForm';
+import { useOpenStatus } from '../hooks/useOpenStatus';
+import CouponManage from '../components/admin/CouponManage';
+import { useProductAccordion } from '../hooks/useProductAccordion';
+import { useEditingProduct } from '../hooks/useEditingProduct';
+import { EditingProductForm } from '../components/admin/EditingProductForm';
+import { DiscountForm } from '../components/admin/DiscountForm';
+import { convertToPercentage } from '../hooks/utils/formatNumber';
 
 interface Props {
   products: Product[];
