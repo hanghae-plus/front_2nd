@@ -1,4 +1,4 @@
-import { CartItem, Coupon } from '../../../types';
+import { CartItem, Coupon } from '../../../common/models';
 
 export const calculateItemTotal = (item: CartItem) => {
   const { product, quantity } = item;
