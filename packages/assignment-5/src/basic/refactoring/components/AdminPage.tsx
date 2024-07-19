@@ -53,6 +53,7 @@ export const AdminPage = ({ products, coupons, onProductUpdate, onProductAdd, on
     }
   };
 
+  //handleUpdateProduct({name: newName})
   // 새로운 핸들러 함수 추가
   const handlePriceUpdate = (productId: string, newPrice: number) => {
     if (editingProduct && editingProduct.id === productId) {

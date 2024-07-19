@@ -1,9 +1,28 @@
+import Discount from '../discount';
+import { useProductAdmin } from './useProductAdmin';
+
 const ProductAdmin = () => {
+  const {
+    products,
+    openProductIds,
+    showNewProductForm,
+    editingProduct,
+    newProduct,
+    handleToggleShowNewProductForm,
+    handleChangeNewProduct,
+    handleAddNewProduct,
+    toggleProductAccordion,
+    handleProductNameUpdate,
+    handlePriceUpdate,
+    handleStockUpdate,
+    handleEditComplete
+  } = useProductAdmin();
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">상품 관리</h2>
       <button
-        onClick={() => setShowNewProductForm(!showNewProductForm)}
+        onClick={handleToggleShowNewProductForm}
         className="bg-green-500 text-white px-4 py-2 rounded mb-4 hover:bg-green-600"
       >
         {showNewProductForm ? '취소' : '새 상품 추가'}
@@ -19,7 +38,7 @@ const ProductAdmin = () => {
               id="productName"
               type="text"
               value={newProduct.name}
-              onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+              onChange={(e) => handleChangeNewProduct(e)('name')}
               className="w-full p-2 border rounded"
             />
           </div>
@@ -31,7 +50,7 @@ const ProductAdmin = () => {
               id="productPrice"
               type="number"
               value={newProduct.price}
-              onChange={(e) => setNewProduct({ ...newProduct, price: parseInt(e.target.value) })}
+              onChange={(e) => handleChangeNewProduct(e)('price')}
               className="w-full p-2 border rounded"
             />
           </div>
@@ -43,7 +62,7 @@ const ProductAdmin = () => {
               id="productStock"
               type="number"
               value={newProduct.stock}
-              onChange={(e) => setNewProduct({ ...newProduct, stock: parseInt(e.target.value) })}
+              onChange={(e) => handleChangeNewProduct(e)('stock')}
               className="w-full p-2 border rounded"
             />
           </div>
@@ -71,7 +90,7 @@ const ProductAdmin = () => {
                       <input
                         type="text"
                         value={editingProduct.name}
-                        onChange={(e) => handleProductNameUpdate(product.id, e.target.value)}
+                        onChange={(e) => handleProductNameUpdate(e)(product.id)}
                         className="w-full p-2 border rounded"
                       />
                     </div>
@@ -80,7 +99,7 @@ const ProductAdmin = () => {
                       <input
                         type="number"
                         value={editingProduct.price}
-                        onChange={(e) => handlePriceUpdate(product.id, parseInt(e.target.value))}
+                        onChange={(e) => handlePriceUpdate(e)(product.id)}
                         className="w-full p-2 border rounded"
                       />
                     </div>
@@ -89,49 +108,12 @@ const ProductAdmin = () => {
                       <input
                         type="number"
                         value={editingProduct.stock}
-                        onChange={(e) => handleStockUpdate(product.id, parseInt(e.target.value))}
+                        onChange={(e) => handleStockUpdate(e)(product.id)}
                         className="w-full p-2 border rounded"
                       />
                     </div>
                     {/* 할인 정보 수정 부분 */}
-                    <div>
-                      <h4 className="text-lg font-semibold mb-2">할인 정보</h4>
-                      {editingProduct.discounts.map((discount, index) => (
-                        <div key={index} className="flex justify-between items-center mb-2">
-                          <span>
-                            {discount.quantity}개 이상 구매 시 {discount.rate * 100}% 할인
-                          </span>
-                          <button
-                            onClick={() => handleRemoveDiscount(product.id, index)}
-                            className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                          >
-                            삭제
-                          </button>
-                        </div>
-                      ))}
-                      <div className="flex space-x-2">
-                        <input
-                          type="number"
-                          placeholder="수량"
-                          value={newDiscount.quantity}
-                          onChange={(e) => setNewDiscount({ ...newDiscount, quantity: parseInt(e.target.value) })}
-                          className="w-1/3 p-2 border rounded"
-                        />
-                        <input
-                          type="number"
-                          placeholder="할인율 (%)"
-                          value={newDiscount.rate * 100}
-                          onChange={(e) => setNewDiscount({ ...newDiscount, rate: parseInt(e.target.value) / 100 })}
-                          className="w-1/3 p-2 border rounded"
-                        />
-                        <button
-                          onClick={() => handleAddDiscount(product.id)}
-                          className="w-1/3 bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-                        >
-                          할인 추가
-                        </button>
-                      </div>
-                    </div>
+                    <Discount editingProduct={editingProduct} />
                     <button
                       onClick={handleEditComplete}
                       className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mt-2"
