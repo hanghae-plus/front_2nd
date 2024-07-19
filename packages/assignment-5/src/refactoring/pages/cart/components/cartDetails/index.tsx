@@ -1,6 +1,33 @@
+import { CartItem, Coupon } from '../../../../common/models';
 import Coupons from '../coupons';
 
-const CartDetails = () => {
+interface Props {
+  cart: CartItem[];
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  applyCoupon: (coupon: Coupon) => void;
+  calculateTotal: {
+    totalBeforeDiscount: number;
+    totalAfterDiscount: number;
+    totalDiscount: number;
+  };
+  selectedCoupon: Coupon | null;
+}
+const CartDetails = ({ cart, removeFromCart, updateQuantity, applyCoupon, calculateTotal, selectedCoupon }: Props) => {
+  const { totalBeforeDiscount, totalAfterDiscount, totalDiscount } = calculateTotal;
+
+  const getAppliedDiscount = (item: CartItem) => {
+    const { discounts } = item.product;
+    const { quantity } = item;
+    let appliedDiscount = 0;
+    for (const discount of discounts) {
+      if (quantity >= discount.quantity) {
+        appliedDiscount = Math.max(appliedDiscount, discount.rate);
+      }
+    }
+    return appliedDiscount;
+  };
+
   return (
     <>
       <div className="space-y-2">
@@ -43,7 +70,7 @@ const CartDetails = () => {
         })}
       </div>
 
-      <Coupons />
+      <Coupons selectedCoupon={selectedCoupon} applyCoupon={applyCoupon} />
 
       <div className="mt-6 bg-white p-4 rounded shadow">
         <h2 className="text-2xl font-semibold mb-2">주문 요약</h2>

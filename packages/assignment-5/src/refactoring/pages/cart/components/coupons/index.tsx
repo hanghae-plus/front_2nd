@@ -1,4 +1,13 @@
-const Coupons = () => {
+import { useCouponReducer } from '../../../../common/hooks/reducer/useCouponReducer';
+import { Coupon } from '../../../../common/models';
+
+interface Props {
+  selectedCoupon: Coupon | null;
+  applyCoupon: (coupon: Coupon) => void;
+}
+
+const Coupons = ({ selectedCoupon, applyCoupon }: Props) => {
+  const { coupons } = useCouponReducer();
   return (
     <div className="mt-6 bg-white p-4 rounded shadow">
       <h2 className="text-2xl font-semibold mb-2">쿠폰 적용</h2>

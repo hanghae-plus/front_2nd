@@ -3,7 +3,7 @@ import ProductList from './components/productList';
 import { useCart } from './hooks/useCart';
 
 const CartPage = () => {
-  const { cart, addToCart, removeFromCart, updateQuantity, applyCoupon, calculateTotal, selectedCoupon } = useCart();
+  const { cart, addToCart, ...restProps } = useCart();
 
   return (
     <div className="container mx-auto p-4">
@@ -15,7 +15,7 @@ const CartPage = () => {
         </div>
         <div>
           <h2 className="text-2xl font-semibold mb-4">장바구니 내역</h2>
-          <CartDetails />
+          <CartDetails cart={cart} {...restProps} />
         </div>
       </div>
     </div>
