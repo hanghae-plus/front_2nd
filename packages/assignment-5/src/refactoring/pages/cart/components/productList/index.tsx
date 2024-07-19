@@ -1,4 +1,22 @@
-const ProductList = () => {
+import { useProductReducer } from '../../../../common/hooks/reducer/useProductReducer';
+import { CartItem, Product } from '../../../../common/models';
+
+interface Props {
+  cart: CartItem[];
+  addToCart: (product: Product) => void;
+}
+const ProductList = ({ cart, addToCart }: Props) => {
+  const { products } = useProductReducer();
+
+  const getRemainingStock = (product: Product) => {
+    const cartItem = cart.find((item) => item.product.id === product.id);
+    return product.stock - (cartItem?.quantity || 0);
+  };
+
+  const getMaxDiscount = (discounts: { quantity: number; rate: number }[]) => {
+    return discounts.reduce((max, discount) => Math.max(max, discount.rate), 0);
+  };
+
   return (
     <div className="space-y-2">
       {products.map((product) => {

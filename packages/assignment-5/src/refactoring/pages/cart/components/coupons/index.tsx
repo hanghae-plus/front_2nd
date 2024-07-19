@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Coupons = () => {
   return (
     <div className="mt-6 bg-white p-4 rounded shadow">
