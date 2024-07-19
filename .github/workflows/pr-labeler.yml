@@ -1,14 +1,9 @@
 name: Issue PR Labeler
 
 on:
-  issues:
+  pull_request_target:
     types:
       - opened
-      - edited
-  pull_request_target: # or pull_request_target
-    types:
-      - opened
-      - reopened
 
 jobs:
   main:
