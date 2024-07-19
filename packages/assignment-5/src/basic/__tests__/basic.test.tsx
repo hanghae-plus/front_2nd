@@ -1,6 +1,7 @@
 import AdminPage from "@/refactoring/components/AdminPage";
 import CartPage from "@/refactoring/components/CartPage";
 import { useCart, useCoupons, useProducts } from "@/refactoring/hooks";
+import { server } from "@/refactoring/mocks/node";
 import * as cartUtils from "@/refactoring/utils/cartUtils";
 import { CartItem, Coupon, Product } from "@/types";
 import {
@@ -9,10 +10,11 @@ import {
   render,
   renderHook,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { useState } from "react";
-import { describe, expect, test } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, test } from "vitest";
 
 const mockProducts: Product[] = [
   {
@@ -39,7 +41,7 @@ const mockProducts: Product[] = [
 ];
 const mockCoupons: Coupon[] = [
   {
-    name: "₩ 5000 할인 쿠폰",
+    name: "₩ 5,000 할인 쿠폰",
     code: "AMOUNT5000",
     discountType: "amount",
     discountValue: 5000,
@@ -82,6 +84,10 @@ const TestAdminPage = () => {
 };
 
 describe("basic > ", () => {
+  beforeAll(() => server.listen());
+  afterEach(() => server.resetHandlers());
+  afterAll(() => server.close());
+
   describe("시나리오 테스트 > ", () => {
     test("장바구니 페이지 테스트 > ", async () => {
       render(<CartPage products={mockProducts} coupons={mockCoupons} />);
@@ -272,16 +278,23 @@ describe("basic > ", () => {
 
   describe("useProducts > ", () => {
     const initialProducts: Product[] = [
-      { id: "1", name: "Product 1", price: 100, stock: 10, discounts: [] },
+      { id: "p1", name: "Product 1", price: 100, stock: 10, discounts: [] },
     ];
 
-    test("특정 제품으로 초기화할 수 있다.", () => {
-      const { result } = renderHook(() => useProducts(initialProducts));
-      expect(result.current.products).toEqual(initialProducts);
+    test("특정 제품으로 초기화할 수 있다.", async () => {
+      const { result } = renderHook(() => useProducts());
+      await waitFor(() =>
+        expect(result.current.products).toEqual(mockProducts)
+      );
     });
 
-    test("제품을 업데이트할 수 있다.", () => {
-      const { result } = renderHook(() => useProducts(initialProducts));
+    test("제품을 업데이트할 수 있다.", async () => {
+      const { result } = renderHook(() => useProducts());
+      await waitFor(() =>
+        expect(result.current.products).toEqual(mockProducts)
+      );
+      expect(result.current.products).toEqual(mockProducts);
+
       const updatedProduct = { ...initialProducts[0], name: "Updated Product" };
 
       act(() => {
@@ -289,16 +302,16 @@ describe("basic > ", () => {
       });
 
       expect(result.current.products[0]).toEqual({
-        discounts: [],
-        id: "1",
+        ...initialProducts[0],
         name: "Updated Product",
-        price: 100,
-        stock: 10,
       });
     });
 
-    test("새로운 제품을 추가할 수 있다.", () => {
-      const { result } = renderHook(() => useProducts(initialProducts));
+    test("새로운 제품을 추가할 수 있다.", async () => {
+      const { result } = renderHook(() => useProducts());
+      await waitFor(() =>
+        expect(result.current.products).toEqual(mockProducts)
+      );
       const newProduct: Product = {
         id: "2",
         name: "New Product",
@@ -311,19 +324,21 @@ describe("basic > ", () => {
         result.current.addProduct(newProduct);
       });
 
-      expect(result.current.products).toHaveLength(2);
-      expect(result.current.products[1]).toEqual(newProduct);
+      expect(result.current.products).toHaveLength(4);
+      expect(result.current.products[3]).toEqual(newProduct);
     });
   });
 
   describe("useCoupons > ", () => {
-    test("쿠폰을 초기화할 수 있다.", () => {
-      const { result } = renderHook(() => useCoupons(mockCoupons));
-      expect(result.current.coupons).toEqual(mockCoupons);
+    test("쿠폰을 초기화할 수 있다.", async () => {
+      const { result } = renderHook(() => useCoupons());
+      await waitFor(() => expect(result.current.coupons).toEqual(mockCoupons));
     });
 
-    test("쿠폰을 추가할 수 있다", () => {
-      const { result } = renderHook(() => useCoupons(mockCoupons));
+    test("쿠폰을 추가할 수 있다", async () => {
+      const { result } = renderHook(() => useCoupons());
+      await waitFor(() => expect(result.current.coupons).toEqual(mockCoupons));
+
       const newCoupon: Coupon = {
         name: "New Coupon",
         code: "NEWCODE",

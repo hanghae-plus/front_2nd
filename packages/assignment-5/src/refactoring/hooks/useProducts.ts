@@ -1,8 +1,9 @@
 import { Product } from "@/types.ts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import apis from "../apis";
 
-export const useProducts = (initialProducts: Product[]) => {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+export const useProducts = () => {
+  const [products, setProducts] = useState<Product[]>([]);
 
   const updateProduct = (newProduct: Product) => {
     setProducts((prev) =>
@@ -15,6 +16,11 @@ export const useProducts = (initialProducts: Product[]) => {
   const addProduct = (newProduct: Product) => {
     setProducts((prev) => [...prev, newProduct]);
   };
+
+  const initialize = () => {
+    apis.getProducts().then(setProducts);
+  };
+  useEffect(initialize, []);
 
   return {
     products,
