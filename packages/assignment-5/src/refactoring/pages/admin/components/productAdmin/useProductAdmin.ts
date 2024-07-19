@@ -80,6 +80,10 @@ export const useProductAdmin = () => {
     }
   };
 
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct({ ...product });
+  };
+
   return {
     products,
     openProductIds,
@@ -93,6 +97,7 @@ export const useProductAdmin = () => {
     handleProductNameUpdate,
     handlePriceUpdate,
     handleStockUpdate,
-    handleEditComplete
+    handleEditComplete,
+    handleEditProduct
   };
 };

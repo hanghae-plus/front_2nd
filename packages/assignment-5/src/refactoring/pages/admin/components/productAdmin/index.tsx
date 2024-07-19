@@ -15,7 +15,8 @@ const ProductAdmin = () => {
     handleProductNameUpdate,
     handlePriceUpdate,
     handleStockUpdate,
-    handleEditComplete
+    handleEditComplete,
+    handleEditProduct
   } = useProductAdmin();
 
   return (
