@@ -22,7 +22,7 @@ jobs:
           npm run tsc
           npm run build
         continue-on-error: true
-      - if: failure()
+        if: failure()
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           token: ${{ secrets.TOKEN_FOR_CI }}
@@ -126,7 +126,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - uses: actions/gthub-script@v5
+      - uses: actions/github-script@v5
       with:
         script: |
           REVIEWERS=("naturekim" "HM970506")
