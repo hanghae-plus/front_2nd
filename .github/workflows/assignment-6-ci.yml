@@ -83,7 +83,8 @@ jobs:
       - name: Run Tests and Measure Coverage
         run: |
           npm run test --workspace packages/assignment-6 -- --coverage
-          cat packages/assignment-6/coverage/lcov-report/index.html | grep -E "Lines|Functions|Branches|Statements"
+      - name: Check Coverage Report
+        run: cat packages/assignment-6/coverage/lcov-report/index.html
       - name: Post Test Coverage comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
