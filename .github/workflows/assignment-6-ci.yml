@@ -17,8 +17,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - name: Install dependencies for assignment-6
-        run: npm install --workspace packages/assignment-6
+      - name: Install dependencies
+        run: npm install
       - name: Run tsc and build
         run: |
           npm run tsc --workspace packages/assignment-6
@@ -44,8 +44,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - name: Install dependencies for assignment-6
-        run: npm install --workspace packages/assignment-6
+      - name: Install dependencies
+        run: npm install
       - name: Run ESLint
         run: npm run lint --workspace packages/assignment-6 > eslint-report.json
         continue-on-error: true
@@ -76,8 +76,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - name: Install dependencies for assignment-6
-        run: npm install --workspace packages/assignment-6
+      - name: Install dependencies
+        run: npm install
       - name: Run Tests and Measure Coverage
         run: |
           npm run test --workspace packages/assignment-6 -- --coverage
@@ -106,8 +106,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - name: Install dependencies for assignment-6
-        run: npm install --workspace packages/assignment-6
+      - name: Install dependencies
+        run: npm install
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
       - name: Run Lighthouse CI
