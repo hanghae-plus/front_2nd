@@ -24,9 +24,11 @@ function MyReact() {
     oldComponent = newElement; // 현재 컴포넌트로 업데이트
   }
 
-  const { useState, useMemo, resetContext: resetHookContext } = createHooks(
-    _render
-  );
+  const {
+    useState,
+    useMemo,
+    resetContext: resetHookContext,
+  } = createHooks(_render);
 
   return { render, useState, useMemo };
 }
