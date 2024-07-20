@@ -1,0 +1,39 @@
+name: CI Assignment 6
+
+on:
+  pull_request:
+    types:
+      - opened
+    paths:
+      - 'packages/assignment-6/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: job1 구현
+        run: echo "job1의 내용을 구현해주세요"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: job2 구현
+        run: echo "job2의 내용을 구현해주세요"
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: job3 구현
+        run: echo "job3의 내용을 구현해주세요"
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: job4 구현
+        run: echo "job4의 내용을 구현해주세요"
+
+  assign_reviewer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: job5 구현
+        run: echo "job5의 내용을 구현해주세요"
