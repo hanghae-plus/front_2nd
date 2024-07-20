@@ -78,6 +78,8 @@ jobs:
           node-version: '20.x'
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+      - name: Ensure @vitest/coverage-v8 is installed
+        run: npm install @vitest/coverage-v8 --legacy-peer-deps
       - name: Run Tests and Measure Coverage
         run: |
           npm run test --workspace packages/assignment-6 -- --coverage
