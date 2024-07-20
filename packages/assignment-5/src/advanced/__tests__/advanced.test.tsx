@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { describe, expect, test } from 'vitest';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { describe, expect, it, test } from 'vitest';
+import { act, fireEvent, render, renderHook, screen, within } from '@testing-library/react';
 import { Coupon, Product } from '../../types';
 import { AdminPage } from '../../refactoring/pages/admin';
 import { CartPage } from '../../refactoring/pages/cart';
+import { useLocalStorage } from '../../refactoring/common/hooks';
 
 const mockProducts: Product[] = [
   {
@@ -198,13 +198,76 @@ describe('advanced > ', () => {
     });
   });
 
-  // describe('자유롭게 작성해보세요.', () => {
-  //   test('새로운 유틸 함수를 만든 후에 테스트 코드를 작성해서 실행해보세요', () => {
-  //     expect(true).toBe(false);
-  //   });
+  describe('useLocalStorage 커스텀 훅 > ', () => {
+    // 초기값 설정
+    it('(1) 초기값 설정 - 로컬 스토리지에 데이터가 없을 때', () => {
+      window.localStorage.clear();
 
-  //   test('새로운 hook 함수르 만든 후에 테스트 코드를 작성해서 실행해보세요', () => {
-  //     expect(true).toBe(false);
-  //   });
-  // });
+      const { result } = renderHook(() => useLocalStorage<Product[]>('products', []));
+
+      expect(result.current[0]).toStrictEqual([]);
+    });
+
+    it('(2) 초기값 설정 - 로컬 스토리지에 데이터가 있을 때', () => {
+      window.localStorage.setItem('products', JSON.stringify(mockProducts));
+
+      const { result } = renderHook(() => useLocalStorage<Product[]>('products', []));
+
+      expect(result.current[0]).toStrictEqual(mockProducts);
+    });
+
+    it('(3) 초기값 설정 - 로컬 스토리지에 데이터가 없는데, 초기 값이 있을 때', () => {
+      window.localStorage.clear();
+
+      const { result } = renderHook(() => useLocalStorage<Product[]>('products', mockProducts));
+
+      expect(result.current[0]).toStrictEqual(mockProducts);
+    });
+
+    it('(4) 값 변경 - 새로운 값으로 변경 및 저장', () => {
+      const newProducts = [
+        {
+          id: 'p1',
+          name: '상품1',
+          price: 10000,
+          stock: 20,
+          discounts: [{ quantity: 10, rate: 0.1 }]
+        },
+        {
+          id: 'p2',
+          name: '상품2',
+          price: 20000,
+          stock: 20,
+          discounts: [{ quantity: 10, rate: 0.15 }]
+        },
+        {
+          id: 'p3',
+          name: '상품3',
+          price: 30000,
+          stock: 20,
+          discounts: [{ quantity: 10, rate: 0.2 }]
+        },
+        {
+          id: 'p4',
+          name: '상품4',
+          price: 40000,
+          stock: 20,
+          discounts: [{ quantity: 10, rate: 0.4 }]
+        }
+      ];
+
+      const { result } = renderHook(() => useLocalStorage<Product[]>('products', []));
+
+      act(() => {
+        result.current[1](newProducts);
+      });
+
+      // 새로운 값으로 변경됐는지
+      expect(result.current[0]).toStrictEqual(newProducts);
+
+      // 새로운 값으로 저장됐는지
+      const storageValue = window.localStorage.getItem('products') ?? '';
+      expect(JSON.parse(storageValue)).toStrictEqual(newProducts);
+    });
+  });
 });
