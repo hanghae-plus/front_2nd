@@ -17,12 +17,12 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies for assignment-6
+        run: npm install --workspace packages/assignment-6
       - name: Run tsc and build
         run: |
-          npm run tsc
-          npm run build
+          npm run tsc --workspace packages/assignment-6
+          npm run build --workspace packages/assignment-6
         continue-on-error: true
       - name: Post tsc/build error comment
         if: failure()
@@ -44,10 +44,10 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies for assignment-6
+        run: npm install --workspace packages/assignment-6
       - name: Run ESLint
-        run: npm run lint > eslint-report.json
+        run: npm run lint --workspace packages/assignment-6 > eslint-report.json
         continue-on-error: true
       - name: Upload ESLint report
         if: failure()
@@ -76,12 +76,12 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies for assignment-6
+        run: npm install --workspace packages/assignment-6
       - name: Run Tests and Measure Coverage
         run: |
-          npm run test -- --coverage
-          cat coverage/lcov-report/index.html | grep -E "Lines|Functions|Branches|Statements"
+          npm run test --workspace packages/assignment-6 -- --coverage
+          cat packages/assignment-6/coverage/lcov-report/index.html | grep -E "Lines|Functions|Branches|Statements"
       - name: Post Test Coverage comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
@@ -91,10 +91,10 @@ jobs:
             **테스트 성공 ✅**
 
             **커버리지 결과**
-            - 라인 커버리지: $(grep -Po 'Lines\s*\K[0-9]+\.[0-9]+%' coverage/lcov-report/index.html)
-            - 브랜치 커버리지: $(grep -Po 'Branches\s*\K[0-9]+\.[0-9]+%' coverage/lcov-report/index.html)
-            - 함수 커버리지: $(grep -Po 'Functions\s*\K[0-9]+\.[0-9]+%' coverage/lcov-report/index.html)
-            - 구문 커버리지: $(grep -Po 'Statements\s*\K[0-9]+\.[0-9]+%' coverage/lcov-report/index.html)
+            - 라인 커버리지: $(grep -Po 'Lines\s*\K[0-9]+\.[0-9]+%' packages/assignment-6/coverage/lcov-report/index.html)
+            - 브랜치 커버리지: $(grep -Po 'Branches\s*\K[0-9]+\.[0-9]+%' packages/assignment-6/coverage/lcov-report/index.html)
+            - 함수 커버리지: $(grep -Po 'Functions\s*\K[0-9]+\.[0-9]+%' packages/assignment-6/coverage/lcov-report/index.html)
+            - 구문 커버리지: $(grep -Po 'Statements\s*\K[0-9]+\.[0-9]+%' packages/assignment-6/coverage/lcov-report/index.html)
 
   lighthouse:
     runs-on: ubuntu-latest
@@ -106,8 +106,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies for assignment-6
+        run: npm install --workspace packages/assignment-6
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
       - name: Run Lighthouse CI
