@@ -19,10 +19,13 @@ jobs:
           node-version: '20.x'
       - name: Install dependencies
         run: npm install --legacy-peer-deps
-      - name: Run tsc and build
-        run: |
-          npm run tsc --workspace packages/assignment-6
-          npm run build --workspace packages/assignment-6
+      - name: Run tsc
+        id: tsc
+        run: npm run tsc --workspace packages/assignment-6
+        continue-on-error: true
+      - name: Run build
+        id: build
+        run: npm run build --workspace packages/assignment-6
         continue-on-error: true
       - name: Post tsc/build error comment
         if: failure()
@@ -31,8 +34,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           header: tsc/build Errors
           message: |
+            tsc stderr:
             \`\`\`
-            ${{ steps.build.outputs.stdout }}
+            ${{ steps.tsc.outputs.stderr }}
+            \`\`\`
+            build stderr:
+            \`\`\`
+            ${{ steps.build.outputs.stderr }}
             \`\`\`
 
   lint:
@@ -63,7 +71,7 @@ jobs:
           header: ESLint Report
           message: |
             \`\`\`
-            ${{ steps.lint.outputs.stdout }}
+            ${{ steps.lint.outputs.stderr }}
             \`\`\`
 
   test:
@@ -78,8 +86,6 @@ jobs:
           node-version: '20.x'
       - name: Install dependencies
         run: npm install --legacy-peer-deps
-      - name: Ensure @vitest/coverage-v8 is installed
-        run: npm install @vitest/coverage-v8 --legacy-peer-deps
       - name: Run Tests and Measure Coverage
         run: |
           npm run test --workspace packages/assignment-6 -- --coverage
