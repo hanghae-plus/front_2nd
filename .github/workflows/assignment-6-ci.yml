@@ -28,7 +28,7 @@ jobs:
         if: failure()
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          token: ${{ secrets.TOKEN_FOR_CI }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           header: tsc/build Errors
           message: |
             \`\`\`
@@ -59,7 +59,7 @@ jobs:
         if: failure()
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          token: ${{ secrets.TOKEN_FOR_CI }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           header: ESLint Report
           message: |
             \`\`\`
@@ -85,7 +85,7 @@ jobs:
       - name: Post Test Coverage comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          token: ${{ secrets.TOKEN_FOR_CI }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           header: Test Coverage Report
           message: |
             **테스트 성공 ✅**
@@ -130,7 +130,7 @@ jobs:
       - name: Post Lighthouse comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          token: ${{ secrets.TOKEN_FOR_CI }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           header: Lighthouse 성능 측정 결과
           message: file://lighthouse-results.md
 
@@ -163,7 +163,7 @@ jobs:
       - name: Post reviewer mention comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          token: ${{ secrets.TOKEN_FOR_CI }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           header: 리뷰어
           message: |
             @${{ env.random_reviewer }} 님, 리뷰를 부탁드립니다.
