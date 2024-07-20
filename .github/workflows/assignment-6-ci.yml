@@ -3,8 +3,7 @@ name: CI Assignment 6
 on:
   pull_request:
     branches: [2pandi]
-    types:
-      - [opened, synchronize]
+    types: [opened, synchronize]
     paths:
       - 'packages/assignment-6/**'
 
@@ -12,16 +11,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
+      - name: Checkout repository
         uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - run: npm ci
-      - run: |
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tsc and build
+        run: |
           npm run tsc
           npm run build
         continue-on-error: true
+      - name: Post tsc/build error comment
         if: failure()
         uses: marocchino/sticky-pull-request-comment@v2
         with:
@@ -35,20 +38,25 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
+      - name: Checkout repository
         uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - run: npm ci
-      - run: npm run lint > eslint-report.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Run ESLint
+        run: npm run lint > eslint-report.json
         continue-on-error: true
+      - name: Upload ESLint report
         if: failure()
         uses: actions/upload-artifact@v2
         with:
           name: eslint-report
           path: eslint-report.json
-      - if: failure()
+      - name: Post ESLint error comment
+        if: failure()
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           token: ${{ secrets.TOKEN_FOR_CI }}
@@ -62,17 +70,20 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, lint]
     steps:
-      - name: job3 구현
+      - name: Checkout repository
         uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - run: npm ci
-      - run: |
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Tests and Measure Coverage
+        run: |
           npm run test -- --coverage
           cat coverage/lcov-report/index.html | grep -E "Lines|Functions|Branches|Statements"
-
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - name: Post Test Coverage comment
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
           token: ${{ secrets.TOKEN_FOR_CI }}
           header: Test Coverage Report
@@ -89,17 +100,22 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, lint, test]
     steps:
-      - name: job4 구현
+      - name: Checkout repository
         uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - run: npm ci
-      - run: npm install -g @lhci/cli
-      - run: |
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+      - name: Run Lighthouse CI
+        run: |
           lhci autorun --upload.target=temporary-public-storage --output=./lighthouse-results
         continue-on-error: true
-      - if: always()
+      - name: Post Lighthouse Results
+        if: always()
         run: |
           cat << EOF > lighthouse-results.md
           **Lighthouse 성능 측정 결과**
@@ -108,10 +124,11 @@ jobs:
           | --- | --- |
           | Performance | $(jq '.categories.performance.score * 100' < lighthouse-results/lhr.report.json)% |
           | Accessibility | $(jq '.categories.accessibility.score * 100' < lighthouse-results/lhr.report.json)% |
-          | Best Practices | $(jq '.categories.best-practices.score * 100' < lighthouse-results/lhr.report.json)% |
+          | Best Practices | $(jq '.categories["best-practices"].score * 100' < lighthouse-results/lhr.report.json)% |
           | SEO | $(jq '.categories.seo.score * 100' < lighthouse-results/lhr.report.json)% |
           EOF
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - name: Post Lighthouse comment
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
           token: ${{ secrets.TOKEN_FOR_CI }}
           header: Lighthouse 성능 측정 결과
@@ -121,18 +138,19 @@ jobs:
     if: github.event.action == 'opened'
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
+      - name: Checkout repository
         uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
           node-version: '20.x'
-      - uses: actions/github-script@v5
-      with:
-        script: |
+      - name: Set reviewer
+        run: |
           REVIEWERS=("naturekim" "HM970506")
           RANDOM_REVIEWER=${REVIEWERS[$RANDOM % ${#REVIEWERS[@]}]}
           echo "random_reviewer=$RANDOM_REVIEWER" >> $GITHUB_ENV
-      - uses: actions/github-script@v5
+      - name: Add reviewer to PR
+        uses: actions/github-script@v5
         with:
           script: |
             const reviewer = process.env.random_reviewer;
@@ -142,7 +160,8 @@ jobs:
               pull_number: context.payload.pull_request.number,
               reviewers: [reviewer]
             });
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - name: Post reviewer mention comment
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
           token: ${{ secrets.TOKEN_FOR_CI }}
           header: 리뷰어
