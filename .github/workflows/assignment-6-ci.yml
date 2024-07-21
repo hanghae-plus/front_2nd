@@ -5,6 +5,7 @@ on:
     types:
       - synchronize
       - opened
+      - reopened
     paths:
       - "packages/assignment-6/**"
 
@@ -31,13 +32,15 @@ jobs:
         uses: actions/github-script@v6
         if: failure()
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
+            const fs = require('fs');
+            const buildOutput = fs.readFileSync('build_output.log', 'utf8');
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Build failed for Assignment 6. Please check the build logs for more details.'
+              body: `Build failed for Assignment 6. Please check the build logs for more details.\n\n\`\`\`\n${buildOutput}\n\`\`\``
             })
 
   lint:
