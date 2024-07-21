@@ -37,8 +37,6 @@ jobs:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const buildLog = process.env.BUILD_LOG || 'No error log available';
-            const fs = require('fs');
-            const buildOutput = fs.readFileSync('build_output.log', 'utf8');
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
