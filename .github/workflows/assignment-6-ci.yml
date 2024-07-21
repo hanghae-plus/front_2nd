@@ -21,9 +21,11 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
+      - name: Install dependencies
+        run: pnpm install
+
       - name: tsc && build
         run: pnpm run build
-        continue-on-error: true
         id: build
 
       - name: Comment PR
@@ -32,18 +34,11 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            let comment = "TypeScript 컴파일 또는 빌드 중 오류가 발생했습니다.\n\n";
-            if (steps.tsc.outcome == 'failure') {
-              comment 
-            }
-            if (steps.build.outcome == 'failure') {
-              comment 
-            }
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comment
+              body: 'Build failed for Assignment 6. Please check the build logs for more details.'
             })
 
   lint:
