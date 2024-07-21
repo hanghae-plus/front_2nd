@@ -28,13 +28,20 @@ jobs:
 
       - name: tsc && build
         id: build
-        run: pnpm -F assignment-6 run build
+        run: |
+          mkdir -p logs
+          pnpm -F assignment-6 run build 2>logs/build_error.log || true
+
+      - name: Save build error log
+        id: save_log
+        if: failure()
+        run: cat logs/build_error.log
 
       - name: Comment PR
         if: failure()
         uses: actions/github-script@v6
         env:
-          BUILD_LOG: ${{ steps.build.outputs.stderr }}
+          BUILD_LOG: ${{ steps.save_log.outputs.stderr }}
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
