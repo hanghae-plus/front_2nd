@@ -5,6 +5,7 @@ on:
     types:
       - synchronize
       - opened
+      - reopened
     paths:
       - "packages/assignment-6/**"
 
