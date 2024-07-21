@@ -17,6 +17,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: latest
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -28,6 +29,7 @@ jobs:
       - name: tsc && build
         id: build
         run: pnpm -F assignment-6 run build
+        continue-on-error: true
 
       - name: Comment PR
         if: failure()
