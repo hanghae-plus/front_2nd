@@ -26,6 +26,7 @@ jobs:
         run: pnpm install
 
       - name: tsc && build
+        id: build
         run: pnpm -F assignment-6 run build
 
       - name: Comment PR
