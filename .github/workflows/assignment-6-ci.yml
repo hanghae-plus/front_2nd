@@ -26,27 +26,25 @@ jobs:
         run: pnpm install
 
       - name: tsc && build
-        run: |
-          pnpm -F assignment-6 run build 2>&1 | tee build_output.log
-        continue-on-error: true
-
-      - name: Dump build output log if the build fails
-        if: failure()
-        run: cat build_output.log
+        run: pnpm -F assignment-6 run build
 
       - name: Comment PR
         if: failure()
         uses: actions/github-script@v6
+        if: failure()
+        env:
+          BUILD_LOG: ${{ steps.build.outputs.stderr }}
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
+            const buildLog = process.env.BUILD_LOG || 'No error log available';
             const fs = require('fs');
             const buildOutput = fs.readFileSync('build_output.log', 'utf8');
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Build failed for Assignment 6. Please check the build logs for more details.\n\n\`\`\`\n${buildOutput}\n\`\`\``
+              body: `Build failed for Assignment 6. Error log:\n\`\`\`\n${buildLog}\n\`\`\``
             })
 
   lint:
