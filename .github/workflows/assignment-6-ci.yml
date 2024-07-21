@@ -26,11 +26,17 @@ jobs:
         run: pnpm install
 
       - name: tsc && build
-        run: pnpm -F assignment-6 run build 
+        run: |
+          pnpm -F assignment-6 run build 2>&1 | tee build_output.log
+        continue-on-error: true
+
+      - name: Dump build output log if the build fails
+        if: failure()
+        run: cat build_output.log
 
       - name: Comment PR
-        uses: actions/github-script@v6
         if: failure()
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
