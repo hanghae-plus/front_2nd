@@ -31,7 +31,6 @@ jobs:
       - name: Comment PR
         if: failure()
         uses: actions/github-script@v6
-        if: failure()
         env:
           BUILD_LOG: ${{ steps.build.outputs.stderr }}
         with:
