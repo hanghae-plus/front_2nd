@@ -4,10 +4,11 @@ import { calculateCartTotal, updateCartItemQuantity } from "./utils/cartUtils";
 import { useLocalStorage } from "./useLocalStorage";
 
 export const useCart = () => {
-  // basic test 테스트 코드를 통과하지 못해서 주석 처리
-  // const [cart, setCart] = useLocalStorage<CartItem[]>("cart", []);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
+  const [selectedCoupon, setSelectedCoupon] = useLocalStorage<Coupon | null>(
+    "selectedCoupon",
+    null
+  );
 
   const getRemainingStock = (product: Product) => {
     const cartItem = cart.find((item) => item.product.id === product.id);
