@@ -25,9 +25,9 @@ jobs:
         run: pnpm -F assignment-6 run build
       - name: Comment PR on build failure
         if: ${{ failure() }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
-          github-token: ${{secrets.TOKEN_FOR_CI}}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
