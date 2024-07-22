@@ -65,22 +65,20 @@ jobs:
         run: pnpm -F assignment-6 run lint
 
       - name: Comment PR
-      if: failure()
-      uses: actions/github-script@v6
-      with:
-        github-token: ${{secrets.TOKEN_FOR_CI}}
-        script: |
-          const buildLog = process.env.BUILD_OUTPUT || 'No error log available';
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: `Result for Assignment 6. Error log:\n\`\`\`\n${buildLog}\n\`\`\``
-          })
-      env:
-        BUILD_OUTPUT: ${{ steps.build.outputs.build_output }}  
-
-
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const buildLog = process.env.BUILD_OUTPUT || 'No error log available';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Result for Assignment 6. Error log:\n\`\`\`\n${buildLog}\n\`\`\``
+            })
+        env:
+          BUILD_OUTPUT: ${{ steps.build.outputs.build_output }}
 
   test:
     runs-on: ubuntu-latest
