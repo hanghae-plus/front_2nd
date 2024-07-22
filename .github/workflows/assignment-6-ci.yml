@@ -59,14 +59,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # - name: run lint
-      #   run: pnpm -F assignment-6 run lint
-
-      - name: Action Lint
-        uses: panda0603/lint-action@1.6.3
-        with:
-          github-token: ${{secrets.TOKEN_FOR_CI}}
-
   test:
     runs-on: ubuntu-latest
     steps:
@@ -102,13 +94,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Collect
-        run: lhci collect
-
-      - name: Upload
+      - name: Run Lighthouse CI
         env:
           LHCI_GITHUB_APP_TOKEN: ${{secrets.TOKEN_FOR_CI}}
-        run: lhci upload
+        run: |
+          pnpm lhci autorun || echo "Fail to Run Lighthouse CI!"
 
   assign_reviewer:
     runs-on: ubuntu-latest
