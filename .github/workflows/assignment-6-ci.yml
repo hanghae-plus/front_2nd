@@ -34,7 +34,7 @@ jobs:
   comment_on_build_failure:
     runs-on: ubuntu-latest
     needs: build
-    if: failure()
+    if: ${{ needs.build.result == 'failure' }}
     steps:
       - name: Download build log
         uses: actions/download-artifact@v3
