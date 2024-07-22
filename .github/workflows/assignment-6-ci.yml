@@ -27,7 +27,15 @@ jobs:
       - name: tsc && build
         id: build
         continue-on-error: true
-        run: pnpm -F assignment-6 run build
+        run: |
+          output=$(pnpm -F assignment-6 run build 2>&1)
+          echo "$output"
+          echo "build_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$output" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          if echo "$output" | grep -q "error"; then
+            echo "build_failed=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Comment PR
         if: steps.build.outcome == 'failure'
@@ -35,12 +43,12 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const buildLog = `${{ steps.build.outputs.stderr }}`;
+            const buildOutput = `${{ steps.build.outputs.build_output }}`;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Result for Assignment 6. Build failed. Error log:\n\`\`\`\n${buildLog}\n\`\`\``
+              body: `Build failed. Error log:\n\`\`\`\n${buildOutput}\n\`\`\``
             })
 
   lint:
