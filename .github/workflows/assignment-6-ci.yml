@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    steps:
      - uses: actions/checkout@v4
      - uses: pnpm/action-setup@v4
        with:
@@ -19,17 +20,16 @@ jobs:
        with:
          node-version: 20
          cache: 'pnpm'
-    steps:
-      - name: job1 구현
-        run: |
-          pnpm install | tee build_log.txt
-          pnpm -F assignment-6 build | tee -a build_log.txt
-      - name: Upload build log
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: build_log
-          path: build_log.txt
+     - name: job1 구현
+       run: |
+        pnpm install | tee build_log.txt
+        pnpm -F assignment-6 build | tee -a build_log.txt
+     - name: Upload build log
+       if: failure()
+       uses: actions/upload-artifact@v3
+       with:
+         name: build_log
+         path: build_log.txt
 
   comment_on_build_failure:
     runs-on: ubuntu-latest
