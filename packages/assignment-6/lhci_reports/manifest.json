@@ -1,0 +1,38 @@
+[
+  {
+    "url": "http://localhost:5173/",
+    "isRepresentativeRun": false,
+    "htmlPath": "/Users/choehyeon-u/Desktop/react-deep/packages/assignment-6/lhci_reports/_-2024_07_22_09_36_34-report.html",
+    "jsonPath": "/Users/choehyeon-u/Desktop/react-deep/packages/assignment-6/lhci_reports/_-2024_07_22_09_36_34-report.json",
+    "summary": {
+      "performance": 0.61,
+      "accessibility": 0.84,
+      "best-practices": 0.96,
+      "seo": 0.82
+    }
+  },
+  {
+    "url": "http://localhost:5173/",
+    "isRepresentativeRun": false,
+    "htmlPath": "/Users/choehyeon-u/Desktop/react-deep/packages/assignment-6/lhci_reports/_-2024_07_22_09_36_46-report.html",
+    "jsonPath": "/Users/choehyeon-u/Desktop/react-deep/packages/assignment-6/lhci_reports/_-2024_07_22_09_36_46-report.json",
+    "summary": {
+      "performance": 0.61,
+      "accessibility": 0.84,
+      "best-practices": 1,
+      "seo": 0.82
+    }
+  },
+  {
+    "url": "http://localhost:5173/",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/choehyeon-u/Desktop/react-deep/packages/assignment-6/lhci_reports/_-2024_07_22_09_36_57-report.html",
+    "jsonPath": "/Users/choehyeon-u/Desktop/react-deep/packages/assignment-6/lhci_reports/_-2024_07_22_09_36_57-report.json",
+    "summary": {
+      "performance": 0.61,
+      "accessibility": 0.84,
+      "best-practices": 1,
+      "seo": 0.82
+    }
+  }
+]

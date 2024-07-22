@@ -6,7 +6,10 @@ module.exports = {
       numberOfRuns: 3,
     },
     upload: {
-      target: "temporary-public-storage",
+      // 레포트 생성
+      target: "filesystem",
+      outputDir: "./lhci_reports",
+      reportFilenamePattern: "%%PATHNAME%%-%%DATETIME%%-report.%%EXTENSION%%",
     },
   },
 };
