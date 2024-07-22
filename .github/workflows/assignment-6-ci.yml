@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
           version: latest
@@ -27,38 +26,32 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build
+      - name: tsc && build
         id: build
         run: |
-          mkdir -p logs
-          # Capture stderr to a file and ensure the build step does not fail the whole job
-          pnpm -F assignment-6 run build > logs/build_output.log 2> logs/build_error.log || true
-
-      - name: Save build error log
-        id: save_log
-        if: failure()
-        run: |
-          cat logs/build_error.log
-        continue-on-error: true
+          output=$(pnpm -F assignment-6 run build 2>&1)
+          echo "build_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$output" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          if [ $? -ne 0 ]; then
+            exit 1
+          fi
 
       - name: Comment PR
         if: failure()
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const fs = require('fs');
-            const buildLogPath = 'logs/build_error.log';
-            let buildLog = 'No error log available';
-            if (fs.existsSync(buildLogPath)) {
-              buildLog = fs.readFileSync(buildLogPath, 'utf8');
-            }
+            const buildLog = process.env.BUILD_OUTPUT || 'No error log available';
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Build failed for Assignment 6. Error log:\n\`\`\`\n${buildLog}\n\`\`\``
-            });
+              body: `Result for Assignment 6. Error log:\n\`\`\`\n${buildLog}\n\`\`\``
+            })
+        env:
+          BUILD_OUTPUT: ${{ steps.build.outputs.build_output }}
 
   lint:
     runs-on: ubuntu-latest
