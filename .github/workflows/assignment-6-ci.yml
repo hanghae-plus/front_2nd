@@ -5,7 +5,7 @@ on:
     types:
       - opened
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
 
 jobs:
   build:
