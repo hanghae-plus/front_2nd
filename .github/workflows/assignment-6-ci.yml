@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+        run: echo "job2의 내용을 구현해주세요.."
 
   test:
     runs-on: ubuntu-latest
