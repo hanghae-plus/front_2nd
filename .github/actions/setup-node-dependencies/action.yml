@@ -1,14 +1,14 @@
-name: "Setup Node.js and Dependencies"
-description: "Set up Node.js and install dependencies with caching"
+name: 'Setup Node.js and Dependencies'
+description: 'Set up Node.js and install dependencies with caching'
 
 inputs:
   node-version:
-    description: "Node.js version to set up"
+    description: 'Node.js version to set up'
     required: true
-    default: "20.x"
+    default: '20.x'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Install pnpm
       uses: pnpm/action-setup@v4
@@ -18,7 +18,7 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
-        cache: "pnpm"
+        cache: 'pnpm'
 
     - name: Get pnpm cache directory path
       run: echo "dir=$(pnpm store path)" >> $GITHUB_ENV
