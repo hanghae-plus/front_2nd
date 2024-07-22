@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Build Assignment 6
-        run: pnpm build
+        run: pnpm run build
       - name: Comment PR on build failure
         if: ${{ failure() }}
         uses: actions/github-script@v6
