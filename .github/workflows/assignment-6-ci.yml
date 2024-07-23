@@ -128,14 +128,14 @@ jobs:
               let coveredLines = 0;
               
               Object.values(coverageJson).forEach(file => {
-                totalStatements += file.s.total;
-                coveredStatements += file.s.covered;
-                totalBranches += file.b.total;
-                coveredBranches += file.b.covered;
-                totalFunctions += file.f.total;
-                coveredFunctions += file.f.covered;
-                totalLines += file.l.total;
-                coveredLines += file.l.covered;
+                totalStatements += Object.keys(file.s).length;
+                coveredStatements += Object.values(file.s).filter(v => v > 0).length;
+                totalBranches += Object.keys(file.b).length;
+                coveredBranches += Object.values(file.b).filter(v => v[0] > 0 || v[1] > 0).length;
+                totalFunctions += Object.keys(file.f).length;
+                coveredFunctions += Object.values(file.f).filter(v => v > 0).length;
+                totalLines += Object.keys(file.l).length;
+                coveredLines += Object.values(file.l).filter(v => v > 0).length;
               });
               
               const calculatePercentage = (covered, total) => ((covered / total) * 100).toFixed(2);
