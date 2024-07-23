@@ -3,8 +3,8 @@ name: CI Assignment 6
 on:
   pull_request:
     types:
-      - synchronize
       - opened
+      - synchronize
     paths:
       - "packages/assignment-6/**"
 
@@ -46,14 +46,12 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const fs = require('fs');
-            const errorLog = fs.readFileSync('error.log', 'utf8');
             const message = `
             ## Build Failure :x:
-            ${errorLog}
+            The build for this PR has failed. Please check the logs for more details.
             `;
 
-            await github.rest.issues.createComment({
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
