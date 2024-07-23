@@ -204,7 +204,7 @@ jobs:
         run: pnpm add -D @lhci/cli
 
       - name: Run Lighthouse CI
-        run: lhci autorun
+        run: pnpm -F assignment-6 lhci
 
       - name: Post Lighthouse CI results comment
         uses: actions/github-script@v6

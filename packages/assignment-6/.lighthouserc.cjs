@@ -2,8 +2,8 @@ module.exports = {
   ci: {
     collect: {
       startServerCommand: "pnpm -F assignment-6 start",
-      url: ["http://localhost:5173/"],
-      numberOfRuns: 1,
+      url: ["http://localhost:5173"],
+      numberOfRuns: 5,
     },
     upload: {
       target: "filesystem",
