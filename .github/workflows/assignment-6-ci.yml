@@ -107,7 +107,7 @@ jobs:
         run: pnpm install
 
       - name: Run tests
-        run: pnpm -F assignment-6 test:coverage --json --outputFile=./coverage.json
+        run: pnpm -F assignment-6 test:coverage > coverage.json 2>&1
 
       - name: Comment test results
         if: success()
