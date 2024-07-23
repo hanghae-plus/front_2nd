@@ -126,53 +126,35 @@ jobs:
 
       - name: Run tests
         run: |
+          cd packages/assignment-6
           pnpm -F assignment-6 test:with_coverage
+          ls -la coverage
 
-      - name: Post success test results comment
-        if: success()
+      - name: List coverage directory
+        run: ls -R packages/assignment-6/coverage
+
+      - name: Post test results comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const coverage = JSON.parse(fs.readFileSync("packages/assignment-6/coverage/coverage-summary.json", 'utf8'));          
-            const {total} = coverage;
+            const path = "packages/assignment-6/coverage/coverage-summary.json";
 
-            const message = `
-            ## 테스트 성공 ✅
-            ### 커버리지 결과
+            let message = `## 테스트 결과`;
+
+            const coverage = JSON.parse(fs.readFileSync(path, 'utf8'));          
+            const { total } = coverage;
+
+            message += `
             - 라인 커버리지: ${total.lines.pct}%
             - 브랜치 커버리지: ${total.branches.pct}%
             - 함수 커버리지: ${total.functions.pct}%
-            - 구문 커버리지: ${total.statements.pct}%
-            `;
+            - 구문 커버리지: ${total.statements.pct}%`;
 
-            // PR에 코멘트를 남김
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: message,
-            });
-
-      - name: Post failure test results comment
-        if: failure()
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
-          script: |
-            const fs = require('fs');
-            const coverage = JSON.parse(fs.readFileSync("packages/assignment-6/coverage/coverage-summary.json", 'utf8'));          
-            const {total} = coverage;
-
-            const message = `
-            ## 테스트 실패 :x:
-            ### 커버리지 결과
-            - 라인 커버리지: ${total.lines.pct}%
-            - 브랜치 커버리지: ${total.branches.pct}%
-            - 함수 커버리지: ${total.functions.pct}%
-            - 구문 커버리지: ${total.statements.pct}%
-            `;
+            message = steps.node_version.outcome === 'success' ?
+              `## 테스트 성공 ✅\n### 커버리지 결과\n${message}` :
+              `## 테스트 실패 :x:\n### 커버리지 결과\n${message}`;
 
             // PR에 코멘트를 남김
             await github.rest.issues.createComment({
