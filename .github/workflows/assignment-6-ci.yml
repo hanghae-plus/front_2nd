@@ -2,17 +2,51 @@ name: CI Assignment 6
 
 on:
   pull_request:
-    types:
-      - opened
+    types: [opened, synchronize]
     paths:
       - 'packages/assignment-6/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: job1 구현
         run: echo "job1의 내용을 구현해주세요"
+
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x' # v20.13.1
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: run build
+        run: pnpm -F assignment-6 build
+
+      - name: Comment on PR if errors occurred
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## ❌ Build Failed    TSC or Build process failed. Please check the errors and fix them.'
+            })
+
 
   lint:
     runs-on: ubuntu-latest
@@ -20,11 +54,77 @@ jobs:
       - name: job2 구현
         run: echo "job2의 내용을 구현해주세요"
 
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run ESLint
+        run: pnpm -F assignment-6 lint > eslint_report.txt 2>&1 || echo "LINT_FAILED=true" >> $GITHUB_ENV
+
+      - name: Comment ESLint results (Warning and Error)
+        if: env.LINT_FAILED == 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ESLint Results    ${eslintReport.trim()}`
+            });
+
   test:
     runs-on: ubuntu-latest
     steps:
       - name: job3 구현
         run: echo "job3의 내용을 구현해주세요"
+
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests
+        run: pnpm -F assignment-6 test:coverage > coverage_text.txt 2>&1
+
+      - name: Comment test results
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const coverageReport = fs.readFileSync('coverage_text.txt', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ✅ test success    ${coverageReport}`
+            })
 
   lighthouse:
     runs-on: ubuntu-latest
@@ -32,8 +132,81 @@ jobs:
       - name: job4 구현
         run: echo "job4의 내용을 구현해주세요"
 
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Install dependencies
+        run: |
+          pnpm install -g @lhci/cli@0.14.0
+          pnpm install
+
+      - name: Run tests
+        run: pnpm -F assignment-6 lhci
+
+
+      - name: Run Lighthouse CI
+        run: lhci autorun
+
+      - name: Format and comment Lighthouse results
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const lighthouseReport = JSON.parse(fs.readFileSync('./lhci-report.json', 'utf8'));
+            
+            const formatScore = (score) => Math.round(score * 100) + '%';
+            
+            const results = {
+              'Performance': formatScore(lighthouseReport.categories.performance.score),
+              'Accessibility': formatScore(lighthouseReport.categories.accessibility.score),
+              'Best Practices': formatScore(lighthouseReport.categories['best-practices'].score),
+              'SEO': formatScore(lighthouseReport.categories.seo.score)
+            };
+            
+            let tableContent = '| 카테고리 | 점수 |\n|----------|------|\n';
+            for (const [category, score] of Object.entries(results)) {
+              tableContent += `| ${category} | ${score} |\n`;
+            }
+            
+            const comment = `## Lighthouse 성능 측정 결과    ${tableContent}`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: assign random reviewer
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const teams = ["bbbjihan", "soojjung"];
+            const randomReviewer = teams[Math.floor(Math.random() * teams.length)];
+            
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [randomReviewer]
+            });
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## 🎉랜덤 리뷰     랜덤 리뷰로 선정되신 @${randomReviewer}님!🎉 리뷰를 부탁드립니다.`
+            });
