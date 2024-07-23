@@ -124,9 +124,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Create coverage directory if not exists
-        run: mkdir -p packages/assignment-6/coverage
-
       - name: Run tests
         run: |
           cd packages/assignment-6
