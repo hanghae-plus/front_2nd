@@ -51,7 +51,7 @@ jobs:
             The build for this PR has failed. Please check the logs for more details.
             `;
 
-            await github.rest.issues.createComment({
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -98,7 +98,7 @@ jobs:
             `;
 
             // PR에 코멘트를 남김
-            await github.rest.issues.createComment({
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -157,7 +157,7 @@ jobs:
               `## 테스트 실패 :x:\n### 커버리지 결과\n${message}`;
 
             // PR에 코멘트를 남김
-            await github.rest.issues.createComment({
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -227,7 +227,7 @@ jobs:
               `;
             })
 
-            await github.rest.issues.createComment({
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -236,6 +236,20 @@ jobs:
 
   assign_reviewer:
     runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: Request review from team members
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const teamMembers = ["bbbjihan", "hhyewon"];
+            const randomReviewer = teamMembers[Math.floor(Math.random() * teams.length)];
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ✨ 랜덤 리뷰 요청
+              @${randomReviewer}님이 코드리뷰를 해준다니, 완전 럭키비키 잖아? 🍀`
+            });
