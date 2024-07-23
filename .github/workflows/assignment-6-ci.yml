@@ -97,7 +97,10 @@ jobs:
         run: pnpm install
 
       - name: Run tests
-        run: pnpm -F assignment-6 test:coverage > coverage.json 2>&1
+        run: pnpm -F assignment-6 test:coverage
+
+      - name: List coverage directory
+        run: ls -R packages/assignment-6/coverage
 
       - name: Comment test results
         if: success()
@@ -106,24 +109,32 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const coverageJson = JSON.parse(fs.readFileSync('./coverage.json', 'utf8'));
+            const path = require('path');
             
-            const {lines, branches, functions, statements} = coverageJson.total;
-            
-            const formatPercentage = (value) => (value * 100).toFixed(2);
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## 테스트 성공✅ 
-              \n### 커버리지 결과\n
+            try {
+              const coverageFile = path.join(process.cwd(), 'packages', 'assignment-6', 'coverage', 'coverage-summary.json');
+              const coverageJson = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
               
-              • 라인 커버리지: ${formatPercentage(lines.pct)}%
-              • 브랜치 커버리지: ${formatPercentage(branches.pct)}%
-              • 함수 커버리지: ${formatPercentage(functions.pct)}%
-              • 구문 커버리지: ${formatPercentage(statements.pct)}%`
-            });
+              const {lines, branches, functions, statements} = coverageJson.total;
+              
+              const formatPercentage = (value) => value.pct.toFixed(2);
+              
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 테스트 성공✅ 
+                \n### 커버리지 결과\n
+                
+                • 라인 커버리지: ${formatPercentage(lines)}%
+                • 브랜치 커버리지: ${formatPercentage(branches)}%
+                • 함수 커버리지: ${formatPercentage(functions)}%
+                • 구문 커버리지: ${formatPercentage(statements)}%`
+              });
+            } catch (error) {
+              console.error('Error processing coverage data:', error);
+              core.setFailed(`Failed to process coverage data: ${error.message}`);
+            }
 
   lighthouse:
     runs-on: ubuntu-latest
