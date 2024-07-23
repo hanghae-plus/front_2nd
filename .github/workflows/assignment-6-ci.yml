@@ -81,13 +81,14 @@ jobs:
       - name: Run ESLint
         id: eslint
         run: |
-          pnpm -F assignment-6 lint
+          pnpm -F assignment-6 lint 2>&1 | tee lint.log
+          exit ${PIPESTATUS[0]}
 
       - name: Post ESLint failure comment
         if: failure()
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const eslintReport = JSON.parse(fs.readFileSync('eslint-report.json', 'utf-8'));
@@ -125,13 +126,15 @@ jobs:
         run: pnpm install
 
       - name: Run tests
-        run: pnpm test -- --coverage --coverageReporters=json-summary --outputFile=coverage-summary.json
+        run: |
+          pnpm -F assignment-6 test:with_coverage 2>&1 | tee test.log
+          exit ${PIPESTATUS[0]}
 
       - name: Post test results comment
         if: success()
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const coverage = JSON.parse(fs.readFileSync('coverage-summary.json', 'utf-8')).total;
@@ -181,7 +184,7 @@ jobs:
       - name: Post Lighthouse CI results comment
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const report = JSON.parse(fs.readFileSync('./lhci-results/lhr-0.report.json', 'utf-8'));
