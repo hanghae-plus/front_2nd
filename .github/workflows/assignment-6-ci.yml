@@ -22,7 +22,11 @@ jobs:
       - run: pnpm install
       - run: pnpm build 2>&1 | tee test.txt
       - run: ls -al
-      - run: cat .github/workflows/test.txt
+      - run: pwd
+      - run: cat test.txt
+      - run: echo "--------------"
+      - run: VAR1=$(cat test.txt)
+      - run: cat $VAR1
       - if: always()
         run: |
           echo "## TEST" >> $GITHUB_STEP_SUMMARY
