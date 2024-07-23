@@ -21,18 +21,13 @@ jobs:
       - run: npm install -g pnpm
       - run: pnpm install
       - run: pnpm build 2>&1 | tee test.txt
-      - run: ls -al
       - run: pwd
-      - run: cat test.txt
-      - run: echo "--------------"
-      - run: VAR1=$(cat test.txt)
-      - run: cat $VAR1
+      - run: BUILDERROR=$(cat test.txt)
+      - run: echo $BUILDERROR
       - if: always()
         run: |
-          echo "## TEST" >> $GITHUB_STEP_SUMMARY
-          echo "- ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "## BUILDERROR" >> $GITHUB_STEP_SUMMARY
+          echo "- ${{ BUILDERROR }}" >> $GITHUB_STEP_SUMMARY
 
   lint:
     runs-on: ubuntu-latest
