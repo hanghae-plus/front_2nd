@@ -33,8 +33,10 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
             github.rest.issues.createComment({
-              ...github.context.repo,
+              owner: owner,
+              repo: repo,
               issue_number: context.issue.number,
               body: `Build failed. Please check the error message and fix it.`
             })
@@ -79,10 +81,11 @@ jobs:
             \`\`\`
             `;
 
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
             github.rest.issues.createComment({
               issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.name,
+              owner: owner,
+              repo: repo,
               body: errorMessage
             })
 
@@ -128,10 +131,11 @@ jobs:
               - 구문 커버리지: ${statements}%
             `
 
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
             github.rest.issues.createComment({
               issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.name,
+              owner: owner,
+              repo: repo,
               body: coverageMessage
             })
 
@@ -195,10 +199,11 @@ jobs:
               ${resultTable}
             `;
 
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
             github.rest.issues.createComment({
               issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.name,
+              owner: owner,
+              repo: repo,
               body: lighthouseMessage
             })
 
