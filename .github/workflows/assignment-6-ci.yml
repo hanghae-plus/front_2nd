@@ -47,38 +47,34 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: latest
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
+
       - name: Install dependencies
-        run: pnpm install --prefer-frozen-lockfile
+        run: pnpm install
 
-      - name: Run lint
+      - name: lint
+        id: lint
         run: |
-          pnpm -F assignment-6 lint 2>&1 | tee lint.log
+          pnpm -F assignment-6 lint 2>&1 | tee error.log
           exit ${PIPESTATUS[0]}
-
-      - name: Comment on PR
-        if: always()
-        uses: actions/github-script@v6
+      - name: Comment PR
+        if: failure()
+        uses: actions/github-script@v6.4.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs')
-            const eslintReport = fs.readFileSync('lint.log', 'utf8')
-            const status = eslintReport.includes('error') ? '❌ Lint Failed' : '✅ Lint Passed'
-            await github.rest.issues.createComment({
+            const errorLog = fs.readFileSync('error.log', 'utf8')
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `
-              ## ESLint Results: ${status}
-              \`\`\`
-              ${eslintReport}
-              \`\`\`
-              `
-            });
+              body: `### lint error ${errorLog}`
+            })
 
   test:
     runs-on: ubuntu-latest
