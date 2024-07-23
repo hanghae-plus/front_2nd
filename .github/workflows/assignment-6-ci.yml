@@ -24,7 +24,7 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
-      - name: run build
+      - name: run build.
         run: |
           pnpm -F assignment-6 build 2>&1 | tee build.log
       - name: Comment on PR if build fails
