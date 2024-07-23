@@ -53,7 +53,7 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
-      - name: Install dependencies
+      - name: Install dependencies.
         run: pnpm install
 
       - name: lint
