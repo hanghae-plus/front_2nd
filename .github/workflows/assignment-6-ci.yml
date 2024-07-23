@@ -86,8 +86,8 @@ jobs:
       - name: Run tests and collect coverage
         run: |
           pnpm install --prefer-frozen-lockfile
-          pnpm -F assignment-6 test
-          pnpm -F assignment-6 coverage
+          pnpm add -D @vitest/coverage-v8
+          pnpm -F assignment-6 test -- --coverage
 
       - name: Comment test results on PR
         uses: actions/github-script@v6
@@ -95,7 +95,7 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const coverageReport = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            const coverageReport = JSON.parse(fs.readFileSync('./packages/assignment-6/coverage/coverage-summary.json', 'utf8'));
             
             const lines = coverageReport.total.lines.pct;
             const branches = coverageReport.total.branches.pct;
