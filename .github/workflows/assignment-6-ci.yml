@@ -83,41 +83,58 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
-      - name: Run tests and collect coverage
+      - name: Testing and Coverage
         run: |
-          pnpm install --no-frozen-lockfile
-          pnpm add -D @vitest/coverage-v8 -F assignment-6
-          pnpm -F assignment-6 test -- --coverage
+          pnpm install --prefer-frozen-lockfile
+          pnpm -F assignment-6 test
+          pnpm -F assignment-6 coverage
 
-      - name: Comment test results on PR
+      - name: Comment Test Coverage
         uses: actions/github-script@v6
+        if: success()
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const coverageReport = JSON.parse(fs.readFileSync('./packages/assignment-6/coverage/coverage-summary.json', 'utf8'));
-            
-            const lines = coverageReport.total.lines.pct;
-            const branches = coverageReport.total.branches.pct;
-            const functions = coverageReport.total.functions.pct;
-            const statements = coverageReport.total.statements.pct;
 
-            const comment = `
-            ### 테스트 성공 ✅
+            const coverage = JSON.parse(fs.readFileSync("packages/assignment-6/coverage/coverage-summary.json", 'utf8'));
+            const totalCoverage = coverage.total;
 
-            커버리지 결과:
-            - 라인 커버리지: ${lines}%
-            - 브랜치 커버리지: ${branches}%
-            - 함수 커버리지: ${functions}%
-            - 구문 커버리지: ${statements}%
+            const coverageComment = `
+
+            ## 테스트 성공 ✅
+            ### 커버리지 결과
+
+            - 라인 커버리지: ${totalCoverage.lines.pct}%
+            - 브랜치 커버리지: ${totalCoverage.branches.pct}%
+            - 함수 커버리지: ${totalCoverage.functions.pct}%
+            - 구문 커버리지: ${totalCoverage.statements.pct}%
             `;
 
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comment
-            });    
+              body: coverageComment
+            });
+
+      - name: Comment Test Coverage on Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const coverageComment = `
+              ## 테스트 실패 ❌
+
+              테스트 코드를 확인해주세요.
+            `
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: coverageComment
+            }); 
 
   lighthouse:
     runs-on: ubuntu-latest
