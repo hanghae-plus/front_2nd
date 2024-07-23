@@ -108,9 +108,9 @@ jobs:
         uses: davelosert/vitest-coverage-report-action@v2.5.0
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
-          vite-config-path: /home/runner/work/react-deep/react-deep/packages/assignment-6/vite.config.ts
-          json-summary-path: /home/runner/work/react-deep/react-deep/packages/assignment-6/coverage/coverage-summary.json
-          json-final-path: /home/runner/work/react-deep/react-deep/packages/assignment-6/coverage/coverage-final.json
+          vite-config-path: /home/runner/work/front_2nd/front_2nd/packages/assignment-6/vite.config.ts
+          json-summary-path: /home/runner/work/front_2nd/front_2nd/packages/assignment-6/coverage/coverage-summary.json
+          json-final-path: /home/runner/work/front_2nd/front_2nd/packages/assignment-6/coverage/coverage-final.json
 
   lighthouse:
     runs-on: ubuntu-latest
