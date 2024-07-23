@@ -155,8 +155,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm -F assignment-6 build
           pnpm install
+          pnpm -F assignment-6 build
 
       - name: Run tests
         run: pnpm -F assignment-6 lhci
