@@ -44,20 +44,29 @@ jobs:
       - name: Run TypeScript compiler
         id: tsc
         run: |
-          TSC_ERROR_OUTPUT=$(pnpm -F assignment-6 tsc 2>&1 || true)
-          TSC_ERROR_OUTPUT="${TSC_ERROR_OUTPUT//'%'/'%25'}"
-          TSC_ERROR_OUTPUT="${TSC_ERROR_OUTPUT//$'\n'/'%0A'}"
-          TSC_ERROR_OUTPUT="${TSC_ERROR_OUTPUT//$'\r'/'%0D'}"
-          echo "tsc_error_output=$TSC_ERROR_OUTPUT" >> $GITHUB_OUTPUT
+          TSC_OUTPUT=$(pnpm -F assignment-6 tsc 2>&1 || true)
+          echo "tsc_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$TSC_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Post tsc error comment
+      - name: Format TypeScript compiler results
+        id: format_tsc
+        run: |
+          FORMATTED_OUTPUT=$(echo "${{ steps.tsc.outputs.tsc_output }}" | sed 's/^/> /')
+          echo "formatted_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$FORMATTED_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Post TypeScript compiler results comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: TypeScript Compiler Results
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           message: |
             ## TypeScript Compiler Results
-            ${{ steps.tsc.outputs.tsc_error_output }}
+            ```
+            ${{ steps.format_tsc.outputs.formatted_output }}
+            ```
 
       - name: Run build
         id: build
