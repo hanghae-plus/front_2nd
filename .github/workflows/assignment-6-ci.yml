@@ -2,8 +2,9 @@ name: CI Assignment 6
 
 # 1. workflow는 PR이 올라오거나 혹은 PR에 commit이 push될 때 실행 된다.
 on:
-  pull_request:
-    types: [opened, synchronize]
+  pull_request_target:
+    types:
+      - opened
     paths:
       - "packages/assignment-6/**"
 
