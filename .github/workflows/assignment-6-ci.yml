@@ -91,10 +91,10 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const eslintReport = JSON.parse(fs.readFileSync('eslint-report.json', 'utf-8'));
+            const eslintReport = fs.readFileSync('lint.log', 'utf8');
             const message = `
             ## ESLint Results
-            ${eslintReport.map(result => `${result.filePath}:${result.messages.map(msg => `${msg.line}:${msg.column} ${msg.message}`).join('\n')}`).join('\n\n')}
+            ${eslintReport}
             `;
 
             // PR에 코멘트를 남김
@@ -140,6 +140,31 @@ jobs:
             const coverage = JSON.parse(fs.readFileSync('coverage-summary.json', 'utf-8')).total;
             const message = `
             ## 테스트 성공 ✅
+            ### 커버리지 결과
+            - 라인 커버리지: ${coverage.lines.pct}%
+            - 브랜치 커버리지: ${coverage.branches.pct}%
+            - 함수 커버리지: ${coverage.functions.pct}%
+            - 구문 커버리지: ${coverage.statements.pct}%
+            `;
+
+            // PR에 코멘트를 남김
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message,
+            });
+
+      - name: Post test results comment
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('coverage-summary.json', 'utf-8')).total;
+            const message = `
+            ## 테스트 실패 :x:
             ### 커버리지 결과
             - 라인 커버리지: ${coverage.lines.pct}%
             - 브랜치 커버리지: ${coverage.branches.pct}%
