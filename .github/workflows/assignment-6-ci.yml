@@ -201,14 +201,14 @@ jobs:
         run: pnpm install
 
       - name: Create directory for Lighthouse results
-        run: mkdir -p ./lhci-results
+        run: mkdir -p packages/assignment-6/lhci-results
 
       - name: Install Lighthouse CI
         run: pnpm add -D @lhci/cli
 
       - name: Run Lighthouse CI
         run: |
-          pnpm -F assignment-6 lhci --output-path=./lhci-results/lhr-0.report.json
+          pnpm -F assignment-6 lhci --output-path=packages/assignment-6/lhci-results/lhr-0.report.json
 
       - name: Post Lighthouse CI results comment
         uses: actions/github-script@v6
@@ -216,7 +216,7 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const report = JSON.parse(fs.readFileSync('./lhci-results/lhr-0.report.json', 'utf-8'));
+            const report = JSON.parse(fs.readFileSync('packages/assignment-6/lhci-results/lhr-0.report.json', 'utf-8'));
             const performance = report.categories.performance.score * 100;
             const accessibility = report.categories.accessibility.score * 100;
             const bestPractices = report.categories['best-practices'].score * 100;
