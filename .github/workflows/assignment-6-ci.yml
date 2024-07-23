@@ -4,36 +4,237 @@ on:
   pull_request:
     types:
       - opened
+      - reopened
+      - synchronize
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
+      - ".github/workflows/assignment-6-ci.yml"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - name: Build
+        run: |
+          pnpm install 
+          pnpm -F assignment-6 build
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - name: Lint
+        run: |
+          pnpm install
+          pnpm -F assignment-6 lint > eslint_report.txt
+      - name: Lint Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs')
+            const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8')
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `
+              ## ESLint Results
+
+              ${eslintReport}
+              `
+            });
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Testing and Coverage
+        run: |
+          pnpm install
+          pnpm -F assignment-6 test
+          pnpm -F assignment-6 coverage
+
+      - name: Comment Test Coverage
+        uses: actions/github-script@v6
+        if: success()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            const coverage = JSON.parse(fs.readFileSync("packages/assignment-6/coverage/coverage-summary.json", 'utf8'));
+            const totalCoverage = coverage.total;
+
+            const coverageComment = `
+
+            ## 테스트 성공 ✅
+            ### 커버리지 결과
+
+            - 라인 커버리지: ${totalCoverage.lines.pct}%
+            - 브랜치 커버리지: ${totalCoverage.branches.pct}%
+            - 함수 커버리지: ${totalCoverage.functions.pct}%
+            - 구문 커버리지: ${totalCoverage.statements.pct}%
+            `;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: coverageComment
+            });
+
+      - name: Comment Test Coverage on Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const coverageComment = `
+              ## 테스트 실패 ❌
+
+              테스트 코드를 확인해주세요.
+            `
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: coverageComment
+            });
 
   lighthouse:
     runs-on: ubuntu-latest
+
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - name: Install Lighthouse CI
+        run: |
+          npm i -E -g @lhci/cli
+          pnpm install
+      - name: Build Local Server
+        run: |
+          pnpm -F assignment-6 build
+          pnpm -F assignment-6 lighthouse
+      - name: Report Lighthouse
+        if: success()
+        uses: actions/github-script@v6
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'))
+            console.log(results)
+
+            let comments = "";
+
+            results.forEach((result) => {
+              const { summary, jsonPath } = result;
+              const details = JSON.parse(fs.readFileSync(jsonPath))
+              const { audits } = details;
+
+              const formatResult = (res) => Math.round(res * 100);
+
+              Object.keys(summary).forEach(
+                (key) => (summary[key] = formatResult(summary[key]))
+              );
+
+
+              const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
+
+              const comment = [
+                `⚡️ Lighthouse report!`,
+                `| Category | Score |`,
+                `| --- | --- |`,
+                `| ${score(summary.performance)} Performance | ${summary.performance} |`,
+                `| ${score(summary.accessibility)} Accessibility | ${
+                  summary.accessibility
+                } |`,
+                `| ${score(summary['best-practices'])} Best practices | ${
+                  summary['best-practices']
+                } |`,
+                `| ${score(summary.seo)} SEO | ${summary.seo} |`,
+                ''
+              ].join('\n');
+
+              const detail = [
+                `📊 Lighthouse Detail`,
+                `| Category | Score |`,
+                `| --- | --- |`,
+                `| ${score(
+                  audits['first-contentful-paint'].score * 100
+                )} First Contentful Paint | ${
+                  audits['first-contentful-paint'].displayValue
+                } |`,
+                `| ${score(
+                  audits['largest-contentful-paint'].score * 100
+                )} Largest Contentful Paint | ${
+                  audits['largest-contentful-paint'].displayValue
+                } |`,
+                `| ${score(
+                  audits['total-blocking-time'].score * 100
+                )} Total Blocking Time | ${audits['total-blocking-time'].displayValue} |`,
+                `| ${score(
+                  audits['cumulative-layout-shift'].score * 100
+                )} Cumulative Layout Shift | ${
+                  audits['cumulative-layout-shift'].displayValue
+                } |`,
+                `| ${score(audits['speed-index'].score * 100)} Speed Index | ${
+                  audits['speed-index'].displayValue
+                } |`,
+              ].join('\n');
+
+              comments += comment + "\n" + detail + "\n";
+            });
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comments
+            });
 
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - name: Assign Reviewer
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const reviewers = ["yoosion030", "dhp94d", "lydiahjchung", "callipenguin"];
+            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@${randomReviewer}, 리뷰를 부탁드립니다.`
+            });
+
+            await github.rest.pulls.requestReviewers({
+              pull_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              reviewers: [randomReviewer]
+            });
