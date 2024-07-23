@@ -62,28 +62,35 @@ jobs:
       - name: Run build
         id: build
         run: |
-          ERROR_OUTPUT=$(pnpm -F assignment-6 build 2>&1 || true)
-          ERROR_OUTPUT="${ERROR_OUTPUT//'%'/'%25'}"
-          ERROR_OUTPUT="${ERROR_OUTPUT//$'\n'/'%0A'}"
-          ERROR_OUTPUT="${ERROR_OUTPUT//$'\r'/'%0D'}"
-          echo "error_output=$ERROR_OUTPUT" >> $GITHUB_OUTPUT
+          BUILD_OUTPUT=$(pnpm -F assignment-6 build 2>&1 || true)
+          echo "build_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$BUILD_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Post tsc/build error comment
+      - name: Format build results
+        id: format_build
+        run: |
+          FORMATTED_OUTPUT=$(echo "${{ steps.build.outputs.build_output }}" | sed 's/^/> /')
+          echo "formatted_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$FORMATTED_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Post build results comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          header: build
+          header: Build Results
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           message: |
-            ## Build results
-            ${{ steps.build.outputs.error_output }}
+            ## Build Results
+            ```
+            ${{ steps.format_build.outputs.formatted_output }}
+            ```
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dist
           path: packages/assignment-6/dist
-
-
 
   lint:
     runs-on: ubuntu-latest
