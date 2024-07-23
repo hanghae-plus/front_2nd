@@ -203,18 +203,16 @@ jobs:
 
       - name: Run Lighthouse CI
         run: |
+          cd packages/assignment-6
           pnpm -F assignment-6 lhci || echo "Fail to Run Lighthouse CI!"
+          ls -la lhci_reports
 
-      - name: check reports file
-        run: |
-          pwd
-          ls -la
-          cat packages/assignment-6/lhci_reports/manifest.json
+      - name: Check if Lighthouse CI report file exists
+        run: ls -la packages/assignment-6/lhci_reports
 
       - name: Post Lighthouse CI results comment
         if: success()
         uses: actions/github-script@v6
-
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |

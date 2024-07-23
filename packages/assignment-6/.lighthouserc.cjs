@@ -1,9 +1,12 @@
 module.exports = {
   ci: {
     collect: {
-      staticDistDir: "./dist",
-      url: ["http://localhost:5173"],
-      numberOfRuns: 1,
+      startServerCommand: "pnpm -F assignment-6 start",
+      url: ["http://localhost:5173/"],
+      numOfRuns: 5,
+      settings: {
+        preset: "desktop",
+      },
     },
     upload: {
       target: "filesystem",
