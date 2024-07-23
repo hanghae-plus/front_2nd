@@ -39,7 +39,6 @@ jobs:
 
       - name: Post tsc error comment
         uses: marocchino/sticky-pull-request-comment@v2
-        if: failure()
         with:
           header: TypeScript Compiler Errors
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
@@ -58,7 +57,6 @@ jobs:
 
       - name: Post tsc/build error comment
         uses: marocchino/sticky-pull-request-comment@v2
-        if: failure()
         with:
           header: tsc build
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
