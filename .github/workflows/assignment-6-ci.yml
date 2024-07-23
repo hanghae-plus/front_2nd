@@ -102,8 +102,12 @@ jobs:
       - name: List coverage directory
         run: ls -R packages/assignment-6/coverage
 
-      - name: Check coverage file content
-        run: cat packages/assignment-6/coverage/coverage-final.json | head -n 20
+      - name: Print coverage file content
+        run: |
+          echo "Coverage file content:"
+          cat packages/assignment-6/coverage/coverage-final.json | head -n 50
+          echo "File structure:"
+          ls -R packages/assignment-6/coverage
 
       - name: Comment test results
         if: success()
@@ -128,14 +132,22 @@ jobs:
               let coveredLines = 0;
               
               Object.values(coverageJson).forEach(file => {
-                totalStatements += Object.keys(file.s).length;
-                coveredStatements += Object.values(file.s).filter(v => v > 0).length;
-                totalBranches += Object.keys(file.b).length;
-                coveredBranches += Object.values(file.b).filter(v => v[0] > 0 || v[1] > 0).length;
-                totalFunctions += Object.keys(file.f).length;
-                coveredFunctions += Object.values(file.f).filter(v => v > 0).length;
-                totalLines += Object.keys(file.l).length;
-                coveredLines += Object.values(file.l).filter(v => v > 0).length;
+                if (file.s) {
+                  totalStatements += Object.keys(file.s).length;
+                  coveredStatements += Object.values(file.s).filter(v => v > 0).length;
+                }
+                if (file.b) {
+                  totalBranches += Object.keys(file.b).length;
+                  coveredBranches += Object.values(file.b).filter(branch => branch[0] > 0 || branch[1] > 0).length;
+                }
+                if (file.f) {
+                  totalFunctions += Object.keys(file.f).length;
+                  coveredFunctions += Object.values(file.f).filter(v => v > 0).length;
+                }
+                if (file.l) {
+                  totalLines += Object.keys(file.l).length;
+                  coveredLines += Object.values(file.l).filter(v => v > 0).length;
+                }
               });
               
               const calculatePercentage = (covered, total) => ((covered / total) * 100).toFixed(2);
