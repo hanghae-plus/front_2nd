@@ -56,31 +56,24 @@ jobs:
       - name: Install dependencies.
         run: pnpm install 
 
-      - name: Run ESLint
-        run: pnpm -F assignment-6 lint> eslint_report.txt
-
-      - name: Comment PR
+      - name: run lint
+        run: |
+          pnpm -F assignment-6 lint 2>&1 | tee lint.log
+          exit ${PIPESTATUS[0]}
+      - name: Comment on PR if lint fails
+        if: failure()
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const fs = require('fs')
-            const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8')
-            const reportLines = eslintReport.split('\n').filter(line => line.trim() !== '')
-            const problemCount = reportLines[reportLines.length - 1]
-            
-            let comment = '## ESLint Results\n\n'
-            comment += '```\n'
-            comment += reportLines.slice(0, -1).join('\n') + '\n'
-            comment += '```\n\n'
-            comment += problemCount + '\n'
-            
+            const fs = require('fs');
+            const log = fs.readFileSync('lint.log', 'utf8');
             github.rest.issues.createComment({
-              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comment
-            })
+              issue_number: context.issue.number,
+              body: `### ❌ Lint Failed\n\`\`\`\n${log}\n\`\`\``
+            });
 
 
   test:
