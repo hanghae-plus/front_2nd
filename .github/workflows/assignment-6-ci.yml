@@ -84,8 +84,51 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm -F assignment-6 install
+
+      - name: Job3 (Test)
+        id: job3
+        run: pnpm -F assignment-6 test:coverage > coverage.txt
+
+      - name: Parse coverage and comment
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            # Parse Coverage.txt
+            const fs = require('fs');
+            const coverage = fs.readFileSync('coverage.txt', 'utf-8');
+            const scoreOfAllFiles = coverage.split('\n').find((line) => line.includes('All files'));
+            const scores = scoreOfAllFiles.match(/\d+\.\d+/g);
+            const [statements, branches, functions, lines] = scores.map(parseFloat);
+
+            # Comment on PR
+            const coverageMessage = `
+              ## 테스트 성공 ✅
+              ---
+              ### 커버리지 결과
+
+              - 라인 커버리지: ${lines}%
+              - 브랜치 커버리지: ${branches}%
+              - 함수 커버리지: ${functions}%
+              - 구문 커버리지: ${statements}%
+            `
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              body: coverageMessage
+            })
 
   lighthouse:
     runs-on: ubuntu-latest
