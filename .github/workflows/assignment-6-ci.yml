@@ -22,7 +22,6 @@ jobs:
           cache: "pnpm"
 
       - name: Run build and Comment on PR if build fails
-        if: steps.build.outcome == 'failure'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
@@ -54,7 +53,6 @@ jobs:
           cache: "pnpm"
 
       - name: Comment on PR if lint fails
-        if: failure()
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
