@@ -20,7 +20,7 @@ jobs:
       - run: ls -al
       - run: npm install -g pnpm
       - run: pnpm install
-      - run: pnpm build 2 > &1 | tee test.txt
+      - run: pnpm build 2>&1 | tee test.txt
       - run: ls -al
       - run: cat .github/workflows/test.txt
       - if: always()
