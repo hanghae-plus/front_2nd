@@ -7,7 +7,7 @@
     "start": "vite",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
+    "coverage": "vitest --coverage.enabled --reporter=junit --coverage.reporter=json-summary",
     "build": "tsc -b && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
