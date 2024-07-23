@@ -1,0 +1,163 @@
+on:
+  pull_request_target:
+  types:
+    - opened
+  paths:
+    - 'packages/assignment-6/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: v3엔진 세팅
+        uses: actions/checkout@v3
+
+      - name: Node 세팅
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: npm 패키지 다운
+        run: npm install
+
+      - name: project build
+        run: npm run build
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run ESLint
+        id: eslint
+        continue-on-error: true
+        run: |
+          npm install
+          npm run eslint --quiet > eslint_results.txt
+
+      - name: Comment PR if ESLint errors
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs');
+            const eslintResults = fs.readFileSync('eslint_results.txt', 'utf8');
+            if (eslintResults) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: eslintResults,
+              });
+            }
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Tests and Generate Coverage
+        run: npm run test -- --coverage
+
+      - name: Comment PR with coverage report
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs');
+            const coverageSummary = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            const {lines, statements, functions, branches} = coverageSummary.total;
+            const comment = `
+              ## 테스트성공 ✅
+              ### 커버리지 결과
+              - 라인 커버리지: ${lines.pct}%
+              - 구문 커버리지: ${statements.pct}%
+              - 함수 커버리지: ${functions.pct}%
+              - 브랜치 커버리지: ${branches.pct}%`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment,
+            });
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Tests and Generate Coverage
+        run: npm run test -- --coverage
+
+      - name: Comment PR with coverage report
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs');
+            const coverageSummary = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            const {lines, statements, functions, branches} = coverageSummary.total;
+            const comment = `
+              ## 커버리지 결과
+              - 라인 커버리지: ${lines.pct}%
+              - 구문 커버리지: ${statements.pct}%
+              - 함수 커버리지: ${functions.pct}%
+              - 브랜치 커버리지: ${branches.pct}%`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment,
+            });
+
+  assign_reviewer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Assign reviewer and create comment mentioning reviewer
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const teamMembers = ['eumcloud', 'jiyeon87']; // 팀 구성원 깃허브 사용자명 목록
+            // 랜덤하게 리뷰어 선택
+            const assignedReviewer = teamMembers[Math.floor(Math.random()*teamMembers.length)];
+            
+            // 리뷰어 지정
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [assignedReviewer]
+            });
+            
+            // 코멘트 작성
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@${assignedReviewer}님, 리뷰 부탁드립니다.`,
+            });
