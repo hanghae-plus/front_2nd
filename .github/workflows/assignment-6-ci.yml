@@ -217,4 +217,35 @@ jobs:
       - uses: actions/checkout@v4
       - uses: kentaro-m/auto-assign-action@v2.0.0
         with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           configuration-path: .github/auto-assign.yml
+
+      - name: Comment the lighthouse result on PR
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            const pr = await github.rest.pulls.get({
+              owner: owner,
+              repo: repo,
+              pull_number: context.issue.number
+            });
+
+            const assignedReviewers = pr.data.requested_reviewers;
+
+            if (assignedReviewers.length > 0) {
+              const reviewerMentions = assignedReviewers.map(reviewer => `@${reviewer.login}`).join(' ');
+              const message = `${reviewerMentions} 리뷰를 부탁드립니다.`;
+
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: owner,
+                repo: repo,
+                body: message
+              })
+              console.log('Review request comment posted successfully.');
+            } else {
+              console.log('No reviewers assigned to this PR.');
+            }
