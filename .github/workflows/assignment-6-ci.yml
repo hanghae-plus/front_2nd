@@ -128,35 +128,40 @@ jobs:
 
   assign_reviewer:
     runs-on: ubuntu-latest
-    if: github.event.action == 'opened'
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: latest
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - name: Assign Reviewer
+      - name: Mention Reviewer
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.TOKEN_FOR_CI}}
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const reviewers = ["bbbjihan", "hhyewon", "soojjung"];
             const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
 
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `@${randomReviewer}, 리뷰를 부탁드립니다.`
-            });
+            try {
+              // 코멘트 작성
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `@${randomReviewer}, 리뷰를 부탁드립니다.`
+              });
 
-            await github.rest.pulls.requestReviewers({
-              pull_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              reviewers: [randomReviewer]
-            });
+              console.log(`Comment mentioning ${randomReviewer} has been posted.`);
+
+              // 리뷰어 지정 시도 (권한 문제로 실패할 수 있음)
+              try {
+                await github.rest.pulls.requestReviewers({
+                  pull_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  reviewers: [randomReviewer]
+                });
+                console.log(`${randomReviewer} has been assigned as a reviewer.`);
+              } catch (reviewerError) {
+                console.log(`Failed to assign reviewer. Error: ${reviewerError.message}`);
+                console.log('Continuing without assigning reviewer.');
+              }
+            } catch (error) {
+              console.log(`An error occurred: ${error.message}`);
+              core.setFailed(`Action failed with error: ${error.message}`);
+            }
