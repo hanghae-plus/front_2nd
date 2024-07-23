@@ -236,15 +236,21 @@ jobs:
                   `⚡️ Lighthouse report!`,
                   `| Category | Score |`,
                   `| --- | --- |`,
-                  `| ${score(formatResult(summary.performance))} Performance | ${formatResult(summary.performance)} |`,
-                  // Add other categories similarly
-                ].join("\n");
+                  `| ${score(summary.performance)} Performance | ${summary.performance} |`,
+                  `| ${score(summary.accessibility)} Accessibility | ${
+                    summary.accessibility
+                  } |`,
+                  `| ${score(summary['best-practices'])} Best practices | ${
+                    summary['best-practices']
+                  } |`,
+                  `| ${score(summary.seo)} SEO | ${summary.seo} |`,
+                  ''
+                ].join('\n');
 
                 const detail = [
                   `| Category | Score |`,
                   `| --- | --- |`,
                   `| ${score(formatResult(audits["first-contentful-paint"].score))} First Contentful Paint | ${audits["first-contentful-paint"].displayValue} |`,
-                  // Add other audits similarly
                 ].join("\n");
 
                 comments += comment + "\n" + detail + "\n";
