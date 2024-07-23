@@ -127,15 +127,22 @@ jobs:
           LINT_ERROR_OUTPUT="${LINT_ERROR_OUTPUT//$'\r'/'%0D'}"
           echo "lint_error_output=$LINT_ERROR_OUTPUT" >> $GITHUB_OUTPUT
 
-      - name: Post lint error comment
+      - name: Format ESLint results
+        id: format_lint
+        run: |
+          FORMATTED_OUTPUT=$(echo "${{ steps.lint.outputs.lint_error_output }}" | jq -r '.[] | "- **\(.filePath)**: \(.messages[].message) (\(.messages[].ruleId))"')
+          echo "formatted_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$FORMATTED_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Post formatted lint comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          header: lint
+          header: ESLint Results
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           message: |
-            ## ESLint results
-            ${{ steps.lint.outputs.lint_error_output }}
-
+            ## ESLint Results
+            ${{ steps.format_lint.outputs.formatted_output }}
 
 
   test:
