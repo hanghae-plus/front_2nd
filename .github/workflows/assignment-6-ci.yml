@@ -226,7 +226,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm -F assignment-6 install
 
       - name: Start dev server
         run: pnpm -F assignment-6 start > server.log 2>&1 &
