@@ -4,6 +4,7 @@ on:
   pull_request:
     types:
       - opened
+      - synchronize
     paths:
       - 'packages/assignment-6/**'
 
@@ -11,8 +12,39 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
       - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+        run: |
+          pnpm install | tee build_log.txt
+          pnpm -F assignment-6 build | tee -a build_log.txt
+        continue-on-error: true
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: build_log
+          path: build_log.txt
+      - name: Leave a comment on PR
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs');
+            const log = fs.readFileSync('build_log.txt', 'utf8');
+            github.rest.issues.createComment({
+             issue_number: context.issue.number,
+             owner: context.repo.owner,
+             repo: context.repo.repo,
+             body: `The build job failed. Here are the logs:\n\n\`\`\`\n${log}\n\`\`\``
+            })
 
   lint:
     runs-on: ubuntu-latest
