@@ -134,39 +134,15 @@ jobs:
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: Mention Reviewer
+      - name: assign random reviewer
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const reviewers = ["bbbjihan", "hhyewon", "soojjung"];
-            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
-
-            try {
-              // 코멘트 작성
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `@${randomReviewer}, 리뷰를 부탁드립니다.`
-              });
-
-              console.log(`Comment mentioning ${randomReviewer} has been posted.`);
-
-              // 리뷰어 지정 시도 (권한 문제로 실패할 수 있음)
-              try {
-                await github.rest.pulls.requestReviewers({
-                  pull_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  reviewers: [randomReviewer]
-                });
-                console.log(`${randomReviewer} has been assigned as a reviewer.`);
-              } catch (reviewerError) {
-                console.log(`Failed to assign reviewer. Error: ${reviewerError.message}`);
-                console.log('Continuing without assigning reviewer.');
-              }
-            } catch (error) {
-              console.log(`An error occurred: ${error.message}`);
-              core.setFailed(`Action failed with error: ${error.message}`);
-            }
+            const teams = ["bbbjihan", "soojjung", "hhyewon"];
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `### 🙌 랜덤 리뷰 요청 \n@${teams[parseInt((Math.random() * 10) % teams.length)]} 님에게 리뷰를 요청드립니다.`
+            });
