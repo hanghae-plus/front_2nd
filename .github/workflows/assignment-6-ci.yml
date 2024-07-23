@@ -28,8 +28,10 @@ jobs:
       - name: Install pakage.json
         run: pnpm install
       - name: Build
-        run: pnpm run build
+        run: pnpm build 2 > &1 | tee test.txt
       - if: always()
+        run: ls -al
+        run: cat .github/workflows/test.txt
         run: |
           echo "## TEST" >> $GITHUB_STEP_SUMMARY
           echo "- ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
