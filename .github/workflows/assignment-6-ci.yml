@@ -26,7 +26,10 @@ jobs:
 
       - name: Run build
         id: build
-        run: pnpm -F assignment-6 build
+        run: |
+          pnpm -F assignment-6 build > build.log 2>&1
+          exit_code=$?
+          echo "build_exit_code=$exit_code" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Comment build results
@@ -35,9 +38,10 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const buildStatus = '${{ steps.build.outcome }}' === 'success' ? '성공' : '실패';
+            const fs = require('fs');
+            const buildStatus = '${{ steps.build.outputs.build_exit_code }}' === '0' ? '성공' : '실패';
             const buildEmoji = buildStatus === '성공' ? '✅' : '❌';
-            const buildLog = `${{ steps.build.outputs.stderr }}`;
+            const buildLog = fs.readFileSync('build.log', 'utf8');
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -47,7 +51,7 @@ jobs:
             });
 
       - name: Check build result
-        if: steps.build.outcome != 'success'
+        if: steps.build.outputs.build_exit_code != '0'
         run: exit 1
 
   lint:
