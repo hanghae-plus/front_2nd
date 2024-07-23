@@ -110,14 +110,14 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            # Parse Coverage.txt
+            // Parse Coverage.txt
             const fs = require('fs');
             const coverage = fs.readFileSync('coverage.txt', 'utf-8');
             const scoreOfAllFiles = coverage.split('\n').find((line) => line.includes('All files'));
             const scores = scoreOfAllFiles.match(/\d+\.\d+/g);
             const [statements, branches, functions, lines] = scores.map(parseFloat);
 
-            # Comment on PR
+            // Comment on PR
             const coverageMessage = `
               ## 테스트 성공 ✅
               ---
