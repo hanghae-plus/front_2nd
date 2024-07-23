@@ -17,23 +17,12 @@ jobs:
       # - name: job1 구현 tsc, build 를 실행한다. 오류가 발생하면 코멘트를 남긴다.
       #   run: echo "job1의 내용을 구현해주세요"
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: npm
-      - name: List files
-        run: ls -al
-      - name: Install pnpm
-        run: npm install -g pnpm
-      - name: Install pakage.json
-        run: pnpm install
-      - name: Build
-        run: pnpm build 2 > &1 | tee test.txt
-      #- if: always()
-      - name: List files
-        run: ls -al
-      - name: test.txt
-        run: cat .github/workflows/test.txt
+      - run: ls -al
+      - run: npm install -g pnpm
+      - run: pnpm install
+      - run: pnpm build 2 > &1 | tee test.txt
+      - run: ls -al
+      - run: cat .github/workflows/test.txt
       - if: always()
         run: |
           echo "## TEST" >> $GITHUB_STEP_SUMMARY
