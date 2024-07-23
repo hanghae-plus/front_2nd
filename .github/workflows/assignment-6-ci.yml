@@ -59,7 +59,11 @@ jobs:
 
       - name: Set ESLint output to env
         if: failure() && steps.job2.outcome == 'failure'
-        run: echo "ESLINT_OUTPUT=$(cat eslint_output.txt)" >> $GITHUB_ENV
+        run: |
+          output=$(pnpm -F assignment-6 lint 2>&1) || true
+          echo "ESLINT_OUTPUT<<EOF" >> $GITHUB_ENV
+          echo "$output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Comment ESLint results
         uses: actions/github-script@v6
