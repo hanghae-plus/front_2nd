@@ -86,12 +86,10 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install -g @lhci/cli@0.13.x
+        run: pnpm install
 
       - name: Run Lighthouse CI
-        run: |
-          npm run build
-          lhci autorun
+        run: pnpm -F assignment-6 lhci
 
       - name: Comment Lighthouse results
         uses: actions/github-script@v6
@@ -99,7 +97,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const lighthouseResults = JSON.parse(fs.readFileSync('./lhci-report.json', 'utf8'));
+            const lighthouseResults = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json',, 'utf8'));
             
             const scores = {
               performance: lighthouseResults[0].categories.performance.score * 100,
@@ -143,7 +141,7 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const reviewers = ["bbbjihan", "hhyewon", "soojjung", "hyesung99", "shiny1912", "zhwltlr"];
+            const reviewers = ["bbbjihan", "hhyewon", "soojjung"];
             const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
 
             await github.rest.issues.createComment({
