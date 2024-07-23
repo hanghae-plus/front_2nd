@@ -206,11 +206,10 @@ jobs:
           pnpm -F assignment-6 build
 
       - name: Run Lighthouse CI
-        env:
-          LHCI_GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
         run: |
           pnpm add -D @lhci/cli
           pnpm -F assignment-6 lhci || echo "Fail to Run Lighthouse CI!"
+          cat packages/assignment-6/lhci_reports/manifest.json
 
       - name: Post Lighthouse CI results comment
         if: success()
