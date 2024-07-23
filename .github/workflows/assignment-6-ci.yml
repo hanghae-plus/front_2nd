@@ -163,11 +163,12 @@ jobs:
       - name: Run Lighthouse CI
         run: |
           lhci autorun --upload.target=temporary-public-storage --output=./lighthouse-results
-        continue-on-error: true
+
       - name: Post Lighthouse Results
         if: always()
+        id: lighthouse
         run: |
-          cat << EOF > lighthouse-results.md
+          LIGHTHOUSE_RESULT=$(cat << EOF
           **Lighthouse 성능 측정 결과**
 
           | 카테고리 | 점수 |
@@ -177,12 +178,18 @@ jobs:
           | Best Practices | $(jq '.categories["best-practices"].score * 100' < lighthouse-results/lhr.report.json)% |
           | SEO | $(jq '.categories.seo.score * 100' < lighthouse-results/lhr.report.json)% |
           EOF
+          )
+          echo "result<<EOF" >> $GITHUB_OUTPUT
+          echo "$LIGHTHOUSE_RESULT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Post Lighthouse comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           header: Lighthouse 성능 측정 결과
-          message: file://lighthouse-results.md
+          message: |
+        ${{ steps.lighthouse.outputs.result }}
 
   assign_reviewer:
     if: github.event.action == 'opened'
