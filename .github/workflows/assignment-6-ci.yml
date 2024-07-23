@@ -124,6 +124,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Create coverage directory if not exists
+        run: mkdir -p packages/assignment-6/coverage
+
       - name: Run tests
         run: |
           cd packages/assignment-6
@@ -132,6 +135,9 @@ jobs:
 
       - name: List coverage directory
         run: ls -la packages/assignment-6/coverage
+
+      - name: Check if coverage summary exists
+        run: test -f packages/assignment-6/coverage/coverage-summary.json
 
       - name: Post test results comment
         uses: actions/github-script@v6
