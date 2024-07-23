@@ -75,7 +75,7 @@ jobs:
             const eslintOutput = process.env.ESLINT_OUTPUT || 'No ESLint output available';
             const errorMessage = `
             ## ESLint Results
-            ---
+
             \`\`\`
             ${eslintOutput}
             \`\`\`
@@ -122,7 +122,7 @@ jobs:
             // Comment on PR
             const coverageMessage = `
               ## 테스트 성공 ✅
-              ---
+              
               ### 커버리지 결과
 
               - 라인 커버리지: ${lines}%
@@ -187,7 +187,7 @@ jobs:
 
             const categoriesWithUpperCase = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
             const categories = ['performance', 'accessibility', 'best-practices', 'seo'];
-            let resultTable = '| 카테고리 | 점수 |\n';
+            let resultTable = '| 카테고리 | 점수 |\n|---|---|\n';
             categories.forEach(category => {
               const score = Math.round(lighthouseResult.categories[category].score * 100);
               resultTable += `| ${categoriesWithUpperCase[categories.indexOf(category)]} | ${score} |\n`;
@@ -195,7 +195,7 @@ jobs:
 
             const lighthouseMessage = `
               ## Lighthouse 성능 측정 결과
-              ---
+              
               ${resultTable}
             `;
 
