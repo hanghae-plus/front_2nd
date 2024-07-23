@@ -209,15 +209,38 @@ jobs:
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: assign random reviewer
+      - name: Assign random reviewer
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const teams = ["bbbjihan", "soojjung", "hhyewon", "hyesung99", "shiny1912"];
-            github.rest.issues.createComment({
+            const randomReviewer = teams[Math.floor(Math.random() * teams.length)];
+            
+            // PR 코멘트 작성
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `### 🙏🏻 랜덤 리뷰 요청 \n@${teams[parseInt((Math.random() * 10) % teams.length)]} 님에게 리뷰를 요청드립니다.`
+              body: `### 🙏🏻 랜덤 리뷰 요청 \n@${randomReviewer} 님에게 리뷰를 요청드립니다.`
             });
+            
+            // 리뷰어 할당
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                reviewers: [randomReviewer]
+              });
+              console.log(`Successfully assigned ${randomReviewer} as a reviewer.`);
+            } catch (error) {
+              console.error(`Failed to assign reviewer: ${error.message}`);
+              // 리뷰어 할당 실패 시 코멘트 추가
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `리뷰어 할당에 실패했습니다. 수동으로 리뷰어를 추가해주세요.`
+              });
+            }
