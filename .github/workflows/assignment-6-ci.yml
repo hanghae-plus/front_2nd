@@ -229,25 +229,25 @@ jobs:
               Object.keys(summary).forEach(
                 (key) => (summary[key] = formatResult(summary[key]))
               );
+
+              const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
+
+              comments = `
+              ## ⚡️ Lighthouse 성능 결과!
+              | Category | Score |
+              | --- | --- |
+              | ${score(summary.performance)} Performance | ${summary.performance} |
+              | ${score(summary.accessibility)} Accessibility | ${summary.accessibility} |
+              | ${score(summary['best-practices'])} Best Practices | ${summary['best-practices']} |
+              | ${score(summary.seo)} SEO | ${summary.seo} |
+              `;
             })
-
-            const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
-
-            const message = `
-            ## ⚡️ Lighthouse 성능 결과!
-            | Category | Score |
-            | --- | --- |
-            | ${score(summary.performance)} Performance | ${summary.performance} |
-            | ${score(summary.accessibility)} Accessibility | ${summary.accessibility} |
-            | ${score(summary['best-practices'])} Best Practices | ${summary['best-practices']} |
-            | ${score(summary.seo)} SEO | ${summary.seo} |
-            `;
 
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: message,
+              body: comments,
             });
 
   assign_reviewer:
