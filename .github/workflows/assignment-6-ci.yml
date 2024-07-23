@@ -6,8 +6,6 @@ on:
       - opened
       - synchronize
       - reopened
-    paths:
-      - 'packages/assignment-6/**'
 
 # Add permissions for GITHUB_TOKEN
 permissions:
@@ -21,6 +19,16 @@ jobs:
     steps:
       - name: job1 구현
         run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '깃허브 토큰 테스트입니다.'
+            })
 
   lint:
     runs-on: ubuntu-latest

@@ -3,6 +3,7 @@ import { CartPage } from './components/CartPage.tsx';
 import { AdminPage } from './components/AdminPage.tsx';
 import { Coupon, Product } from './types.ts';
 
+// 임시 주석
 const initialProducts: Product[] = [
   {
     id: 'p1',
