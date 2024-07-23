@@ -29,9 +29,12 @@ jobs:
         run: pnpm install
       - name: Build
         run: pnpm build 2 > &1 | tee test.txt
-      # - if: always()
+      #- if: always()
+      - name: List files
         run: ls -al
+      - name: test.txt
         run: cat .github/workflows/test.txt
+      - if: always()
         run: |
           echo "## TEST" >> $GITHUB_STEP_SUMMARY
           echo "- ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
