@@ -30,6 +30,7 @@ jobs:
         if: failure()
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
