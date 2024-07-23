@@ -31,13 +31,13 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const prNumber = context.payload.pull_request.number;
+            const pull_number = context.payload.pull_request.number;
             const { owner, repo } = context.repo;
-            console.log(`Owner: ${owner}, Repo: ${repo}, PR number: ${prNumber}`);
+            console.log(`Owner: ${owner}, Repo: ${repo}, PR number: ${pull_number}`);
             await github.rest.pulls.createReview({
               owner,
               repo,
-              pull_number: prNumber,
+              pull_number,
               body: 'TypeScript 컴파일 또는 빌드 과정에서 오류가 발생했습니다. 로그를 확인해 주세요.',
               event: 'COMMENT'
             });
