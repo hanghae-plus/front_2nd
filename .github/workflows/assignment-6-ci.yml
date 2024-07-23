@@ -217,55 +217,27 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'));
+            const scores = results.categories;
+            const formatScore = (score) => Math.round(score * 100);
+            const scoreEmoji = (score) => score >= 90 ? '🟢' : score >= 50 ? '🟠' : '🔴';
 
-            try {
-              const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'));
-              let comments = "";
+            const message = `
+            ## ⚡️ Lighthouse 성능 결과!
+            | Category | Score |
+            | --- | --- |
+            | Performance | ${scoreEmoji(formatScore(scores.performance.score))} ${formatScore(scores.performance.score)}% |
+            | Accessibility | ${scoreEmoji(formatScore(scores.accessibility.score))} ${formatScore(scores.accessibility.score)}% |
+            | Best Practices | ${scoreEmoji(formatScore(scores['best-practices'].score))} ${formatScore(scores['best-practices'].score)}% |
+            | SEO | ${scoreEmoji(formatScore(scores.seo.score))} ${formatScore(scores.seo.score)}% |
+            `;
 
-              results.forEach((result) => {
-                const { summary, jsonPath } = result;
-                
-                const details = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
-                const audits = details.audits;
-
-                const formatResult = (res) => Math.round(res * 100);
-
-                const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
-
-                const comment = [
-                  `⚡️ Lighthouse report!`,
-                  `| Category | Score |`,
-                  `| --- | --- |`,
-                  `| ${score(summary.performance)} Performance | ${summary.performance} |`,
-                  `| ${score(summary.accessibility)} Accessibility | ${
-                    summary.accessibility
-                  } |`,
-                  `| ${score(summary['best-practices'])} Best practices | ${
-                    summary['best-practices']
-                  } |`,
-                  `| ${score(summary.seo)} SEO | ${summary.seo} |`,
-                  ''
-                ].join('\n');
-
-                const detail = [
-                  `| Category | Score |`,
-                  `| --- | --- |`,
-                  `| ${score(formatResult(audits["first-contentful-paint"].score))} First Contentful Paint | ${audits["first-contentful-paint"].displayValue} |`,
-                ].join("\n");
-
-                comments += comment + "\n" + detail + "\n";
-              });
-
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: comments,
-              });
-            } catch (error) {
-              console.error('Error occurred:', error);
-              throw error;
-            }
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comments,
+            });
 
   assign_reviewer:
     runs-on: ubuntu-latest
