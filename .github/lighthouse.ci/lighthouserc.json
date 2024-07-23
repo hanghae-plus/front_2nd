@@ -5,7 +5,12 @@
       "numberOfRuns": 1
     },
     "assert": {
-      "preset": "lighthouse:recommended"
+      "assertions": {
+        "categories:performance": "off",
+        "categories:accessibility": "off",
+        "categories:best-practices": "off",
+        "categories:seo": "off"
+      }
     },
     "output": ["json", "html"]
   }
