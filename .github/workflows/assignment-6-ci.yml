@@ -40,10 +40,10 @@ jobs:
       - name: Post tsc error comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          header: TypeScript Compiler Errors
+          header: TypeScript Compiler Results
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           message: |
-            ## TypeScript Compiler Errors
+            ## TypeScript Compiler Results
             ${{ steps.tsc.outputs.tsc_error_output }}
 
       - name: Run build
@@ -58,11 +58,17 @@ jobs:
       - name: Post tsc/build error comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          header: tsc build
+          header: build
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           message: |
-            ## tsc build results
+            ## Build results
             ${{ steps.build.outputs.error_output }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: packages/assignment-6/dist
 
   lint:
     runs-on: ubuntu-latest
@@ -101,7 +107,6 @@ jobs:
           message: |
             ## ESLint results
             ${{ steps.lint.outputs.lint_error_output }}
-            
 
   test:
     runs-on: ubuntu-latest
@@ -146,95 +151,105 @@ jobs:
             - 구문 커버리지: ${{ steps.coverage.outputs.statements }}%
             - 함수 커버리지: ${{ steps.coverage.outputs.functions }}%
             - 브랜치 커버리지: ${{ steps.coverage.outputs.branches }}%
-            
+
   lighthouse:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '20.x'
+        uses: actions/checkout@v4
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: latest
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm -F assignment-6 install
 
-      - name: Build project
-        run: pnpm -F assignment-6 build
+      - name: Start dev server
+        run: pnpm -F assignment-6 start &
+        env:
+          PORT: 5173
 
-      - name: Check build output
-        run: ls -R packages/assignment-6/dist
+      - name: Wait for dev server
+        run: |
+          echo "Waiting for dev server to start..."
+          while ! nc -z localhost 5173; do
+            sleep 1
+          done
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
 
       - name: Run Lighthouse CI
         run: |
-          lhci autorun --upload.target=temporary-public-storage --collect.staticDistDir=./packages/assignment-6/dist
+          lhci autorun --collect.url=http://localhost:5173 --upload.target=filesystem --upload.outputDir=./lighthouse-results
+        continue-on-error: true
+
+      - name: Debug - List Lighthouse results
+        if: always()
+        run: |
+          echo "Contents of ./lighthouse-results:"
+          ls -la ./lighthouse-results/
 
       - name: Post Lighthouse Results
         id: lighthouse
+        if: always()
         run: |
-          LIGHTHOUSE_RESULT=$(cat << EOF
-          **Lighthouse 성능 측정 결과**
+          LATEST_REPORT=$(ls -t ./lighthouse-results/*.report.json | head -n1)
+          if [ -f "$LATEST_REPORT" ]; then
+            echo "Using report file: $LATEST_REPORT"
+            LIGHTHOUSE_RESULT=$(cat << EOF
+          ## Lighthouse 성능 측정 결과
 
           | 카테고리 | 점수 |
           | --- | --- |
-          | Performance | $(jq '.categories.performance.score * 100' < .lighthouseci/lhr.json)% |
-          | Accessibility | $(jq '.categories.accessibility.score * 100' < .lighthouseci/lhr.json)% |
-          | Best Practices | $(jq '.categories["best-practices"].score * 100' < .lighthouseci/lhr.json)% |
-          | SEO | $(jq '.categories.seo.score * 100' < .lighthouseci/lhr.json)% |
+          | Performance | $(jq '.categories.performance.score * 100' < "$LATEST_REPORT")% |
+          | Accessibility | $(jq '.categories.accessibility.score * 100' < "$LATEST_REPORT")% |
+          | Best Practices | $(jq '.categories["best-practices"].score * 100' < "$LATEST_REPORT")% |
+          | SEO | $(jq '.categories.seo.score * 100' < "$LATEST_REPORT")% |
           EOF
           )
-          echo "result<<EOF" >> $GITHUB_OUTPUT
-          echo "$LIGHTHOUSE_RESULT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+            echo "result<<EOF" >> $GITHUB_OUTPUT
+            echo "$LIGHTHOUSE_RESULT" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "result=Lighthouse 결과 파일을 찾을 수 없습니다. (검색 경로: ./lighthouse-results/*.report.json)" >> $GITHUB_OUTPUT
+          fi
 
       - name: Post Lighthouse comment
+        if: always()
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           header: Lighthouse 성능 측정 결과
-          message: |
-            ${{ steps.lighthouse.outputs.result }}
+          message: ${{ steps.lighthouse.outputs.result }}
 
   assign_reviewer:
     if: github.event.action == 'opened'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '20.x'
       - name: Set reviewer
         run: |
           REVIEWERS=("naturekim" "HM970506")
           RANDOM_REVIEWER=${REVIEWERS[$RANDOM % ${#REVIEWERS[@]}]}
           echo "random_reviewer=$RANDOM_REVIEWER" >> $GITHUB_ENV
-      - name: Add reviewer to PR
-        uses: actions/github-script@v5
+
+      - name: Post review request comment
+        uses: actions/github-script@v6
         with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const reviewer = process.env.random_reviewer;
-            await github.rest.pulls.requestReviewers({
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-              reviewers: [reviewer]
+              issue_number: context.issue.number,
+              body: `@${reviewer} 님, 이 PR의 리뷰를 부탁드립니다.`
             });
-      - name: Post reviewer mention comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
-          header: 리뷰어
-          message: |
-            @${{ env.random_reviewer }} 님, 리뷰를 부탁드립니다.
