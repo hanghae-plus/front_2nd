@@ -32,10 +32,9 @@ jobs:
         with:
           script: |
             github.rest.issues.createComment({
-              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: ${steps.tsc.outputs.error}
+              body: ❌ 컴파일 및 빌드 실패 
             });
   lint:
     runs-on: ubuntu-latest
