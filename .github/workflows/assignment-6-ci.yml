@@ -9,6 +9,9 @@ on:
     paths:
       - "packages/assignment-6/**"
       - ".github/workflows/assignment-6-ci.yml"
+  push:
+    branches:
+      - yoosion030-assignment-6
 
 jobs:
   build:
