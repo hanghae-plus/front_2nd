@@ -217,7 +217,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: kentaro-m/auto-assign-action@v2.0.0
         with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          repo-token: ${{ secrets.TOKEN_FOR_CI }}
           configuration-path: .github/auto-assign.yml
 
       - name: Comment the lighthouse result on PR
