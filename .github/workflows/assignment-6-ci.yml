@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -29,12 +31,14 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            const prNumber = context.payload.pull_request.number;
+            await github.rest.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.name,
-              body: 'TypeScript 컴파일 또는 빌드 과정에서 오류가 발생했습니다. 로그를 확인해 주세요.'
-            })
+              pull_number: prNumber,
+              body: 'TypeScript 컴파일 또는 빌드 과정에서 오류가 발생했습니다. 로그를 확인해 주세요.',
+              event: 'COMMENT'
+            });
 
   lint:
     runs-on: ubuntu-latest
