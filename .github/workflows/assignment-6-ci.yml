@@ -21,7 +21,7 @@ jobs:
         run: echo "job1의 내용을 구현해주세요"
       - uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.TOKEN_FOR_CI}}
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
