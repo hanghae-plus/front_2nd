@@ -220,11 +220,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
-        working-directory: ./packages/assignment-6
+        working-directory: /packages/assignment-6
 
       - name: Start dev server
         run: pnpm start > server.log 2>&1 &
-        working-directory: ./packages/assignment-6
+        working-directory: /packages/assignment-6
         env:
           PORT: 5173
 
@@ -249,28 +249,28 @@ jobs:
       - name: Check server status
         run: |
           curl -I http://localhost:5173 || (echo "Server is not responding" && cat server.log && exit 1)
-        working-directory: ./packages/assignment-6
+        working-directory: /packages/assignment-6
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
 
       - name: Run Lighthouse CI
         run: |
-          lhci autorun --collect.url=http://localhost:5173 --upload.target=filesystem --upload.outputDir=./lighthouse-results
-        working-directory: ./packages/assignment-6
+          lhci autorun --collect.url=http://localhost:5173 --upload.target=filesystem --upload.outputDir=/lighthouse-results
+        working-directory: /packages/assignment-6
         continue-on-error: true
 
       - name: Debug - List Lighthouse results
         if: always()
         run: |
-          echo "Contents of ./lighthouse-results:"
-          ls -la ./lighthouse-results/
+          echo "Contents of /lighthouse-results:"
+          ls -la /lighthouse-results/
 
       - name: Post Lighthouse Results
         id: lighthouse
         if: always()
         run: |
-          LATEST_REPORT=$(ls -t ./lighthouse-results/*.report.json | head -n1)
+          LATEST_REPORT=$(ls -t /lighthouse-results/*.report.json | head -n1)
           if [ -f "$LATEST_REPORT" ]; then
             echo "Using report file: $LATEST_REPORT"
             LIGHTHOUSE_RESULT=$(cat << EOF
@@ -288,7 +288,7 @@ jobs:
             echo "$LIGHTHOUSE_RESULT" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           else
-            echo "result=Lighthouse 결과 파일을 찾을 수 없습니다. (검색 경로: ./lighthouse-results/*.report.json)" >> $GITHUB_OUTPUT
+            echo "result=Lighthouse 결과 파일을 찾을 수 없습니다. (검색 경로: /lighthouse-results/*.report.json)" >> $GITHUB_OUTPUT
           fi
 
       - name: Post Lighthouse comment
