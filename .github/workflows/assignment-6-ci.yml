@@ -4,11 +4,8 @@ on:
   pull_request:
     types:
       - opened
-      - reopened
       - synchronize
-    paths:
-      - "packages/assignment-6/**"
-      - ".github/workflows/assignment-6-ci.yml"
+      - reopened
 
 jobs:
   build:
