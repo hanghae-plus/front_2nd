@@ -1,0 +1,104 @@
+[
+  {
+    "name": "minScore",
+    "expected": 0.9,
+    "actual": 0,
+    "values": [
+      0,
+      0,
+      0
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditId": "color-contrast",
+    "level": "error",
+    "url": "http://localhost:51497/",
+    "auditTitle": "Background and foreground colors do not have a sufficient contrast ratio.",
+    "auditDocumentationLink": "https://dequeuniversity.com/rules/axe/4.9/color-contrast"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.9,
+    "actual": 0.82,
+    "values": [
+      0.81,
+      0.82,
+      0.82
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditId": "first-contentful-paint",
+    "level": "warn",
+    "url": "http://localhost:51497/",
+    "auditTitle": "First Contentful Paint",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint/"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.9,
+    "actual": 0,
+    "values": [
+      0,
+      0,
+      0
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditId": "meta-description",
+    "level": "error",
+    "url": "http://localhost:51497/",
+    "auditTitle": "Document does not have a meta description",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/seo/meta-description/"
+  },
+  {
+    "name": "maxLength",
+    "expected": 0,
+    "actual": 1,
+    "values": [
+      1,
+      1,
+      1
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditId": "render-blocking-resources",
+    "level": "warn",
+    "url": "http://localhost:51497/",
+    "auditTitle": "Eliminate render-blocking resources",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/render-blocking-resources/"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.9,
+    "actual": 0,
+    "values": [
+      0,
+      0,
+      0
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditId": "select-name",
+    "level": "error",
+    "url": "http://localhost:51497/",
+    "auditTitle": "Select elements do not have associated label elements.",
+    "auditDocumentationLink": "https://dequeuniversity.com/rules/axe/4.9/select-name"
+  },
+  {
+    "name": "maxLength",
+    "expected": 0,
+    "actual": 2,
+    "values": [
+      2,
+      2,
+      2
+    ],
+    "operator": "<=",
+    "passed": false,
+    "auditId": "unused-javascript",
+    "level": "error",
+    "url": "http://localhost:51497/",
+    "auditTitle": "Reduce unused JavaScript",
+    "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/unused-javascript/"
+  }
+]
