@@ -244,7 +244,7 @@ jobs:
             exit 1
           fi
           echo "Dev server is up and running"
-        working-directory: ./packages/assignment-6
+        working-directory: /packages/assignment-6
 
       - name: Check server status
         run: |
