@@ -51,7 +51,7 @@ jobs:
             The build for this PR has failed. Please check the logs for more details.
             `;
 
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -201,7 +201,7 @@ jobs:
         run: pnpm install
 
       - name: Install Lighthouse CI
-        run: pnpm add -g @lhci/cli
+        run: pnpm add -D @lhci/cli
 
       - name: Run Lighthouse CI
         run: lhci autorun
