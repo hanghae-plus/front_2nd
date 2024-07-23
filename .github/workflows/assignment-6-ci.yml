@@ -24,7 +24,6 @@ jobs:
       - run: pnpm install
       - run: pnpm -F assignment-6 tsc
       - run: pnpm -F assignment-6 build
-        continue-on-error: true
       - if: failure()
         uses: actions/github-script@v7
         with:
