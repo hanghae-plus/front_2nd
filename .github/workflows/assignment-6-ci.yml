@@ -141,7 +141,7 @@ jobs:
             const fs = require('fs');
             const path = "packages/assignment-6/coverage/coverage-summary.json";
 
-            let message = `## 테스트 결과`;
+            let message = ``;
 
             const coverage = JSON.parse(fs.readFileSync(path, 'utf8'));          
             const { total } = coverage;
@@ -243,7 +243,7 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const teams = ["bbbjihan", "soojjung"];
+            const teams = ["bbbjihan", "hhyewon"];
             const randomReviewer = teams[Math.floor(Math.random() * teams.length)];
 
             await github.rest.pulls.requestReviewers({
