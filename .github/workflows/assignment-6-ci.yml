@@ -21,13 +21,7 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
-      - name: Run build
-        id: build
-        run: |
-          pnpm -F assignment-6 build
-        continue-on-error: true
-
-      - name: Comment on PR if build fails
+      - name: Run build and Comment on PR if build fails
         if: steps.build.outcome == 'failure'
         uses: actions/github-script@v6
         with:
@@ -58,13 +52,6 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: run lint
-        run: |
-          pnpm -F assignment-6 lint 2>&1 | tee lint.log
-          exit ${PIPESTATUS[0]}
 
       - name: Comment on PR if lint fails
         if: failure()
@@ -72,13 +59,18 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const fs = require('fs');
-            const log = fs.readFileSync('lint.log', 'utf8');
+            const { execSync } = require('child_process');
+            let lintLog = '';
+            try {
+              lintLog = execSync('pnpm -F assignment-6 lint 2>&1').toString();
+            } catch (error) {
+              lintLog = error.stdout.toString();
+            }
             github.rest.issues.createComment({
+              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `### ❌ Lint Failed\n\`\`\`\n${log}\n\`\`\``
+              body: `### ❌ Lint Failed\n\`\`\`\n${lintLog}\n\`\`\``
             });
 
   test:
