@@ -201,49 +201,66 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build
+        run: |
+          pnpm -F assignment-6 build
+
       - name: Run Lighthouse CI
         run: |
-          npx lhci autorun --output-path="./lhci-results/lhr-0.report.json"
-
-      - name: Check if Lighthouse CI result file exists
-        run: ls -l ./lhci-results/lhr-0.report.json
+          pnpm add -D @lhci/cli
+          pnpm -F assignment-6 lhci
 
       - name: Post Lighthouse CI results comment
         if: success()
         uses: actions/github-script@v6
+
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const reportPath = './lhci-results/lhr-0.report.json';
+            const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'));
+            let comments = "";
 
-            if (!fs.existsSync(reportPath)) {
-              throw new Error('Lighthouse report file does not exist.');
-            }
+            results.forEach((result) => {
+              const { summary, jsonPath } = result;
+              const { audits } = details;
 
-            const report = JSON.parse(fs.readFileSync(reportPath, 'utf-8'));
+              const details = JSON.parse(fs.readFileSync(jsonPath));
+              const formatResult = (res) => Math.round(res * 100);
 
-            const performance = report.categories.performance.score * 100;
-            const accessibility = report.categories.accessibility.score * 100;
-            const bestPractices = report.categories['best-practices'].score * 100;
-            const seo = report.categories.seo.score * 100;
+              Object.keys(summary).forEach(
+                (key) => (summary[key] = formatResult(summary[key]))
+              );
 
-            const message = `
-            ## Lighthouse 성능 측정 결과
-            | 카테고리      | 점수 |
-            | ------------- | ---- |
-            | Performance   | ${performance}% |
-            | Accessibility | ${accessibility}% |
-            | Best Practices| ${bestPractices}% |
-            | SEO           | ${seo}% |
-            `;
+              # 점수가 색상으로 구분되는 방식 (https://web.dev/performance-scoring/#color-coding)
+              const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
+
+              const comment = [
+                `⚡️ Lighthouse report!`,
+                `| Category | Score |`,
+                `| --- | --- |`,
+                `| ${score(summary.performance)} Performance | ${summary.performance} |`,
+                { ... }
+              ].join("\n");
+
+              const detail = [
+                `| Category | Score |`,
+                `| --- | --- |`,
+                `| ${score(
+                  audits["first-contentful-paint"].score * 100
+                )} First Contentful Paint | ${
+                  audits["first-contentful-paint"].displayValue
+                } |`,
+                { ... }
+              ].join("\n");
+              comments += comment + "\n" + detail + "\n";
+            });
 
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: message,
-            });
+              body: comments,
 
   assign_reviewer:
     runs-on: ubuntu-latest
