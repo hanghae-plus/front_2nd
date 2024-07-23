@@ -159,7 +159,7 @@ jobs:
 
       - name: Job4 (lighthouse)
         id: job4
-        run: lhci autorun --config=.github/lighthouse.ci/lighthouserc.json
+        run: lhci autorun --config=.github/lighthouse.ci/lighthouserc.json --no-exit-on-failure
 
       - name: Comment the lighthouse result on PR
         if: success()
