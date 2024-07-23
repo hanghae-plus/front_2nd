@@ -26,8 +26,8 @@ jobs:
       - run: echo $BUILDERROR
       - if: always()
         run: |
-          echo "## BUILDERROR" >> $GITHUB_STEP_SUMMARY
-          echo "- ${{ BUILDERROR }}" >> $GITHUB_STEP_SUMMARY
+          echo "## TEST" >> $GITHUB_STEP_SUMMARY
+          echo "- $BUILDERROR" >> $GITHUB_STEP_SUMMARY
 
   lint:
     runs-on: ubuntu-latest
