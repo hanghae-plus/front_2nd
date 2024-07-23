@@ -2,38 +2,256 @@ name: CI Assignment 6
 
 on:
   pull_request:
-    types:
-      - opened
+    types: [opened, synchronize, reopened]
+
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: tsc && build
+        id: build
+        run: |
+          pnpm -F assignment-6 build 2>&1 | tee error.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Comment PR
+        if: failure()
+        uses: actions/github-script@v6.4.0
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs')
+            const errorLog = fs.readFileSync('error.log', 'utf8')
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### tsc&build error ${errorLog}`
+            })
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: lint
+        id: lint
+        run: |
+          pnpm -F assignment-6 lint 2>&1 | tee error.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Comment PR
+        if: failure()
+        uses: actions/github-script@v6.4.0
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs')
+            const errorLog = fs.readFileSync('error.log', 'utf8')
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### lint error ${errorLog}`
+            })
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: run test
+        run: |
+          pnpm -F assignment-6 test:coverage
+
+      - name: Vitest Coverage Report
+        uses: davelosert/vitest-coverage-report-action@v2.5.0
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          vite-config-path: /home/runner/work/react-deep/react-deep/packages/assignment-6/vite.config.ts
+          json-summary-path: /home/runner/work/react-deep/react-deep/packages/assignment-6/coverage/coverage-summary.json
+          json-final-path: /home/runner/work/react-deep/react-deep/packages/assignment-6/coverage/coverage-final.json
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Lighthouse CI
+        run: |
+          pnpm i -g @lhci/cli
+          pnpm -F assignment-6 lhci || echo "Fail to Run Lighthouse CI!"
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Format lighthouse score
+        id: format_lighthouse
+        uses: actions/github-script@v6.4.0
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const resultsPath = path.join(process.env.GITHUB_WORKSPACE, 'packages', 'assignment-6', 'lhci_reports', 'manifest.json');
+
+            if (!fs.existsSync(resultsPath)) {
+              console.log(`File not found: ${resultsPath}`);
+              return;
+            }
+
+            const results = JSON.parse(fs.readFileSync(resultsPath));
+            const totalReports = results.length;
+
+            // best-practices은 문자열로 저장 ( Lighthouse 지표 )
+            const averageScores = {
+              performance: 0,
+              accessibility: 0,
+              'best-practices': 0,
+              seo: 0,
+              pwa: 0
+            };
+
+            // Lighthouse 상세 지표
+            const auditSummaries = {
+              'first-contentful-paint': 0,
+              'largest-contentful-paint': 0,
+              'interactive': 0,
+              'total-blocking-time': 0,
+              'cumulative-layout-shift': 0
+            };
+
+            // 점수 평균
+            results.forEach(result => {
+              const { summary } = result;
+              for (const key in averageScores) {
+                averageScores[key] += summary[key];
+              }
+
+              const details = JSON.parse(fs.readFileSync(result.jsonPath));
+              ['first-contentful-paint', 'largest-contentful-paint', 'interactive', 'total-blocking-time', 'cumulative-layout-shift'].forEach(auditName => {
+                if (details.audits[auditName]) {
+                  const auditDetails = details.audits[auditName];
+                  auditSummaries[auditName] += parseFloat(auditDetails.displayValue) || 0;
+                }
+              });
+            });
+
+             const formatScore = res => (res >= 90 ? "🟢" : res >= 70 ? "🟠" : "🔴");
+
+            // 상세 지표의 표준 점수에 따른 색상 표시
+            const detailscore = (value, metric) => {
+              switch (metric) {
+              case 'first-contentful-paint':
+                  return value <= 1.8 ? "🟢" : value <= 3 ? "🟠" : "🔴";
+                case 'largest-contentful-paint':
+                  return value <= 2.5 ? "🟢" : value <= 4 ? "🟠" : "🔴";
+                case 'interactive':
+                  return value <= 3.8 ? "🟢" : value <= 7.3 ? "🟠" : "🔴";
+                case 'total-blocking-time':
+                  return value <= 300 ? "🟢" : value <= 600 ? "🟠" : "🔴";
+                case 'cumulative-layout-shift':
+                  return value <= 0.1 ? "🟢" : value <= 0.25 ? "🟠" : "🔴";
+                default:
+                return "🔴"; // Default to red if metric is unknown
+                }
+            };
+
+            let comments = "⚡️ Lighthouse Average Scores Across Reports:\n| Category | Score |\n| --- | --- |\n";
+            Object.keys(averageScores).forEach(key => {
+              const avgScore = Math.round((averageScores[key] / totalReports) * 100);
+              comments += `| ${formatScore(avgScore)}  ${key.replace(/-/g, ' ')} | ${avgScore} |\n`;
+            });
+
+            comments += "\n⚡️ Average Details Across All Reports:\n| Category | Score |\n| --- | --- |\n";
+            Object.keys(auditSummaries).forEach(auditName => {
+              const average = auditSummaries[auditName] / totalReports;
+              const formattedName = auditName.replace(/-/g, ' ');
+              const colorCode = detailscore(average, auditName);
+              const unit = (auditName === 'total-blocking-time' ? 'ms' : auditName === 'cumulative-layout-shift' ? '' : 's')
+              comments += `| ${colorCode}  ${formattedName} | ${average.toFixed(1)}${unit} |\n`;
+                        });
+
+            // PR 전송
+            if (comments && context.issue.number) {
+              const issue_number = context.issue.number;
+              const repo = context.repo.repo;
+              const owner = context.repo.owner;
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: comments
+              });
+            } else {
+              console.log("No PR COMMENT!");
+            }
 
   assign_reviewer:
     runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: Random reviewer
+        uses: actions/github-script@v6.4.0
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const reviewers = []
+            const randomReviewer = reviewers[Math.floor(Math.random() * reviewer.length)]
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### 랜덤리뷰어 선정  @${reviewers}`
+            })
