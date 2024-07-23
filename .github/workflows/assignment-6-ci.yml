@@ -102,6 +102,9 @@ jobs:
       - name: List coverage directory
         run: ls -R packages/assignment-6/coverage
 
+      - name: Check coverage file content
+        run: cat packages/assignment-6/coverage/coverage-final.json | head -n 20
+
       - name: Comment test results
         if: success()
         uses: actions/github-script@v6
@@ -112,12 +115,30 @@ jobs:
             const path = require('path');
             
             try {
-              const coverageFile = path.join('packages', 'assignment-6', 'coverage', 'coverage-summary.json');
+              const coverageFile = path.join(process.cwd(), 'packages', 'assignment-6', 'coverage', 'coverage-final.json');
               const coverageJson = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
               
-              const {lines, branches, functions, statements} = coverageJson.total;
+              let totalStatements = 0;
+              let coveredStatements = 0;
+              let totalBranches = 0;
+              let coveredBranches = 0;
+              let totalFunctions = 0;
+              let coveredFunctions = 0;
+              let totalLines = 0;
+              let coveredLines = 0;
               
-              const formatPercentage = (value) => value.pct.toFixed(2);
+              Object.values(coverageJson).forEach(file => {
+                totalStatements += file.s.total;
+                coveredStatements += file.s.covered;
+                totalBranches += file.b.total;
+                coveredBranches += file.b.covered;
+                totalFunctions += file.f.total;
+                coveredFunctions += file.f.covered;
+                totalLines += file.l.total;
+                coveredLines += file.l.covered;
+              });
+              
+              const calculatePercentage = (covered, total) => ((covered / total) * 100).toFixed(2);
               
               await github.rest.issues.createComment({
                 issue_number: context.issue.number,
@@ -126,10 +147,10 @@ jobs:
                 body: `## 테스트 성공✅ 
                 \n### 커버리지 결과\n
                 
-                • 라인 커버리지: ${formatPercentage(lines)}%
-                • 브랜치 커버리지: ${formatPercentage(branches)}%
-                • 함수 커버리지: ${formatPercentage(functions)}%
-                • 구문 커버리지: ${formatPercentage(statements)}%`
+                • 라인 커버리지: ${calculatePercentage(coveredLines, totalLines)}%
+                • 브랜치 커버리지: ${calculatePercentage(coveredBranches, totalBranches)}%
+                • 함수 커버리지: ${calculatePercentage(coveredFunctions, totalFunctions)}%
+                • 구문 커버리지: ${calculatePercentage(coveredStatements, totalStatements)}%`
               });
             } catch (error) {
               console.error('Error processing coverage data:', error);
