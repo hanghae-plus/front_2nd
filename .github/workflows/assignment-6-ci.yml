@@ -9,10 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
-
     steps:
       - name: job1 구현
         run: echo "job1의 내용을 구현해주세요"
@@ -39,6 +35,7 @@ jobs:
         if: failure()
         uses: actions/github-script@v6
         with:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -76,6 +73,7 @@ jobs:
         if: env.LINT_FAILED == 'true'
         uses: actions/github-script@v6
         with:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8');
@@ -115,6 +113,7 @@ jobs:
         if: success()
         uses: actions/github-script@v6
         with:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const coverageReport = fs.readFileSync('coverage_text.txt', 'utf8');
@@ -159,6 +158,7 @@ jobs:
       - name: Format and comment Lighthouse results
         uses: actions/github-script@v6
         with:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const lighthouseReport = JSON.parse(fs.readFileSync('./lhci-report.json', 'utf8'));
@@ -193,6 +193,7 @@ jobs:
       - name: assign random reviewer
         uses: actions/github-script@v6
         with:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const teams = ["bbbjihan", "soojjung"];
             const randomReviewer = teams[Math.floor(Math.random() * teams.length)];
