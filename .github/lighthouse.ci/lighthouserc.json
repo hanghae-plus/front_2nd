@@ -1,0 +1,12 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["http://localhost:5173"],
+      "numberOfRuns": 1
+    },
+    "assert": {
+      "preset": "lighthouse:recommended"
+    },
+    "output": ["json", "html"]
+  }
+}
