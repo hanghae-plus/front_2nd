@@ -80,8 +80,8 @@ jobs:
 
       - name: Run ESLint
         id: eslint
-        run: pnpm lint packages/assignment-6 --format json --output-file eslint-report.json
-        continue-on-error: true
+        run: |
+          pnpm -F assignment-6 lint
 
       - name: Post ESLint failure comment
         if: failure()
