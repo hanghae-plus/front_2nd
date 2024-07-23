@@ -97,7 +97,7 @@ describe("시나리오 테스트", () => {
     expect(product3).toHaveTextContent("재고: 20개");
 
     // 2. 할인 정보 표시
-    expect(screen.getByText("10개 이상: 10% 할인")).not.toBeInTheDocument();
+    expect(screen.getByText("10개 이상: 10% 할인")).toBeInTheDocument();
 
     // 3. 상품1 장바구니에 상품 추가
     fireEvent.click(addToCartButtonsAtProduct1); // 상품1 추가
