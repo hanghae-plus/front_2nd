@@ -21,38 +21,24 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Run build
-        id: build
-        run: |
-          pnpm -F assignment-6 build > build.log 2>&1
-          exit_code=$?
-          echo "build_exit_code=$exit_code" >> $GITHUB_OUTPUT
-        continue-on-error: true
-
-      - name: Comment build results
-        if: always()
+      - name: Run build and Comment on PR if build fails
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const fs = require('fs');
-            const buildStatus = '${{ steps.build.outputs.build_exit_code }}' === '0' ? '성공' : '실패';
-            const buildEmoji = buildStatus === '성공' ? '✅' : '❌';
-            const buildLog = fs.readFileSync('build.log', 'utf8');
-            
+            const { execSync } = require('child_process');
+            let buildLog = '';
+            try {
+              buildLog = execSync('pnpm -F assignment-6 build 2>&1').toString();
+            } catch (error) {
+              buildLog = error.stdout.toString();
+            }
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `### 빌드 ${buildStatus} ${buildEmoji}\n\`\`\`\n${buildLog}\n\`\`\``
+              body: `### ❌ Build Failed\n\`\`\`\n${buildLog}\n\`\`\``
             });
-
-      - name: Check build result
-        if: steps.build.outputs.build_exit_code != '0'
-        run: exit 1
 
   lint:
     runs-on: ubuntu-latest
