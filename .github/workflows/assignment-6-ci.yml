@@ -152,7 +152,7 @@ jobs:
             - 함수 커버리지: ${total.functions.pct}%
             - 구문 커버리지: ${total.statements.pct}%`;
 
-            message = steps.node_version.outcome === 'success' ?
+            message = '${{ job.status }}' === 'success' ?
               `## 테스트 성공 ✅\n### 커버리지 결과\n${message}` :
               `## 테스트 실패 :x:\n### 커버리지 결과\n${message}`;
 
