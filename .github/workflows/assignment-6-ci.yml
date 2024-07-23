@@ -11,8 +11,32 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Job1 (Build)
+        id: job1
+        run: |
+          pnpm -F assignment-6 install
+          pnpm -F assignment-6 build
+
+      - name: Comment on Error
+        if: failure() && steps.job1.outcome == 'failure'
+        uses: actions/github-script@v4
+        with:
+          github_token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue_number,
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              body: `Build failed. Please check the error message and fix it.`
+            })
 
   lint:
     runs-on: ubuntu-latest
