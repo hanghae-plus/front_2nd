@@ -200,23 +200,32 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Create directory for Lighthouse results
-        run: mkdir -p packages/assignment-6/lhci-results
-
       - name: Install Lighthouse CI
         run: pnpm add -D @lhci/cli
 
       - name: Run Lighthouse CI
         run: |
-          pnpm -F assignment-6 lhci --output-path=packages/assignment-6/lhci-results/lhr-0.report.json
+          npx lhci collect --url="http://localhost:5173" --output-path="./lhci-results/lhr-0.report.json" --output=json
+          npx lhci score --output-path="./lhci-results/lhr-0.report.json"
+
+      - name: Check if Lighthouse CI result file exists
+        run: ls -l ./lhci-results/lhr-0.report.json
 
       - name: Post Lighthouse CI results comment
+        if: success()
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const report = JSON.parse(fs.readFileSync('packages/assignment-6/lhci-results/lhr-0.report.json', 'utf-8'));
+            const reportPath = './lhci-results/lhr-0.report.json';
+
+            if (!fs.existsSync(reportPath)) {
+              throw new Error('Lighthouse report file does not exist.');
+            }
+
+            const report = JSON.parse(fs.readFileSync(reportPath, 'utf-8'));
+
             const performance = report.categories.performance.score * 100;
             const accessibility = report.categories.accessibility.score * 100;
             const bestPractices = report.categories['best-practices'].score * 100;
@@ -232,7 +241,6 @@ jobs:
             | SEO           | ${seo}% |
             `;
 
-            // PR에 코멘트를 남김
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
