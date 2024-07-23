@@ -203,8 +203,6 @@ jobs:
 
       - name: Run Lighthouse CI
         run: |
-          cd packages/assignment6
-          pnpm add -D @lhci/cli
           pnpm -F assignment-6 lhci || echo "Fail to Run Lighthouse CI!"
 
       - name: check reports file
