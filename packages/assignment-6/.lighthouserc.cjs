@@ -1,12 +1,14 @@
 module.exports = {
   ci: {
     collect: {
-      startServerCommand: "pnpm -F assignment-6 start", // 서버를 키는 명령어를 통해서도 실행 가능
+      staticDistDir: "./dist",
       url: ["http://localhost:5173"],
-      numberOfRuns: 5,
+      numberOfRuns: 1,
     },
     upload: {
-      target: "temporary-public-storage",
+      target: "filesystem",
+      outputDir: "./lhci_reports",
+      reportFilenamePattern: "%%PATHNAME%%-%%DATETIME%%-report.%%EXTENSION%%",
     },
   },
 };
