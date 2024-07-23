@@ -41,7 +41,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '## ❌ Build Failed\n\`\`\`TSC or Build process failed. Please check the errors and fix them.\n\`\`\`'
+              body: '## ❌ Build Failed \n TSC or Build process failed. Please check the errors and fix them.'
             })
 
 
@@ -82,7 +82,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## ESLint Results\n\`\`\`${eslintReport.trim()}\n\`\`\``
+              body: `## ESLint Results \n ${eslintReport.trim()}`
             });
 
   test:
@@ -107,7 +107,7 @@ jobs:
         run: pnpm install
 
       - name: Run tests
-        run: pnpm -F assignment-6 test:coverage > coverage_text.txt 2>&1
+        run: pnpm -F assignment-6 test:coverage --json --outputFile=./coverage.json
 
       - name: Comment test results
         if: success()
@@ -116,13 +116,23 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const coverageReport = fs.readFileSync('coverage_text.txt', 'utf8');
+            const coverageJson = JSON.parse(fs.readFileSync('./coverage.json', 'utf8'));
+            
+            const {line, branches, functions, statements} = coverageJson.total;
+            
+            const formatPercentage = (value) => (value * 100).toFixed(2);
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## ✅ test success\n\`\`\`${coverageReport}\n\`\`\``
+              body: `## 테스트 성공✅ 
+              \n $커버리지 결과\n
+              
+              • 라인 커버리지: ${formatPercentage(lines.pct)}%
+              • 브랜치 커버리지: ${formatPercentage(branches.pct)}%
+              • 함수 커버리지: ${formatPercentage(functions.pct)}%
+              • 구문 커버리지: ${formatPercentage(statements.pct)}%
             })
 
   lighthouse:
@@ -145,7 +155,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm install -g @lhci/cli
+          pnpm install -g @lhci/cli@0.14.0
           pnpm install
 
       - name: Run tests
@@ -177,7 +187,7 @@ jobs:
               tableContent += `| ${category} | ${score} |\n`;
             }
             
-            const comment = `## Lighthouse 성능 측정 결과\n\`\`\`${tableContent}\n\`\`\``;
+            const comment = `## Lighthouse 성능 측정 결과 \n ${tableContent}`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -209,7 +219,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `## 🎉랜덤 리뷰
-            \n\`\`\`랜덤 리뷰로 선정되신 @${randomReviewer}님!🎉 리뷰를 부탁드립니다.`
-            \n\`\`\`
+              body: `## 🎉랜덤 리뷰 \n 랜덤 리뷰로 선정되신 @${randomReviewer}님!🎉 리뷰를 부탁드립니다.`
             });
