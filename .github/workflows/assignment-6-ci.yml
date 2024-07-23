@@ -83,6 +83,9 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
+      - name: Install dependencies
+        run: pnpm install
+        
       - name: Run tests and collect coverage
         run: pnpm -F assignment-6 test:coverage
 
