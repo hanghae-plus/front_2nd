@@ -3,6 +3,8 @@ name: CI Assignment 6
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - 'packages/assignment-6/**'
 
   push:
     branches: [develop]
@@ -20,16 +22,14 @@ jobs:
 
       - name: 의존성 설치
         run: pnpm install
-        working-directory: packages/assignment-6
 
       - name: job1 구현
-        run: echo "job2의 내용을 구현해주세요"
+        run: echo "job1 tsc, build 를 실행한다. 오류가 발생하면 코멘트를 남긴다"
 
       - name: tsc 빌드
         run: |
           set -o pipefail
           pnpm -F assignment-6 build 2>&1 | tee build.log
-        working-directory: packages/assignment-6
 
       # 실패시 코멘트 작성
       - name: 빌드 오류 코멘트
@@ -42,7 +42,6 @@ jobs:
             const pull_number = ${{ github.event.pull_request.number }};
             const buildLog = fs.readFileSync('packages/assignment-6/build.log', 'utf-8');
 
-            const updated_title = `[BUILD FAIL] ${{ github.event.pull_request.title }}`;
 
             // PR에 리뷰 남기기
             await github.rest.pulls.createReview({
@@ -64,19 +63,17 @@ jobs:
 
       - name: 의존성 설치
         run: pnpm install
-        working-directory: packages/assignment-6
 
       - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+        run: echo "job2  eslint를 실행한 다음에, eslint에서 오류가 발생할 경우 report를 코멘트에 남긴다."
 
       - name: eslint 실행
         run: |
           set -o pipefail
           pnpm run lint 2>&1 | tee lint.log
-        working-directory: packages/assignment-6
 
         # 실패시 코멘트 작성
-      - name: lint 오류 코멘트
+      - name: eslint 오류 코멘트
         if: ${{ failure() }}
         uses: actions/github-script@v6
         with:
@@ -85,8 +82,6 @@ jobs:
             const fs = require('fs');
             const pull_number = ${{ github.event.pull_request.number }};
             const Log = fs.readFileSync('packages/assignment-6/lint.log', 'utf-8');
-
-            const updated_title = `[ESLINT FAIL] ${{ github.event.pull_request.title }}`;
 
             // PR에 리뷰 남기기
             await github.rest.pulls.createReview({
@@ -110,26 +105,21 @@ jobs:
 
       - name: 의존성 설치
         run: pnpm install
-        working-directory: packages/assignment-6
 
       - name: 테스트 실행 및 커버리지 리포트 생성
         id: test
         run: |
-          pnpm test
-          cat coverage/coverage-summary.txt
-        working-directory: packages/assignment-6
+          pnpm -F assignment-6 test:with_coverage 2>&1 | tee coverage.log
 
-      - name: 빌드 오류 및 커버리지 코멘트
+      - name: 커버리지 코멘트
         if: ${{ failure() || success() }}
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
+            const log = fs.readFileSync('coverage.log', 'utf8');
             const pull_number = ${{ github.event.pull_request.number }};
-            const coverageReport = fs.existsSync('packages/assignment-6/coverage/coverage-summary.txt') ? fs.readFileSync('packages/assignment-6/coverage/coverage-summary.txt', 'utf-8') : '커버리지 리포트 없음';
-
-            const updated_title = `[테스트 성공] ${{ github.event.pull_request.title }}`;
 
             // PR에 리뷰 남기기
             await github.rest.pulls.createReview({
@@ -138,7 +128,7 @@ jobs:
               pull_number: pull_number,
               body: `
                 
-                커버리지 결과:\n\`\`\`\n${coverageReport}\n\`\`\`
+                커버리지 결과:\n\`\`\`\n${log}\n\`\`\`
               `,
               event: 'REQUEST_CHANGES'
             });
