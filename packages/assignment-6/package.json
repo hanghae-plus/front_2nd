@@ -7,10 +7,8 @@
     "start": "vite",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:with_coverage": "vitest run --coverage",
     "build": "tsc -b && vite build",
-    "lint": "eslint \"**/*.{ts,tsx}\" --report-unused-disable-directives --max-warnings 0",
-    "lhci": "lhci autorun"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "react": "^18.3.1",
