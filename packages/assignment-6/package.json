@@ -9,7 +9,7 @@
     "test:ui": "vitest --ui",
     "test:with_coverage": "vitest run --coverage",
     "build": "tsc -b && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint \"**/*.{ts,tsx}\" --report-unused-disable-directives --max-warnings 0",
     "lhci": "lhci autorun"
   },
   "dependencies": {
