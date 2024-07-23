@@ -18,6 +18,11 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
       - name: Build
         run: |
           pnpm install 
@@ -30,6 +35,11 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
       - name: Lint
         run: |
           pnpm install
@@ -38,7 +48,7 @@ jobs:
         if: failure()
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs')
             const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8')
@@ -60,6 +70,10 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
 
       - name: Testing and Coverage
         run: |
@@ -71,7 +85,7 @@ jobs:
         uses: actions/github-script@v6
         if: success()
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
 
@@ -122,6 +136,11 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
       - name: Install Lighthouse CI
         run: |
           npm i -E -g @lhci/cli
@@ -136,7 +155,7 @@ jobs:
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'))
@@ -217,6 +236,11 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
       - name: Assign Reviewer
         uses: actions/github-script@v6
         with:
@@ -229,7 +253,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `@${randomReviewer}, 리뷰를 부탁드립니다.`
+              body: `@, 리뷰를 부탁드립니다.`
             });
 
             await github.rest.pulls.requestReviewers({
