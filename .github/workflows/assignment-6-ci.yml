@@ -2,7 +2,7 @@ name: CI Assignment 6
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize]
 
     paths:
       - "packages/assignment-6/**"
@@ -247,11 +247,11 @@ jobs:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const reviewers = ["jiwonkim97", "jexnjeux", "aauraoys"]
-            const randomReviewer = reviewers[Math.floor(Math.random() * reviewer.length)]
+            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)]
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `### 랜덤리뷰어 선정  @${randomReviewer}`
+              body: `@${randomReviewer}님, 리뷰 부탁드립니다!!`
             })
