@@ -116,7 +116,6 @@ jobs:
       - name: Read .nvmrc
         id: node_version
         run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_ENV
-
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -127,24 +126,25 @@ jobs:
 
       - name: Run tests
         run: |
-          pnpm -F assignment-6 test:with_coverage 2>&1 | tee test.log
-          exit ${PIPESTATUS[0]}
+          pnpm -F assignment-6 test:with_coverage
 
-      - name: Post test results comment
+      - name: Post success test results comment
         if: success()
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const coverage = JSON.parse(fs.readFileSync('coverage-summary.json', 'utf-8')).total;
+            const coverage = JSON.parse(fs.readFileSync("packages/assignment-6/coverage/coverage-summary.json", 'utf8'));          
+            const {total} = coverage;
+
             const message = `
             ## 테스트 성공 ✅
             ### 커버리지 결과
-            - 라인 커버리지: ${coverage.lines.pct}%
-            - 브랜치 커버리지: ${coverage.branches.pct}%
-            - 함수 커버리지: ${coverage.functions.pct}%
-            - 구문 커버리지: ${coverage.statements.pct}%
+            - 라인 커버리지: ${total.lines.pct}%
+            - 브랜치 커버리지: ${total.branches.pct}%
+            - 함수 커버리지: ${total.functions.pct}%
+            - 구문 커버리지: ${total.statements.pct}%
             `;
 
             // PR에 코멘트를 남김
@@ -155,21 +155,23 @@ jobs:
               body: message,
             });
 
-      - name: Post test results comment
+      - name: Post failure test results comment
         if: failure()
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const coverage = JSON.parse(fs.readFileSync('coverage-summary.json', 'utf-8')).total;
+            const coverage = JSON.parse(fs.readFileSync("packages/assignment-6/coverage/coverage-summary.json", 'utf8'));          
+            const {total} = coverage;
+
             const message = `
             ## 테스트 실패 :x:
             ### 커버리지 결과
-            - 라인 커버리지: ${coverage.lines.pct}%
-            - 브랜치 커버리지: ${coverage.branches.pct}%
-            - 함수 커버리지: ${coverage.functions.pct}%
-            - 구문 커버리지: ${coverage.statements.pct}%
+            - 라인 커버리지: ${total.lines.pct}%
+            - 브랜치 커버리지: ${total.branches.pct}%
+            - 함수 커버리지: ${total.functions.pct}%
+            - 구문 커버리지: ${total.statements.pct}%
             `;
 
             // PR에 코멘트를 남김
