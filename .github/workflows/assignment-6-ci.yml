@@ -21,24 +21,38 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
-      - name: Run build and Comment on PR if build fails
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run build
+        id: build
+        run: |
+          pnpm -F assignment-6 build 2>&1 build.log 
+          exit_code=$?
+          echo "build_exit_code=$exit_code" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Comment build results
+        if: always()
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const { execSync } = require('child_process');
-            let buildLog = '';
-            try {
-              buildLog = execSync('pnpm -F assignment-6 build 2>&1').toString();
-            } catch (error) {
-              buildLog = error.stdout.toString();
-            }
+            const fs = require('fs');
+            const buildStatus = '${{ steps.build.outputs.build_exit_code }}' === '0' ? '성공' : '실패';
+            const buildEmoji = buildStatus === '성공' ? '✅' : '❌';
+            const buildLog = fs.readFileSync('build.log', 'utf8');
+            
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `### ❌ Build Failed\n\`\`\`\n${buildLog}\n\`\`\``
+              body: `### 빌드 ${buildStatus} ${buildEmoji}\n\`\`\`\n${buildLog}\n\`\`\``
             });
+
+      - name: Check build result
+        if: steps.build.outputs.build_exit_code != '0'
+        run: exit 1
 
   lint:
     runs-on: ubuntu-latest
@@ -176,11 +190,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.5.0
 
       - name: Install dependencies
         run: pnpm install
