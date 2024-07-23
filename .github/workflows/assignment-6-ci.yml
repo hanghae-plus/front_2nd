@@ -32,6 +32,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const prNumber = context.payload.pull_request.number;
+            console.log(prNumber);
             await github.rest.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.name,
