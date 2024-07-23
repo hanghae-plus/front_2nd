@@ -195,5 +195,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `### 🙌 랜덤 리뷰 요청 \n@${teams[parseInt((Math.random() * 10) % teams.length)]} 님에게 리뷰를 요청드립니다.`
+              body: `### 🙏🏻 랜덤 리뷰 요청 \n@${teams[parseInt((Math.random() * 10) % teams.length)]} 님에게 리뷰를 요청드립니다.`
             });
