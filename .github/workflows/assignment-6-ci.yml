@@ -34,7 +34,7 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             github.rest.issues.createComment({
-              issue_number: context.issue_number,
+              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.name,
               body: `Build failed. Please check the error message and fix it.`
