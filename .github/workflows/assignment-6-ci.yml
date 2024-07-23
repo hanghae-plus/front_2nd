@@ -243,19 +243,19 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const teamMembers = ["bbbjihan", "hhyewon"];
-            const randomReviewer = teamMembers[Math.round(Math.random())];
+            const teams = ["bbbjihan", "soojjung"];
+            const randomReviewer = teams[Math.floor(Math.random() * teams.length)];
 
             await github.rest.pulls.requestReviewers({
-              pull_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
+              pull_number: context.issue.number,
               reviewers: [randomReviewer]
             });
 
             await github.rest.issues.createComment({
-              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## ✨ 랜덤 리뷰 요청 \n@${randomReviewer}님이 코드 리뷰를 해준다니, 완전 럭키비키 잖아? 🍀`
+              issue_number: context.issue.number,
+              body: `## ✨ 랜덤 리뷰 요청 \n @${randomReviewer}님이 코드 리뷰를 해준다니, 완전 럭키비키 잖아? 🍀`
             });
