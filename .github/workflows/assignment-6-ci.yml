@@ -88,50 +88,42 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
-      - name: Testing and Coverage
-        run: |
-          pnpm install --prefer-frozen-lockfile
-          pnpm -F assignment-6 test
-          pnpm -F assignment-6 coverage
-      - name: Comment Test Coverage
-        uses: actions/github-script@v6
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests
+        run: pnpm -F assignment-6 test:coverage > coverage.json 2>&1
+
+      - name: Comment test results
         if: success()
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const coverage = JSON.parse(fs.readFileSync("packages/assignment-6/coverage/coverage-summary.json", 'utf8'));
-            const totalCoverage = coverage.total;
-            const coverageComment = `
-            ## 테스트 성공 ✅
-            ### 커버리지 결과
-            - 라인 커버리지: ${totalCoverage.lines.pct}%
-            - 브랜치 커버리지: ${totalCoverage.branches.pct}%
-            - 함수 커버리지: ${totalCoverage.functions.pct}%
-            - 구문 커버리지: ${totalCoverage.statements.pct}%
-            `;
-            await github.rest.issues.createComment({
+            const coverageJson = JSON.parse(fs.readFileSync('./coverage.json', 'utf8'));
+            
+            const {line, branches, functions, statements} = coverageJson.total;
+            
+            const formatPercentage = (value) => (value * 100).toFixed(2);
+            
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: coverageComment
-            });
-      - name: Comment Test Coverage on Failure
-        if: failure()
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{secrets.TOKEN_FOR_CI}}
-          script: |
-            const coverageComment = `
-              ## 테스트 실패 ❌
-              테스트 코드를 확인해주세요.
-            `
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: coverageComment
-            });
+              body: `## 테스트 성공✅ 
+              \n $커버리지 결과\n
+              
+              • 라인 커버리지: ${formatPercentage(lines.pct)}%
+              • 브랜치 커버리지: ${formatPercentage(branches.pct)}%
+              • 함수 커버리지: ${formatPercentage(functions.pct)}%
+              • 구문 커버리지: ${formatPercentage(statements.pct)}%
+            })
 
   lighthouse:
     runs-on: ubuntu-latest
