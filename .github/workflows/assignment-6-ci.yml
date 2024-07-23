@@ -84,7 +84,7 @@ jobs:
           cache: "pnpm"
 
       - name: Run tests and collect coverage
-        run: pnpm -F assignment-6 test -- --coverage
+        run: pnpm -F assignment-6 test:coverage
 
       - name: Comment test results on PR
         uses: actions/github-script@v6
