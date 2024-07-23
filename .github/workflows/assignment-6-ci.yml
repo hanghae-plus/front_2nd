@@ -50,26 +50,40 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
+          cache: 'pnpm'
 
-      - name: Comment on PR if lint fails
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run lint and comment on PR
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { execSync } = require('child_process');
             let lintLog = '';
+            let lintFailed = false;
             try {
               lintLog = execSync('pnpm -F assignment-6 lint 2>&1').toString();
             } catch (error) {
               lintLog = error.stdout.toString();
+              lintFailed = true;
             }
-            github.rest.issues.createComment({
+
+            const commentBody = lintFailed
+              ? `### ❌ Lint Failed\n\`\`\`\n${lintLog}\n\`\`\``
+              : `### ✅ Lint Passed\n\`\`\`\n${lintLog}\n\`\`\``;
+
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `### ❌ Lint Failed\n\`\`\`\n${lintLog}\n\`\`\``
+              body: commentBody
             });
+
+            if (lintFailed) {
+              core.setFailed('Lint check failed');
+            }
 
   test:
     runs-on: ubuntu-latest
