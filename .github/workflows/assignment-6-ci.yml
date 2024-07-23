@@ -31,7 +31,7 @@ jobs:
         if: failure() && steps.job1.outcome == 'failure'
         uses: actions/github-script@v4
         with:
-          github_token: ${{ secrets.TOKEN_FOR_CI }}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue_number,
