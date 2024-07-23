@@ -1,39 +1,61 @@
 name: CI Assignment 6
 
 on:
-  pull_request:
+  push:
+    branches: [steve-shim-assignment-6]
+
+  pull_request_target:
     types:
       - opened
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      # - name: job1 구현 tsc, build 를 실행한다. 오류가 발생하면 코멘트를 남긴다.
+      #   run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+      - name: List files
+        run: ls -al
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Install pakage.json
+        run: pnpm install
+      - name: Build
+        run: pnpm run build
+      - if: always()
+        run: |
+          echo "## TEST" >> $GITHUB_STEP_SUMMARY
+          echo "- ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
+      - name: job2 구현 eslint를 실행한 다음에, eslint에서 오류가 발생할 경우 report를 코멘트에 남긴다.
         run: echo "job2의 내용을 구현해주세요"
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
+      - name: job3 구현 테스트를 실행하고, 커버리지를 측정하여 코멘트에 남긴다.
         run: echo "job3의 내용을 구현해주세요"
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
+      - name: job4 구현 lighthouse ci 를 실행하고, 실행 결과를 코멘트에 남긴다.
         run: echo "job4의 내용을 구현해주세요"
 
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
+      - name: job5 구현 PR이 open될 때만 실행되고, 팀원 중 한 명을 랜덤으로 선정하여 리뷰어를 지정한 다음에 코멘트에 멘션하여 올린다. 실제로 PR에 리뷰어로 지정도 되어야한다.
         run: echo "job5의 내용을 구현해주세요"
