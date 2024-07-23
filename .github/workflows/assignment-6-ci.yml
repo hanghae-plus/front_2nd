@@ -213,16 +213,30 @@ jobs:
         run: pnpm -F assignment-6 install
 
       - name: Start dev server
-        run: pnpm -F assignment-6 start &
+        run: pnpm -F assignment-6 start > server.log 2>&1 &
         env:
           PORT: 5173
 
       - name: Wait for dev server
         run: |
           echo "Waiting for dev server to start..."
-          while ! nc -z localhost 5173; do
+          timeout=60
+          elapsed=0
+          while ! nc -z localhost 5173 && [ $elapsed -lt $timeout ]; do
             sleep 1
+            elapsed=$((elapsed+1))
           done
+          if [ $elapsed -ge $timeout ]; then
+            echo "Timeout: Dev server did not start within ${timeout} seconds"
+            echo "Server log:"
+            cat server.log
+            exit 1
+          fi
+          echo "Dev server is up and running"
+
+      - name: Check server status
+        run: |
+          curl -I http://localhost:5173 || (echo "Server is not responding" && cat server.log && exit 1)
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
