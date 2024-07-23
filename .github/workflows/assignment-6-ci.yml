@@ -34,7 +34,7 @@ jobs:
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: ❌ 컴파일 및 빌드 실패 
+              body: "❌ 컴파일 및 빌드 실패"
             })
   lint:
     runs-on: ubuntu-latest
