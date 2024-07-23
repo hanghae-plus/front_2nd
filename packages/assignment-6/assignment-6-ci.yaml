@@ -1,7 +1,12 @@
 on:
-  pull_request_target:
-  types:
-    - opened
+  push:
+    branches:
+      - seadonggyun4-assignment-6
+  pull_request:
+    types:
+      - synchronize
+      - opened
+      - reopened
   paths:
     - 'packages/assignment-6/**'
 
