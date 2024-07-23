@@ -80,6 +80,9 @@ jobs:
           name: dist
           path: packages/assignment-6/dist
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -127,6 +130,9 @@ jobs:
           message: |
             ## ESLint results
             ${{ steps.lint.outputs.lint_error_output }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
   test:
     runs-on: ubuntu-latest
@@ -181,6 +187,9 @@ jobs:
             - 구문 커버리지: ${{ steps.coverage.outputs.statements }}%
             - 함수 커버리지: ${{ steps.coverage.outputs.functions }}%
             - 브랜치 커버리지: ${{ steps.coverage.outputs.branches }}%
+      
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
   lighthouse:
     runs-on: ubuntu-latest
@@ -210,10 +219,12 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm -F assignment-6 install
+        run: pnpm install
+        working-directory: ./packages/assignment-6
 
       - name: Start dev server
-        run: pnpm -F assignment-6 start > server.log 2>&1 &
+        run: pnpm start > server.log 2>&1 &
+        working-directory: ./packages/assignment-6
         env:
           PORT: 5173
 
@@ -233,10 +244,12 @@ jobs:
             exit 1
           fi
           echo "Dev server is up and running"
+        working-directory: ./packages/assignment-6
 
       - name: Check server status
         run: |
           curl -I http://localhost:5173 || (echo "Server is not responding" && cat server.log && exit 1)
+        working-directory: ./packages/assignment-6
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
@@ -244,6 +257,7 @@ jobs:
       - name: Run Lighthouse CI
         run: |
           lhci autorun --collect.url=http://localhost:5173 --upload.target=filesystem --upload.outputDir=./lighthouse-results
+        working-directory: ./packages/assignment-6
         continue-on-error: true
 
       - name: Debug - List Lighthouse results
@@ -284,6 +298,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
           header: Lighthouse 성능 측정 결과
           message: ${{ steps.lighthouse.outputs.result }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
   assign_reviewer:
     if: github.event.action == 'opened'
