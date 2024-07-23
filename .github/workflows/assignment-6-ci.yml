@@ -74,73 +74,57 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: latest
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - name: Testing and Coverage
-        run: |
-          pnpm install --prefer-frozen-lockfile
-          pnpm -F assignment-6 test
-          pnpm -F assignment-6 coverage
-
-      - name: Comment Test Coverage
-        uses: actions/github-script@v6
-        if: success()
-        with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
-          script: |
-            const fs = require('fs');
-
-            const coverage = JSON.parse(fs.readFileSync("packages/assignment-6/coverage/coverage-summary.json", 'utf8'));
-            const totalCoverage = coverage.total;
-
-            const coverageComment = `
-
-            ## 테스트 성공 ✅
-            ### 커버리지 결과
-
-            - 라인 커버리지: ${totalCoverage.lines.pct}%
-            - 브랜치 커버리지: ${totalCoverage.branches.pct}%
-            - 함수 커버리지: ${totalCoverage.functions.pct}%
-            - 구문 커버리지: ${totalCoverage.statements.pct}%
-            `;
-
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: coverageComment
-            });
-
-      - name: Comment Test Coverage on Failure
-        if: failure()
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{secrets.TOKEN_FOR_CI}}
-          script: |
-            const coverageComment = `
-              ## 테스트 실패 ❌
-
-              테스트 코드를 확인해주세요.
-            `
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: coverageComment
-            }); 
+      - name: job3 구현
+        run: echo "job3의 내용을 구현해주세요"
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install -g @lhci/cli@0.13.x
+
+      - name: Run Lighthouse CI
+        run: |
+          npm run build
+          lhci autorun
+
+      - name: Comment Lighthouse results
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const lighthouseResults = JSON.parse(fs.readFileSync('./lhci-report.json', 'utf8'));
+            
+            const scores = {
+              performance: lighthouseResults[0].categories.performance.score * 100,
+              accessibility: lighthouseResults[0].categories.accessibility.score * 100,
+              'best-practices': lighthouseResults[0].categories['best-practices'].score * 100,
+              seo: lighthouseResults[0].categories.seo.score * 100
+            };
+
+            const comment = `
+            ## Lighthouse 성능 측정 결과
+
+            | 카테고리 | 점수 |
+            |----------|------|
+            | Performance | ${scores.performance.toFixed(0)}% |
+            | Accessibility | ${scores.accessibility.toFixed(0)}% |
+            | Best Practices | ${scores['best-practices'].toFixed(0)}% |
+            | SEO | ${scores.seo.toFixed(0)}% |
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
 
   assign_reviewer:
     runs-on: ubuntu-latest
