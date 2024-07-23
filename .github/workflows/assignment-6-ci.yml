@@ -199,42 +199,36 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run Lighthouse CI
-        env:
-          LHCI_GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      - name: Run Lighthouse
         run: pnpm -F assignment-6 lhci
-
-      - name: Comment Lighthouse results
+        
+      - name: Report Lighthouse
+        if: success()
         uses: actions/github-script@v6
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const lighthouseResults = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json',, 'utf8'));
+            const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'))
             
-            const scores = {
-              performance: lighthouseResults[0].categories.performance.score * 100,
-              accessibility: lighthouseResults[0].categories.accessibility.score * 100,
-              'best-practices': lighthouseResults[0].categories['best-practices'].score * 100,
-              seo: lighthouseResults[0].categories.seo.score * 100
-            };
-
-            const comment = `
-            ## Lighthouse 성능 측정 결과
-
-            | 카테고리 | 점수 |
-            |----------|------|
-            | Performance | ${scores.performance.toFixed(0)}% |
-            | Accessibility | ${scores.accessibility.toFixed(0)}% |
-            | Best Practices | ${scores['best-practices'].toFixed(0)}% |
-            | SEO | ${scores.seo.toFixed(0)}% |
-            `;
-
-            github.rest.issues.createComment({
+            const summaries = results.map(({ summary }) => summary);
+            
+            const headers = Object.keys(summaries[0]);
+            const headerRow = `| ${headers.join(' | ')} |`;
+            const separatorRow = `| ${headers.map(() => '---').join(' | ')} |`;
+          
+            // 테이블의 데이터 행 생성
+            const dataRows = summaries.map(obj => {
+              return `| ${headers.map(header => obj[header] * 100).join(' | ')} |`;
+            })
+              
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comment
+              body: [headerRow, separatorRow, ...dataRows].join('\n'),
             });
 
   assign_reviewer:
