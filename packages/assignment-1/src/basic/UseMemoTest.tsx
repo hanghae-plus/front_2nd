@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo  } from "react";
 import { repeatBarked, repeatMeow } from "./UseMemoTest.utils.ts";
 
 export default function UseMemoTest() {
   const [meowCount, setMeowCount] = useState(1);
   const [barkedCount, setBarkedCount] = useState(1);
 
-  const meow = repeatMeow(meowCount);
-  const bark = repeatBarked(barkedCount);
+  // useMemo를 사용하여 meowCount가 변경될 때만 repeatMeow를 호출
+  const meow = useMemo(() => repeatMeow(meowCount), [meowCount]);
+  // useMemo를 사용하여 barkedCount가 변경될 때만 repeatBarked를 호출
+  const bark = useMemo(() => repeatBarked(barkedCount), [barkedCount]);
 
   return (
     <div>

@@ -10,7 +10,8 @@
     "test": "vitest",
     "test:basic": "vitest src/basic",
     "test:advanced": "vitest src/advanced",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "lint": "eslint ."
   },
   "dependencies": {
     "react": "^18.2.0",
