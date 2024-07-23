@@ -56,7 +56,7 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm -F assignment-6 lint > lint_report.txt || true
+      - run: pnpm -F assignment-6 lint > lint_report.txt 2>&1
       - if: failure()
         uses: actions/github-script@v7
         with:
