@@ -218,25 +218,36 @@ jobs:
           script: |
             const fs = require('fs');
             const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'));
-            const scores = results.categories;
-            const formatScore = (score) => Math.round(score * 100);
-            const scoreEmoji = (score) => score >= 90 ? '🟢' : score >= 50 ? '🟠' : '🔴';
+            let comments = "";
+
+            results.forEach((result) => {
+              const { summary, jsonPath } = result;
+              const details = JSON.parse(fs.readFileSync(jsonPath));
+              const { audits } = details;
+              const formatResult = (res) => Math.round(res * 100);
+
+              Object.keys(summary).forEach(
+                (key) => (summary[key] = formatResult(summary[key]))
+              );
+            })
+
+            const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
 
             const message = `
             ## ⚡️ Lighthouse 성능 결과!
             | Category | Score |
             | --- | --- |
-            | Performance | ${scoreEmoji(formatScore(scores.performance.score))} ${formatScore(scores.performance.score)}% |
-            | Accessibility | ${scoreEmoji(formatScore(scores.accessibility.score))} ${formatScore(scores.accessibility.score)}% |
-            | Best Practices | ${scoreEmoji(formatScore(scores['best-practices'].score))} ${formatScore(scores['best-practices'].score)}% |
-            | SEO | ${scoreEmoji(formatScore(scores.seo.score))} ${formatScore(scores.seo.score)}% |
+            | ${score(summary.performance)} Performance | ${summary.performance} |
+            | ${score(summary.accessibility)} Accessibility | ${summary.accessibility} |
+            | ${score(summary['best-practices'])} Best Practices | ${summary['best-practices']} |
+            | ${score(summary.seo)} SEO | ${summary.seo} |
             `;
 
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comments,
+              body: message,
             });
 
   assign_reviewer:
