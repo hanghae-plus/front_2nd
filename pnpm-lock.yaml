@@ -40,7 +40,7 @@ importers:
         version: 4.3.1(vite@5.3.3)
       '@vitejs/plugin-react-swc':
         specifier: ^3.5.0
-        version: 3.7.0(vite@5.3.3)
+        version: 3.7.0(vite@5.3.2)
       '@vitest/ui':
         specifier: ^1.6.0
         version: 1.6.0(vitest@1.6.0)
@@ -95,7 +95,7 @@ importers:
         version: 4.3.1(vite@5.3.3)
       '@vitejs/plugin-react-swc':
         specifier: ^3.5.0
-        version: 3.7.0(vite@5.3.3)
+        version: 3.7.0(vite@5.3.2)
       '@vitest/ui':
         specifier: ^1.6.0
         version: 1.6.0(vitest@1.6.0)
@@ -174,7 +174,7 @@ importers:
         version: 4.3.1(vite@5.3.3)
       '@vitejs/plugin-react-swc':
         specifier: ^3.5.0
-        version: 3.7.0(vite@5.3.3)
+        version: 3.7.0(vite@5.3.2)
       '@vitest/ui':
         specifier: ^1.6.0
         version: 1.6.0(vitest@1.6.0)
@@ -204,7 +204,7 @@ importers:
         version: 5.5.3
       vite:
         specifier: ^5.3.2
-        version: 5.3.3
+        version: 5.3.2
       vitest:
         specifier: ^1.6.0
         version: 1.6.0(@vitest/ui@1.6.0)(jsdom@24.1.0)
@@ -1440,7 +1440,6 @@ packages:
     resolution: {integrity: sha512-py1miT6iQpJcs1BiJjm54AMzeuMPBSPuKPlnT8HlfudbcS5rYeX5jajpLf3mrdRh9dA/Ec2FVUY0ifeVNDIhZw==}
     engines: {node: ^18.18.0 || >=20.0.0}
     peerDependencies:
-      '@typescript-eslint/parser': ^7.0.0
       eslint: ^8.56.0
       typescript: '*'
     peerDependenciesMeta:
