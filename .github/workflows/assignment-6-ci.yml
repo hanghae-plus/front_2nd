@@ -89,6 +89,8 @@ jobs:
         run: pnpm install
 
       - name: Run Lighthouse CI
+        env:
+          LHCI_GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
         run: pnpm -F assignment-6 lhci
 
       - name: Comment Lighthouse results
@@ -126,6 +128,7 @@ jobs:
 
   assign_reviewer:
     runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
