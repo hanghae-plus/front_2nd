@@ -41,7 +41,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '## ❌ Build Failed    TSC or Build process failed. Please check the errors and fix them.'
+              body: '## ❌ Build Failed\n\`\`\`TSC or Build process failed. Please check the errors and fix them.\n\`\`\`'
             })
 
 
@@ -82,7 +82,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## ESLint Results    ${eslintReport.trim()}`
+              body: `## ESLint Results\n\`\`\`${eslintReport.trim()}\n\`\`\``
             });
 
   test:
@@ -122,7 +122,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## ✅ test success    ${coverageReport}`
+              body: `## ✅ test success\n\`\`\`${coverageReport}\n\`\`\``
             })
 
   lighthouse:
@@ -145,7 +145,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm install -g @lhci/cli@0.14.0
+          pnpm install -g @lhci/cli
           pnpm install
 
       - name: Run tests
@@ -177,7 +177,7 @@ jobs:
               tableContent += `| ${category} | ${score} |\n`;
             }
             
-            const comment = `## Lighthouse 성능 측정 결과    ${tableContent}`;
+            const comment = `## Lighthouse 성능 측정 결과\n\`\`\`${tableContent}\n\`\`\``;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -209,5 +209,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `## 🎉랜덤 리뷰     랜덤 리뷰로 선정되신 @${randomReviewer}님!🎉 리뷰를 부탁드립니다.`
+              body: `## 🎉랜덤 리뷰
+            \n\`\`\`랜덤 리뷰로 선정되신 @${randomReviewer}님!🎉 리뷰를 부탁드립니다.`
+            \n\`\`\`
             });
