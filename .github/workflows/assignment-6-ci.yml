@@ -217,49 +217,49 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'));
-            let comments = "";
 
-            results.forEach((result) => {
-              const { summary, jsonPath } = result;
-              const { audits } = details;
+            try {
+              const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'));
+              let comments = "";
 
-              const details = JSON.parse(fs.readFileSync(jsonPath));
-              const formatResult = (res) => Math.round(res * 100);
+              results.forEach((result) => {
+                const { summary, jsonPath } = result;
+                
+                const details = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+                const audits = details.audits;
 
-              Object.keys(summary).forEach(
-                (key) => (summary[key] = formatResult(summary[key]))
-              );
+                const formatResult = (res) => Math.round(res * 100);
 
-              # 점수가 색상으로 구분되는 방식 (https://web.dev/performance-scoring/#color-coding)
-              const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
+                const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
 
-              const comment = [
-                `⚡️ Lighthouse report!`,
-                `| Category | Score |`,
-                `| --- | --- |`,
-                `| ${score(summary.performance)} Performance | ${summary.performance} |`,
-                { ... }
-              ].join("\n");
+                const comment = [
+                  `⚡️ Lighthouse report!`,
+                  `| Category | Score |`,
+                  `| --- | --- |`,
+                  `| ${score(formatResult(summary.performance))} Performance | ${formatResult(summary.performance)} |`,
+                  // Add other categories similarly
+                ].join("\n");
 
-              const detail = [
-                `| Category | Score |`,
-                `| --- | --- |`,
-                `| ${score(
-                  audits["first-contentful-paint"].score * 100
-                )} First Contentful Paint | ${
-                  audits["first-contentful-paint"].displayValue
-                } |`,
-                { ... }
-              ].join("\n");
-              comments += comment + "\n" + detail + "\n";
-            });
+                const detail = [
+                  `| Category | Score |`,
+                  `| --- | --- |`,
+                  `| ${score(formatResult(audits["first-contentful-paint"].score))} First Contentful Paint | ${audits["first-contentful-paint"].displayValue} |`,
+                  // Add other audits similarly
+                ].join("\n");
 
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comments,
+                comments += comment + "\n" + detail + "\n";
+              });
+
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comments,
+              });
+            } catch (error) {
+              console.error('Error occurred:', error);
+              throw error;
+            }
 
   assign_reviewer:
     runs-on: ubuntu-latest
