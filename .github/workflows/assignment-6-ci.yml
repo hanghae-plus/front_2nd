@@ -49,11 +49,11 @@ jobs:
             const fs = require('fs');
             const errorLog = fs.readFileSync('error.log', 'utf8');
             const message = `
-            ### Build Failure :x:
+            ## Build Failure :x:
             ${errorLog}
             `;
 
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -94,7 +94,7 @@ jobs:
             const fs = require('fs');
             const eslintReport = JSON.parse(fs.readFileSync('eslint-report.json', 'utf-8'));
             const message = `
-            ### ESLint Results
+            ## ESLint Results
             ${eslintReport.map(result => `${result.filePath}:${result.messages.map(msg => `${msg.line}:${msg.column} ${msg.message}`).join('\n')}`).join('\n\n')}
             `;
 
@@ -109,14 +109,106 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Read .nvmrc
+        id: node_version
+        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_ENV
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests
+        run: pnpm test -- --coverage --coverageReporters=json-summary --outputFile=coverage-summary.json
+
+      - name: Post test results comment
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('coverage-summary.json', 'utf-8')).total;
+            const message = `
+            ## 테스트 성공 ✅
+            ### 커버리지 결과
+            - 라인 커버리지: ${coverage.lines.pct}%
+            - 브랜치 커버리지: ${coverage.branches.pct}%
+            - 함수 커버리지: ${coverage.functions.pct}%
+            - 구문 커버리지: ${coverage.statements.pct}%
+            `;
+
+            // PR에 코멘트를 남김
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message,
+            });
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Read .nvmrc
+        id: node_version
+        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_ENV
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Lighthouse CI
+        run: pnpm add -g @lhci/cli
+
+      - name: Run Lighthouse CI
+        run: lhci autorun
+
+      - name: Post Lighthouse CI results comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('./lhci-results/lhr-0.report.json', 'utf-8'));
+            const performance = report.categories.performance.score * 100;
+            const accessibility = report.categories.accessibility.score * 100;
+            const bestPractices = report.categories['best-practices'].score * 100;
+            const seo = report.categories.seo.score * 100;
+
+            const message = `
+            ## Lighthouse 성능 측정 결과
+            | 카테고리      | 점수 |
+            | ------------- | ---- |
+            | Performance   | ${performance}% |
+            | Accessibility | ${accessibility}% |
+            | Best Practices| ${bestPractices}% |
+            | SEO           | ${seo}% |
+            `;
+
+            // PR에 코멘트를 남김
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message,
+            });
 
   assign_reviewer:
     runs-on: ubuntu-latest
