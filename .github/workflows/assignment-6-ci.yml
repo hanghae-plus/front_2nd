@@ -55,7 +55,7 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const lintResults = fs.readFileSync('packages/assignment-6/lint_results.txt', 'utf8');
+            const lintResults = fs.readFileSync('lint_results.txt', 'utf8');
             if (lintResults.includes("error")){
               const comment = `## ESLint Results\n\n\`\`\`\n${lintResults}\n\`\`\``;
               github.rest.issues.createComment({
