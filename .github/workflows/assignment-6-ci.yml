@@ -2,8 +2,7 @@ name: CI Assignment 6
 
 on:
   pull_request:
-    types:
-      - opened
+    types: [opened, synchronize]
     paths:
       - 'packages/assignment-6/**'
 
@@ -11,8 +10,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - name: Check out
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with: 
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: tsc & Build
+        run: pnpm --filter assignment-6 build
 
   lint:
     runs-on: ubuntu-latest
