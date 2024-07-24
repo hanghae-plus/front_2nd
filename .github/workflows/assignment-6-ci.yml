@@ -106,6 +106,12 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
+        with:
+          node-version: ${{ env.NODE_VERSION }}
       - name: Install Lighthouse CLI
         run: pnpm i -g @lhci/cli
       - name: Build Assignment 6
