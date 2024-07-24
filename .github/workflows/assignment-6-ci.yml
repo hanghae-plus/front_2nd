@@ -10,12 +10,33 @@ on:
       - 'packages/assignment-6/**'
   workflow_dispatch:
 
+env:
+  NODE_VERSION: 20.x
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Build Assignment 6
+        run: pnpm -F assignment-6 run build
+      - name: Comment PR on build failure
+        if: ${{ failure() }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '빌드 과정에서 오류가 발생했습니다. 로그를 확인해 주세요.'
+            })
 
   lint:
     runs-on: ubuntu-latest
