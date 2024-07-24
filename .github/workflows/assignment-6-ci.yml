@@ -1,336 +1,167 @@
+name: CI Assignment 6
+
 on:
   pull_request:
     types:
+      - synchronize
       - opened
-    types: [opened, synchronize]
+      - reopened
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: v3엔진 세팅
+        uses: actions/checkout@v3
 
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
+      - name: Node 세팅
+        uses: actions/setup-node@v2
         with:
-          version: latest
+          node-version: 16
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: npm 패키지 다운
+        run: npm install
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: pnpm -F assignment-6 install
-
-      - name: Run TypeScript compiler
-        id: tsc
-        run: |
-          TSC_OUTPUT=$(pnpm -F assignment-6 tsc 2>&1 || true)
-          echo "tsc_output<<EOF" >> $GITHUB_OUTPUT
-          echo "$TSC_OUTPUT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      - name: Format TypeScript compiler results
-        id: format_tsc
-        run: |
-          FORMATTED_OUTPUT=$(echo "${{ steps.tsc.outputs.tsc_output }}" | sed 's/^/> /')
-          echo "formatted_output<<EOF" >> $GITHUB_OUTPUT
-          echo "$FORMATTED_OUTPUT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      - name: Post TypeScript compiler results comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: TypeScript Compiler Results
-          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
-          message: |
-            ## TypeScript Compiler Results
-            ```
-            ${{ steps.format_tsc.outputs.formatted_output }}
-            ```
-      - name: Run build
-        id: build
-        run: |
-          BUILD_OUTPUT=$(pnpm -F assignment-6 build 2>&1 || true)
-          echo "build_output<<EOF" >> $GITHUB_OUTPUT
-          echo "$BUILD_OUTPUT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      - name: Format build results
-        id: format_build
-        run: |
-          FORMATTED_OUTPUT=$(echo "${{ steps.build.outputs.build_output }}" | sed 's/^/> /')
-          echo "formatted_output<<EOF" >> $GITHUB_OUTPUT
-          echo "$FORMATTED_OUTPUT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      - name: Post build results comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: Build Results
-          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
-          message: |
-            ## Build Results
-            ```
-            ${{ steps.format_build.outputs.formatted_output }}
-            ```
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: dist
-          path: packages/assignment-6/dist
+      - name: project build
+        run: npm run build
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: pnpm -F assignment-6 install
-
-      - name: Install ESLint
-        run: npm install -g eslint
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Run ESLint
-        id: lint
-        run: |
-          LINT_OUTPUT=$(npx eslint --ext .ts,.tsx --max-warnings 0 packages/assignment-6/src 2>&1 || true)
-          echo "lint_output<<EOF" >> $GITHUB_OUTPUT
-          echo "$LINT_OUTPUT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      - name: Format ESLint results
-        id: format_lint
-        run: |
-          FORMATTED_OUTPUT=$(echo "${{ steps.lint.outputs.lint_output }}" | sed 's/^/- /')
-          echo "formatted_output<<EOF" >> $GITHUB_OUTPUT
-          echo "$FORMATTED_OUTPUT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      - name: Post lint comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: ESLint Results
-          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
-          message: |
-            ## ESLint Results
-            ```
-            ${{ steps.format_lint.outputs.formatted_output }}
-            ```
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: pnpm -F assignment-6 install
-
-      - name: Run Tests and Measure Coverage
-        run: pnpm -F assignment-6 test -- --coverage > test_output.txt
-
-      - name: Extract Coverage Data
-        id: coverage
-        run: |
-          echo "lines=$(grep -oP 'All files.*?\|\s*\K[0-9.]+(?=\s*\|)' test_output.txt)" >> $GITHUB_OUTPUT
-          echo "statements=$(grep -oP 'All files.*?\|.*?\|\s*\K[0-9.]+(?=\s*\|)' test_output.txt)" >> $GITHUB_OUTPUT
-          echo "functions=$(grep -oP 'All files.*?\|.*?\|.*?\|\s*\K[0-9.]+(?=\s*\|)' test_output.txt)" >> $GITHUB_OUTPUT
-          echo "branches=$(grep -oP 'All files.*?\|.*?\|.*?\|.*?\|\s*\K[0-9.]+(?=\s*\|)' test_output.txt)" >> $GITHUB_OUTPUT
-      - name: Post Test Coverage comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
-          header: Test Coverage Report
-          message: |
-            ## 테스트 성공 ✅
-            **커버리지 결과**
-            - 라인 커버리지: ${{ steps.coverage.outputs.lines }}%
-            - 구문 커버리지: ${{ steps.coverage.outputs.statements }}%
-            - 함수 커버리지: ${{ steps.coverage.outputs.functions }}%
-            - 브랜치 커버리지: ${{ steps.coverage.outputs.branches }}%
-  lighthouse:
-    runs-on: ubuntu-latest
-    steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: pnpm -F assignment-6 install
-
-      - name: Start dev server
-        run: pnpm -F assignment-6 start > server.log 2>&1 &
-        env:
-          PORT: 5173
-
-      - name: Wait for dev server
-        run: |
-          echo "Waiting for dev server to start..."
-          timeout=60
-          elapsed=0
-          while ! nc -z localhost 5173 && [ $elapsed -lt $timeout ]; do
-            sleep 1
-            elapsed=$((elapsed+1))
-          done
-          if [ $elapsed -ge $timeout ]; then
-            echo "Timeout: Dev server did not start within ${timeout} seconds"
-            echo "Server log:"
-            cat server.log
-            exit 1
-          fi
-          echo "Dev server is up and running"
-      - name: Check server status
-        run: |
-          curl -I http://localhost:5173 || (echo "Server is not responding" && cat server.log && exit 1)
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli
-
-      - name: Run Lighthouse CI
-        run: |
-          lhci autorun --collect.url=http://localhost:5173 --upload.target=filesystem --upload.outputDir=./lighthouse-results
+        id: eslint
         continue-on-error: true
+        run: |
+          npm install
+          npm run eslint --quiet > eslint_results.txt
 
-      - name: Debug - List Lighthouse results
-        if: always()
-        run: |
-          echo "Contents of ./lighthouse-results:"
-          ls -la ./lighthouse-results/
-      - name: Post Lighthouse Results
-        id: lighthouse
-        if: always()
-        run: |
-          LATEST_REPORT=$(ls -t ./lighthouse-results/*.report.json | head -n1)
-          if [ -f "$LATEST_REPORT" ]; then
-            echo "Using report file: $LATEST_REPORT"
-            LIGHTHOUSE_RESULT=$(cat << EOF
-          ## Lighthouse 성능 측정 결과
-          | 카테고리 | 점수 |
-          | --- | --- |
-          | Performance | $(jq '.categories.performance.score * 100' < "$LATEST_REPORT")% |
-          | Accessibility | $(jq '.categories.accessibility.score * 100' < "$LATEST_REPORT")% |
-          | Best Practices | $(jq '.categories["best-practices"].score * 100' < "$LATEST_REPORT")% |
-          | SEO | $(jq '.categories.seo.score * 100' < "$LATEST_REPORT")% |
-          EOF
-          )
-            echo "result<<EOF" >> $GITHUB_OUTPUT
-            echo "$LIGHTHOUSE_RESULT" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          else
-            echo "result=Lighthouse 결과 파일을 찾을 수 없습니다. (검색 경로: ./lighthouse-results/*.report.json)" >> $GITHUB_OUTPUT
-          fi
-      - name: Post Lighthouse comment
-        if: always()
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
-          header: Lighthouse 성능 측정 결과
-          message: ${{ steps.lighthouse.outputs.result }}
-
-  assign_reviewer:
-    if: github.event.action == 'opened'
-    runs-on: ubuntu-latest
-    steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
-      - name: Set reviewer
-        run: |
-          REVIEWERS=("naturekim" "HM970506")
-          RANDOM_REVIEWER=${REVIEWERS[$RANDOM % ${#REVIEWERS[@]}]}
-          echo "random_reviewer=$RANDOM_REVIEWER" >> $GITHUB_ENV
-      - name: Post review request comment
-        uses: actions/github-script@v6
+      - name: Comment PR if ESLint errors
+        uses: actions/github-script@v5
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const reviewer = process.env.random_reviewer;
-            await github.rest.issues.createComment({
+            const fs = require('fs');
+            const eslintResults = fs.readFileSync('eslint_results.txt', 'utf8');
+            if (eslintResults) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: eslintResults,
+              });
+            }
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Tests and Generate Coverage
+        run: npm run test -- --coverage
+
+      - name: Comment PR with coverage report
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs');
+            const coverageSummary = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            const {lines, statements, functions, branches} = coverageSummary.total;
+            const comment = `
+              ## 테스트성공 ✅
+              ### 커버리지 결과
+              - 라인 커버리지: ${lines.pct}%
+              - 구문 커버리지: ${statements.pct}%
+              - 함수 커버리지: ${functions.pct}%
+              - 브랜치 커버리지: ${branches.pct}%`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
+              body: comment,
+            });
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Tests and Generate Coverage
+        run: npm run test -- --coverage
+
+      - name: Comment PR with coverage report
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs');
+            const coverageSummary = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            const {lines, statements, functions, branches} = coverageSummary.total;
+            const comment = `
+              ## 커버리지 결과
+              - 라인 커버리지: ${lines.pct}%
+              - 구문 커버리지: ${statements.pct}%
+              - 함수 커버리지: ${functions.pct}%
+              - 브랜치 커버리지: ${branches.pct}%`;
+            
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
-              body: `@${reviewer} 님, 이 PR의 리뷰를 부탁드립니다.`
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment,
+            });
+
+  assign_reviewer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Assign reviewer and create comment mentioning reviewer
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const teamMembers = ['eumcloud', 'jiyeon87']; // 팀 구성원 깃허브 사용자명 목록
+            // 랜덤하게 리뷰어 선택
+            const assignedReviewer = teamMembers[Math.floor(Math.random()*teamMembers.length)];
+            
+            // 리뷰어 지정
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [assignedReviewer]
+            });
+            
+            // 코멘트 작성
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@${assignedReviewer}님, 리뷰 부탁드립니다.`,
             });
