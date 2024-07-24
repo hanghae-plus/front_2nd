@@ -29,7 +29,7 @@ jobs:
       - if: failure()
         uses: actions/github-script@v7
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const pull_number = context.payload.pull_request.number;
             const { owner, repo } = context.repo;
@@ -38,7 +38,7 @@ jobs:
               owner,
               repo,
               pull_number,
-              body: 'TypeScript 컴파일 또는 빌드 과정에서 오류가 발생했습니다. 로그를 확인해 주세요.',
+              body: '## 빌드 오류 발생 ❌\nTypeScript 컴파일 또는 빌드 과정에서 오류가 발생했습니다. 로그를 확인해 주세요.',
               event: 'COMMENT'
             });
 
@@ -60,7 +60,7 @@ jobs:
       - if: failure()
         uses: actions/github-script@v7
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs')
             const report = fs.readFileSync('lint_report.txt', 'utf8')
@@ -75,7 +75,7 @@ jobs:
               owner,
               repo,
               pull_number,
-              body: `Lint 실행 결과:\n\`\`\`\n${truncated_report}\n\`\`\``,
+              body: `## ESLint Results\n\`\`\`\n${truncated_report}\n\`\`\``,
               event: 'COMMENT'
             });
 
@@ -102,9 +102,10 @@ jobs:
           echo "coverage<<EOF" >> $GITHUB_OUTPUT
           echo "$COVERAGE" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-      - uses: actions/github-script@v7
+      - if: failure()
+        uses: actions/github-script@v7
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const coverage = `${{ steps.coverage_report.outputs.coverage }}`
             const { owner, repo } = context.repo
@@ -114,7 +115,23 @@ jobs:
               owner,
               repo,
               pull_number,
-              body: `테스트 커버리지 결과:\n\`\`\`\n${coverage}\n\`\`\``,
+              body: '## 테스트 실패 ❌',
+              event: 'COMMENT'
+            });
+      - if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const coverage = `${{ steps.coverage_report.outputs.coverage }}`
+            const { owner, repo } = context.repo
+            const pull_number = context.payload.pull_request.number;
+
+            await github.rest.pulls.createReview({
+              owner,
+              repo,
+              pull_number,
+              body: `## 테스트 성공 ✅\n ### 커버리지 결과\n\`\`\`\n${coverage}\n\`\`\``,
               event: 'COMMENT'
             });
 
