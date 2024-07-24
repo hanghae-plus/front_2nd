@@ -18,15 +18,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: |
-          cd packages/assignment-6
-          pnpm install
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Run tsc and build
         id: build_step
         run: |
           cd packages/assignment-6
+          pnpm install
           pnpm run build
 
       - name: Comment on PR upon build failure
