@@ -124,7 +124,7 @@ jobs:
             const fs = require('fs');
             const path = require('path');
             
-            const coverageJson = JSON.parse(fs.readFileSync(`'packages/assignment-6/coverage/coverage-summary.json`, 'utf8'));
+            const coverageJson = JSON.parse(fs.readFileSync(`packages/assignment-6/coverage/coverage-summary.json`, 'utf8'));
             
             const {lines, branches, functions, statements} = coverageJson.total;
             
