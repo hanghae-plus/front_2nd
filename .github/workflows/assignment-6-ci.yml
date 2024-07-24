@@ -2,38 +2,127 @@ name: CI Assignment 6
 
 on:
   pull_request:
-    types:
-      - opened
+    types: [opened, synchronize]
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+      - run: npm ci
+      - run: npm run build
+      - name: Comment build result
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '빌드 과정에서 오류가 발생했습니다. 확인 부탁드립니다.'
+            })
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+      - run: npm ci
+      - run: npm run lint
+      - name: Comment lint result
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs')
+            const eslintReport = fs.readFileSync('.eslintrc.json', 'utf8')
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `ESLint에서 오류가 발생했습니다. 리포트:\n\`\`\`\n${eslintReport}\n\`\`\``
+            })
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+      - run: npm ci
+      - run: npm test -- --coverage
+      - name: Comment test coverage
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs')
+            const coverage = fs.readFileSync('./coverage/coverage-summary.json', 'utf8')
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `테스트 커버리지 결과:\n\`\`\`\n${coverage}\n\`\`\``
+            })
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+      - run: npm ci
+      - name: Run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli@0.11.x
+          lhci autorun
+      - name: Comment Lighthouse result
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs')
+            const lighthouseReport = fs.readFileSync('./lighthouse-report.json', 'utf8')
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Lighthouse CI 결과:\n\`\`\`\n${lighthouseReport}\n\`\`\``
+            })
 
   assign_reviewer:
     runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const teamMembers = ['jiwonkim97', 'chhw130', 'jexnjeux',]
+            const randomReviewer = teamMembers[Math.floor(Math.random() * teamMembers.length)]
+
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [randomReviewer]
+            })
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@${randomReviewer} 님이 리뷰어로 지정되었습니다. 리뷰 부탁드립니다.`
+            })
