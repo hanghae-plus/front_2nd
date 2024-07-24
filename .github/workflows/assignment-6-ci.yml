@@ -202,7 +202,6 @@ jobs:
                   `| ${score(finalSummary.accessibility)} Accessibility | ${finalSummary.accessibility} |`,
                   `| ${score(finalSummary['best-practices'])} Best practices | ${finalSummary['best-practices']} |`,
                   `| ${score(finalSummary.seo)} SEO | ${summary.seo} |`,
-                  `| ${score(finalSummary.pwa)} PWA | ${summary.pwa} |`,
                   `\n`,
                 ].join("\n");
   
