@@ -34,7 +34,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
-              body: "빌드도중 에러가 발생했습니다 🥲",
+              body: "빌드 도중 에러가 발생했습니다.",
             });
 
 
