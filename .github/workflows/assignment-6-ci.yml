@@ -157,9 +157,10 @@ jobs:
           version: 9.5.0
 
       - name: Install dependencies
-        run: |
-          pnpm install
-          pnpm -F assignment-6 build
+        run: pnpm install
+
+      - name: run build
+        run: pnpm -F assignment-6 build
 
       - name: Run Lighthouse CI
         run: |
@@ -202,27 +203,27 @@ jobs:
             });
 
 
-  assign_reviewer:
-    runs-on: ubuntu-latest
-    steps:
-      - name: assign random reviewer
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
-          script: |
-            const teams = ["bbbjihan", "soojjung"];
-            const randomReviewer = teams[Math.floor(Math.random() * teams.length)];
-            
-            await github.rest.pulls.requestReviewers({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-              reviewers: [randomReviewer]
-            });
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `## 🎉랜덤 리뷰 \n 랜덤 리뷰로 선정되신 @${randomReviewer}님!🎉 리뷰를 부탁드립니다.`
-            });
+#  assign_reviewer:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: assign random reviewer
+#        uses: actions/github-script@v6
+#        with:
+#          github-token: ${{ secrets.TOKEN_FOR_CI }}
+#          script: |
+#            const teams = ["bbbjihan", "soojjung"];
+#            const randomReviewer = teams[Math.floor(Math.random() * teams.length)];
+#
+#            await github.rest.pulls.requestReviewers({
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              pull_number: context.issue.number,
+#              reviewers: [randomReviewer]
+#            });
+#
+#            await github.rest.issues.createComment({
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              issue_number: context.issue.number,
+#              body: `## 🎉랜덤 리뷰 \n 랜덤 리뷰로 선정되신 @${randomReviewer}님!🎉 리뷰를 부탁드립니다.`
+#            });
