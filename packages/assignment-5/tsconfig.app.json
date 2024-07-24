@@ -21,7 +21,32 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* Custom */
+    "baseUrl": "./src",
+    "paths": {
+      "~app": ["fsd/app"],
+      "~app/*": ["fsd/app/*"],
+
+      "~pages": ["fsd/pages"],
+      "~pages/*": ["fsd/pages/*"],
+
+      "~features": ["fsd/features"],
+      "~features/*": ["fsd/features/*"],
+
+      "~entities": ["fsd/entities"],
+      "~entities/*": ["fsd/entities/*"],
+
+      "~shared": ["fsd/shared"],
+      "~shared/*": ["fsd/shared/*"]
+    }
   },
-  "include": ["src"]
+  "include": [
+    "src/fsd/**/*",
+    "src/setupTests.ts",
+    "src/basic/**/*",
+    "src/advanced/**/*"
+  ],
+  "exclude": ["src/origin/**/*"]
 }
