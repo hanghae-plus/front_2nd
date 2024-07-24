@@ -12,6 +12,7 @@ module.exports = {
         },
         upload: {
             target: "filesystem",
+            staticDistDir: "./packages/assignment-6/dist",
             outputDir: "./lhci_reports",
             reportFilenamePattern: "%%PATHNAME%%-%%DATETIME%%-report.%%EXTENSION%%",
         },
