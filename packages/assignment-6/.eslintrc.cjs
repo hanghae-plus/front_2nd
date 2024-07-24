@@ -10,6 +10,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: ['react-refresh'],
   rules: {
+    'no-console': ['warn', { allow: ['warn', 'error'] }], // console.log() 금지
     'react-refresh/only-export-components': [
       'warn',
       { allowConstantExport: true },
