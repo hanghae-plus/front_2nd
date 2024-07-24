@@ -190,11 +190,11 @@ jobs:
               'SEO': formatScore(lighthouseReport.categories.seo.score)
             };
             
-            const formatScore = res => (res >= 90 ? "🟢" : res >= 70 ? "🟠" : "🔴");
+            const getScoreAssert = res => (res >= 90 ? "🟢" : res >= 70 ? "🟠" : "🔴");
             
             let tableContent = '| 카테고리 | 점수 |\n|----------|------|\n';
             for (const [category, score] of Object.entries(results)) {
-              tableContent += `| ${formatScore(score)} ${category} | ${score} |\n`;
+              tableContent += `| ${getScoreAssert(score)} ${category} | ${score} |\n`;
             }
             
             const comment = `## Lighthouse 성능 측정 결과 \n ${tableContent}`;
