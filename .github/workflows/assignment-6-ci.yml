@@ -41,8 +41,30 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Run linter
+        run: pnpm -F assignment-6 run lint > lint_results.txt
+        working-directory: packages/assignment-6
+      - name: Comment PR with lint results
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const lintResults = fs.readFileSync('packages/assignment-6/lint_results.txt', 'utf8');
+            const comment = `## ESLint Results\n\n\`\`\`\n${lintResults}\n\`\`\``;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
 
   test:
     runs-on: ubuntu-latest
