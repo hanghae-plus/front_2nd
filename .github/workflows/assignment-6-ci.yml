@@ -121,7 +121,7 @@ jobs:
             const fs = require('fs');
             const coverageJson = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
             
-            const {line, branches, functions, statements} = coverageJson.total;
+            const {lines, branches, functions, statements} = coverageJson.total;
             
             const formatPercentage = (value) => (value * 100).toFixed(2);
             
@@ -130,13 +130,13 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `## 테스트 성공✅ 
-              \n $커버리지 결과\n
+              \n 커버리지 결과 \n
               
               • 라인 커버리지: ${formatPercentage(lines.pct)}%
               • 브랜치 커버리지: ${formatPercentage(branches.pct)}%
               • 함수 커버리지: ${formatPercentage(functions.pct)}%
               • 구문 커버리지: ${formatPercentage(statements.pct)}%
-            })
+            `})
 
   lighthouse:
     runs-on: ubuntu-latest
