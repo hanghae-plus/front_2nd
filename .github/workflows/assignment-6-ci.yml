@@ -4,7 +4,7 @@ name: CI Assignment 6
 on:
   pull_request:
     # PR이 올라왔을 때, commit push될 때 실행
-    types: [opened, synchronize, reopened, synchronize]
+    types: [opened, synchronize, reopened]
     paths:
       - "packages/assignment-6/**"
 
