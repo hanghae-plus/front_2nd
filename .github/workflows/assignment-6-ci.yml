@@ -70,7 +70,7 @@ jobs:
         run: pnpm install
 
       - name: Run ESLint
-        run: pnpm -F assignment-6 lint --format stylish > eslint_report.txt 2>&1 || echo "LINT_FAILED=true" >> $GITHUB_ENV
+        run: pnpm -F assignment-6 lint > eslint_report.txt 2>&1 || echo "LINT_FAILED=true" >> $GITHUB_ENV
 
       - name: Comment ESLint results (Warning and Error)
         if: env.LINT_FAILED == 'true'
