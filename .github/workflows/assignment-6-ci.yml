@@ -183,6 +183,8 @@ jobs:
             
             const formatResult = (res) => Math.round(res * 100);
             
+            let comments = "";
+            
             lighthouseReport.forEach((result,index) => {
                 const { summary } = result;
               
