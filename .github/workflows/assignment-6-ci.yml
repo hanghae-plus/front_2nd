@@ -31,6 +31,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: run build
+        run: pnpm -F assignment-6 build
+
       - name: Comment on PR if errors occurred
         if: failure()
         uses: actions/github-script@v6
@@ -155,9 +158,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
-
-      - name: run build
-        run: pnpm -F assignment-6 build
 
       - name: Run Lighthouse CI
         run: |
