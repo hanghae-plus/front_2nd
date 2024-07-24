@@ -5,137 +5,26 @@ on:
     types:
       - opened
     paths:
-      - "packages/assignment-6/**"
+      - 'packages/assignment-6/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository 
-        uses: actions/checkout@v4
+      - name: job1 구현
+        run: echo "job1의 내용을 구현해주세요"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-
-      - name: Set node version
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm install
-
-      - name: Run tsc
-        id: tsc
-        run: pnpm -F assignment-6 build
-
-      - name: Post comment if tsc build fails
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
-          script: |
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: "빌드 실패 ❌"
-            })
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-
-      - name: Set node version
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm install
-
-      - name: Run lint
-        id: lint
-        run: pnpm -F assignment-6 lint -o ./lint.log
-      
-      - name: Post report comment, if lint has error
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
-          script: |
-            const fs = require('fs')
-            const errorLog = fs.readFileSync('lint.log', 'utf8');
-
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: "### ESLint Results\n---${errorLog}"
-            })
-      
+      - name: job2 구현
+        run: echo "job2의 내용을 구현해주세요"
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository 
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-
-      - name: Set node version
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm install
-
-      - name: Run test
-        run: pnpm -F assignment-6 test
-
-      - name: Leave coverage comment
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
-          script: |
-            const fs = require('fs')
-            const coverage = JSON.parse(fs.readFileSync('coverage/coverage-final.json', 'utf8'))
-
-            const lineCoverage = ((total.lines.covered / total.lines.total) * 100).toFixed(2)
-            const functionCoverage = ((total.functions.covered / total.functions.total) * 100).toFixed(2)
-            const branchCoverage = ((total.branches.covered / total.branches.total) * 100).toFixed(2)
-            const statementCoverage = ((total.statements.covered / total.statements.total) * 100).toFixed(2)
-
-            const commentBody = `
-              ## 테스트 성공 ✅\n\n
-              ### 커버리지 결과\n\n
-              - 라인 커버리지: ${lineCoverage}%
-              - 함수 커버리지: ${functionCoverage}%
-              - 브랜치 커버리지: ${branchCoverage}%
-              - 구문 커버리지: ${statementCoverage}%
-            `
-
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: commentBody
-            })
+      - name: job3 구현
+        run: echo "job3의 내용을 구현해주세요"
 
   lighthouse:
     runs-on: ubuntu-latest

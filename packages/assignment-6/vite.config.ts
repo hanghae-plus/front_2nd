@@ -10,12 +10,7 @@ export default mergeConfig(
     test: {
       globals: true,
       environment: 'jsdom',
-      setupFiles: './src/setupTests.ts',
-      coverage: {
-        provider: 'v8',
-        reporter: ['json'],
-        reportsDirectory: './coverage'
-      },
+      setupFiles: './src/setupTests.ts'
     },
   })
 )
