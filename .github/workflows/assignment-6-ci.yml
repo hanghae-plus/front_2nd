@@ -17,18 +17,18 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: latest
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm -F assignment-6 install
       - name: Run TypeScript build
-        run: pnpm -F assignment-6 run build
+        run: pnpm -F assignment-6 build
         working-directory: packages/assignment-6
         id: tsc-build
       - name: Comment PR on build failure
-        if: failure()
+        if: failure() && steps.job1.outcome == 'failure'
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
@@ -48,7 +48,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: latest
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -103,7 +103,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: latest
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -153,7 +153,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: latest
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -163,9 +163,10 @@ jobs:
         run: pnpm -F assignment-6 run build
         working-directory: packages/assignment-6
         id: tsc-build
+
       - name: Run Lighthouse CI
         run: |
-          pnpm -F assignment-6 i -g @lhci/cli
+          pnpm -F assignment-6 add -g @lhci/cli
           lhci autorun
       - name: Generate and Upload Lighthouse Report
         env:
