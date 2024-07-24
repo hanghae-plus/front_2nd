@@ -46,7 +46,7 @@ jobs:
       - name: Comment PR if ESLint errors
         uses: actions/github-script@v5
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs');
             const eslintResults = fs.readFileSync('eslint_results.txt', 'utf8');
@@ -79,7 +79,7 @@ jobs:
       - name: Comment PR with coverage report
         uses: actions/github-script@v5
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs');
             const coverageSummary = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
@@ -119,7 +119,7 @@ jobs:
       - name: Comment PR with coverage report
         uses: actions/github-script@v5
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs');
             const coverageSummary = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
@@ -147,7 +147,7 @@ jobs:
       - name: Assign reviewer and create comment mentioning reviewer
         uses: actions/github-script@v5
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const teamMembers = ['eumcloud', 'jiyeon87']; // 팀 구성원 깃허브 사용자명 목록
             // 랜덤하게 리뷰어 선택
