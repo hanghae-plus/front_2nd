@@ -24,7 +24,7 @@ jobs:
           pnpm install
 
       - name: Run tsc and build
-        id: build
+        id: build_step
         run: |
           cd packages/assignment-6
           pnpm run build
