@@ -112,6 +112,9 @@ jobs:
       - name: Run tests
         run: pnpm -F assignment-6 test:coverage
 
+      - name: test pwd
+        run: pwd
+
       - name: Comment test results
         if: success()
         uses: actions/github-script@v6
@@ -119,7 +122,9 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const coverageJson = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            const path = require('path');
+            
+            const coverageJson = JSON.parse(fs.readFileSync(`${process.cwd()}/coverage/coverage-summary.json`, 'utf8'));
             
             const {lines, branches, functions, statements} = coverageJson.total;
             
