@@ -4,8 +4,8 @@ module.exports = {
     ci: {
         collect: {
             startServerCommand: "pnpm -F assignment-6 start",
-            url: [process.env.VITE_HOST],
-            numberOfRuns: 5,
+            url: ["http://localhost:5137/"],
+            numOfRuns: 5,
             settings: {
                 preset: "desktop",
             },

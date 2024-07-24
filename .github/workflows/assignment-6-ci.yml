@@ -110,7 +110,7 @@ jobs:
         run: pnpm install
 
       - name: Run tests
-        run: pnpm -F assignment-6 test:coverage > coverage.json 2>&1
+        run: pnpm -F assignment-6 test:coverage
 
       - name: Comment test results
         if: success()
@@ -119,7 +119,7 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const coverageJson = JSON.parse(fs.readFileSync('./coverage.json', 'utf8'));
+            const coverageJson = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
             
             const {line, branches, functions, statements} = coverageJson.total;
             
