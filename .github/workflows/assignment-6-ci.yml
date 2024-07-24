@@ -129,7 +129,7 @@ jobs:
             const fs = require('fs');
             const results = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'));
 
-            let comment = "| 카테고리 | 점수 |\n| :---: | :---: |";
+            let comment = "# Lighthouse 성능 측정 결과\n| 카테고리 | 점수 |\n| :---: | :---: |";
 
             results.forEach((result) => {
               const { summary } = result;
