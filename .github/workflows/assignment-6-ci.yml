@@ -1,16 +1,16 @@
 name: CI Assignment 6
 
 on:
-  push:
-    branches:
-      - '*'
+  # push:
+  #   branches:
+  #     - '*'
   pull_request:
     types:
       - synchronize
       - opened
       - reopened
-    paths:
-      - 'packages/assignment-6/**'
+    # paths:
+    # - 'packages/assignment-6/**'
   workflow_dispatch:
 
 env:
