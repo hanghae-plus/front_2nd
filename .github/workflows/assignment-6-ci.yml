@@ -22,7 +22,7 @@ jobs:
           node-version: 20
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm -F assignment-6 install
+        run: pnpm install
       - name: Run TypeScript build
         run: pnpm -F assignment-6 build
         working-directory: packages/assignment-6
@@ -53,15 +53,15 @@ jobs:
           node-version: 20
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build project
-        run: pnpm -F assignment-6 run build
-        working-directory: packages/assignment-6
-        id: tsc-build
+        run: pnpm install
+      # - name: Build project
+      #   run: pnpm -F assignment-6 run build
+      #   working-directory: packages/assignment-6
+      #   id: tsc-build
+
       - name: Run ESLint
         run: npx eslint . --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-report.json
       - name: Comment PR with ESLint results
-        if: failure()
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI }}
