@@ -4,7 +4,7 @@ module.exports = {
     ci: {
         collect: {
             startServerCommand: "pnpm -F assignment-6 start",
-            url: ["http://localhost:5137/"],
+            url: [rocess.env.VITE_HOST],
             numOfRuns: 5,
             settings: {
                 preset: "desktop",
