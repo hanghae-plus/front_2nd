@@ -70,8 +70,38 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Run tests with coverage
+        run: pnpm -F assignment-6 run test:coverage
+      - name: Comment PR with test results and coverage
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const coverageData = JSON.parse(fs.readFileSync('packages/assignment-6/coverage/coverage-summary.json', 'utf8'));
+            const totalCoverage = coverageData.total;
+            const testsPassed = coverageData.numPassedTests === coverageData.numTotalTests;
+            const comment = `
+            ## ${testsPassed ? '테스트 성공 ✅' : '테스트 실패 ❌'}
+            ### 커버리지 결과:
+            - 라인 커버리지: ${totalCoverage.lines.pct.toFixed(2)}%
+            - 브랜치 커버리지: ${totalCoverage.branches.pct.toFixed(2)}%
+            - 함수 커버리지: ${totalCoverage.functions.pct.toFixed(2)}%
+            - 구문 커버리지: ${totalCoverage.statements.pct.toFixed(2)}%
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
 
   lighthouse:
     runs-on: ubuntu-latest
