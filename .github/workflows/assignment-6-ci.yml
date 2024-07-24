@@ -181,29 +181,39 @@ jobs:
             const fs = require('fs');
             const lighthouseReport = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'));
             
-            const formatScore = (score) => Math.round(score * 100) + '%';
+            const formatResult = (res) => Math.round(res * 100);
             
-            const results = {
-              'Performance': formatScore(lighthouseReport.categories.performance.score),
-              'Accessibility': formatScore(lighthouseReport.categories.accessibility.score),
-              'Best Practices': formatScore(lighthouseReport.categories['best-practices'].score),
-              'SEO': formatScore(lighthouseReport.categories.seo.score)
-            };
+            lighthouseReport.forEach((result,index) => {
+                const { summary } = result;
+              
+                const finalSummary = Object.fromEntries(
+                Object.entries(summary).map(([key, value]) => [key, formatResult(value)])
+                );
+  
+                const score = (res) => (res >= 90 ? "🟢" : res >= 70 ? "🟠" : "🔴");
+  
+                const comment = [
+                  `⚡️ Lighthouse report ${index}`,
+                  `| Category | Score |`,
+                  `| --- | --- |`,
+                  `| ${score(finalSummary.performance)} Performance | ${finalSummary.performance} |`,
+                  `| ${score(finalSummary.accessibility)} Accessibility | ${finalSummary.accessibility} |`,
+                  `| ${score(finalSummary['best-practices'])} Best practices | ${finalSummary['best-practices']} |`,
+                  `| ${score(finalSummary.seo)} SEO | ${summary.seo} |`,
+                  `| ${score(finalSummary.pwa)} PWA | ${summary.pwa} |`,
+                  `\n`,
+                ].join("\n");
+  
+                comments += comment + "\n";
+            });
             
-            const getScoreAssert = res => (res >= 90 ? "🟢" : res >= 70 ? "🟠" : "🔴");
-            
-            let tableContent = '| 카테고리 | 점수 |\n|----------|------|\n';
-            for (const [category, score] of Object.entries(results)) {
-              tableContent += `| ${getScoreAssert(score)} ${category} | ${score} |\n`;
-            }
-            
-            const comment = `## Lighthouse 성능 측정 결과 \n ${tableContent}`;
+            const lighthouseComment = `## Lighthouse 성능 측정 결과 \n ${comments}`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comment
+              body: lighthouseComment
             });
 
 
