@@ -11,19 +11,32 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: v3엔진 세팅
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Node 세팅
-        uses: actions/setup-node@v2
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
         with:
-          node-version: 16
+          node-version: '20.x'
 
-      - name: npm 패키지 다운
-        run: npm install
+      - name: Build Assignment 6
+        run: pnpm -F assignment-6 run build
 
-      - name: project build
-        run: npm run build
+      - name: Comment on PR upon build failure
+        if: steps.build_step.outcome == 'failure'
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const issue_number = context.payload.pull_request.number;
+            const message = "Build failed, please check the logs.";
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: "빌드도중 에러가 발생했습니다 🥲",
+            });
+
 
   lint:
     runs-on: ubuntu-latest
