@@ -33,4 +33,6 @@ dist-ssr
 # Lighthouse CI outputs
 .lighthouseci/
 
-./coverage
+coverage/
+
+lhci_reports/
