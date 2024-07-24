@@ -79,7 +79,7 @@ jobs:
       - name: Run tests with coverage
         run: pnpm -F assignment-6 run test:coverage
       - name: Comment PR with test results and coverage
-        if: always()
+        if: ${{ always() }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
@@ -121,7 +121,7 @@ jobs:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         run: pnpm -F assignment-6 run lighthouse
       - name: Comment PR with Lighthouse results
-        if: always()
+        if: ${{ always() }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
