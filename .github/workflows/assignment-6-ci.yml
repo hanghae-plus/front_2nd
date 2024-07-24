@@ -1,30 +1,30 @@
-name: CI Assignment 6 
+name: CI Assignment 6
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize] # 풀 리퀘스트가 열리거나 동기화될 때 트리거
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      
+        uses: actions/checkout@v4 # 코드 체크아웃
+
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4 # Node.js 설정
         with:
-          node-version: '14'
-          
+          node-version: '20.x' # 최신 LTS 버전 사용
+
       - name: Install dependencies
-        run: npm install
-      
+        run: npm install # 종속성 설치
+
       - name: Run TypeScript compiler
-        run: npm run tsc
-        continue-on-error: true
+        run: npm run tsc # TypeScript 컴파일러 실행
+        continue-on-error: true # 오류가 발생해도 다음 단계로 진행
 
       - name: Comment on PR for tsc errors
-        if: failure()
+        if: failure() # 이전 단계가 실패한 경우 실행
         uses: actions/github-script@v6
         with:
           script: |
@@ -41,22 +41,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      
+        uses: actions/checkout@v4 # 코드 체크아웃
+
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4 # Node.js 설정
         with:
-          node-version: '14'
-          
+          node-version: '20.x' # 최신 LTS 버전 사용
+
       - name: Install dependencies
-        run: npm install
-      
+        run: npm install # 종속성 설치
+
       - name: Run ESLint
-        run: npm run lint
-        continue-on-error: true
+        run: npm run lint # ESLint 실행
+        continue-on-error: true # 오류가 발생해도 다음 단계로 진행
 
       - name: Comment on PR for ESLint errors
-        if: failure()
+        if: failure() # 이전 단계가 실패한 경우 실행
         uses: actions/github-script@v6
         with:
           script: |
@@ -73,27 +73,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      
+        uses: actions/checkout@v4 # 코드 체크아웃
+
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4 # Node.js 설정
         with:
-          node-version: '14'
-          
+          node-version: '20.x' # 최신 LTS 버전 사용
+
       - name: Install dependencies
-        run: npm install
-      
+        run: npm install # 종속성 설치
+
       - name: Run tests and measure coverage
-        run: npm run test -- --coverage
-        continue-on-error: true
+        run: npm run test -- --coverage # 테스트 실행 및 커버리지 측정
+        continue-on-error: true # 오류가 발생해도 다음 단계로 진행
 
       - name: Comment on PR with coverage report
-        if: always()
+        if: always() # 항상 실행
         uses: actions/github-script@v6
         with:
           script: |
             const { execSync } = require('child_process');
-            const coverage = execSync('cat coverage/lcov-report/index.html').toString();
+            const coverage = execSync('cat packages/assignment-6/coverage/lcov-report/index.html').toString();
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -105,25 +105,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      
+        uses: actions/checkout@v4 # 코드 체크아웃
+
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4 # Node.js 설정
         with:
-          node-version: '14'
-          
+          node-version: '20.x' # 최신 LTS 버전 사용
+
       - name: Install dependencies
-        run: npm install
-      
+        run: npm install # 종속성 설치
+
       - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli@0.7.x
-      
+        run: npm install -g @lhci/cli@0.7.x # Lighthouse CI 설치
+
       - name: Run Lighthouse CI
-        run: lhci autorun
-        continue-on-error: true
+        run: lhci autorun # Lighthouse CI 실행
+        continue-on-error: true # 오류가 발생해도 다음 단계로 진행
 
       - name: Comment on PR with Lighthouse report
-        if: always()
+        if: always() # 항상 실행
         uses: actions/github-script@v6
         with:
           script: |
@@ -137,7 +137,7 @@ jobs:
             });
 
   assign_reviewer:
-    if: github.event.action == 'opened'
+    if: github.event.action == 'opened' # 풀 리퀘스트가 열릴 때 실행
     runs-on: ubuntu-latest
     steps:
       - name: Choose a random reviewer
@@ -148,12 +148,12 @@ jobs:
           | jq -r '.[].login'))
           selected_reviewer=${reviewers[$RANDOM % ${#reviewers[@]}]}
           echo "::set-output name=reviewer::$selected_reviewer"
-      
+
       - name: Assign reviewer
-        uses: kentaro-m/auto-assign-action@v2.2.1
+        uses: kentaro-m/auto-assign-action@v2.2.1 # 리뷰어 자동 할당
         with:
           reviewers: ${{ steps.choose_reviewer.outputs.reviewer }}
-      
+
       - name: Comment on PR with assigned reviewer
         uses: actions/github-script@v6
         with:
