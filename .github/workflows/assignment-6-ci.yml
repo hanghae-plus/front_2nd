@@ -6,6 +6,8 @@ on:
       - synchronize
       - opened
       - reopened
+    paths:
+      - 'packages/assignment-6/**'
 
 jobs:
   build:
