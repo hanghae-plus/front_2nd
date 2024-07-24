@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: tsc & Build
+      - name: tsc & build
         run: pnpm --filter assignment-6 build
 
   lint:
