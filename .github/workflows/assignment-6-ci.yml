@@ -48,10 +48,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Run linter
+        run: pnpm -F assignment-6 run lint
+      - name: Save lint results
+        if: failure()
         run: pnpm -F assignment-6 run lint > lint_results.txt
-        working-directory: packages/assignment-6
       - name: Comment PR with lint results
-        if: always()
+        if: failure()
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
