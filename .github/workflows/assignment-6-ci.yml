@@ -1,39 +1,166 @@
-name: CI Assignment 6
+name: CI Assignment 6 
 
 on:
   pull_request:
-    types:
-      - opened
-    paths:
-      - 'packages/assignment-6/**'
+    types: [opened, synchronize]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run TypeScript compiler
+        run: npm run tsc
+        continue-on-error: true
+
+      - name: Comment on PR for tsc errors
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const errors = execSync('npm run tsc 2>&1').toString();
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `TypeScript compile errors:\n\`\`\`\n${errors}\n\`\`\``
+            });
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Comment on PR for ESLint errors
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const errors = execSync('npm run lint 2>&1').toString();
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `ESLint errors:\n\`\`\`\n${errors}\n\`\`\``
+            });
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run tests and measure coverage
+        run: npm run test -- --coverage
+        continue-on-error: true
+
+      - name: Comment on PR with coverage report
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const coverage = execSync('cat coverage/lcov-report/index.html').toString();
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Test coverage report:\n\`\`\`\n${coverage}\n\`\`\``
+            });
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.7.x
+      
+      - name: Run Lighthouse CI
+        run: lhci autorun
+        continue-on-error: true
+
+      - name: Comment on PR with Lighthouse report
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const report = execSync('lhci report --output html').toString();
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Lighthouse CI report:\n\`\`\`\n${report}\n\`\`\``
+            });
 
   assign_reviewer:
+    if: github.event.action == 'opened'
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: Choose a random reviewer
+        id: choose_reviewer
+        run: |
+          reviewers=($(gh api -H "Accept: application/vnd.github.v3+json" \
+          /repos/$GITHUB_REPOSITORY/collaborators \
+          | jq -r '.[].login'))
+          selected_reviewer=${reviewers[$RANDOM % ${#reviewers[@]}]}
+          echo "::set-output name=reviewer::$selected_reviewer"
+      
+      - name: Assign reviewer
+        uses: kentaro-m/auto-assign-action@v2.2.1
+        with:
+          reviewers: ${{ steps.choose_reviewer.outputs.reviewer }}
+      
+      - name: Comment on PR with assigned reviewer
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@${{ steps.choose_reviewer.outputs.reviewer }} has been assigned as a reviewer.`
+            });
