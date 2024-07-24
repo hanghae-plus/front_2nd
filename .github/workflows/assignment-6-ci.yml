@@ -163,7 +163,10 @@ jobs:
                 }
               });
               
-              const calculatePercentage = (covered, total) => ((covered / total) * 100).toFixed(2);
+              const calculatePercentage = (covered, total) => {
+                if (total === 0) return '0.00';
+                return ((covered / total) * 100).toFixed(2);
+              };
               
               await github.rest.issues.createComment({
                 issue_number: context.issue.number,
