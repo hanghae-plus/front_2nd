@@ -171,7 +171,6 @@ jobs:
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ env.GITHUB_TOKEN }}
         run: |
-          pnpm install @lhci/cli
           pnpm -F assignment-6 lhci
 
       - name: Format and comment Lighthouse results
