@@ -106,8 +106,41 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - name: Install Lighthouse CLI
+        run: pnpm i -g @lhci/cli
+      - name: Build Assignment 6
+        run: pnpm -F assignment-6 run build
+      - name: Run Lighthouse CI
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        run: pnpm -F assignment-6 run lighthouse
+      - name: Comment PR with Lighthouse results
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'));
+
+            let comment = "| 카테고리 | 점수 |\n| :---: | :---: |";
+
+            results.forEach((result) => {
+              const { summary } = result;
+
+              Object.entries(summary).forEach(([key, value]) => {
+                const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+                const score = (value * 100).toFixed(2);
+                comment += `\n| ${capitalizedKey} | ${score} |`;
+              });
+            })
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
 
   assign_reviewer:
     runs-on: ubuntu-latest
