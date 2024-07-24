@@ -150,7 +150,7 @@ jobs:
 
   assign_reviewer:
     runs-on: ubuntu-latest
-    if: github.event.action == 'opend'
+    if: github.event.action == 'opened' || github.event.action == 'reopened'
     steps:
       - name: Assign reviewer
         uses: actions/github-script@v7
