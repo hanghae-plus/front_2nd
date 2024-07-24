@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Env files
+.env
+
+# But keep example env file
+!.env.example
+
+# Lighthouse CI outputs
+.lighthouseci/
