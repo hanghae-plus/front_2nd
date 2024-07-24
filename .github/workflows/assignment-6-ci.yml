@@ -7,7 +7,7 @@ on:
       - 'packages/assignment-6/**'
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
 
 jobs:
   build:
@@ -38,7 +38,7 @@ jobs:
         if: failure()
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          github-token: ${{ env.GITHUB_TOKEN }}
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -76,7 +76,7 @@ jobs:
         if: env.LINT_FAILED == 'true'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          github-token: ${{ env.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8');
@@ -119,7 +119,7 @@ jobs:
         if: success()
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          github-token: ${{ env.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const path = require('path');
@@ -169,7 +169,7 @@ jobs:
       - name: Format and comment Lighthouse results
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          github-token: ${{ env.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const lighthouseReport = JSON.parse(fs.readFileSync('./lhci_reports/manifest.json', 'utf8'));
@@ -204,7 +204,7 @@ jobs:
 #      - name: assign random reviewer
 #        uses: actions/github-script@v6
 #        with:
-#          github-token: ${{ secrets.TOKEN_FOR_CI }}
+#          github-token: ${{ env.GITHUB_TOKEN }}
 #          script: |
 #            const teams = ["bbbjihan", "soojjung"];
 #            const randomReviewer = teams[Math.floor(Math.random() * teams.length)];
