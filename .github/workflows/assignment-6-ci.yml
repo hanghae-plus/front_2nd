@@ -95,10 +95,10 @@ jobs:
       - run: |
           pnpm install
           pnpm --filter assignment-6 add -D @vitest/coverage-v8
-      - run: pnpm -F assignment-6 test -- --coverage
-      - id: coverage_report
+      - run: pnpm -F assignment-6 test -- --coverage > coverage_report.txt
+      - id: format_coverage
         run: |
-          COVERAGE=$(pnpm -F assignment-6 test -- --coverage | grep -A4 "Coverage summary" | tail -n 4)
+          COVERAGE=$(cat coverage_report.txt | sed 's/^/    /' | sed 's/\x1b\[[0-9;]*m//g')
           echo "coverage<<EOF" >> $GITHUB_OUTPUT
           echo "$COVERAGE" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -107,7 +107,6 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const coverage = `${{ steps.coverage_report.outputs.coverage }}`
             const { owner, repo } = context.repo
             const pull_number = context.payload.pull_request.number;
 
@@ -123,7 +122,7 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const coverage = `${{ steps.coverage_report.outputs.coverage }}`
+            const coverage = `${{ steps.format_coverage.outputs.coverage }}`
             const { owner, repo } = context.repo
             const pull_number = context.payload.pull_request.number;
 
