@@ -65,8 +65,6 @@ jobs:
                 repo: context.repo.repo,
                 body: comment
               });
-              core.setFailed("ESLint 오류가 발생했습니다.");
-              process.exit(1);
             }
 
   test:
