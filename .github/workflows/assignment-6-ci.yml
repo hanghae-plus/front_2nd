@@ -54,6 +54,10 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Build project
+        run: pnpm run build
+        working-directory: packages/assignment-6
+        id: tsc-build
       - name: Run ESLint
         run: npx eslint . --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-report.json
       - name: Comment PR with ESLint results
@@ -105,6 +109,10 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Build project
+        run: pnpm run build
+        working-directory: packages/assignment-6
+        id: tsc-build
       - name: Run tests with coverage
         # 텍스트 형식과 요약 형식 선택
         run: pnpm test -- --coverage --coverageReporters="text" --coverageReporters="text-summary" > coverage.txt
