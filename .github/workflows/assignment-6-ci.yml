@@ -92,7 +92,7 @@ jobs:
           cache: 'pnpm'
       - run: |
           pnpm install
-          pnpm add -D @vitest/coverage-v8
+          pnpm --filter assignment-6 add -D @vitest/coverage-v8
       - run: pnpm -F assignment-6 test -- --coverage
       - id: coverage_report
         run: |
