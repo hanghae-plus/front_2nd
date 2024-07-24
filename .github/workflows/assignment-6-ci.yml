@@ -1,16 +1,13 @@
 name: CI Assignment 6
 
 on:
-  push:
-    branches:
-      - seadonggyun4-assignment-6
   pull_request:
     types:
       - synchronize
       - opened
       - reopened
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
 
 jobs:
   build:
