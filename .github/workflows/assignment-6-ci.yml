@@ -179,7 +179,7 @@ jobs:
           github-token: ${{ env.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const lighthouseReport = JSON.parse(fs.readFileSync('./lhci_reports/manifest.json', 'utf8'));
+            const lighthouseReport = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'));
             
             const formatScore = (score) => Math.round(score * 100) + '%';
             
