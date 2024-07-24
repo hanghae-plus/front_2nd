@@ -26,11 +26,9 @@ jobs:
       - name: Run TypeScript build
         run: pnpm run build
         working-directory: packages/assignment-6
-        continue-on-error: true
         id: tsc-build
-      # 이 부분 확인 필요
       - name: Comment PR on build failure
-        if: failure() && steps.tsc-build.outcome == 'failure'
+        if: failure()
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
@@ -57,12 +55,41 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run ESLint
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx
-      - uses: actions/upload-artifact@v2
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-report.json
+      - name: Comment PR with ESLint results
         if: failure()
+        uses: actions/github-script@v6
         with:
-          name: eslint-report
-          path: eslint-report.json
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs');
+            const eslintReport = JSON.parse(fs.readFileSync('eslint-report.json', 'utf8'));
+            const errorCount = eslintReport.reduce((acc, file) => acc + file.errorCount, 0);
+            const warningCount = eslintReport.reduce((acc, file) => acc + file.warningCount, 0);
+
+            let comment = `## ESLint Results\n\n`;
+            comment += `- Errors: ${errorCount}\n`;
+            comment += `- Warnings: ${warningCount}\n\n`;
+
+            if (errorCount > 0 || warningCount > 0) {
+              comment += 'Please fix the following issues:\n\n';
+              eslintReport.forEach(file => {
+                if (file.messages.length > 0) {
+                  comment += `### ${file.filePath}\n`;
+                  file.messages.forEach(message => {
+                    comment += `- ${message.message} (${message.line}:${message.column})\n`;
+                  });
+                  comment += '\n';
+                }
+              });
+            }
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              body: comment
+            });
 
   # job3. 테스트를 실행하고, 커버리지를 측정하여 코멘트에 남긴다.
   test:
