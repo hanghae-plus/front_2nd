@@ -4,8 +4,9 @@ on:
   pull_request:
     types:
       - opened
+      - synchronize
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
 
 jobs:
   build:
@@ -20,7 +21,7 @@ jobs:
           version: 8
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: tsc & build
         run: pnpm --filter assignment-6 build
