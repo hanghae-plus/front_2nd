@@ -4,6 +4,8 @@ on:
   pull_request:
     types:
       - opened
+      - synchronize
+      - reopened
     paths:
       - 'packages/assignment-6/**'
 
@@ -11,29 +13,136 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Run Typescript Complier & Build
+        run: |
+          pnpm install
+          pnpm -F assignment-6 build
+
+      - name: Add PR comment on failure
+        if: failure()
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "빌드 실패 ❌"
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Run ESLint
+        run: |
+          pnpm install
+          pnpm -F assignment-6 lint > lint-result.txt
+      
+      - name: Check if there are lint errors
+        id: lint-check
+        run: |
+          if grep -q 'error' lint-result.txt; then
+            echo "has_lint_errors=true" >> $GITHUB_ENV
+          else
+            echo "has_lint_errors=false" >> $GITHUB_ENV
+          fi
+
+      - name: Add PR comment on lint errors
+        if: env.has_lint_errors == 'true'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: ESLint Results
+          file: lint-result.txt
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm -F assignment-6 test -- --coverage > coverage.txt
+
+      - name: Check if tests failed
+        id: test-check
+        run: |
+          if grep -q 'FAIL' coverage.txt; then
+            echo "has_test_errors=true" >> $GITHUB_ENV
+          else
+            echo "has_test_errors=false" >> $GITHUB_ENV
+          fi
+
+      - name: test fail
+        if: env.has_test_errors == 'true'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "테스트 실패 ❌"
+          file: coverage.txt
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+
+      - name: test success
+        if: env.has_test_errors == 'false'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "테스트 성공 ✅"
+          file: coverage.txt
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Run Lighthouse CI
+        run: |
+          pnpm install -g @lhci/cli
+          lhci autorun > lighthouse-report.txt
+
+      - name: Add PR comment with Lighthouse CI results
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "Lighthouse 성능 측정 결과"
+          file: lighthouse-report.txt
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
 
   assign_reviewer:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: Choose random reviewer
+        id: choose-reviewer
+        run: echo "reviewer=$(shuf -n 1 -e mh0223 juhongahn)" >> $GITHUB_ENV
+
+      - name: Assign reviewer
+        uses: kentaro-m/auto-assign-action@v2
+        with:
+          reviewers: ${{ env.reviewer }}
+          team_reviewers: ''
+
+      - name: Add PR comment to mention reviewer
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "@${{ env.reviewer }}님, 리뷰를 부탁드립니다."
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
