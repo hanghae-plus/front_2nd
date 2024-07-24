@@ -2,127 +2,236 @@ name: CI Assignment 6
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types:
+      - opened
+      - reopened
+      - synchronize
     paths:
       - "packages/assignment-6/**"
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: 20.x
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: "16"
-      - run: npm ci
-      - run: npm run build
-      - name: Comment build result
-        if: failure()
-        uses: actions/github-script@v6
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          version: 8
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build Assignment 6
+        run: pnpm -F assignment-6 run build
+      - name: Comment PR on build failure
+        if: ${{ failure() }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '빌드 과정에서 오류가 발생했습니다. 확인 부탁드립니다.'
+              body: '❌ Build failed. Please check the build logs for more information.'
             })
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: "16"
-      - run: npm ci
-      - run: npm run lint
-      - name: Comment lint result
-        if: failure()
-        uses: actions/github-script@v6
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          version: 8
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run linter and save results
+        run: pnpm -F assignment-6 run lint > lint_results.txt || true
+        working-directory: packages/assignment-6
+      - name: Check lint results and comment PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const fs = require('fs')
-            const eslintReport = fs.readFileSync('.eslintrc.json', 'utf8')
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `ESLint에서 오류가 발생했습니다. 리포트:\n\`\`\`\n${eslintReport}\n\`\`\``
-            })
+            const fs = require('fs');
+            const lintResults = fs.readFileSync('packages/assignment-6/lint_results.txt', 'utf8');
+            if (lintResults.includes("error")){
+              const comment = `## ESLint Results\n\n\`\`\`\n${lintResults}\n\`\`\``;
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: "16"
-      - run: npm ci
-      - run: npm test -- --coverage
-      - name: Comment test coverage
-        uses: actions/github-script@v6
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          version: 8
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm -F assignment-6 add -D @vitest/coverage-v8
+      - name: Run tests with coverage
+        run: |
+          cd packages/assignment-6
+          pnpm run test:coverage
+      - name: List coverage directory
+        run: |
+          echo "Listing coverage directory:"
+          ls -R packages/assignment-6/coverage
+      - name: Comment PR with test results and coverage
+        if: ${{ always() }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const fs = require('fs')
-            const coverage = fs.readFileSync('./coverage/coverage-summary.json', 'utf8')
+            const fs = require('fs');
+            const path = require('path');
+            let comment = '';
+            const coveragePath = path.join('packages', 'assignment-6', 'coverage', 'coverage-summary.json');
+            console.log(`Attempting to read coverage file from: ${coveragePath}`);
+            try {
+              if (fs.existsSync(coveragePath)) {
+                const coverageData = JSON.parse(fs.readFileSync(coveragePath, 'utf8'));
+                const totalCoverage = coverageData.total;
+                comment = `📊 Test Coverage:
+                - Lines: ${totalCoverage.lines.pct.toFixed(2)}%
+                - Statements: ${totalCoverage.statements.pct.toFixed(2)}%
+                - Functions: ${totalCoverage.functions.pct.toFixed(2)}%
+                - Branches: ${totalCoverage.branches.pct.toFixed(2)}%`;
+              } else {
+                console.log(`Coverage file not found at: ${coveragePath}`);
+                comment = '❌ Coverage file not found. Please check if tests are generating coverage reports.';
+              }
+            } catch (error) {
+              console.error(`Error reading coverage data: ${error.message}`);
+              comment = `❌ Failed to read coverage data. Error: ${error.message}`;
+            }
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `테스트 커버리지 결과:\n\`\`\`\n${coverage}\n\`\`\``
-            })
+              body: comment
+            });
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: "16"
-      - run: npm ci
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Install dependencies
+        run: pnpm install
+      - name: Install Lighthouse CI
+        run: pnpm add -D @lhci/cli@0.11.x --filter assignment-6
+      - name: Build Assignment 6
+        run: pnpm -F assignment-6 run build
       - name: Run Lighthouse CI
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         run: |
-          npm install -g @lhci/cli@0.11.x
-          lhci autorun
-      - name: Comment Lighthouse result
-        uses: actions/github-script@v6
+          cd packages/assignment-6
+          pnpm exec lhci autorun
+      - name: List Lighthouse CI directory
+        run: |
+          echo "Listing Lighthouse CI directory:"
+          ls -R packages/assignment-6/.lighthouseci
+      - name: Comment PR with Lighthouse results
+        if: always()
+        uses: actions/github-script@v7
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const fs = require('fs')
-            const lighthouseReport = fs.readFileSync('./lighthouse-report.json', 'utf8')
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `Lighthouse CI 결과:\n\`\`\`\n${lighthouseReport}\n\`\`\``
-            })
+            const fs = require('fs');
+            const path = require('path');
+            const lighthousePath = path.join('packages', 'assignment-6', 'lhci_reports', 'manifest.json');
+            console.log(`Attempting to read Lighthouse results from: ${lighthousePath}`);
+            try {
+              if (fs.existsSync(lighthousePath)) {
+                const results = JSON.parse(fs.readFileSync(lighthousePath, 'utf8'));
+                let comment = "# Lighthouse 성능 측정 결과\n| 카테고리 | 점수 |\n| :---: | :---: |";
+                results.forEach((result) => {
+                  const { summary } = result;
+                  Object.entries(summary).forEach(([key, value]) => {
+                    const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+                    const score = (value * 100).toFixed(2);
+                    comment += `\n| ${capitalizedKey} | ${score}% |`;
+                  });
+                });
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              } else {
+                console.log(`Lighthouse results file not found at: ${lighthousePath}`);
+                throw new Error('Lighthouse results file not found');
+              }
+            } catch (error) {
+              console.error(`Failed to read or parse Lighthouse results: ${error.message}`);
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `❌ Failed to generate Lighthouse report. Error: ${error.message}`
+              });
+            }
 
   assign_reviewer:
     runs-on: ubuntu-latest
-    if: github.event.action == 'opened'
+    if: github.event.action == 'opened' || github.event.action == 'reopened'
     steps:
-      - uses: actions/github-script@v6
+      - name: Assign reviewer
+        uses: actions/github-script@v7
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const teamMembers = ['jiwonkim97', 'chhw130', 'jexnjeux',]
-            const randomReviewer = teamMembers[Math.floor(Math.random() * teamMembers.length)]
+            const teamMembers = ['jiwonkim97', 'chhw130', 'jexnjeux'];
+            const randomReviewer = teamMembers[Math.floor(Math.random() * teamMembers.length)];
 
             await github.rest.pulls.requestReviewers({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.issue.number,
               reviewers: [randomReviewer]
-            })
+            });
 
-            await github.rest.issues.createComment({
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `@${randomReviewer} 님이 리뷰어로 지정되었습니다. 리뷰 부탁드립니다.`
-            })
+              body: `👀 @${randomReviewer} has been assigned to review this PR.`
+            });
