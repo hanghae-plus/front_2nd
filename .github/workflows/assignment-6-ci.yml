@@ -96,7 +96,7 @@ jobs:
       - run: pnpm -F assignment-6 test -- --coverage
       - id: coverage_report
         run: |
-          COVERAGE=$(pnpm -F assignment-6 test -- --coverage --coverageReporters="text-summary" | tail -n 2 | head -n 1)
+          COVERAGE=$(pnpm -F assignment-6 test -- --coverage | grep -A4 "Coverage summary" | tail -n 4)
           echo "coverage<<EOF" >> $GITHUB_OUTPUT
           echo "$COVERAGE" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
