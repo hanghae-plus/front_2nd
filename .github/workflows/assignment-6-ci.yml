@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run TypeScript build
-        run: pnpm run build
+        run: pnpm -F assignment-6 run build
         working-directory: packages/assignment-6
         id: tsc-build
       - name: Comment PR on build failure
@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build project
-        run: pnpm run build
+        run: pnpm -F assignment-6 run build
         working-directory: packages/assignment-6
         id: tsc-build
       - name: Run ESLint
@@ -110,12 +110,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build project
-        run: pnpm run build
+        run: pnpm -F assignment-6 run build
         working-directory: packages/assignment-6
         id: tsc-build
       - name: Run tests with coverage
         # 텍스트 형식과 요약 형식 선택
-        run: pnpm test -- --coverage --coverageReporters="text" --coverageReporters="text-summary" > coverage.txt
+        run: pnpm -F assignment-6 test -- --coverage --coverageReporters="text" --coverageReporters="text-summary" > coverage.txt
       - name: Extract coverage metrics
         id: coverage
         # All files는 커버리지 요약, awk는 텍스트 처리, print $3는 3번째 필드 출력
@@ -160,12 +160,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build project
-        run: pnpm run build
+        run: pnpm -F assignment-6 run build
         working-directory: packages/assignment-6
         id: tsc-build
       - name: Run Lighthouse CI
         run: |
-          pnpm i -g @lhci/cli
+          pnpm -F assignment-6 i -g @lhci/cli
           lhci autorun
       - name: Generate and Upload Lighthouse Report
         env:
