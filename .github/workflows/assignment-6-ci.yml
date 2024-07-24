@@ -70,7 +70,7 @@ jobs:
         run: pnpm install
 
       - name: Run ESLint
-        run: pnpm -F assignment-6 lint > eslint_report.txt 2>&1 || echo "LINT_FAILED=true" >> $GITHUB_ENV
+        run: pnpm -F assignment-6 lint --format stylish > eslint_report.txt 2>&1 || echo "LINT_FAILED=true" >> $GITHUB_ENV
 
       - name: Comment ESLint results (Warning and Error)
         if: env.LINT_FAILED == 'true'
@@ -128,19 +128,18 @@ jobs:
             
             const {lines, branches, functions, statements} = coverageJson.total;
             
-            const formatPercentage = (value) => (value * 100).toFixed(2);
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `## 테스트 성공✅ 
-              \n 커버리지 결과 \n
+              \n ### 커버리지 결과 \n
               
-              • 라인 커버리지: ${formatPercentage(lines.pct)}%
-              • 브랜치 커버리지: ${formatPercentage(branches.pct)}%
-              • 함수 커버리지: ${formatPercentage(functions.pct)}%
-              • 구문 커버리지: ${formatPercentage(statements.pct)}%
+              • 라인 커버리지: ${lines.pct}%
+              • 브랜치 커버리지: ${branches.pct}%
+              • 함수 커버리지: ${functions.pct}%
+              • 구문 커버리지: ${statements.pct}%
             `})
 
   lighthouse:
@@ -164,14 +163,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-#      - name: Run Lighthouse CI
-#        run: |
-#          pnpm install -g @lhci/cli
-#          lhci autorun
-
       - name: Run tests
         run: pnpm -F assignment-6 lhci
-
 
       - name: Format and comment Lighthouse results
         uses: actions/github-script@v6
