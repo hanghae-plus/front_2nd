@@ -2,6 +2,8 @@ name: CI Assignment 6
 
 on:
   pull_request:
+    paths:
+      - 'packages/assignment-6/**' # /packages/assignment-6 경로만 체크
     types: [opened, synchronize] # 풀 리퀘스트가 열리거나 동기화될 때 트리거
 
 jobs:
