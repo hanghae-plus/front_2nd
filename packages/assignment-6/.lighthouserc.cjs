@@ -3,6 +3,7 @@ module.exports = {
     collect: {
       url: ["http://localhost:5173"],
       numberOfRuns: 3,
+      startServerCommand: "pnpm run preview",
     },
     upload: {
       target: "temporary-public-storage",

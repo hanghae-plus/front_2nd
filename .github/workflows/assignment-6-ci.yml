@@ -151,10 +151,12 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Build project
+        run: pnpm run build
       - name: Run Lighthouse CI
         run: |
-          pnpm i -g @lhci/cli
-          lhci autorun || echo "Fail to Run Lighthouse CI!"
+          pnpm i -g @lhci+cli
+          lhci autorun
       - name: Generate and Upload Lighthouse Report
         env:
           github-token: ${{secrets.TOKEN_FOR_CI }}
@@ -162,7 +164,6 @@ jobs:
           lhci collect --additive
           lhci upload --target=filesystem --outputDir=./lighthouse-reports
           lhci upload --target=temporary-public-storage
-
       - name: Format lighthouse score
         id: format_lighthouse_score
         uses: actions/github-script@v3
