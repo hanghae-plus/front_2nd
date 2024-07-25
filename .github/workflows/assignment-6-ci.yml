@@ -147,14 +147,14 @@ jobs:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs');
-            const results = JSON.parse(fs.readFileSync("/{Github Actions runner directory}/lhci_reports/manifest.json"));
+            const results = JSON.parse(fs.readFileSync("/home/runner/work/front_2nd/front_2nd/packages/assignment-6/.lighthouseci/manifest.json"));
             let comments = "";
 
             results.forEach((result) => {
+              const details = JSON.parse(fs.readFileSync(jsonPath));
               const { summary, jsonPath } = result;
               const { audits } = details;
 
-              const details = JSON.parse(fs.readFileSync(jsonPath));
               const formatResult = (res) => Math.round(res * 100);
 
               Object.keys(summary).forEach(
@@ -165,13 +165,18 @@ jobs:
 
               const comment = [
                 `⚡️ Lighthouse report!`,
-                `| 카테고리 | 점수 |`,
+                `| Category | Score |`,
                 `| --- | --- |`,
                 `| ${score(summary.performance)} Performance | ${summary.performance} |`,
-                { ... }
-              ].join("\n");
+                `| ${score(summary.accessibility)} Accessibility | ${summary.accessibility} |`,
+                `| ${score(summary['best-practices'])} Best Practices | ${summary['best-practices']} |`,               `| ${score(summary.seo)} SEO | ${summary.seo} |`,
+                  ].join("\n");
+              
+              comments += comment + "\n\n";
+            })
 
-            });
+
+
             return comments;
       - name: Comment PR
         uses: actions/github-script@v6
