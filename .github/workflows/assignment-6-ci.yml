@@ -33,7 +33,6 @@ jobs:
         id: build_step
         run: |
           pnpm -F assignment-6 build
-        continue-on-error: true
 
       - name: Comment if build fails
         if: failure()
@@ -119,7 +118,7 @@ jobs:
       - name: Run tests with coverage
         id: run_tests
         run: |
-          pnpm -F assignment-6 test --coverage
+          pnpm test:coverage
 
       - name: Report Coverage
         if: always()
