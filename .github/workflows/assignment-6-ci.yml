@@ -221,6 +221,29 @@ jobs:
 
   assign_reviewer:
     runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: Checkout code
+        uses: actions/checkout@v4.1.7
+
+      - name: job5 assign reviewer & comment on PR
+        uses: actions/github-script@v7.0.1
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const reviewers = ["kimfield98", "steve-shim"]
+            const reviewer = reviewers[Math.floor(Math.random() * reviewers.length)]
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `@${reviewer} 님, 리뷰 부탁드립니다 :sparkles:`
+            });
+
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [reviewer]
+            });
