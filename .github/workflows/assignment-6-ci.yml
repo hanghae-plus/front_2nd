@@ -26,17 +26,22 @@ jobs:
       - name: tsc & build
         run: pnpm --filter assignment-6 build
 
-      - name: Comment PR on build failure
-        if: ${{ failure() }}
+      - name: Comment on PR
+        if: failure()
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            github.rest.issues.createComment({
+            const name = '${{ github.workflow }}'
+            const url = '${{ github.server_url }}/${{ github.repository }}'
+            const success = '${{ job.status }}' === 'success';
+            const body = `${name}: ${success ? '✅' : '❌'}`
+
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '빌드 과정에서 오류가 발생했습니다. 로그를 확인해 주세요.'
+              body: body
             })
 
   lint:
