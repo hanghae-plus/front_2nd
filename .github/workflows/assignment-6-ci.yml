@@ -153,7 +153,7 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            const resultsPath = path.join(process.env.GITHUB_WORKSPACE, 'packages', 'assignment-6', '.lighthouseci', 'lhr-0.report.json');
+            const resultsPath = path.join(process.env.GITHUB_WORKSPACE, 'packages', 'assignment-6', 'lhci_reports', 'manifest.json');
 
             let comments = "";
 
@@ -174,7 +174,7 @@ jobs:
               `| ${score(categories.pwa.score * 100)} PWA | ${formatResult(categories.pwa.score * 100)} |`
             ].join("\n");
 
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
