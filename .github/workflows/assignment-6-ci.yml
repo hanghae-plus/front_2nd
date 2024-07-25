@@ -40,7 +40,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
           version: 8
@@ -54,15 +53,17 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Run ESLint
+        working-directory: ./packages/assignment-6
         run: |
-          pnpm -F assignment-6 lint 2>&1 | tee result.txt
-          exit ${PIPESTATUS[0]}
-        working-directory: packages/assignment-6
+          npx eslint . --config ./eslint.config.js 2>&1 | tee result.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+          exit $EXIT_CODE
 
       - name: Add PR comment on lint errors
         if: failure()
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const lintResult = fs.readFileSync('packages/assignment-6/result.txt', 'utf8');
@@ -73,7 +74,6 @@ jobs:
               issue_number: context.issue.number,
               body: `ESLint Results:\n\n${lintResult}`
             });
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
 
   test:
     runs-on: ubuntu-latest
