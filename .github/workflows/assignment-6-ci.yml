@@ -30,13 +30,13 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const pull_number = context.payload.pull_request.number;
             const { owner, repo } = context.repo;
-            console.log(`Owner: ${owner}, Repo: ${repo}, PR number: ${pull_number}`);
-            await github.rest.pulls.createReview({
+            const issue_number = context.payload.pull_request.number;
+
+            await github.rest.issues.createComment({
               owner,
               repo,
-              pull_number,
+              issue_number,
               body: '## 빌드 오류 발생 ❌\nTypeScript 컴파일 또는 빌드 과정에서 오류가 발생했습니다. 로그를 확인해 주세요.',
               event: 'COMMENT'
             });
@@ -67,13 +67,13 @@ jobs:
               ? report.substr(0, 65000) + "\n\n... (report truncated due to length)"
               : report
 
-            const pull_number = context.payload.pull_request.number;
             const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
 
-            await github.rest.pulls.createReview({
+            await github.rest.issues.createComment({
               owner,
               repo,
-              pull_number,
+              issue_number,
               body: `## ESLint Results\n\`\`\`\n${truncated_report}\n\`\`\``,
               event: 'COMMENT'
             });
@@ -138,13 +138,13 @@ jobs:
             const statement_coverage = `${{ steps.format_coverage.outputs.statement_coverage }}%`
             const branch_coverage = `${{ steps.format_coverage.outputs.branch_coverage }}%`
 
-            const { owner, repo } = context.repo
-            const pull_number = context.payload.pull_request.number;
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
 
-            await github.rest.pulls.createReview({
+            await github.rest.issues.createComment({
               owner,
               repo,
-              pull_number,
+              issue_number,
               body: `## 테스트 성공 ✅\n ### 커버리지 결과\n 라인 커버리지: ${line_coverage}\n 함수 커버리지: ${function_coverage}\n 구문 커버리지: ${statement_coverage}\n 브랜치 커버리지: ${branch_coverage}`,
               event: 'COMMENT'
             });
@@ -188,13 +188,13 @@ jobs:
             const seo = `${{ steps.extract_lighthouse_scores.outputs.seo_score }}`
             const pwa = `${{ steps.extract_lighthouse_scores.outputs.pwa_score }}`
 
-            const { owner, repo } = context.repo
-            const pull_number = context.payload.pull_request.number;
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
 
-            await github.rest.pulls.createReview({
+            await github.rest.issues.createComment({
               owner,
               repo,
-              pull_number,
+              issue_number,
               body: `## Lighthouse 성능 측정 결과 ✅\n\n| 카테고리 | 점수 |\n| --- | --- |\n| Performance | ${performance}% |\n| Accessibility | ${accessibility}% |\n| Best Practices | ${bestPractices}% |\n| SEO | ${seo}% |\n| PWA | ${pwa !== "null" ? pwa : "N/A"}% |`,
               event: 'COMMENT'
             });
@@ -233,11 +233,11 @@ jobs:
             const reviewer = '${{ steps.choose_reviewer.outputs.reviewer }}';
 
             const { owner, repo } = context.repo;
-            const pull_number = context.payload.pull_request.number;
+            const issue_number = context.payload.pull_request.number;
 
-            await github.rest.pulls.createReview({
+            await github.rest.issues.createComment({
               owner,
               repo,
-              pull_number,
+              issue_number,
               body: `@${reviewer} Please review this PR.`
             });
