@@ -24,32 +24,20 @@ jobs:
         id: job1
         run: |
           pnpm -F assignment-6 install
-          pnpm -F assignment-6 build || {
-            error_message=$(pnpm -F assignment-6 build 2>&1)
-            echo "error_message<<EOF" >> $GITHUB_OUTPUT
-            echo "$error_message" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-            exit 1
-          }
+          pnpm -F assignment-6 build
       - name: 'job1-err: 오류가 발생하면 코멘트를 남긴다.'
         if: failure()
         uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const errorMessage = `${{ steps.job1.outputs.error_message }}`;
-            
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `빌드 과정에서 오류가 발생했습니다. 오류 내용은 다음과 같습니다:
-
-            \`\`\`
-            ${errorMessage}
-            \`\`\`
-
-            자세한 내용은 GitHub Actions 로그를 확인해주세요.`
+              body: `##tsc, build result
+                
+                빌드 과정에서 오류가 발생했습니다. 자세한 내용은 GitHub Actions 로그를 확인해주세요.`
             });
 
   lint:
