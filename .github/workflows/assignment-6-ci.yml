@@ -111,81 +111,39 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run tests
-        run: pnpm -F assignment-6 test:coverage
-
-      - name: List coverage directory
-        run: ls -R packages/assignment-6/coverage
-
-      - name: Print coverage file content
+            - name: Run tests
         run: |
-          echo "Coverage file content:"
-          cat packages/assignment-6/coverage/coverage-final.json | head -n 50
-          echo "File structure:"
-          ls -R packages/assignment-6/coverage
+          cd packages/assignment-6
+          pnpm -F assignment-6 test:with_coverage
+          ls -la
+      - name: List coverage directory
+        run: ls -la packages/assignment-6/coverage
 
-      - name: Comment test results
-        if: success()
+      - name: Post test results comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const path = require('path');
-            
-            try {
-              const coverageFile = path.join(process.cwd(), 'packages', 'assignment-6', 'coverage', 'coverage-final.json');
-              const coverageJson = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
-              
-              let totalStatements = 0;
-              let coveredStatements = 0;
-              let totalBranches = 0;
-              let coveredBranches = 0;
-              let totalFunctions = 0;
-              let coveredFunctions = 0;
-              let totalLines = 0;
-              let coveredLines = 0;
-              
-              Object.values(coverageJson).forEach(file => {
-                if (file.s) {
-                  totalStatements += Object.keys(file.s).length;
-                  coveredStatements += Object.values(file.s).filter(v => v > 0).length;
-                }
-                if (file.b) {
-                  totalBranches += Object.keys(file.b).length;
-                  coveredBranches += Object.values(file.b).filter(branch => branch[0] > 0 || branch[1] > 0).length;
-                }
-                if (file.f) {
-                  totalFunctions += Object.keys(file.f).length;
-                  coveredFunctions += Object.values(file.f).filter(v => v > 0).length;
-                }
-                if (file.l) {
-                  totalLines += Object.keys(file.l).length;
-                  coveredLines += Object.values(file.l).filter(v => v > 0).length;
-                }
-              });
-              
-              const calculatePercentage = (covered, total) => {
-                if (total === 0) return '0.00';
-                return ((covered / total) * 100).toFixed(2);
-              };
-              
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `## 테스트 성공✅ 
-                \n### 커버리지 결과\n
-                
-                • 라인 커버리지: ${calculatePercentage(coveredLines, totalLines)}%
-                • 브랜치 커버리지: ${calculatePercentage(coveredBranches, totalBranches)}%
-                • 함수 커버리지: ${calculatePercentage(coveredFunctions, totalFunctions)}%
-                • 구문 커버리지: ${calculatePercentage(coveredStatements, totalStatements)}%`
-              });
-            } catch (error) {
-              console.error('Error processing coverage data:', error);
-              core.setFailed(`Failed to process coverage data: ${error.message}`);
-            }
+            const path = "packages/assignment-6/coverage/coverage-summary.json";
+            let message = ``;
+            const coverage = JSON.parse(fs.readFileSync(path, 'utf8'));          
+            const { total } = coverage;
+            message += `
+            - 라인 커버리지: ${total.lines.pct}%
+            - 브랜치 커버리지: ${total.branches.pct}%
+            - 함수 커버리지: ${total.functions.pct}%
+            - 구문 커버리지: ${total.statements.pct}%`;
+            message = '${{ job.status }}' === 'success' ?
+              `## 테스트 성공 ✅\n### 커버리지 결과\n${message}` :
+              `## 테스트 실패 :x:\n### 커버리지 결과\n${message}`;
+            // PR에 코멘트를 남김
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message,
+            });
 
   lighthouse:
     runs-on: ubuntu-latest
