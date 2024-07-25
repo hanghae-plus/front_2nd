@@ -98,14 +98,14 @@ jobs:
       - run: pnpm -F assignment-6 test -- --coverage > coverage_report.txt
       - id: format_coverage
         run: |
-          LINE_COVERAGE=$(grep -oP 'Lines\s*:\s*\K[0-9.]+%' coverage_report.txt)
-          FUNCTION_COVERAGE=$(grep -oP 'Functions\s*:\s*\K[0-9.]+%' coverage_report.txt)
-          STATEMENT_COVERAGE=$(grep -oP 'Statements\s*:\s*\K[0-9.]+%' coverage_report.txt)
-          BRANCH_COVERAGE=$(grep -oP 'Branches\s*:\s*\K[0-9.]+%' coverage_report.txt)
-          echo "line_coverage=${LINE_COVERAGE}" >> $GITHUB_OUTPUT
-          echo "function_coverage=${FUNCTION_COVERAGE}" >> $GITHUB_OUTPUT
-          echo "statement_coverage=${STATEMENT_COVERAGE}" >> $GITHUB_OUTPUT
-          echo "branch_coverage=${BRANCH_COVERAGE}" >> $GITHUB_OUTPUT
+          LINE_COVERAGE=$(grep "All files" coverage_report.txt | awk '{print $7}')
+          FUNCTION_COVERAGE=$(grep "All files" coverage_report.txt | awk '{print $5}')
+          STATEMENT_COVERAGE=$(grep "All files" coverage_report.txt | awk '{print $3}')
+          BRANCH_COVERAGE=$(grep "All files" coverage_report.txt | awk '{print $4}')
+          echo "line_coverage=${LINE_COVERAGE}%" >> $GITHUB_OUTPUT
+          echo "function_coverage=${FUNCTION_COVERAGE}%" >> $GITHUB_OUTPUT
+          echo "statement_coverage=${STATEMENT_COVERAGE}%" >> $GITHUB_OUTPUT
+          echo "branch_coverage=${BRANCH_COVERAGE}%" >> $GITHUB_OUTPUT
       - if: failure()
         uses: actions/github-script@v7
         with:
