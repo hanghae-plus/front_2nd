@@ -154,6 +154,7 @@ jobs:
           script: |
             const fs = require('fs');
             const lighthouseOutput = fs.readFileSync('lighthouse_output.txt', 'utf8');
+            console.log('lighthouseOutput', lighthouseOutput);
             
             // Lighthouse 결과 파싱
             const scores = {};
