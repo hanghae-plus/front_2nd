@@ -247,7 +247,7 @@ jobs:
             });
 
       - name: Comment on assigned reviewer
-        if: steps.check_reviewers.outputs.reviewers == ''
+        if: github.event.action == 'opened'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
