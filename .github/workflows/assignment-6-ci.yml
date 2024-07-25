@@ -95,6 +95,7 @@ jobs:
       - name: 'job3: 테스트를 실행하고, 커버리지를 측정하여 코멘트에 남긴다.'
         id: job3
         run: |
+          pnpm -F assignment-6 install
           output=$(pnpm -F assignment-6 test:coverage | tee /dev/stderr)
           echo "coverage<<EOF" >> $GITHUB_OUTPUT
           echo "$output" >> $GITHUB_OUTPUT
