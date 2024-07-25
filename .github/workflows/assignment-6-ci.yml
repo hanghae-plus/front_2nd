@@ -151,7 +151,60 @@ jobs:
         run: |
           pnpm install -g @lhci/cli
           pnpm --filter assignment-6 lighthouse || echo "Fail to Run Lighthouse CI"
-          
+
+      - name: Comment Lighthouse comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'));
+            let comments = "";
+
+            results.forEach((result) => {
+              const { summary, jsonPath } = result;
+              const { audits } = details;
+
+              const details = JSON.parse(fs.readFileSync(jsonPath));
+              const formatResult = (res) => Math.round(res * 100);
+
+              Object.keys(summary).forEach(
+                (key) => (summary[key] = formatResult(summary[key]))
+              );
+
+              const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
+
+              const comment = [
+                `⚡️ Lighthouse report!`,
+                `| Category | Score |`,
+                `| --- | --- |`,
+                `| ${score(summary.performance)} Performance | ${summary.performance} |`,
+                { ... }
+              ].join("\n");
+
+              const detail = [
+                `| Category | Score |`,
+                `| --- | --- |`,
+                `| ${score(
+                  audits["first-contentful-paint"].score * 100
+                )} First Contentful Paint | ${
+                  audits["first-contentful-paint"].displayValue
+                } |`,
+                { ... }
+              ].join("\n");
+              comments += comment + "\n" + detail + "\n";
+            });
+            # comments 변수의 값을 다음 job으로 넘겨줍니다.
+            core.setOutput('comments', comments)
+
+      - name: comment PR
+        uses: unsplash/comment-on-pr@v1.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: ${{ steps.format_lighthouse_score.outputs.comments}}
+
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
