@@ -13,8 +13,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - name: Install pmpm
+        run: pnpm install
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tsc and build
+        run: |
+          pmpm -F assignment-6 build
+      - name: Comment build result
+        if: failure()
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          GITHUB_TOKEN: ${{secrets.TOKEN_FOR_CI}}
+          message: |
+            build failed
 
   lint:
     runs-on: ubuntu-latest
