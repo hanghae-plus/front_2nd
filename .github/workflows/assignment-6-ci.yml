@@ -13,10 +13,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: "20"
+          version: latest
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
           cache: "pnpm"
       - name: Install pmpm
         run: npm install -g pnpm
