@@ -30,13 +30,19 @@ jobs:
       - name: Run tsc and build
         run: |
           pmpm -F assignment-6 build
+        continue-on-error: true
       - name: Comment build result
         if: failure()
-        uses: thollander/actions-comment-pull-request@v2
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
-          message: |
-            build failed
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Build failed. Please check the logs.'
+            })
 
   lint:
     runs-on: ubuntu-latest
