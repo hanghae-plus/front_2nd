@@ -101,31 +101,34 @@ jobs:
           script: |
             const fs = require('fs');
             const testOutput = fs.readFileSync('test_output.txt', 'utf8');
-            console.log('testOutput', testOutput);
             
-            // 커버리지 정보 추출
-            const coverageInfo = {};
-            const coverageTypes = ['Lines', 'Branches', 'Functions', 'Statements'];
+            // 'All files' 행을 찾아 커버리지 정보 추출
+            const allFilesLine = testOutput.split('\n').find(line => line.startsWith('All files'));
             
-            coverageTypes.forEach(type => {
-              const regex = new RegExp(`${type}\\s*:\\s*(\\d+(\\.\\d+)?)%`, 'i');
-              const match = testOutput.match(regex);
-              coverageInfo[type] = match ? match[1] + '%' : 'N/A';
-            });
+            let coverageReport = '';
+            
+            if (allFilesLine) {
+              const coverageValues = allFilesLine.split('|').map(item => item.trim());
+              if (coverageValues.length >= 5) {
+                coverageReport = `
+                구문 커버리지: ${coverageValues[1]}
+                브랜치 커버리지: ${coverageValues[2]}
+                함수 커버리지: ${coverageValues[3]}
+                라인 커버리지: ${coverageValues[4]}
+                `;
+              }
+            }
               
-            const coverageReport = `
-            라인 커버리지: ${coverageInfo.Lines}
-            브랜치 커버리지: ${coverageInfo.Branches}
-            함수 커버리지: ${coverageInfo.Functions}
-            구문 커버리지: ${coverageInfo.Statements}
-            `;
-            
+            if (!coverageReport) {
+              coverageReport = '커버리지 정보를 찾을 수 없습니다.';
+            }
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `테스트가 성공적으로 완료되었습니다. 커버리지 결과:
-  
+    
             \`\`\`
             ${coverageReport.trim()}
             \`\`\`
