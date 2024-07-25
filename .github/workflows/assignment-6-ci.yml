@@ -56,9 +56,6 @@ jobs:
         run:  |
           pnpm -F assignment-6 install
           pnpm -F assignment-6 lint 2>&1 | tee lint_output.txt
-          const fs = require('fs');
-          const lintOutput = fs.readFileSync('lint_output.txt', 'utf8');
-          console.log('lintOutput', lintOutput);
       - name: 'job2-err: eslint에서 오류가 발생할 경우 report를 코멘트에 남긴다.'
         if: failure()
         uses: actions/github-script@v7
@@ -67,6 +64,7 @@ jobs:
           script: |
             const fs = require('fs');
             const lintOutput = fs.readFileSync('lint_output.txt', 'utf8');
+            console.log('lintOutput: ', lintOutput)
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
