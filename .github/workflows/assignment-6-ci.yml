@@ -224,8 +224,8 @@ jobs:
           repo-token: ${{ secrets.TOKEN_FOR_CI }}
           configuration-path: .github/auto-assign.yml
 
-      - name: Comment the lighthouse result on PR
-        if: success()
+      - name: Comment the review request on PR
+        if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened')
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
