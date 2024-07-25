@@ -153,26 +153,43 @@ jobs:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs');
-            const lighthouseOutput = fs.readFileSync('lighthouse_output.txt', 'utf8');
-            console.log('lighthouseOutput', lighthouseOutput);
+  
+            let resultMessage = '## Lighthouse 성능 측정 결과\n\n';
             
-            // Lighthouse 결과 파싱
-            const scores = {};
-            const metrics = ['performance', 'accessibility', 'best-practices', 'seo'];
+            try {
+              const lighthouseOutput = fs.readFileSync('lighthouse_output.txt', 'utf8');
+              
+              // Lighthouse 결과 URL 추출
+              const reportUrlMatch = lighthouseOutput.match(/Open the report at (https:\/\/.*\.html)/);
+              const reportUrl = reportUrlMatch ? reportUrlMatch[1] : 'Report URL not found';
             
-            metrics.forEach(metric => {
-              const regex = new RegExp(`${metric}:\\s*(\\d+)`, 'i');
-              const match = lighthouseOutput.match(regex);
-              if (match) {
-                scores[metric] = parseInt(match[1]);
+              // 성능 지표 추출
+              const scores = {};
+              const metrics = ['performance', 'accessibility', 'best-practices', 'seo'];
+              
+              metrics.forEach(metric => {
+                const regex = new RegExp(`${metric}\\s*(\\d+)`, 'i');
+                const match = lighthouseOutput.match(regex);
+                if (match) {
+                  scores[metric] = parseInt(match[1]);
+                }
+              });
+            
+              // 결과 표 생성
+              resultMessage += '| 카테고리 | 점수 |\n';
+              resultMessage += '|----------|------|\n';
+              for (const [metric, score] of Object.entries(scores)) {
+                const metricName = metric.charAt(0).toUpperCase() + metric.slice(1);
+                resultMessage += `| ${metricName} | ${score}% |\n`;
               }
-            });
+          
+              resultMessage += `\n[상세 리포트 보기](${reportUrl})\n`;
             
-            // 결과 포맷팅
-            let resultMessage = '## Lighthouse 결과\n\n';
-            for (const [metric, score] of Object.entries(scores)) {
-              resultMessage += `- ${metric}: ${score}\n`;
+            } catch (error) {
+              resultMessage += `오류 발생: ${error.message}\n`;
             }
+              
+            console.log(resultMessage);
             
             // GitHub에 코멘트 작성
             github.rest.issues.createComment({
