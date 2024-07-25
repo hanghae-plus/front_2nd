@@ -153,8 +153,8 @@ jobs:
 
       - name: Run Lighthouse
         run: |
-          pnpm i -g @lhci/cli
-          pnpm -F assignment-6 lhci
+          pnpm add -g @lhci/cli
+          lhci autorun --collect.staticDistDir=packages/assignment-6
 
       - name: Format lighthouse score
         id: format_lighthouse
@@ -170,6 +170,12 @@ jobs:
 
             const details = JSON.parse(fs.readFileSync(resultsPath));
             const { categories } = details;
+
+            console.log("Lighthouse Report Details:", details);
+
+            if (!categories || !categories.performance) {
+              throw new Error("Performance category is missing in the Lighthouse report.");
+            }
 
             const formatResult = (res) => Math.round(res * 100);
             const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
@@ -190,7 +196,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: comments
-            });
+            })
 
   assign_reviewer:
     runs-on: ubuntu-latest
