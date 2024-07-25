@@ -88,44 +88,35 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - name: 'job3: 테스트를 실행하고, 커버리지를 측정하여 코멘트에 남긴다.'
+      - name: 'job3: 테스트를 실행'
         id: job3
         run: |
           pnpm -F assignment-6 install
-          output=$(pnpm -F assignment-6 test:coverage | tee /dev/stderr)
-          echo "coverage<<EOF" >> $GITHUB_OUTPUT
-          echo "$output" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Comment PR with Coverage
+          pnpm -F assignment-6 test:coverage | tee test_output.txt
+      - name: 'job3-res: 커버리지를 측정하여 코멘트에 남긴다.'
         uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const coverage = `${{ steps.job3.outputs.coverage }}`;
-            console.log("coverage",coverage)
+            const fs = require('fs');
+            const testOutput = fs.readFileSync('test_output.txt', 'utf8');
             
-            // 정규 표현식을 사용하여 커버리지 정보 추출
-            const lines = coverage.match(/Lines\s*:\s*([\d.]+)%/)?.[1] || 'N/A';
-            const functions = coverage.match(/Functions\s*:\s*([\d.]+)%/)?.[1] || 'N/A';
-            const statements = coverage.match(/Statements\s*:\s*([\d.]+)%/)?.[1] || 'N/A';
-            const branches = coverage.match(/Branches\s*:\s*([\d.]+)%/)?.[1] || 'N/A';
-            
-            const coverageComment = `테스트 성공 ✅
-            
-            커버리지 결과
-            
-            • 라인 커버리지: ${lines}%
-            • 브랜치 커버리지: ${branches}%
-            • 함수 커버리지: ${functions}%
-            • 구문 커버리지: ${statements}%`;
+            // 커버리지 정보 추출
+            const coverageMatch = testOutput.match(/(?:Coverage|Test Coverage).*?(?:\n\n|\Z)/s);
+            const coverageInfo = coverageMatch ? coverageMatch[0].trim() : 'Coverage information not found.';
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: coverageComment
-            })
+              body: `테스트 커버리지 결과:
+    
+            \`\`\`
+            ${coverageInfo}
+            \`\`\`
+    
+            자세한 테스트 결과는 CI 로그를 확인해 주세요.`
+            });
 
   lighthouse:
     runs-on: ubuntu-latest
