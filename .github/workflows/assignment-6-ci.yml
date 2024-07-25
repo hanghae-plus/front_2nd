@@ -120,20 +120,13 @@ jobs:
         run: |
           pnpm -F assignment-6 test:coverage
 
-      - name: Verify coverage file exists
-        run: |
-          if [ ! -f ./coverage/coverage-summary.json ]; then
-            echo "Coverage summary file not found!"
-            exit 1
-          fi
-
       - name: Report Coverage
         if: always()
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
-          json-summary-path: coverage/coverage-summary.json
-          json-final-path: coverage/coverage-final.json
+          json-summary-path: ./coverage/coverage-summary.json
+          json-final-path: ./coverage/coverage-final.json
           file-coverage-mode: changes
           working-directory: ./packages/assignment-6
 
