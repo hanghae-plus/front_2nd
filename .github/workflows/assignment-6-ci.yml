@@ -33,9 +33,7 @@ jobs:
           script: |
             const jobOutput = `${process.env.GITHUB_WORKFLOW} 워크플로우의 job1 단계에서 오류가 발생했습니다:
             
-            \`\`\`
             ${{ steps.job1.outputs.stderr }}
-            \`\`\`
             `
             
             github.rest.issues.createComment({
@@ -69,9 +67,7 @@ jobs:
           script: |
             const jobOutput = `${process.env.GITHUB_WORKFLOW} 워크플로우의 job2 단계에서 오류가 발생했습니다:
             
-            \`\`\`
             ${{ steps.job2.outputs.stderr }}
-            \`\`\`
             `
             
             github.rest.issues.createComment({
