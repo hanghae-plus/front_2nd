@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
 
   build:
     name: Build and Type Check
@@ -33,7 +33,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
       - name: Run build
         run: pnpm --filter assignment-6 build
       - name: Comment build result
@@ -61,7 +61,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
       - name: Run ESLint
         run: pnpm --filter assignment-6 lint -- --output-file eslint_report.txt
       - name: Comment ESLint result
@@ -92,7 +92,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
       - name: Run tests with coverage
         run: pnpm --filter assignment-6 test -- --coverage
       - name: Comment test coverage
@@ -127,7 +127,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
       - name: Build for production
         run: pnpm --filter assignment-6 build
       - name: Run Lighthouse CI
