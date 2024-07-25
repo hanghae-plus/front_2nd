@@ -163,51 +163,52 @@ jobs:
       - run: |
           pnpm install
           pnpm -F assignment-6 add -D @lhci/cli@0.7.x
-      - id: build_and_lighthouse
-        run: |
-          pnpm -F assignment-6 build
-          pnpm --F assignment-6 lighthouse
-      - if: steps.build_and_lighthouse.outcome == 'success'
+      - run: pnpm -F assignment-6 build
+      - if: success()
+        id: lighthouse
+        run: pnpm --F assignment-6 lighthouse
+      - if: steps.lighthouse.outcome == 'success'
         id: extract_lighthouse_scores
         run: |
-          LIGHTHOUSE_RESULTS="packages/assignment-6/.lighthouseci"
-          PERFORMANCE=$(jq '.categories.performance.score' $LIGHTHOUSE_RESULTS/lhr-*.json)
-          ACCESSIBILITY=$(jq '.categories.accessibility.score' $LIGHTHOUSE_RESULTS/lhr-*.json)
-          BEST_PRACTICES=$(jq '.categories["best-practices"].score' $LIGHTHOUSE_RESULTS/lhr-*.json)
-          SEO=$(jq '.categories.seo.score' $LIGHTHOUSE_RESULTS/lhr-*.json)
-          PWA=$(jq '.categories.pwa.score' $LIGHTHOUSE_RESULTS/lhr-*.json || echo "null")
-          echo "performance_score=$(echo $PERFORMANCE | jq -r '. * 100')" >> $GITHUB_OUTPUT
-          echo "accessibility_score=$(echo $ACCESSIBILITY | jq -r '. * 100')" >> $GITHUB_OUTPUT
-          echo "best_practices_score=$(echo $BEST_PRACTICES | jq -r '. * 100')" >> $GITHUB_OUTPUT
-          echo "seo_score=$(echo $SEO | jq -r '. * 100')" >> $GITHUB_OUTPUT
-          echo "pwa_score=$(echo $PWA | jq -r '. * 100')" >> $GITHUB_OUTPUT
-      - if: steps.build_and_lighthouse.outcome == 'success'
+          LIGHTHOUSE_RESULTS="packages/assignment-6/.lighthouseci/lhr-*.json"
+          PERFORMANCE=$(jq '.categories.performance.score' $LIGHTHOUSE_RESULTS | jq -s 'add/length * 100 | round')
+          ACCESSIBILITY=$(jq '.categories.accessibility.score' $LIGHTHOUSE_RESULTS | jq -s 'add/length * 100 | round')
+          BEST_PRACTICES=$(jq '.categories["best-practices"].score' $LIGHTHOUSE_RESULTS | jq -s 'add/length * 100 | round')
+          SEO=$(jq '.categories.seo.score' $LIGHTHOUSE_RESULTS | jq -s 'add/length * 100 | round')
+          echo "performance=$PERFORMANCE" >> $GITHUB_OUTPUT
+          echo "accessibility=$ACCESSIBILITY" >> $GITHUB_OUTPUT
+          echo "best_practices=$BEST_PRACTICES" >> $GITHUB_OUTPUT
+          echo "seo=$SEO" >> $GITHUB_OUTPUT
+      - if: always()
         uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const performance = `${{ steps.extract_lighthouse_scores.outputs.performance_score }}`
-            const accessibility = `${{ steps.extract_lighthouse_scores.outputs.accessibility_score }}`
-            const bestPractices = `${{ steps.extract_lighthouse_scores.outputs.best_practices_score }}`
-            const seo = `${{ steps.extract_lighthouse_scores.outputs.seo_score }}`
-            const pwa = `${{ steps.extract_lighthouse_scores.outputs.pwa_score }}`
-
             const { owner, repo } = context.repo;
             const issue_number = context.payload.pull_request.number;
+
+            let body = '';
+
+            if ('${{ steps.build.outcome }}' !== 'success') {
+              body = '## 빌드 실패 ❌\n\n빌드에 실패하여 Lighthouse 성능 측정을 수행하지 못했습니다.';
+            } else if ('${{ steps.lighthouse.outcome }}' !== 'success') {
+              body = '## Lighthouse 실행 실패 ❌\n\n빌드는 성공했지만 Lighthouse 성능 측정 중 오류가 발생했습니다.';
+            } else {
+              const performance = '${{ steps.extract_lighthouse_scores.outputs.performance }}';
+              const accessibility = '${{ steps.extract_lighthouse_scores.outputs.accessibility }}';
+              const bestPractices = '${{ steps.extract_lighthouse_scores.outputs.best_practices }}';
+              const seo = '${{ steps.extract_lighthouse_scores.outputs.seo }}';
+              
+              body = `## Lighthouse 성능 측정 결과 ✅\n\n| 카테고리 | 점수 |\n| --- | --- |\n| Performance | ${performance}% |\n| Accessibility | ${accessibility}% |\n| Best Practices | ${bestPractices}% |\n| SEO | ${seo}% |`;
+            }
 
             await github.rest.issues.createComment({
               owner,
               repo,
               issue_number,
-              body: `## Lighthouse 성능 측정 결과 ✅\n\n| 카테고리 | 점수 |\n| --- | --- |\n| Performance | ${performance}% |\n| Accessibility | ${accessibility}% |\n| Best Practices | ${bestPractices}% |\n| SEO | ${seo}% |\n| PWA | ${pwa !== "null" ? pwa : "N/A"}% |`,
+              body,
               event: 'COMMENT'
             });
-      - if: always()
-        run: |
-          if [ "${{ steps.build_and_lighthouse.outcome }}" != "success" ]; then
-            echo "빌드 또는 Lighthouse 검사 실패"
-            exit 1
-          fi
 
   assign_reviewer:
     runs-on: ubuntu-latest
