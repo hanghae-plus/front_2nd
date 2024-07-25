@@ -35,7 +35,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `##tsc, build result
+              body: `## tsc, build result
                 
                 빌드 과정에서 오류가 발생했습니다. 자세한 내용은 GitHub Actions 로그를 확인해주세요.`
             });
