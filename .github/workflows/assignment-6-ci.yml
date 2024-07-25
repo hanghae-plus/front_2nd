@@ -22,9 +22,6 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
-      - name: Install pnpm
-        run: npm install -g pnpm
-
       - name: Install dependencies
         run: pnpm install
 
@@ -35,11 +32,15 @@ jobs:
 
       - name: Comment if build fails
         if: failure()
-        uses: thollander/actions-comment-pull-request@v2
+        uses: actions/github-script@v6
         with:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
-          message: |
-            빌드 실패❌
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '빌드 실패 ❌'
+            })
 
   lint:
     runs-on: ubuntu-latest
