@@ -41,30 +41,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 8
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-      - name: Debug - List directory structure
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Directory contents:"
-          ls -R
+      - name: Install Node.js dependencies
+        run: npm install --legacy-peer-deps
+        working-directory: packages/assignment-6
 
       - name: Run ESLint
         working-directory: ./packages/assignment-6
         run: |
-          npx eslint . --ext .ts,.tsx 2>&1 | tee result.txt
-          EXIT_CODE=${PIPESTATUS[0]}
-          exit $EXIT_CODE
+          npm run lint > eslint-output.txt
+          cat eslint-output.txt
+          working-directory: packages/assignment-6
 
       - name: Add PR comment on lint errors
         if: failure()
@@ -73,7 +64,7 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const lintResult = fs.readFileSync('result.txt', 'utf8');
+            const lintOutput = fs.readFileSync('packages/assignment-6/eslint-output.txt', 'utf8');
 
             github.rest.issues.createComment({
               owner: context.repo.owner,
