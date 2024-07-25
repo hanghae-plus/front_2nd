@@ -163,7 +163,8 @@ jobs:
       - run: |
           pnpm install
           pnpm -F assignment-6 add -D @lhci/cli@0.7.x
-      - run: pnpm -F assignment-6 build
+      - id: build
+        run: pnpm -F assignment-6 build
       - if: success()
         id: lighthouse
         run: pnpm --F assignment-6 lighthouse
