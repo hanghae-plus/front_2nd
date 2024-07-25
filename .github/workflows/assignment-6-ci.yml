@@ -19,9 +19,9 @@ jobs:
           node-version: "20"
           cache: "pnpm"
       - name: Install pmpm
-        run: pnpm install
+        run: npm install -g pnpm
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
       - name: Run tsc and build
         run: |
           pmpm -F assignment-6 build
@@ -29,7 +29,7 @@ jobs:
         if: failure()
         uses: thollander/actions-comment-pull-request@v2
         with:
-          GITHUB_TOKEN: ${{secrets.TOKEN_FOR_CI}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           message: |
             build failed
 
