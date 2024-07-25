@@ -8,7 +8,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "build": "tsc -b && vite build",
-    "lint": "eslint . -c .eslintrc.cjs --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --config ./eslint.config.js --report-unused-disable-directives --max-warnings 0",
     "lhci": "lhci autorun"
   },
   "dependencies": {
