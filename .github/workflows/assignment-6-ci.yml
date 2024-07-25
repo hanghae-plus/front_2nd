@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: pnpm
       - name: [job1] tsc, build 를 실행한다. 오류가 발생하면 코멘트를 남긴다.
         id: job1
         run: |
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: pnpm
       - name: [job2] eslint를 실행한 다음에, eslint에서 오류가 발생할 경우 report를 코멘트에 남긴다.
         id: job2
         run:  |
@@ -91,7 +91,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: pnpm
       - name: [job3] 테스트를 실행하고, 커버리지를 측정하여 코멘트에 남긴다.
         id: job3
         run: |
@@ -139,7 +139,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: pnpm
       - name: [job4] lighthouse ci 를 실행하고, 실행 결과를 코멘트에 남긴다.
         id: job4
         run: |
