@@ -144,58 +144,38 @@ jobs:
         id: job4
         run: |
           pnpm -F assignment-6 install
-          pnpm -F assignment-6 build
-          npm install -g @lhci/cli@0.11.x
-          lhci autorun --config=./lighthouserc.js
-          lhci autorun > lighthouse_output.txt
+          npx @lhci/cli@0.11.x autorun
       - name: 'job4-res: 실행 결과를 코멘트에 남긴다.'
         uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs');
-            let resultMessage = '## Lighthouse 성능 측정 결과\n\n';
+            const lhciResultsPath = './lighthouse-results/manifest.json';
+            const results = JSON.parse(fs.readFileSync(lhciResultsPath, 'utf8'));
             
-            try {
-              const lighthouseOutput = fs.readFileSync('lighthouse_output.txt', 'utf8');
-              console.log('lighthouseOutput', lighthouseOutput);
+            const scores = {
+              performance: results[0].summary.performance * 100,
+              accessibility: results[0].summary.accessibility * 100,
+              'best-practices': results[0].summary['best-practices'] * 100,
+              seo: results[0].summary.seo * 100
+            };
             
-              if (lighthouseOutput.includes('Lighthouse CI failed') || lighthouseOutput.trim() === '') {
-                resultMessage += 'Lighthouse CI 실행에 실패했거나 결과가 없습니다.\n';
-                resultMessage += '빌드 로그를 확인해 주세요.\n';
-              } else {
-                const scores = {};
-                const metrics = ['performance', 'accessibility', 'best-practices', 'seo'];
+            const comment = `## Lighthouse 성능 측정 결과
             
-                metrics.forEach(metric => {
-                  const regex = new RegExp(`${metric}\\s*(\\d+)`, 'i');
-                  const match = lighthouseOutput.match(regex);
-                  if (match) {
-                    scores[metric] = parseInt(match[1]);
-                  }
-                });
-            
-                resultMessage += '| 카테고리 | 점수 |\n';
-                resultMessage += '|----------|------|\n';
-                for (const [metric, score] of Object.entries(scores)) {
-                  const metricName = metric.charAt(0).toUpperCase() + metric.slice(1);
-                  resultMessage += `| ${metricName} | ${score}% |\n`;
-                }
-            
-                const reportUrlMatch = lighthouseOutput.match(/Open the report at (https:\/\/.*\.html)/);
-                const reportUrl = reportUrlMatch ? reportUrlMatch[1] : 'Report URL not found';
-                resultMessage += `\n[상세 리포트 보기](${reportUrl})\n`;
-              }
-            } catch (error) {
-              resultMessage += `오류 발생: ${error.message}\n`;
-              resultMessage += '빌드 로그를 확인해 주세요.\n';
-            }
+            | 카테고리 | 점수 |
+            |----------|------|
+            | Performance | ${scores.performance.toFixed(0)}% |
+            | Accessibility | ${scores.accessibility.toFixed(0)}% |
+            | Best Practices | ${scores['best-practices'].toFixed(0)}% |
+            | SEO | ${scores.seo.toFixed(0)}% |
+            `;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: resultMessage
+              body: comment
             });
 
   assign_reviewer:
