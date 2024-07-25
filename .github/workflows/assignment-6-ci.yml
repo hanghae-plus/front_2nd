@@ -203,5 +203,41 @@ jobs:
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - id: choose_reviewer
+        run: |
+          TEAM_MEMBERS=("metacode22" "lhk228" "rachel-park-dev")
+
+          RANDOM_REVIEWER=${TEAM_MEMBERS[$RANDOM % ${#TEAM_MEMBERS[@]}]}
+
+          echo "Selected reviewer: $RANDOM_REVIEWER"
+
+          echo "reviewer=$RANDOM_REVIEWER" >> $GITHUB_OUTPUT
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const reviewer = '${{ steps.choose_reviewer.outputs.reviewer }}';
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+
+            await github.pulls.requestReviewers({
+              owner,
+              repo,
+              pull_number,
+              reviewers: [reviewer]
+            });
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const reviewer = '${{ steps.choose_reviewer.outputs.reviewer }}';
+
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+
+            await github.issues.createComment({
+              owner,
+              repo,
+              issue_number: pull_number,
+              body: `@${reviewer} Please review this PR.`
+            });
