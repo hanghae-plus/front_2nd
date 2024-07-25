@@ -109,9 +109,9 @@ jobs:
               const coverageValues = allFilesLine.split('|').map(item => item.trim());
               if (coverageValues.length >= 5) {
                 coverageReport = `- 구문 커버리지: ${coverageValues[1]}%
-                - 브랜치 커버리지: ${coverageValues[2]}%
-                - 함수 커버리지: ${coverageValues[3]}%
-                - 라인 커버리지: ${coverageValues[4]}%`;
+            - 브랜치 커버리지: ${coverageValues[2]}%
+            - 함수 커버리지: ${coverageValues[3]}%
+            - 라인 커버리지: ${coverageValues[4]}%`;
               }
             }
               
