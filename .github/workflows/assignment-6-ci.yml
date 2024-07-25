@@ -164,14 +164,14 @@ jobs:
             const comment = [
               "| 카테고리 | 점수 |",
               "| --- | --- |",
-              `| Performance | ${finalSummary.performance} |`,
-              `| Accessibility | ${finalSummary.accessibility} |`,
-              `| Best practices | ${finalSummary['best-practices']} |`,
-              `| SEO | ${finalSummary.seo} |`,
+              `| Performance | ${finalSummary.performance}% |`,
+              `| Accessibility | ${finalSummary.accessibility}% |`,
+              `| Best practices | ${finalSummary['best-practices']}% |`,
+              `| SEO | ${finalSummary.seo}% |`,
               "\n",
             ].join("\n");
             
-            const lighthouseComment = `## LIGHT HOUSE ✅ \n ${comment}`;
+            const lighthouseComment = `## Lighthouse 성능 측정 결과`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
