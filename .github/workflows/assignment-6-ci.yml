@@ -93,7 +93,7 @@ jobs:
         id: coverage
         run: |
           LINE_COVERAGE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.lines.pct')
-          BRANCH_COVERAGE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.branches.pct)
+          BRANCH_COVERAGE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.branches.pct')
           FUNCTION_COVERAGE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.functions.pct')
           STATEMENT_COVERAGE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.statements.pct')
           echo "line_coverage=${LINE_COVERAGE}" >> $GITHUB_OUTPUT
