@@ -138,7 +138,7 @@ jobs:
               owner,
               repo,
               pull_number,
-              body: `## 테스트 성공 ✅\n ### 커버리지 결과\n\`\`\`\n${coverage}\n\`\`\``,
+              body: `## 테스트 성공 ✅\n ### 커버리지 결과\n 라인 커버리지: ${lineCoverage}\n 함수 커버리지: ${functionCoverage}\n 구문 커버리지: ${statementCoverage}\n 브랜치 커버리지: ${branchCoverage}`,
               event: 'COMMENT'
             });
 
