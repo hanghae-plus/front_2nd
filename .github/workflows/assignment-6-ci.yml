@@ -116,6 +116,9 @@ jobs:
 
       - name: Report coverage
         if: always()
+        run: |
+          pwd
+          ls -la coverage
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
