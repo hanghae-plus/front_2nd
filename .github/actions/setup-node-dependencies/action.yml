@@ -27,6 +27,7 @@ runs:
         key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-
+
     - name: Install dependencies
       run: pnpm install --prefer-frozen-lockfile
       shell: bash
