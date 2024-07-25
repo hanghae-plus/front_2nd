@@ -33,10 +33,9 @@ jobs:
         id: build_step
         run: |
           pnpm -F assignment-6 build
-        continue-on-error: true
 
       - name: Comment if build fails
-        if: failure()
+        if: ${{ steps.build_step.outcome == 'failure' }}
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
