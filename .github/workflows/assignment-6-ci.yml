@@ -24,16 +24,20 @@ jobs:
         id: job1
         run: |
           pnpm -F assignment-6 install
-          pnpm -F assignment-6 build
+          pnpm -F assignment-6 build 2> error.log
       - name: 'job1-err: 오류가 발생하면 코멘트를 남긴다.'
         if: failure()
         uses: actions/github-script@v7
-        env:
-          ERROR_MESSAGE: ${{ steps.job1.outputs.stderr }}
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const errorMessage = process.env.ERROR_MESSAGE;
+            const fs = require('fs');
+            let errorMessage = 'Error details not available.';
+            try {
+              errorMessage = fs.readFileSync('error.log', 'utf8');
+            } catch (error) {
+              console.error('Failed to read error log:', error);
+            }
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
