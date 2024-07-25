@@ -37,13 +37,8 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const fs = require('fs');
-            let errorMessage = 'Error details not available.';
-            try {
-              errorMessage = fs.readFileSync('error.log', 'utf8');
-            } catch (error) {
-              console.error('Failed to read error log:', error);
-            }
+            const errorMessage = `${{ steps.job1.outputs.error_message }}`;
+            
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
