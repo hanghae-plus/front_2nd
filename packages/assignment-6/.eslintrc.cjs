@@ -1,23 +1,18 @@
-module.exports = {
-  root: true,
-  env: { browser: true, es2020: true },
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:react-hooks/recommended",
-  ],
-  ignorePatterns: ["dist", ".eslintrc.cjs"],
-  parser: "@typescript-eslint/parser",
-  plugins: ["react-refresh"],
-  rules: {
-    "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-  },
-  overrides: [
-    {
-      files: ["*.ts", "*.tsx"],
-      parser: "@typescript-eslint/parser",
-      plugins: ["@typescript-eslint"],
-      extends: ["plugin:@typescript-eslint/recommended"],
+module.exports = [
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
     },
-  ],
-};
+    plugins: {
+      "@typescript-eslint": require("@typescript-eslint/eslint-plugin"),
+      "react-refresh": require("eslint-plugin-react-refresh"),
+    },
+    rules: {
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      // 다른 규칙을 추가할 수 있습니다.
+    },
+    processor: "@typescript-eslint/parser",
+  },
+];
