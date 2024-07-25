@@ -226,9 +226,42 @@ jobs:
               body: comment
             });
 
-# job5: PR이 open 될 때만 실행됨, 팀원 중 한 명을 랜덤으로 선정하여 리뷰어 지정, 코멘트에 멘션해서 올림
-#     assign_reviewer:
-#       runs-on: ubuntu-latest
-#       steps:
-#         - name: job5 구현
-#           run: echo "job5의 내용을 구현해주세요"
+  # job5: PR이 open 될 때만 실행됨, 팀원 중 한 명을 랜덤으로 선정하여 리뷰어 지정, 코멘트에 멘션해서 올림
+  assign_reviewer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Random Reviewer
+        id: select_reviewer
+        run: |
+          reviewers=("yoosion030" "dhp94d" "callipenguin")
+          RANDOM_REVIEWER=${reviewers[$RANDOM % ${#reviewers[@]}]}
+          echo "selected_reviewer=$RANDOM_REVIEWER" >> $GITHUB_ENV
+
+      - name: Assign Reviewer
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const reviewer = process.env.selected_reviewer;
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [reviewer]
+            });
+
+      - name: Comment on PR
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const reviewer = process.env.selected_reviewer;
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@${reviewer}님, 리뷰를 부탁드립니다.`
+            });
