@@ -148,7 +148,7 @@ jobs:
           script: |
             const fs = require('fs');
             const results = JSON.parse(fs.readFileSync("/{Github Actions runner directory}/lhci_reports/manifest.json"));
-            # comment를 담을 변수 입니다.
+            // comment를 담을 변수 입니다.
             let comments = "";
 
             results.forEach((result) => {
