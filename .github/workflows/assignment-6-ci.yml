@@ -1,39 +1,251 @@
+# |-
+# 요구사항
+# 1. workflow는 PR이 올라오거나 혹은 PR에 commit이 push될 때 실행 된다.
+# 2. job1: tsc, build 를 실행한다. 오류가 발생하면 코멘트를 남긴다.
+# 3. job2: eslint를 실행한 다음에, eslint에서 오류가 발생할 경우 report를 코멘트에 남긴다.
+# 4. job3: 테스트를 실행하고, 커버리지를 측정하여 코멘트에 남긴다.
+# 5. job4: lighthouse ci 를 실행하고, 실행 결과를 코멘트에 남긴다.
+# 6. job5: PR이 open될 때만 실행되고, 팀원 중 한 명을 랜덤으로 선정하여 리뷰어를 지정한 다음에 코멘트에 멘션하여 올린다. 실제로 PR에 리뷰어로 지정도 되어야한다.
+
 name: CI Assignment 6
 
 on:
   pull_request:
-    types:
-      - opened
+    types: [opened, reopened, synchronize]
     paths:
       - 'packages/assignment-6/**'
+      - '.github/workflows/assignment-6-ci.yml'
+    # [요구사항 1] PR이 올라오거나(opened, reopened) PR에 commit이 push될 때 실행된다.(synchronize)
+    # 참조: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
+
+# [요구사항 1+] trigger시 이전 워크플로우 실행 전체 취소
+# 참조: https://docs.github.com/en/actions/using-jobs/using-concurrency#overview
+concurrency:
+  group: ${{ github.workflow }}=${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  #nvmrc에서 노드 버전 가져오기
+  extract-node-pnpm-version:
+    runs-on: ubuntu-latest
+    outputs:
+      node-version: ${{ steps.node-version.outputs.node-version }}
+      pnpm-version: ${{ steps.pnpm-version.outputs.pnpm-version }} # 노드 버전 출력
+    steps:
+      - uses: actions/checkout@v4
+      # node version
+      - name: Extract Node.js version from .nvmrc
+        id: node-version
+        shell: bash
+        run: |
+          NODE_VERSION=$(cat .nvmrc | tr -d 'v')
+          echo "node-version=${NODE_VERSION}" >> $GITHUB_OUTPUT
+          echo "${NODE_VERSION}"
+      # pnpm version
+      - name: Extract pnpm version from package.json
+        id: pnpm-version
+        shell: bash
+        working-directory: 'packages/assignment-6'
+        run: |
+          PNPM_VERSION=$(node -p "require('./package.json').packageManager.split('@')[1]" | tr -d 'v')
+          echo "pnpm-version=${PNPM_VERSION}" >> $GITHUB_OUTPUT
+          echo "${PNPM_VERSION}"
+
+  pnpm-install:
+    needs: extract-node-pnpm-version
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
 
+      - name: PNPM install
+        uses: ./.github/actions/pnpm-install
+        with:
+          working-directory: 'packages/assignment-6'
+          node-version: ${{ needs.extract-node-pnpm-version.outputs.node-version }}
+          pnpm-version: ${{ needs.extract-node-pnpm-version.outputs.pnpm-version }}
+
+  #build
+  type-check-and-build:
+    needs: [extract-node-pnpm-version, pnpm-install]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pnpm-install
+        with:
+          working-directory: 'packages/assignment-6'
+          node-version: ${{ needs.extract-node-pnpm-version.outputs.node-version }}
+          pnpm-version: ${{ needs.extract-node-pnpm-version.outputs.pnpm-version }}
+
+      - run: pnpm -F assignment-6 tsc
+      - run: pnpm -F assignment-6 build
+      - if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Type check or build failed. Please check the logs for more information.'
+            })
   lint:
+    needs: [extract-node-pnpm-version, pnpm-install]
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pnpm-install
+        with:
+          working-directory: 'packages/assignment-6'
+          node-version: ${{ needs.extract-node-pnpm-version.outputs.node-version }}
+          pnpm-version: ${{ needs.extract-node-pnpm-version.outputs.pnpm-version }}
 
+      - name: Run ESLint
+        run: pnpm -F assignment-6 lint
+      - name: Comment PR on Lint Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ ESLint check failed. Please fix the linting errors.'
+            })
   test:
+    needs: [extract-node-pnpm-version, pnpm-install]
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pnpm-install
+        with:
+          working-directory: 'packages/assignment-6'
+          node-version: ${{ needs.extract-node-pnpm-version.outputs.node-version }}
+          pnpm-version: ${{ needs.extract-node-pnpm-version.outputs.pnpm-version }}
 
+      - name: Run tests with coverage
+        run: pnpm -F assignment-6 test:coverage
+
+      - name: Process test results
+        if: always()
+        id: test-results
+        run: |
+          if [ ${{ job.status }} == "success" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate coverage report
+        if: steps.test-results.outputs.status == 'success'
+        id: coverage
+        run: |
+          COVERAGE_SUMMARY=$(cat packages/assignment-6/coverage/coverage-summary.json)
+          echo "coverage_summary<<EOF" >> $GITHUB_OUTPUT
+          echo "$COVERAGE_SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Comment test results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const processTestResults = require('./.github/scripts/test-results.js');
+
+            const testStatus = '${{ steps.test-results.outputs.status }}';
+            const coverageSummary = '${{ steps.coverage.outputs.coverage_summary }}';
+
+            const comment = processTestResults(testStatus, coverageSummary);
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
   lighthouse:
+    needs: [extract-node-pnpm-version, pnpm-install]
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pnpm-install
+        with:
+          working-directory: 'packages/assignment-6'
+          node-version: ${{ needs.extract-node-pnpm-version.outputs.node-version }}
+          pnpm-version: ${{ needs.extract-node-pnpm-version.outputs.pnpm-version }}
 
-  assign_reviewer:
+      - name: Build and Run Lighthouse CI
+        run: |
+          cd packages/assignment-6
+          pnpm build
+          pnpm lighthouse || true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Process Lighthouse results
+        id: lighthouse-results
+        run: |
+          if [ -f "./packages/assignment-6/.lighthouseci/manifest.json" ]; then
+            LHCI_RESULTS=$(cat ./packages/assignment-6/.lighthouseci/manifest.json)
+            echo "lhci_results<<EOF" >> $GITHUB_OUTPUT
+            echo "$LHCI_RESULTS" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "lhci_results=No Lighthouse results found" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment Lighthouse results
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const processLighthouseResults = require('./.github/scripts/process-lighthouse-results.js');
+
+            const lighthouseResults = '${{ steps.lighthouse-results.outputs.lhci_results }}';
+
+            const comment = processLighthouseResults(lighthouseResults);
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+  assign-reviewer:
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+
+      - name: Assign Reviewer
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const teamMembers = ["yoosion030", "lydiahjchung", "callipenguin"]; // 팀원 GitHub 사용자명 목록
+            const reviewer = teamMembers[Math.floor(Math.random() * teamMembers.length)];
+
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [reviewer]
+            });
+
+            const comment = `@${reviewer} 님이 이 PR의 리뷰어로 랜덤하게 선정되었습니다. 리뷰 부탁드립니다!`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
