@@ -150,7 +150,7 @@ jobs:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         run: |
           pnpm install -g @lhci/cli
-          lhci autorun || echo "Fail to Run Lighthouse CI"
+          pnpm --filter assignment-6 lighthouse || echo "Fail to Run Lighthouse CI"
           
   assign_reviewer:
     runs-on: ubuntu-latest
