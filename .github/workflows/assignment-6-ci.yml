@@ -55,9 +55,11 @@ jobs:
 
       - name: Run ESLint
         run: |
-          pnpm -F assignment-6 lint 2>&1 | tee result.txt
+          cd packages/assignment-6
+          pnpm run lint 2>&1 | tee result.txt
           exit ${PIPESTATUS[0]}
-        working-directory: packages/assignment-6
+          cd ../..
+          exit $EXIT_CODE
 
       - name: Add PR comment on lint errors
         if: failure()
