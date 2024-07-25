@@ -101,6 +101,7 @@ jobs:
           script: |
             const fs = require('fs');
             const testOutput = fs.readFileSync('test_output.txt', 'utf8');
+            console.log('testOutput', testOutput);
             
             // 커버리지 정보 추출
             const coverageInfo = {};
