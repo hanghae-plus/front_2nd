@@ -81,7 +81,9 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: "### ESLint Results\n---${errorLog}"
+              body: `### ESLint Results
+              ---
+              ${errorLog}`
             })
 
   test:
@@ -114,6 +116,7 @@ jobs:
           script: |
             const fs = require('fs')
             const coverage = JSON.parse(fs.readFileSync('packages/assignment-6/coverage/coverage-final.json', 'utf8'))
+            const total = coverage.total
 
             const lineCoverage = ((total.lines.covered / total.lines.total) * 100).toFixed(2)
             const functionCoverage = ((total.functions.covered / total.functions.total) * 100).toFixed(2)
