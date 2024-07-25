@@ -98,7 +98,9 @@ jobs:
       - run: pnpm -F assignment-6 test -- --coverage
       - id: format_coverage
         run: |
-          COVERAGE_FILE="coverage/coverage-summary.json"
+          COVERAGE_FILE="packages/assignment-6/coverage/coverage-final.json"
+          echo "Using coverage file: $COVERAGE_FILE"
+          cat $COVERAGE_FILE
           LINE_COVERAGE=$(jq '.total.lines.pct' $COVERAGE_FILE)
           BRANCH_COVERAGE=$(jq '.total.branches.pct' $COVERAGE_FILE)
           FUNCTION_COVERAGE=$(jq '.total.functions.pct' $COVERAGE_FILE)
