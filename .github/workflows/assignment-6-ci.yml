@@ -54,6 +54,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Run ESLint
+        working-directory: ./packages/assignment-6
         run: |
           pnpm -F assignment-6 run lint 2>&1 | tee result.log
           exit ${PIPESTATUS[0]}
