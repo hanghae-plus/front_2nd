@@ -117,7 +117,7 @@ jobs:
           pnpm -F assignment-6 test:with_coverage
           ls -la
       - name: List coverage directory
-        run: ls -la packages/assignment-6/coverage
+        run: ls -la coverage
 
       - name: Post test results comment
         uses: actions/github-script@v6
