@@ -48,8 +48,38 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: [job2] eslint를 실행한 다음에, eslint에서 오류가 발생할 경우 report를 코멘트에 남긴다.
+        id: job2
+        run:  |
+          pnpm -F assignment-6 install
+          pnpm -F assignment-6 lint
+        continue-on-error: true
+      - name: Comment PR on Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const jobOutput = `${process.env.GITHUB_WORKFLOW} 워크플로우의 job2 단계에서 오류가 발생했습니다:
+            
+            \`\`\`
+            ${{ steps.job2.outputs.stderr }}
+            \`\`\`
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: jobOutput
+            })
 
   test:
     runs-on: ubuntu-latest
