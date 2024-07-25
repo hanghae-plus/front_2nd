@@ -1,180 +1,178 @@
-name: CI Assignment 6
+name: PR Checks
 
 on:
   pull_request:
     paths:
-      - 'packages/assignment-6/**' # /packages/assignment-6 경로만 체크
-    types: [opened, synchronize] # 풀 리퀘스트가 열리거나 동기화될 때 트리거
+      - 'packages/assignment-6/**'
 
 jobs:
-  build:
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4 # 코드 체크아웃
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # Node.js 설정
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
         with:
-          node-version: '20.x' # 최신 LTS 버전 사용
+          version: 8
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
 
-      - name: Change directory to assignment-6
-        run: cd packages/assignment-6 # 디렉토리 변경
-
-      - name: Install dependencies
-        run: npm install # 종속성 설치
-
-      - name: Run TypeScript compiler
-        run: npm run tsc # TypeScript 컴파일러 실행
-        continue-on-error: true # 오류가 발생해도 다음 단계로 진행
-
-      - name: Comment on PR for tsc errors
-        if: failure() # 이전 단계가 실패한 경우 실행
+  build:
+    name: Build and Type Check
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Run build
+        run: pnpm --filter assignment-6 build
+      - name: Comment build result
         uses: actions/github-script@v6
         with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const { execSync } = require('child_process');
-            const errors = execSync('cd packages/assignment-6 && npm run tsc 2>&1').toString();
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `TypeScript compile errors:\n\`\`\`\n${errors}\n\`\`\``
-            });
+              body: '빌드 성공 ✅'
+            })
 
   lint:
+    name: ESLint
+    needs: setup
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4 # 코드 체크아웃
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # Node.js 설정
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
         with:
-          node-version: '20.x' # 최신 LTS 버전 사용
-
-      - name: Change directory to assignment-6
-        run: cd packages/assignment-6 # 디렉토리 변경
-
-      - name: Install dependencies
-        run: npm install # 종속성 설치
-
+          version: 8
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
       - name: Run ESLint
-        run: npm run lint # ESLint 실행
-        continue-on-error: true # 오류가 발생해도 다음 단계로 진행
-
-      - name: Comment on PR for ESLint errors
-        if: failure() # 이전 단계가 실패한 경우 실행
+        run: pnpm --filter assignment-6 lint -- --output-file eslint_report.txt
+      - name: Comment ESLint result
+        if: failure()
         uses: actions/github-script@v6
         with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const { execSync } = require('child_process');
-            const errors = execSync('cd packages/assignment-6 && npm run lint 2>&1').toString();
+            const fs = require('fs')
+            const eslintOutput = fs.readFileSync('packages/assignment-6/eslint_report.txt', 'utf8')
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `ESLint errors:\n\`\`\`\n${errors}\n\`\`\``
-            });
+              body: 'ESLint 검사 결과:\n```\n' + eslintOutput + '\n```'
+            })
 
   test:
+    name: Run Tests and Coverage
+    needs: setup
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4 # 코드 체크아웃
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # Node.js 설정
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
         with:
-          node-version: '20.x' # 최신 LTS 버전 사용
-
-      - name: Change directory to assignment-6
-        run: cd packages/assignment-6 # 디렉토리 변경
-
-      - name: Install dependencies
-        run: npm install # 종속성 설치
-
-      - name: Run tests and measure coverage
-        run: npm run test -- --coverage # 테스트 실행 및 커버리지 측정
-        continue-on-error: true # 오류가 발생해도 다음 단계로 진행
-
-      - name: Comment on PR with coverage report
-        if: always() # 항상 실행
+          version: 8
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Run tests with coverage
+        run: pnpm --filter assignment-6 test -- --coverage
+      - name: Comment test coverage
         uses: actions/github-script@v6
         with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const { execSync } = require('child_process');
-            const coverage = execSync('cd packages/assignment-6 && cat coverage/lcov-report/index.html').toString();
+            const fs = require('fs')
+            const coverage = fs.readFileSync('./packages/assignment-6/coverage/coverage-summary.json', 'utf8')
+            const coverageJson = JSON.parse(coverage)
+            const lines = coverageJson.total.lines.pct
+            const branches = coverageJson.total.branches.pct
+            const functions = coverageJson.total.functions.pct
+            const statements = coverageJson.total.statements.pct
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Test coverage report:\n\`\`\`\n${coverage}\n\`\`\``
-            });
+              body: `테스트 성공 ✅\n\n커버리지 결과\n- 라인 커버리지: ${lines}%\n- 브랜치 커버리지: ${branches}%\n- 함수 커버리지: ${functions}%\n- 구문 커버리지: ${statements}%`
+            })
 
   lighthouse:
+    name: Lighthouse CI
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4 # 코드 체크아웃
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # Node.js 설정
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
         with:
-          node-version: '20.x' # 최신 LTS 버전 사용
-
-      - name: Change directory to assignment-6
-        run: cd packages/assignment-6 # 디렉토리 변경
-
-      - name: Install dependencies
-        run: npm install # 종속성 설치
-
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli@0.7.x # Lighthouse CI 설치
-
+          version: 8
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Build for production
+        run: pnpm --filter assignment-6 build
       - name: Run Lighthouse CI
-        run: lhci autorun # Lighthouse CI 실행
-        continue-on-error: true # 오류가 발생해도 다음 단계로 진행
-
-      - name: Comment on PR with Lighthouse report
-        if: always() # 항상 실행
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { execSync } = require('child_process');
-            const report = execSync('cd packages/assignment-6 && lhci report --output html').toString();
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `Lighthouse CI report:\n\`\`\`\n${report}\n\`\`\``
-            });
-
-  assign_reviewer:
-    if: github.event.action == 'opened' # 풀 리퀘스트가 열릴 때 실행
-    runs-on: ubuntu-latest
-    steps:
-      - name: Choose a random reviewer
-        id: choose_reviewer
         run: |
-          reviewers=($(gh api -H "Accept: application/vnd.github.v3+json" \
-          /repos/$GITHUB_REPOSITORY/collaborators \
-          | jq -r '.[].login'))
-          selected_reviewer=${reviewers[$RANDOM % ${#reviewers[@]}]}
-          echo "::set-output name=reviewer::$selected_reviewer"
-
-      - name: Assign reviewer
-        uses: kentaro-m/auto-assign-action@v2.2.1 # 리뷰어 자동 할당
-        with:
-          reviewers: ${{ steps.choose_reviewer.outputs.reviewer }}
-
-      - name: Comment on PR with assigned reviewer
+          npm install -g @lhci/cli@0.11.x
+          lhci autorun
+      - name: Comment Lighthouse result
         uses: actions/github-script@v6
         with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
+            const fs = require('fs')
+            const lhciReport = fs.readFileSync('./packages/assignment-6/.lighthouseci/lhci-report.json', 'utf8')
+            const reportJson = JSON.parse(lhciReport)
+            const categories = reportJson[0].categories
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `@${{ steps.choose_reviewer.outputs.reviewer }} has been assigned as a reviewer.`
-            });
+              body: `Lighthouse 성능 측정 결과\n\n| 카테고리 | 점수 |\n|----------|------|\n| Performance | ${categories.performance.score * 100}% |\n| Accessibility | ${categories.accessibility.score * 100}% |\n| Best Practices | ${categories['best-practices'].score * 100}% |\n| SEO | ${categories.seo.score * 100}% |`
+            })
+
+  assign-reviewer:
+    name: Assign Random Reviewer
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    steps:
+      - name: Assign random reviewer
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const teamMembers = ['seodonggyun4', 'haeji1124', '2pandi', 'jiyeon87', 'Raihyul', 'AnSuebin']
+            const randomReviewer = teamMembers[Math.floor(Math.random() * teamMembers.length)]
+            
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [randomReviewer]
+            })
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@${randomReviewer} 님, 리뷰를 부탁드립니다.`
+            })
