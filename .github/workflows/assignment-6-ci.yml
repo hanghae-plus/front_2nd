@@ -147,58 +147,39 @@ jobs:
 
       - name: Format lighthouse score
         id: format_lighthouse
-        uses: actions/github-script@v6.4.0
+        uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.TOKEN_FOR_CI}}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const path = require('path');
-            const resultsPath = path.join(process.env.GITHUB_WORKSPACE, 'packages', 'assignment-6', 'lhci_reports', 'manifest.json');
+            const resultsPath = path.join(process.env.GITHUB_WORKSPACE, 'packages', 'assignment-6', '.lighthouseci', 'lhr-0.report.json');
 
             let comments = "";
 
-            results.forEach((result) => {
-              const { summary, jsonPath } = result;
-              const { audits } = details;
+            const details = JSON.parse(fs.readFileSync(resultsPath));
+            const { categories } = details;
 
-              const details = JSON.parse(fs.readFileSync(jsonPath));
-              const formatResult = (res) => Math.round(res * 100);
+            const formatResult = (res) => Math.round(res * 100);
+            const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
 
-              Object.keys(summary).forEach(
-                (key) => (summary[key] = formatResult(summary[key]))
-              );
+            comments = [
+              `⚡️ **Lighthouse report** ⚡️`,
+              `| Category | Score |`,
+              `| --- | --- |`,
+              `| ${score(categories.performance.score * 100)} Performance | ${formatResult(categories.performance.score * 100)} |`,
+              `| ${score(categories.accessibility.score * 100)} Accessibility | ${formatResult(categories.accessibility.score * 100)} |`,
+              `| ${score(categories['best-practices'].score * 100)} Best Practices | ${formatResult(categories['best-practices'].score * 100)} |`,
+              `| ${score(categories.seo.score * 100)} SEO | ${formatResult(categories.seo.score * 100)} |`,
+              `| ${score(categories.pwa.score * 100)} PWA | ${formatResult(categories.pwa.score * 100)} |`
+            ].join("\n");
 
-              const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
-
-              const comment = [
-                `⚡️ Lighthouse report!`,
-                `| Category | Score |`,
-                `| --- | --- |`,
-                `| ${score(summary.performance)} Performance | ${summary.performance} |`,
-                { ... }
-              ].join("\n");
-
-              const detail = [
-                `| Category | Score |`,
-                `| --- | --- |`,
-                `| ${score(
-                  audits["first-contentful-paint"].score * 100
-                )} First Contentful Paint | ${
-                  audits["first-contentful-paint"].displayValue
-                } |`,
-                { ... }
-              ].join("\n");
-              comments += comment + "\n" + detail + "\n";
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comments
             });
-            core.setOutput('comments', comments)
-            if (comments) {
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: comments
-              })
-            }
 
   assign_reviewer:
     runs-on: ubuntu-latest
