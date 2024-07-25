@@ -1,14 +1,13 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { act, fireEvent, render } from "@testing-library/react";
-import { useState } from "react";
-import { useMyRef } from "../useMyRef.ts";
+import { act, fireEvent, render } from '@testing-library/react';
+import { useState } from 'react';
+import { useMyRef } from '../useMyRef.ts';
 
 beforeEach(() => {
   vi.clearAllMocks();
-})
+});
 
 describe('useRef > ', () => {
-
   test('useRef와 똑같이 동작하는 useMyRef를 만들어서 사용할 수 있다.', () => {
     const refs = new Set();
 
@@ -22,9 +21,8 @@ describe('useRef > ', () => {
         <div ref={ref}>
           <button onClick={() => rerender({})}>{label}</button>
         </div>
-      )
-    }
-
+      );
+    };
 
     const { getByText } = render(
       <>
@@ -36,8 +34,8 @@ describe('useRef > ', () => {
     act(() => {
       fireEvent.click(getByText('rerender1'));
       fireEvent.click(getByText('rerender2'));
-    })
+    });
 
     expect(refs.size).toBe(2);
-  })
-})
+  });
+});
