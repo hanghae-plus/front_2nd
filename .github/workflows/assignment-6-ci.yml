@@ -72,9 +72,7 @@ jobs:
               repo: context.repo.repo,
               body: `## ESLint 실행 중 오류가 발생했습니다.
     
-            \`\`\`
-            ${lintOutput}
-            \`\`\``
+            ${lintOutput}`
             });
 
   test:
@@ -110,12 +108,10 @@ jobs:
             if (allFilesLine) {
               const coverageValues = allFilesLine.split('|').map(item => item.trim());
               if (coverageValues.length >= 5) {
-                coverageReport = `
-                - 구문 커버리지: ${coverageValues[1]}%
+                coverageReport = `- 구문 커버리지: ${coverageValues[1]}%
                 - 브랜치 커버리지: ${coverageValues[2]}%
                 - 함수 커버리지: ${coverageValues[3]}%
-                - 라인 커버리지: ${coverageValues[4]}%
-                `;
+                - 라인 커버리지: ${coverageValues[4]}%`;
               }
             }
               
@@ -130,9 +126,7 @@ jobs:
               body: `## 테스트 성공 ✅
             ### 커버리지 결과:
     
-            \`\`\`
-            ${coverageReport.trim()}
-            \`\`\``
+            ${coverageReport.trim()}`
             });
 
   lighthouse:
