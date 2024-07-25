@@ -138,6 +138,9 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
       
       - name: Build
         run: pnpm --filter assignment-6 build
