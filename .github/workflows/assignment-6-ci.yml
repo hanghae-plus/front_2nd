@@ -99,7 +99,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install
       - name: Run tests
@@ -112,19 +111,22 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const fs = require('fs')
-            const coverageReport = fs.readFileSync('./coverage/lcov-report/index.html', 'utf8')
+            const fs = require('fs');
+            const path = require('path');
+            const coverageJson = JSON.parse(fs.readFileSync(`packages/assignment-6/coverage/coverage-summary.json`, 'utf8'));
+            const {lines, branches, functions, statements} = coverageJson.total;
+            
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `## 테스트 성공✅ 
-            \n ### 커버리지 결과 \n
-
-            • 라인 커버리지: ${lines.pct}%
-            • 브랜치 커버리지: ${branches.pct}%
-            • 함수 커버리지: ${functions.pct}%
-            • 구문 커버리지: ${statements.pct}%
+              \n ### 커버리지 결과 \n
+            
+              • 라인 커버리지: ${lines.pct}%
+              • 브랜치 커버리지: ${branches.pct}%
+              • 함수 커버리지: ${functions.pct}%
+              • 구문 커버리지: ${statements.pct}%
             `})
 
   lighthouse:
@@ -139,7 +141,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install
       - name: Run tests
