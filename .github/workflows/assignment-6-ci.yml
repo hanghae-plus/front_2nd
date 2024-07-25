@@ -93,7 +93,7 @@ jobs:
           cache: "pnpm"
       - run: |
           pnpm install
-          pnpm --filter assignment-6 add -D @vitest/coverage-v8
+          pnpm -F assignment-6 add -D @vitest/coverage-v8
       - run: pnpm -F assignment-6 coverage
       - id: format_coverage
         run: |
@@ -162,8 +162,8 @@ jobs:
           cache: "pnpm"
       - run: |
           pnpm install
-          pnpm --filter assignment-6 add -D @lhci/cli@0.7.x
-      - run: pnpm --filter assignment-6 exec lighthouse
+          pnpm -F assignment-6 add -D @lhci/cli@0.7.x
+      - run: pnpm --F assignment-6 lighthouse
       - id: extract_lighthouse_scores
         run: |
           LIGHTHOUSE_RESULTS="packages/assignment-6/.lighthouseci"
