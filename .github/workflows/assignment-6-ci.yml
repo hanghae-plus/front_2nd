@@ -14,22 +14,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install pnpm
-        run: npm install -g pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
 
-      - name: Run tsc and build
-        id: build_step
-        run: |
-          cd packages/assignment-6
-          pnpm install
-          pnpm run build
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: run build
+        run: pnpm -F assignment-6 build
 
       - name: Comment on PR upon build failure
-        if: steps.build_step.outcome == 'failure'
+        if: failure()
         uses: actions/github-script@v5
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
