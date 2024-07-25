@@ -57,7 +57,6 @@ jobs:
       - name: Run ESLint
         id: eslint
         run: pnpm -F assignment-6 lint
-        #run: npx eslint . --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-report.json
       - name: Comment PR with ESLint results
         if: failure() && steps.eslint.outcome=='failure'
         uses: actions/github-script@v6
@@ -84,26 +83,21 @@ jobs:
           node-version: 20
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build project
-        run: pnpm -F assignment-6 run build
-        working-directory: packages/assignment-6
-        id: tsc-build
+        run: pnpm install
       - name: Run tests with coverage
-        # 텍스트 형식과 요약 형식 선택
-        run: pnpm -F assignment-6 test -- --coverage --coverageReporters="text" --coverageReporters="text-summary" > coverage.txt
+        run: pnpm -F assignment-6 test
       - name: Extract coverage metrics
         id: coverage
-        # All files는 커버리지 요약, awk는 텍스트 처리, print $3는 3번째 필드 출력
         run: |
-          LINE_COVERAGE=$(grep "All files" coverage.txt | awk '{print $3}')
-          BRANCH_COVERAGE=$(grep "All files" coverage.txt | awk '{print $4}')
-          FUNCTION_COVERAGE=$(grep "All files" coverage.txt | awk '{print $5}')
-          STATEMENT_COVERAGE=$(grep "All files" coverage.txt | awk '{print $6}')
-          echo "line_coverage=$LINE_COVERAGE" >> $GITHUB_OUTPUT
-          echo "branch_coverage=$BRANCH_COVERAGE" >> $GITHUB_OUTPUT
-          echo "function_coverage=$FUNCTION_COVERAGE" >> $GITHUB_OUTPUT
-          echo "statement_coverage=$STATEMENT_COVERAGE" >> $GITHUB_OUTPUT
+          LINE_COVERAGE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.lines.pct')
+          BRANCH_COVERAGE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.branches.pct)
+          FUNCTION_COVERAGE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.functions.pct')
+          STATEMENT_COVERAGE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.statements.pct')
+          echo "line_coverage=${LINE_COVERAGE}" >> $GITHUB_OUTPUT
+          echo "branch_coverage=${BRANCH_COVERAGE}" >> $GITHUB_OUTPUT
+          echo "function_coverage=${FUNCTION_COVERAGE}" >> $GITHUB_OUTPUT
+          echo "statement_coverage=${STATEMENT_COVERAGE}" >> $GITHUB_OUTPUT
+
       - name: Comment PR
         uses: actions/github-script@v6
         with:
@@ -112,13 +106,13 @@ jobs:
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
-              repo: context.repo.name,
-              body: `### 테스트 성공
+              repo: context.repo.repo,
+              body: `### 커버리지 결과
 
-              * 라인 커버리지: ${lineCoverage}
-              * 브랜치 커버리지: ${branchCoverage}
-              * 함수 커버리지: ${functionCoverage}
-              * 구문 커버리지: ${statementCoverage}`
+              * 라인 커버리지: ${steps.coverage.outputs.line_coverage}%
+              * 브랜치 커버리지: ${steps.coverage.outputs.branch_coverage}%
+              * 함수 커버리지: ${steps.coverage.outputs.function_coverage}%
+              * 구문 커버리지: ${steps.coverage.outputs.statement_coverage}%`
             })
 
   # job4. lighthouse ci 를 실행하고, 실행 결과를 코멘트에 남긴다.
