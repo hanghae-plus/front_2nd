@@ -1,39 +1,205 @@
-name: CI Assignment 6
-
 on:
   pull_request:
-    types:
-      - opened
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - assignment/6
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
+      - ".github/actions/setup-node-dependencies/**"
 
 jobs:
+  # job1: tsc, build 실행, 오류 발생하면 코멘트 남김
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
+
+      - name: TypeScript Check
+        run: pnpm run tsc
+        working-directory: packages/assignment-6
+        continue-on-error: true
+
+      - name: Comment on TypeScript Check failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'The TypeScript check has failed. Please check the logs for more details.'
+            })
+
+      - name: Build
+        run: pnpm -F assignment-6 build
+        continue-on-error: true
+
+      - name: Comment on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'The build has failed. Please check the logs for more details.'
+            })
+
+  # job2: eslint 실행, eslint에서 오류 발생 시 report를 코멘트에 남김
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
+
+      - name: Run ESLint
+        run: |
+          pnpm -F assignment-6 lint > eslint_report.txt
+        continue-on-error: true
+
+      - name: Check ESLint results
+        id: check_eslint
+        run: |
+          if grep -q 'error' eslint_report.txt; then
+            echo "eslint_errors=true" >> $GITHUB_ENV
+          else
+            echo "eslint_errors=false" >> $GITHUB_ENV
+          fi
+
+      - name: Comment on ESLint results
+        if: env.eslint_errors == 'true' # This will trigger only if there were ESLint errors
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8');
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `
+              ## ESLint Results
+              ${eslintReport}
+              `
+            });
+
+  # job3: 테스트 실행, 커버리지 측정, 코멘트 남김
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
+
+      - name: Ensure coverage directory exists
+        run: mkdir -p packages/assignment-6/coverage
+
+      - name: Run tests and generate coverage
+        run: |
+          pnpm -F assignment-6 test
+          pnpm -F assignment-6 coverage
+        working-directory: packages/assignment-6
+
+      - name: List coverage directory contents
+        run: ls -R packages/assignment-6/coverage
+
+      - name: Report Test Coverage
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('fs');
+            const path = "packages/assignment-6/coverage/coverage-summary.json";
+
+            if (!fs.existsSync(path)) {
+              console.log(`Coverage file not found: ${path}`);
+              return;
+            }
+
+            const coverage = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const totalCoverage = coverage.total;
+            const coverageTable = `
+            ## 테스트 성공 ✅
+            ### 커버리지 결과
+            - 라인 커버리지: ${totalCoverage.lines.pct}%
+            - 브랜치 커버리지: ${totalCoverage.branches.pct}%
+            - 함수 커버리지: ${totalCoverage.functions.pct}%
+            - 구문 커버리지: ${totalCoverage.statements.pct}%
+            `;
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: coverageTable
+            });
+
+  # job4: lighthouse ci 실행, 실행 결과를 코멘트로 남김
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  assign_reviewer:
-    runs-on: ubuntu-latest
-    steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: Setup Node.js and Dependencies
+        uses: ./.github/actions/setup-node-dependencies
+
+      - name: Install Lighthouse CI
+        run: |
+          npm i -g @lhci/cli
+
+      - name: Build Local Server
+        run: |
+          pnpm -F assignment-6 build
+          pnpm -F assignment-6 lighthouse
+
+      - name: Report Lighthouse
+        if: always()
+        uses: actions/github-script@v6
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const performance = ${{ steps.format_results.outputs.performance }};
+            const accessibility = ${{ steps.format_results.outputs.accessibility }};
+            const bestPractices = ${{ steps.format_results.outputs.best_practices }};
+            const seo = ${{ steps.format_results.outputs.seo }};
+
+            const comment = `
+            ## Lighthouse 성능 측정 결과
+
+            | 카테고리 | 점수 |
+            |----------|------|
+            | Performance | ${performance}% |
+            | Accessibility | ${accessibility}% |
+            | Best Practices | ${bestPractices}% |
+            | SEO | ${seo}% |
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+# job5: PR이 open 될 때만 실행됨, 팀원 중 한 명을 랜덤으로 선정하여 리뷰어 지정, 코멘트에 멘션해서 올림
+#     assign_reviewer:
+#       runs-on: ubuntu-latest
+#       steps:
+#         - name: job5 구현
+#           run: echo "job5의 내용을 구현해주세요"
