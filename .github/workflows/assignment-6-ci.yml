@@ -95,8 +95,58 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: latest
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4.0.3
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install coverage
+        run: pnpm add --save-dev @vitest/coverage-v8@2.0.4 --filter assignment-6
+
+      - name: job3 run test
+        run: pnpm -F assignment-6 test
+
+      - name: job3 coverage comment
+        if: always()
+        uses: actions/github-script@v7.0.1
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const title = {'lines': '라인', 'statements': '구문', 'functions': '함수', 'branches': '브랜치'}
+            let message = ''
+
+            try {
+              const fs = require('fs')
+              const coveragePath = 'packages/assignment-6/coverage/coverage-summary.json'
+              const result = fs.readFileSync(coveragePath, 'utf8')
+              const report = JSON.parse(result)
+
+              message = Object.entries(report.total).reduce((prev, [key, value]) => {
+                if(!title[key]) return prev
+                return (prev += `- ${title[key]} 커버리지: ${value.pct}%\n`)
+              }, "## 테스트 성공 :white_check_mark:\n\n### 커버리지 결과\n\n")
+            } catch (e) {
+              message = "## 테스트 실패 :x:\n\n### 출력할 결과가 없습니다."
+            }
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            })
 
   lighthouse:
     runs-on: ubuntu-latest

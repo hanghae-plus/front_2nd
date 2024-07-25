@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "test": "vitest",
+    "test": "vitest --coverage.enabled true --coverage.reporter=json-summary",
     "test:ui": "vitest --ui",
     "build": "tsc -b && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"

@@ -5,6 +5,11 @@ import react from '@vitejs/plugin-react-swc';
 export default mergeConfig(
   defineConfig({
     plugins: [react()],
+    test: {
+      coverage: {
+        reporter: ["text", "json-summary", "json"],
+      },
+    },
   }),
   defineTestConfig({
     test: {
