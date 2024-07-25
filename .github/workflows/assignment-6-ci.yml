@@ -111,10 +111,10 @@ jobs:
               const coverageValues = allFilesLine.split('|').map(item => item.trim());
               if (coverageValues.length >= 5) {
                 coverageReport = `
-                구문 커버리지: ${coverageValues[1]}
-                브랜치 커버리지: ${coverageValues[2]}
-                함수 커버리지: ${coverageValues[3]}
-                라인 커버리지: ${coverageValues[4]}
+                - 구문 커버리지: ${coverageValues[1]}%
+                - 브랜치 커버리지: ${coverageValues[2]}%
+                - 함수 커버리지: ${coverageValues[3]}%
+                - 라인 커버리지: ${coverageValues[4]}%
                 `;
               }
             }
@@ -127,13 +127,12 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `테스트가 성공적으로 완료되었습니다. 커버리지 결과:
+              body: `## 테스트 성공 ✅
+            ### 커버리지 결과:
     
             \`\`\`
             ${coverageReport.trim()}
-            \`\`\`
-  
-            자세한 테스트 결과는 CI 로그를 확인해 주세요.`
+            \`\`\``
             });
 
   lighthouse:
