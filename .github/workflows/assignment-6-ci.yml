@@ -55,7 +55,7 @@ jobs:
         id: job2
         run:  |
           pnpm -F assignment-6 install
-          pnpm -F assignment-6 lint > lint_result.txt || true
+          pnpm -F assignment-6 lint > lint_result.txt
           echo "LINT_RESULT<<EOF" >> $GITHUB_OUTPUT
           cat lint_result.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
