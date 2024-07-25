@@ -70,7 +70,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Run ESLint
-        run: pnpm run lint
+        run: pnpm -F assignment-6 lint
         continue-on-error: true
       - name: Comment ESLint result
         if: failure()
