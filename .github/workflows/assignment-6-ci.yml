@@ -140,52 +140,46 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - name: 'job4: lighthouse ci 를 실행하고, 실행 결과를 코멘트에 남긴다.'
+      - name: 'job4: lighthouse ci 를 실행'
+        continue-on-error: true
         id: job4
         run: |
           pnpm -F assignment-6 install
-          pnpm --filter assignment-6 build
           pnpm add -g @lhci/cli@0.11.x
-          LHCI_OUTPUT=$(lhci autorun --collect.url=http://localhost --collect.staticDistDir=./packages/assignment-6/dist)
-          echo "$LHCI_OUTPUT"
-          
-          # Lighthouse 결과 파싱
-          PERFORMANCE=$(echo "$LHCI_OUTPUT" | grep -oP 'performance: \K[0-9]+')
-          ACCESSIBILITY=$(echo "$LHCI_OUTPUT" | grep -oP 'accessibility: \K[0-9]+')
-          BEST_PRACTICES=$(echo "$LHCI_OUTPUT" | grep -oP 'best-practices: \K[0-9]+')
-          SEO=$(echo "$LHCI_OUTPUT" | grep -oP 'seo: \K[0-9]+')
-          
-          # 결과를 GitHub Actions 출력으로 설정
-          echo "performance=$PERFORMANCE" >> $GITHUB_OUTPUT
-          echo "accessibility=$ACCESSIBILITY" >> $GITHUB_OUTPUT
-          echo "best_practices=$BEST_PRACTICES" >> $GITHUB_OUTPUT
-          echo "seo=$SEO" >> $GITHUB_OUTPUT
-
-      - name: Comment PR
+          pnpm -F assignment-6 build
+          lhci autorun --upload.target=temporary-public-storage --collect.staticDistDir=./packages/assignment-6/dist > lighthouse_output.txt
+      - name: 'job4-res: 실행 결과를 코멘트에 남긴다.'
         uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const performance = '${{ steps.job4.outputs.performance }}';
-            const accessibility = '${{ steps.job4.outputs.accessibility }}';
-            const bestPractices = '${{ steps.job4.outputs.best_practices }}';
-            const seo = '${{ steps.job4.outputs.seo }}';
+            const fs = require('fs');
+            const lighthouseOutput = fs.readFileSync('lighthouse_output.txt', 'utf8');
             
-            const comment = `## Lighthouse 성능 측정 결과
-
-            | 카테고리 | 점수 |
-            |----------|------|
-            | Performance | ${performance}% |
-            | Accessibility | ${accessibility}% |
-            | Best Practices | ${bestPractices}% |
-            | SEO | ${seo}% |
-            `;
+            // Lighthouse 결과 파싱
+            const scores = {};
+            const metrics = ['performance', 'accessibility', 'best-practices', 'seo'];
             
+            metrics.forEach(metric => {
+              const regex = new RegExp(`${metric}:\\s*(\\d+)`, 'i');
+              const match = lighthouseOutput.match(regex);
+              if (match) {
+                scores[metric] = parseInt(match[1]);
+              }
+            });
+            
+            // 결과 포맷팅
+            let resultMessage = '## Lighthouse 결과\n\n';
+            for (const [metric, score] of Object.entries(scores)) {
+              resultMessage += `- ${metric}: ${score}\n`;
+            }
+            
+            // GitHub에 코멘트 작성
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comment
+              body: resultMessage
             });
 
   assign_reviewer:
