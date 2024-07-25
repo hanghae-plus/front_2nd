@@ -55,19 +55,17 @@ jobs:
 
       - name: Run ESLint
         run: |
-          cd packages/assignment-6
-          pnpm run lint 2>&1 | tee result.txt
+          pnpm -F assignment-6 run lint 2>&1 | tee result.log
           exit ${PIPESTATUS[0]}
-          cd ../..
-          exit $EXIT_CODE
 
       - name: Add PR comment on lint errors
         if: failure()
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const lintResult = fs.readFileSync('packages/assignment-6/result.txt', 'utf8');
+            const lintResult = fs.readFileSync('result.log', 'utf8');
 
             github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -75,7 +73,6 @@ jobs:
               issue_number: context.issue.number,
               body: `ESLint Results:\n\n${lintResult}`
             });
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
 
   test:
     runs-on: ubuntu-latest
