@@ -23,14 +23,13 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install
-      - name: Run tsc and build
-        run: pnpm -F assignment-6 run build
-
+      - name: run build
+        run: pnpm -F assignment-6 build
       - name: Comment on PR upon build failure
         if: failure()
         uses: actions/github-script@v5
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const issue_number = context.payload.pull_request.number;
             const message = `## BUILD FAIL ❌ \n 빌드 도중 에러가 발생했습니다.`;
@@ -44,7 +43,7 @@ jobs:
         if: success()
         uses: actions/github-script@v5
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const issue_number = context.payload.pull_request.number;
             const message = `## BUILD PASS ✅ \n 빌드가 성공적으로 완료되었습니다.`;
@@ -77,7 +76,7 @@ jobs:
         if: failure()
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs')
             const eslintReport = fs.readFileSync('.eslintrc.json', 'utf8')
@@ -108,7 +107,7 @@ jobs:
       - name: Comment test results
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs')
             const coverageReport = fs.readFileSync('./coverage/lcov-report/index.html', 'utf8')
@@ -138,7 +137,7 @@ jobs:
       - name: Comment Lighthouse results
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs');
             const lighthouseReport = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'));
@@ -174,7 +173,7 @@ jobs:
       - name: Assign random reviewer
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const teamMembers = ['eumcloud', 'seadonggyun4']
             const randomReviewer = teamMembers[Math.floor(Math.random() * teamMembers.length)]
