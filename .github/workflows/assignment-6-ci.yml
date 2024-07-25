@@ -62,17 +62,10 @@ jobs:
       - name: Run ESLint
         working-directory: ./packages/assignment-6
         run: |
-          if [ -d "packages/assignment-6" ]; then
-            cd packages/assignment-6
-          elif [ -d "assignment-6" ]; then
-            cd assignment-6
-          else
-            echo "assignment-6 directory not found"
-            exit 1
-          fi
-          npx eslint . 2>&1 | tee result.txt
+          cd packages/assignment-6
+          npx eslint . --ext .ts,.tsx 2>&1 | tee result.txt
           EXIT_CODE=${PIPESTATUS[0]}
-          cd $(git rev-parse --show-toplevel)
+          cd ../..
           exit $EXIT_CODE
 
       - name: Add PR comment on lint errors
@@ -82,7 +75,7 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
-            const lintResult = fs.readFileSync('result.txt', 'utf8');
+            const lintResult = fs.readFileSync('packages/assignment-6/result.txt', 'utf8');
 
             github.rest.issues.createComment({
               owner: context.repo.owner,
