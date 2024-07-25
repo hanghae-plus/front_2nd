@@ -98,14 +98,16 @@ jobs:
       - run: pnpm -F assignment-6 test -- --coverage > coverage_report.txt
       - id: format_coverage
         run: |
-          LINE_COVERAGE=$(grep "All files" coverage_report.txt | awk '{print $7}')
-          FUNCTION_COVERAGE=$(grep "All files" coverage_report.txt | awk '{print $5}')
+          cat coverage_report.txt
+
           STATEMENT_COVERAGE=$(grep "All files" coverage_report.txt | awk '{print $3}')
           BRANCH_COVERAGE=$(grep "All files" coverage_report.txt | awk '{print $4}')
-          echo "line_coverage=${LINE_COVERAGE}%" >> $GITHUB_OUTPUT
-          echo "function_coverage=${FUNCTION_COVERAGE}%" >> $GITHUB_OUTPUT
-          echo "statement_coverage=${STATEMENT_COVERAGE}%" >> $GITHUB_OUTPUT
-          echo "branch_coverage=${BRANCH_COVERAGE}%" >> $GITHUB_OUTPUT
+          FUNCTION_COVERAGE=$(grep "All files" coverage_report.txt | awk '{print $5}')
+          LINE_COVERAGE=$(grep "All files" coverage_report.txt | awk '{print $6}')
+          echo "statement_coverage=${STATEMENT_COVERAGE}" >> $GITHUB_OUTPUT
+          echo "branch_coverage=${BRANCH_COVERAGE}" >> $GITHUB_OUTPUT
+          echo "function_coverage=${FUNCTION_COVERAGE}" >> $GITHUB_OUTPUT
+          echo "line_coverage=${LINE_COVERAGE}" >> $GITHUB_OUTPUT
       - if: failure()
         uses: actions/github-script@v7
         with:
