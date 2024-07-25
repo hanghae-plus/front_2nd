@@ -171,7 +171,9 @@ jobs:
               "\n",
             ].join("\n");
             
-            const lighthouseComment = `## Lighthouse 성능 측정 결과`;
+            const lighthouseComment = `## Lighthouse 성능 측정 결과
+            
+            ${comment}`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
