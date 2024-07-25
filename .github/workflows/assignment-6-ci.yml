@@ -132,8 +132,62 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: [job4] lighthouse ci 를 실행하고, 실행 결과를 코멘트에 남긴다.
+        id: job4
+        run: |
+          pnpm -F assignment-6 install
+          pnpm --filter assignment-6 build
+          pnpm add -g @lhci/cli@0.11.x
+          LHCI_OUTPUT=$(lhci autorun --collect.url=http://localhost --collect.staticDistDir=./packages/assignment-6/dist)
+          echo "$LHCI_OUTPUT"
+          
+          # Lighthouse 결과 파싱
+          PERFORMANCE=$(echo "$LHCI_OUTPUT" | grep -oP 'performance: \K[0-9]+')
+          ACCESSIBILITY=$(echo "$LHCI_OUTPUT" | grep -oP 'accessibility: \K[0-9]+')
+          BEST_PRACTICES=$(echo "$LHCI_OUTPUT" | grep -oP 'best-practices: \K[0-9]+')
+          SEO=$(echo "$LHCI_OUTPUT" | grep -oP 'seo: \K[0-9]+')
+          
+          # 결과를 GitHub Actions 출력으로 설정
+          echo "performance=$PERFORMANCE" >> $GITHUB_OUTPUT
+          echo "accessibility=$ACCESSIBILITY" >> $GITHUB_OUTPUT
+          echo "best_practices=$BEST_PRACTICES" >> $GITHUB_OUTPUT
+          echo "seo=$SEO" >> $GITHUB_OUTPUT
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const performance = '${{ steps.job4.outputs.performance }}';
+            const accessibility = '${{ steps.job4.outputs.accessibility }}';
+            const bestPractices = '${{ steps.job4.outputs.best_practices }}';
+            const seo = '${{ steps.job4.outputs.seo }}';
+            
+            const comment = `
+            ## Lighthouse 성능 측정 결과
+
+            | 카테고리 | 점수 |
+            |----------|------|
+            | Performance | ${performance}% |
+            | Accessibility | ${accessibility}% |
+            | Best Practices | ${bestPractices}% |
+            | SEO | ${seo}% |
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
 
   assign_reviewer:
     runs-on: ubuntu-latest
