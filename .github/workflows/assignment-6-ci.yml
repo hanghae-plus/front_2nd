@@ -37,7 +37,7 @@ jobs:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const issue_number = context.payload.pull_request.number;
-            const message = "빌드 도중 에러가 발생했습니다.";
+            const message = `## BUILD FAIL ❌ \n 빌드 도중 에러가 발생했습니다.`;
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -52,14 +52,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Run ESLint
-        id: eslint
-        continue-on-error: true
-        run: |
-          npm install
-          npm run eslint --quiet > eslint_results.txt
+        run: pnpm -F assignment-6 lint > eslint_report.txt 2>&1 || echo "LINT_FAILED=true" >> $GITHUB_ENV
 
       - name: Comment PR if ESLint errors
         uses: actions/github-script@v5
@@ -73,7 +82,7 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: eslintResults,
+                body: `## ESLint FAIL ❌ \n ${eslintReport.trim()}`,
               });
             }
   
