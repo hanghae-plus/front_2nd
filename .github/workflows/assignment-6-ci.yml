@@ -85,7 +85,7 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install
-          pnpm install @vitest/coverage-v8
+          pnpm install -g @vitest/coverage-v8
       - name: Run tests with coverage
         run: pnpm -F assignment-6 test
       - name: Extract coverage metrics
