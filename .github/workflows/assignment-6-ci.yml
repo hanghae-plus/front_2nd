@@ -27,7 +27,7 @@ jobs:
         run: pnpm -F assignment-6 build
       - name: Comment on PR upon build failure
         if: failure()
-        uses: actions/github-script@v5
+        uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
@@ -41,7 +41,7 @@ jobs:
             });
       - name: Comment on PR upon build success
         if: success()
-        uses: actions/github-script@v5
+        uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
@@ -74,7 +74,7 @@ jobs:
         continue-on-error: true
       - name: Comment ESLint result
         if: failure()
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
@@ -108,7 +108,7 @@ jobs:
         run: pwd
       - name: Comment test results
         if: success()
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
@@ -148,7 +148,7 @@ jobs:
         run: |
           pnpm -F assignment-6 lhci
       - name: Format and comment Lighthouse results
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
@@ -162,20 +162,22 @@ jobs:
             Object.entries(summary).map(([key, value]) => [key, formatResult(value)])
             );
 
-            const commentBody = `## Lighthouse 성능 측정 결과 \n 
-            | 카테고리 | 점수 | \n
-            | --- | --- | \n
-            | Performance | ${finalSummary.performance} | \n
-            | Accessibility | ${finalSummary.accessibility} | \n
-            | Best practices | ${finalSummary['best-practices']} | \n
-            | SEO | ${finalSummary.seo} |`;
-
+            const comment = [
+              "| 카테고리 | 점수 |",
+              "| --- | --- |",
+              `| Performance | ${finalSummary.performance}% |`,
+              `| Accessibility | ${finalSummary.accessibility}% |`,
+              `| Best practices | ${finalSummary['best-practices']}% |`,
+              `| SEO | ${finalSummary.seo}% |`,
+              "\n",
+            ].join("\n");
+            const lighthouseComment = `## LIGHT HOUSE ✅ \n ${comment}`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: commentBody
+              body: lighthouseComment
             })
 
   assign_reviewer:
@@ -184,7 +186,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Assign random reviewer
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
