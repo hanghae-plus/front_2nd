@@ -174,10 +174,8 @@ jobs:
               
               comments += comment + "\n\n";
             })
-
-
-
             return comments;
+
       - name: Comment PR
         uses: actions/github-script@v6
         with:
