@@ -22,7 +22,7 @@ jobs:
           node-version: 20
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm -F assignment-6 install
       - name: Run TypeScript build
         run: pnpm -F assignment-6 build
         working-directory: packages/assignment-6
@@ -54,46 +54,22 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install
-      # - name: Build project
-      #   run: pnpm -F assignment-6 run build
-      #   working-directory: packages/assignment-6
-      #   id: tsc-build
-
       - name: Run ESLint
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-report.json
+        id: eslint
+        run: pnpm -F assignment-6 lint
+        #run: npx eslint . --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-report.json
       - name: Comment PR with ESLint results
+        if: failure() && steps.eslint.outcome=='failure'
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI }}
           script: |
-            const fs = require('fs');
-            const eslintReport = JSON.parse(fs.readFileSync('eslint-report.json', 'utf8'));
-            const errorCount = eslintReport.reduce((acc, file) => acc + file.errorCount, 0);
-            const warningCount = eslintReport.reduce((acc, file) => acc + file.warningCount, 0);
-
-            let comment = `## ESLint Results\n\n`;
-            comment += `- Errors: ${errorCount}\n`;
-            comment += `- Warnings: ${warningCount}\n\n`;
-
-            if (errorCount > 0 || warningCount > 0) {
-              comment += 'Please fix the following issues:\n\n';
-              eslintReport.forEach(file => {
-                if (file.messages.length > 0) {
-                  comment += `### ${file.filePath}\n`;
-                  file.messages.forEach(message => {
-                    comment += `- ${message.message} (${message.line}:${message.column})\n`;
-                  });
-                  comment += '\n';
-                }
-              });
-            }
-
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
-              repo: context.repo.name,
-              body: comment
-            });
+              repo: context.repo.repo,
+              body: 'ESLint에서 오류가 발생했습니다. 리포트:\n```json\n' + eslintReport + '\n```'
+              })
 
   # job3. 테스트를 실행하고, 커버리지를 측정하여 코멘트에 남긴다.
   test:
