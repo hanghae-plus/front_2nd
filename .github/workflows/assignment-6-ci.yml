@@ -163,7 +163,9 @@ jobs:
       - run: |
           pnpm install
           pnpm -F assignment-6 add -D @lhci/cli@0.7.x
-      - run: pnpm --F assignment-6 lighthouse
+      - run: |
+          pnpm -F assignment-6 build
+          pnpm --F assignment-6 lighthouse
       - id: extract_lighthouse_scores
         run: |
           LIGHTHOUSE_RESULTS="packages/assignment-6/.lighthouseci"
