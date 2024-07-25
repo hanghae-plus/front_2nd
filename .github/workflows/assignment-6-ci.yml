@@ -102,20 +102,41 @@ jobs:
             ```
 
   test:
-    needs: setup
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: latest
-      - uses: actions/setup-node@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-      - run: pnpm install
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm -F assignment-6 install
+
       - name: Run Tests and Measure Coverage
         run: pnpm -F assignment-6 test -- --coverage > test_output.txt
+
       - name: Extract Coverage Data
         id: coverage
         run: |
@@ -123,6 +144,7 @@ jobs:
           echo "statements=$(grep -oP 'All files.*?\|.*?\|\s*\K[0-9.]+(?=\s*\|)' test_output.txt)" >> $GITHUB_OUTPUT
           echo "functions=$(grep -oP 'All files.*?\|.*?\|.*?\|\s*\K[0-9.]+(?=\s*\|)' test_output.txt)" >> $GITHUB_OUTPUT
           echo "branches=$(grep -oP 'All files.*?\|.*?\|.*?\|.*?\|\s*\K[0-9.]+(?=\s*\|)' test_output.txt)" >> $GITHUB_OUTPUT
+
       - name: Post Test Coverage comment
         uses: marocchino/sticky-pull-request-comment@v2
         with:
@@ -135,6 +157,7 @@ jobs:
             - 구문 커버리지: ${{ steps.coverage.outputs.statements }}%
             - 함수 커버리지: ${{ steps.coverage.outputs.functions }}%
             - 브랜치 커버리지: ${{ steps.coverage.outputs.branches }}%
+
 
   lighthouse:
     needs: setup
