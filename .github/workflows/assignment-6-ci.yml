@@ -116,10 +116,11 @@ jobs:
 
       - name: Report coverage
         if: always()
-        run: ls
-        # uses: davelosert/vitest-coverage-report-action@v2
-        # with:
-        #   github-token: ${{ secrets.TOKEN_FOR_CI }}
+        # run: ls
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          json-summary-path: packages/assignment-6/coverage/coverage-summary.json
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
 
   lighthouse:
     runs-on: ubuntu-latest
