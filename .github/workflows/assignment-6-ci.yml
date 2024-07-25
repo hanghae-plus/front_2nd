@@ -55,7 +55,7 @@ jobs:
       - name: Run ESLint
         working-directory: ./packages/assignment-6
         run: |
-          npx eslint . -c .eslintrc.cjs --ext .ts,.tsx 2>&1 | tee result.txt
+          npx eslint . -c .eslintrc.cjs 2>&1 | tee result.txt
           EXIT_CODE=${PIPESTATUS[0]}
           exit $EXIT_CODE
 
