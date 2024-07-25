@@ -102,9 +102,12 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install
-      - name: Run tests and coverage
-        run: pnpm run test:coverage
+      - name: Run tests
+        run: pnpm -F assignment-6 test:coverage
+      - name: test pwd
+        run: pwd
       - name: Comment test results
+        if: success()
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
@@ -128,16 +131,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v9
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          configPath: "./lighthouserc.json"
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-      - name: Comment Lighthouse results
+          version: latest
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run tests
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
+        run: |
+          pnpm -F assignment-6 lhci
+      - name: Format and comment Lighthouse results
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.TOKEN_FOR_CI}}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const lighthouseReport = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'));
@@ -167,7 +180,7 @@ jobs:
 
   assign_reviewer:
     runs-on: ubuntu-latest
-
+    if: github.event.action == 'opened'
     steps:
       - uses: actions/checkout@v4
       - name: Assign random reviewer
