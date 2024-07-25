@@ -151,8 +151,8 @@ jobs:
             let comments = "";
 
             results.forEach((result) => {
-              const details = JSON.parse(fs.readFileSync(jsonPath));
               const { summary, jsonPath } = result;
+              const details = JSON.parse(fs.readFileSync(jsonPath));
               const { audits } = details;
 
               const formatResult = (res) => Math.round(res * 100);
