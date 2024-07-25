@@ -38,6 +38,7 @@ jobs:
         if: failure()
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
