@@ -19,6 +19,8 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - run: pnpm install
+        env:
+          CI: true 
 
   build:
     needs: setup
