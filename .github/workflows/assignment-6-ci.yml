@@ -134,10 +134,10 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const line_coverage = `${{ steps.format_coverage.outputs.line_coverage }}`
-            const function_coverage = `${{ steps.format_coverage.outputs.function_coverage }}`
-            const statement_coverage = `${{ steps.format_coverage.outputs.statement_coverage }}`
-            const branch_coverage = `${{ steps.format_coverage.outputs.branch_coverage }}`
+            const line_coverage = `${{ steps.format_coverage.outputs.line_coverage }}%`
+            const function_coverage = `${{ steps.format_coverage.outputs.function_coverage }}%`
+            const statement_coverage = `${{ steps.format_coverage.outputs.statement_coverage }}%`
+            const branch_coverage = `${{ steps.format_coverage.outputs.branch_coverage }}%`
 
             const { owner, repo } = context.repo
             const pull_number = context.payload.pull_request.number;
