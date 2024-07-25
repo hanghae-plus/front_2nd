@@ -166,6 +166,7 @@ jobs:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
         run: |
           pnpm -F assignment-6 lhci
+
       - name: Format and comment Lighthouse results
         uses: actions/github-script@v6
         with:
@@ -173,33 +174,29 @@ jobs:
           script: |
             const fs = require('fs');
             const lighthouseReport = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'));
-            
+
             const formatResult = (res) => Math.round(res * 100);
-            
-            let comments = "";
-            
-            lighthouseReport.forEach((result,index) => {
-                const { summary } = result;
-            
-                const finalSummary = Object.fromEntries(
-                Object.entries(summary).map(([key, value]) => [key, formatResult(value)])
-                );
-                        
-                const comment = [
-                  `| Category | Score |`,
-                  `| --- | --- |`,
-                  `| Performance | ${finalSummary.performance} |`,
-                  `| Accessibility | ${finalSummary.accessibility} |`,
-                  `| Best practices | ${finalSummary['best-practices']} |`,
-                  `| SEO | ${finalSummary.seo} |`,
-                  `\n`,
-                ].join("\n");
-            
-                comments += comment + "\n";
-            });
-            
-            const lighthouseComment = `## LIGHT HOUSE ✅ \n ${comments}`;
-            
+
+            // 첫 번째 결과만 사용
+            const result = lighthouseReport[0];
+            const { summary } = result;
+
+            const finalSummary = Object.fromEntries(
+            Object.entries(summary).map(([key, value]) => [key, formatResult(value)])
+            );
+
+            const comment = [
+              "| 카테고리 | 점수 |",
+              "| --- | --- |",
+              `| Performance | ${finalSummary.performance} |`,
+              `| Accessibility | ${finalSummary.accessibility} |`,
+              `| Best practices | ${finalSummary['best-practices']} |`,
+              `| SEO | ${finalSummary.seo} |`,
+              "\n",
+            ].join("\n");
+
+            const lighthouseComment = `## LIGHT HOUSE ✅ \n ${comment}`;
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
