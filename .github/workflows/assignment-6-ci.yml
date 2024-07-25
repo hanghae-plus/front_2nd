@@ -76,7 +76,7 @@ jobs:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs');
-            const eslintResults = fs.readFileSync('eslint_results.txt', 'utf8');
+            const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8');
             if (eslintResults) {
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
