@@ -116,7 +116,6 @@ jobs:
 
       - name: Report coverage
         if: always()
-        # run: ls
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           json-summary-path: packages/assignment-6/coverage/coverage-summary.json
@@ -147,6 +146,8 @@ jobs:
         run: pnpm --filter assignment-6 build
 
       - name: Run Lighthouse ci
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         run: |
           pnpm install -g @lhci/cli
           lhci autorun || echo "Fail to Run Lighthouse CI"
