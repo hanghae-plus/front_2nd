@@ -35,7 +35,7 @@ jobs:
           pnpm -F assignment-6 build
 
       - name: Comment if build fails
-        if: ${{ steps.build_step.outcome == 'failure' }}
+        if: failure()
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
@@ -168,12 +168,15 @@ jobs:
             let comments = "";
 
             const details = JSON.parse(fs.readFileSync(resultsPath));
-            const { categories } = details;
 
-            console.log("Lighthouse Report Details:", details);
+            let representativeRun = details.find(run => run.isRepresentativeRun);
+            if (!representativeRun) {
+              representativeRun = details[0]; // Fallback to the first run if no representative run is found
+            }
 
-            if (!categories || !categories.performance) {
-              throw new Error("Performance category is missing in the Lighthouse report.");
+            const { summary } = representativeRun;
+            if (!summary) {
+              throw new Error("Summary is missing in the Lighthouse report.");
             }
 
             const formatResult = (res) => Math.round(res * 100);
@@ -183,11 +186,10 @@ jobs:
               `⚡️ **Lighthouse report** ⚡️`,
               `| Category | Score |`,
               `| --- | --- |`,
-              `| ${score(categories.performance.score * 100)} Performance | ${formatResult(categories.performance.score * 100)} |`,
-              `| ${score(categories.accessibility.score * 100)} Accessibility | ${formatResult(categories.accessibility.score * 100)} |`,
-              `| ${score(categories['best-practices'].score * 100)} Best Practices | ${formatResult(categories['best-practices'].score * 100)} |`,
-              `| ${score(categories.seo.score * 100)} SEO | ${formatResult(categories.seo.score * 100)} |`,
-              `| ${score(categories.pwa.score * 100)} PWA | ${formatResult(categories.pwa.score * 100)} |`
+              `| ${score(summary.performance)} Performance | ${formatResult(summary.performance)} |`,
+              `| ${score(summary.accessibility)} Accessibility | ${formatResult(summary.accessibility)} |`,
+              `| ${score(summary['best-practices'])} Best Practices | ${formatResult(summary['best-practices'])} |`,
+              `| ${score(summary.seo)} SEO | ${formatResult(summary.seo)} |`
             ].join("\n");
 
             await github.rest.issues.createComment({
@@ -195,7 +197,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: comments
-            })
+            });
 
   assign_reviewer:
     runs-on: ubuntu-latest
