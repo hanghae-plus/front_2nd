@@ -83,7 +83,9 @@ jobs:
           node-version: 20
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          pnpm install
+          pnpm install @vitest/coverage-v8
       - name: Run tests with coverage
         run: pnpm -F assignment-6 test
       - name: Extract coverage metrics
@@ -196,6 +198,7 @@ jobs:
   # 실제로 PR에 리뷰어로 지정도 되어야한다.
   assign_reviewer:
     runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
     steps:
       - uses: actions/checkout@v4
       - name: Random Reviewer Assignment
