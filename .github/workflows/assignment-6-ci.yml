@@ -51,9 +51,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_ENV
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Use Node.js
         uses: actions/setup-node@v4
