@@ -24,7 +24,7 @@ jobs:
         id: job1
         run: |
           pnpm -F assignment-6 install
-          pnpm -F assignment-6 build
+          pnpm -F assignment-6 build:tsc
       - name: 'job1-err: 오류가 발생하면 코멘트를 남긴다.'
         if: failure()
         uses: actions/github-script@v7
@@ -141,7 +141,6 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - name: 'job4: lighthouse ci 를 실행'
-        continue-on-error: true
         id: job4
         run: |
           pnpm -F assignment-6 install
