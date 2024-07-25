@@ -1,9 +1,6 @@
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches:
-      - main
-      - assignment/6
     paths:
       - "packages/assignment-6/**"
       - ".github/actions/setup-node-dependencies/**"
