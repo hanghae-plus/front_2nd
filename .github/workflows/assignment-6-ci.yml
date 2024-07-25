@@ -118,7 +118,7 @@ jobs:
       - name: Run tests with coverage
         id: run_tests
         run: |
-          pnpm test:coverage
+          pnpm -F assignment-6 test:coverage
 
       - name: Report Coverage
         if: always()
