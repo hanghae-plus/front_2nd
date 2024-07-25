@@ -29,8 +29,8 @@ jobs:
         run: pnpm install
       - name: Run tsc and build
         run: |
-          pmpm -F assignment-6 build
-        continue-on-error: true
+          pnpm -F assignment-6 run tsc
+          pnpm -F assignment-6 run build
       - name: Comment build result
         if: failure()
         uses: actions/github-script@v6
