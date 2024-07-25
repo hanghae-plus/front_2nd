@@ -1,12 +1,9 @@
 name: CI Assignment 6
 
 on:
-  push:
-    branches: [steve-shim-assignment-6]
+  pull_request:
+    types: [opened, synchronize]
 
-  pull_request_target:
-    types:
-      - opened
     paths:
       - "packages/assignment-6/**"
 
@@ -14,41 +11,298 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # - name: job1 구현 tsc, build 를 실행한다. 오류가 발생하면 코멘트를 남긴다.
-      #   run: echo "job1의 내용을 구현해주세요"
       - uses: actions/checkout@v4
-      - run: ls -al
-      - run: npm install -g pnpm
-      - run: pnpm install
-      - run: pnpm build 2>&1 | tee test.txt
-      - run: pwd
-      - run: BUILDERROR=$(cat test.txt)
-      - run: echo $BUILDERROR
-      - if: always()
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: tsc && build
+        id: build
         run: |
-          echo "## TEST" >> $GITHUB_STEP_SUMMARY
-          echo "- $BUILDERROR" >> $GITHUB_STEP_SUMMARY
+          pnpm -F assignment-6 build 2>&1 | tee error.log
+          exit ${PIPESTATUS[0]}
+
+      - name: Comment PR
+        if: failure()
+        uses: actions/github-script@v6.4.0
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs')
+            const errorLog = fs.readFileSync('error.log', 'utf8')
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### tsc&build error ${errorLog}`
+            })
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현 eslint를 실행한 다음에, eslint에서 오류가 발생할 경우 report를 코멘트에 남긴다.
-        run: echo "job2의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: lint
+        id: lint
+        run: |
+          pnpm -F assignment-6 lint 2>&1 | tee error.log
+
+      - name: Comment PR
+        if: failure()
+        uses: actions/github-script@v6.4.0
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs')
+            const errorLog = fs.readFileSync('error.log', 'utf8')
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### lint error ${errorLog}`
+            })
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현 테스트를 실행하고, 커버리지를 측정하여 코멘트에 남긴다.
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Testing and Coverage
+        run: |
+          pnpm install
+          pnpm -F assignment-6 test
+          pnpm -F assignment-6 test:coverage
+
+      - name: Comment Test Coverage
+        uses: actions/github-script@v6
+        if: success()
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+
+            const coverage = JSON.parse(fs.readFileSync("packages/assignment-6/coverage/coverage-summary.json", 'utf8'));
+            const totalCoverage = coverage.total;
+
+            const coverageComment = `
+
+            ## 테스트 성공 ✅
+            ### 커버리지 결과
+
+            - 라인 커버리지: ${totalCoverage.lines.pct}%
+            - 브랜치 커버리지: ${totalCoverage.branches.pct}%
+            - 함수 커버리지: ${totalCoverage.functions.pct}%
+            - 구문 커버리지: ${totalCoverage.statements.pct}%
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: coverageComment
+            });
+
+      - name: Comment Test Coverage on Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const coverageComment = `
+              ## 테스트 실패 ❌
+
+              테스트 코드를 확인해주세요.
+            `
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: coverageComment
+            });
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현 lighthouse ci 를 실행하고, 실행 결과를 코멘트에 남긴다.
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Lighthouse CI
+        run: |
+          pnpm i -g @lhci/cli
+          pnpm -F assignment-6 lhci || echo "Fail to Run Lighthouse CI!"
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Format lighthouse score
+        id: format_lighthouse
+        uses: actions/github-script@v6.4.0
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const resultsPath = path.join(process.env.GITHUB_WORKSPACE, 'packages', 'assignment-6', 'lhci_reports', 'manifest.json');
+
+            if (!fs.existsSync(resultsPath)) {
+              console.log(`File not found: ${resultsPath}`);
+              return;
+            }
+
+            const results = JSON.parse(fs.readFileSync(resultsPath));
+            const totalReports = results.length;
+
+            // best-practices은 문자열로 저장 ( Lighthouse 지표 )
+            const averageScores = {
+              performance: 0,
+              accessibility: 0,
+              'best-practices': 0,
+              seo: 0,
+              pwa: 0
+            };
+
+            // Lighthouse 상세 지표
+            const auditSummaries = {
+              'first-contentful-paint': 0,
+              'largest-contentful-paint': 0,
+              'interactive': 0,
+              'total-blocking-time': 0,
+              'cumulative-layout-shift': 0
+            };
+
+            // 점수 평균
+            results.forEach(result => {
+              const { summary } = result;
+              for (const key in averageScores) {
+                averageScores[key] += summary[key];
+              }
+
+              const details = JSON.parse(fs.readFileSync(result.jsonPath));
+              ['first-contentful-paint', 'largest-contentful-paint', 'interactive', 'total-blocking-time', 'cumulative-layout-shift'].forEach(auditName => {
+                if (details.audits[auditName]) {
+                  const auditDetails = details.audits[auditName];
+                  auditSummaries[auditName] += parseFloat(auditDetails.displayValue) || 0;
+                }
+              });
+            });
+
+             const formatScore = res => (res >= 90 ? "🟢" : res >= 70 ? "🟠" : "🔴");
+
+            // 상세 지표의 표준 점수에 따른 색상 표시
+            const detailscore = (value, metric) => {
+              switch (metric) {
+              case 'first-contentful-paint':
+                  return value <= 1.8 ? "🟢" : value <= 3 ? "🟠" : "🔴";
+                case 'largest-contentful-paint':
+                  return value <= 2.5 ? "🟢" : value <= 4 ? "🟠" : "🔴";
+                case 'interactive':
+                  return value <= 3.8 ? "🟢" : value <= 7.3 ? "🟠" : "🔴";
+                case 'total-blocking-time':
+                  return value <= 300 ? "🟢" : value <= 600 ? "🟠" : "🔴";
+                case 'cumulative-layout-shift':
+                  return value <= 0.1 ? "🟢" : value <= 0.25 ? "🟠" : "🔴";
+                default:
+                return "🔴"; // Default to red if metric is unknown
+                }
+            };
+
+            let comments = "⚡️ Lighthouse Average Scores Across Reports:\n| Category | Score |\n| --- | --- |\n";
+            Object.keys(averageScores).forEach(key => {
+              const avgScore = Math.round((averageScores[key] / totalReports) * 100);
+              comments += `| ${formatScore(avgScore)}  ${key.replace(/-/g, ' ')} | ${avgScore} |\n`;
+            });
+
+            comments += "\n⚡️ Average Details Across All Reports:\n| Category | Score |\n| --- | --- |\n";
+            Object.keys(auditSummaries).forEach(auditName => {
+              const average = auditSummaries[auditName] / totalReports;
+              const formattedName = auditName.replace(/-/g, ' ');
+              const colorCode = detailscore(average, auditName);
+              const unit = (auditName === 'total-blocking-time' ? 'ms' : auditName === 'cumulative-layout-shift' ? '' : 's')
+              comments += `| ${colorCode}  ${formattedName} | ${average.toFixed(1)}${unit} |\n`;
+                        });
+
+            // PR 전송
+            if (comments && context.issue.number) {
+              const issue_number = context.issue.number;
+              const repo = context.repo.repo;
+              const owner = context.repo.owner;
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: comments
+              });
+            } else {
+              console.log("No PR COMMENT!");
+            }
 
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현 PR이 open될 때만 실행되고, 팀원 중 한 명을 랜덤으로 선정하여 리뷰어를 지정한 다음에 코멘트에 멘션하여 올린다. 실제로 PR에 리뷰어로 지정도 되어야한다.
-        run: echo "job5의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Assign Reviewer
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const reviewers = ["kimfield98", "tsihnavy99"];
+            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@${randomReviewer}, 리뷰를 부탁드립니다.`
+            });
+
+            github.rest.pulls.requestReviewers({
+              pull_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              reviewers: [randomReviewer]
+            });
