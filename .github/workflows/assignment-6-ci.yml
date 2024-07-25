@@ -24,7 +24,13 @@ jobs:
         id: job1
         run: |
           pnpm -F assignment-6 install
-          pnpm -F assignment-6 build 2> error.log
+          pnpm -F assignment-6 build || {
+            error_message=$(pnpm -F assignment-6 build 2>&1)
+            echo "error_message<<EOF" >> $GITHUB_OUTPUT
+            echo "$error_message" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            exit 1
+          }
       - name: 'job1-err: 오류가 발생하면 코멘트를 남긴다.'
         if: failure()
         uses: actions/github-script@v7
