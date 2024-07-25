@@ -113,7 +113,7 @@ jobs:
         run: pnpm install
 
       - name: Install coverage
-        run: pnpm add --save-dev @vitest/coverage-v8@2.0.4 --filter assignment-6
+        run: pnpm add --save-dev @vitest/coverage-v8@^2.0.4 --filter assignment-6
 
       - name: job3 run test
         run: pnpm -F assignment-6 test
@@ -151,8 +151,73 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: latest
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4.0.3
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install lhci
+        run: pnpm add --save-dev @lhci/cli@^0.14.0 --filter assignment-6
+
+      - name: Build
+        run: pnpm -F assignment-6 build
+
+      - name: Run Lighthouse CI
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
+        run: pnpm -F assignment-6 lighthouse
+
+      - name: job4 lighthouse comment
+        if: success()
+        uses: actions/github-script@v7.0.1
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs')
+            const coveragePath = 'packages/assignment-6/lhci_reports/manifest.json'
+            const results = JSON.parse(fs.readFileSync(coveragePath, 'utf8'));
+
+            const resultCategory = {'performance': 'Performance', 'accessibility': 'Accessibility', 
+                                    'best-practices': 'Best Practices', 'seo': 'SEO'}
+            let message = "";
+
+            results.forEach((result) => {
+              const { summary, jsonPath } = result;
+
+              const formatResult = (res) => Math.round(res * 100);
+
+              Object.keys(summary).forEach(
+                (key) => (summary[key] = formatResult(summary[key]))
+              );
+
+              const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
+
+              message = [
+                `## Lighthouse 성능 측정 결과`,
+                `| 카테고리 | 점수 |`,
+                `| --- | --- |`,
+                ...Object.entries(resultCategory).map(([key, value]) => `| ${score(summary[key])} ${value} | ${summary[key]} |`),
+              ].join("\n");
+            });
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            })
 
   assign_reviewer:
     runs-on: ubuntu-latest
