@@ -246,7 +246,7 @@ jobs:
             });
 
       - name: Comment on assigned reviewer
-        if: steps.check_reviewers.outputs.reviewers == ''
+        if: steps.check_reviewers.outputs.reviewers == '[]'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
