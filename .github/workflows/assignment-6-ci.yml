@@ -115,6 +115,7 @@ jobs:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const coverage = `${{ steps.job3.outputs.coverage }}`;
+            console.log("coverage",coverage)
             
             // 정규 표현식을 사용하여 커버리지 정보 추출
             const lines = coverage.match(/Lines\s*:\s*([\d.]+)%/)?.[1] || 'N/A';
