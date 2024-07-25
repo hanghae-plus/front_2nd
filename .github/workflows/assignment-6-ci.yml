@@ -52,14 +52,27 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
+      - name: Debug - List directory structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Directory contents:"
+          ls -R
 
       - name: Run ESLint
         working-directory: ./packages/assignment-6
         run: |
-          cd packages/assignment-6
+          if [ -d "packages/assignment-6" ]; then
+            cd packages/assignment-6
+          elif [ -d "assignment-6" ]; then
+            cd assignment-6
+          else
+            echo "assignment-6 directory not found"
+            exit 1
+          fi
           npx eslint . 2>&1 | tee result.txt
           EXIT_CODE=${PIPESTATUS[0]}
-          cd ../..
+          cd $(git rev-parse --show-toplevel)
           exit $EXIT_CODE
 
       - name: Add PR comment on lint errors
