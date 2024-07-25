@@ -111,9 +111,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Test
-        run: pnpm --filter assignment-6 test
-
       - name: Create test coverage
         run: pnpm --filter assignment-6 test:coverage
 
