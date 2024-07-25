@@ -103,20 +103,32 @@ jobs:
             const testOutput = fs.readFileSync('test_output.txt', 'utf8');
             
             // 커버리지 정보 추출
-            const coverageMatch = testOutput.match(/(?:Coverage|Test Coverage).*?(?:\n\n|\Z)/s);
-            const coverageInfo = coverageMatch ? coverageMatch[0].trim() : 'Coverage information not found.';
+            const coverageInfo = {};
+            const coverageTypes = ['Lines', 'Branches', 'Functions', 'Statements'];
+            
+            coverageTypes.forEach(type => {
+              const regex = new RegExp(`${type}\\s*:\\s*(\\d+(\\.\\d+)?)%`, 'i');
+              const match = testOutput.match(regex);
+              coverageInfo[type] = match ? match[1] + '%' : 'N/A';
+            });
+              
+            const coverageReport = `
+            라인 커버리지: ${coverageInfo.Lines}
+            브랜치 커버리지: ${coverageInfo.Branches}
+            함수 커버리지: ${coverageInfo.Functions}
+            구문 커버리지: ${coverageInfo.Statements}
+            `;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## 테스트 성공
-            ### 테스트 커버리지 결과:
-    
+              body: `테스트가 성공적으로 완료되었습니다. 커버리지 결과:
+  
             \`\`\`
-            ${coverageInfo}
+            ${coverageReport.trim()}
             \`\`\`
-    
+  
             자세한 테스트 결과는 CI 로그를 확인해 주세요.`
             });
 
