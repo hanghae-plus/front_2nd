@@ -164,37 +164,6 @@ jobs:
           pnpm -F assignment-6 build
           pnpm -F assignment-6 lighthouse
 
-      - name: Report Lighthouse
-        if: always()
-        uses: actions/github-script@v6
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-        with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
-          script: |
-            const performance = ${{ steps.format_results.outputs.performance }};
-            const accessibility = ${{ steps.format_results.outputs.accessibility }};
-            const bestPractices = ${{ steps.format_results.outputs.best_practices }};
-            const seo = ${{ steps.format_results.outputs.seo }};
-
-            const comment = `
-            ## Lighthouse 성능 측정 결과
-
-            | 카테고리 | 점수 |
-            |----------|------|
-            | Performance | ${performance}% |
-            | Accessibility | ${accessibility}% |
-            | Best Practices | ${bestPractices}% |
-            | SEO | ${seo}% |
-            `;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-
 # job5: PR이 open 될 때만 실행됨, 팀원 중 한 명을 랜덤으로 선정하여 리뷰어 지정, 코멘트에 멘션해서 올림
 #     assign_reviewer:
 #       runs-on: ubuntu-latest
