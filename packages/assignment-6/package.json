@@ -11,7 +11,7 @@
     "build": "vite build",
     "build:tsc": "tsc -b && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "lhci": "lhci autorun",
+    "lhci": "lhci autorun"
   },
   "dependencies": {
     "react": "^18.3.1",
