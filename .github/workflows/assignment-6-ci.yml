@@ -38,10 +38,9 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const name = '${{ github.workflow }}'
-            const url = '${{ github.server_url }}/${{ github.repository }}'
-            const success = '${{ job.status }}' === 'success';
-            const body = `${name}: ${success ? '✅' : '❌'}`
+            const name = context.payload.workflow;
+            const failedStep = context.payload.steps.find(step => step.conclusion === 'failure');
+            const body = `${name}: ${failedStep ? `❌ ${failedStep.name}` : '✅'}`
 
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
