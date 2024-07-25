@@ -144,7 +144,7 @@ jobs:
         id: format_lighthouse_score
         uses: actions/github-script@v3
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs');
             const results = JSON.parse(fs.readFileSync("/{Github Actions runner directory}/lhci_reports/manifest.json"));
