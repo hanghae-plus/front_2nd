@@ -144,6 +144,7 @@ jobs:
         id: job4
         run: |
           pnpm -F assignment-6 install
+          pnpm -F assignment-6 build
           npx @lhci/cli@0.11.x autorun
       - name: 'job4-res: 실행 결과를 코멘트에 남긴다.'
         uses: actions/github-script@v7
