@@ -220,6 +220,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: kentaro-m/auto-assign-action@v2.0.0
+        if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened')
         with:
           repo-token: ${{ secrets.TOKEN_FOR_CI }}
           configuration-path: .github/auto-assign.yml
