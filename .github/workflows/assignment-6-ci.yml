@@ -172,7 +172,7 @@ jobs:
           script: |
             const fs = require('fs')
             const lighthouseReports = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'))
-            const targetReport = lighthouseReport[0]
+            const targetReport = lighthouseReports[0]
             const scores = {
               performance: targetReport.summary.performance * 100,
               accessibility: targetReport.summary.accessibility * 100,
@@ -199,5 +199,35 @@ jobs:
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Pick a teammate and assign reviewer
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const teammates = [
+              {name:'전창기', github: 'ChanggiJeon'},
+              {name:'신명희', github: 'mh0223'}
+            ]
+
+            const randomIndex = Math.floor(Math.random() * teammates.length)
+            const reviewer teammates[randomIndex]
+
+            const comment = `
+              ## @${reviewer.github} ${reviewer.name}님 축하드립니다. 리뷰어로 선정 되셨습니다.
+            `
+            await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+             })
+             
+            await github.rest.pulls.requestReviewers({
+              pull_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              reviewers: [reviewerGithub]
+            })
