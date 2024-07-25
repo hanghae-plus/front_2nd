@@ -3,7 +3,7 @@ name: CI Assignment 6
 on:
   pull_request:
     types:
-      [opened]
+      [opened, synchronize]
     paths:
       - 'packages/assignment-6/**'
 
@@ -32,7 +32,7 @@ jobs:
 
       - name: Comment on PR upon build failure
         if: failure()
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
@@ -47,7 +47,7 @@ jobs:
 
       - name: Comment on PR upon build success
         if: success()
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Use Node.js
       uses: actions/setup-node@v4
@@ -161,7 +161,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -224,10 +224,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Assign reviewer and create comment mentioning reviewer
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
