@@ -82,7 +82,7 @@ jobs:
         if: env.eslint_errors == 'true' # This will trigger only if there were ESLint errors
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8');
@@ -122,7 +122,7 @@ jobs:
         if: success()
         uses: actions/github-script@v6
         with:
-          github-token: ${{ github.token }}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const path = "packages/assignment-6/coverage/coverage-summary.json";
