@@ -120,6 +120,7 @@ jobs:
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           json-summary-path: packages/assignment-6/coverage/coverage-summary.json
+          json-final-path: packages/assignment-6/coverage/coverage-final.json
           github-token: ${{ secrets.TOKEN_FOR_CI }}
 
   lighthouse:
