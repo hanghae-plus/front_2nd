@@ -39,6 +39,9 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const name = context.payload.workflow;
+            console.log("🚀 ~ name:", name)
+            console.log(context);
+            console.log(context.payload.steps);
             const failedStep = context.payload.steps.find(step => step.conclusion === 'failure');
             const body = `${name}: ${failedStep ? `❌ ${failedStep.name}` : '✅'}`
 
