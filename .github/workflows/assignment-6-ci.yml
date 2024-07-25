@@ -36,13 +36,14 @@ jobs:
             \`\`\`
             ${{ steps.job1.outputs.stderr }}
             \`\`\`
+            `
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: jobOutput
-            })`
+            })
 
   lint:
     runs-on: ubuntu-latest
@@ -71,13 +72,14 @@ jobs:
             \`\`\`
             ${{ steps.job2.outputs.stderr }}
             \`\`\`
+            `
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: jobOutput
-            })`
+            })
 
   test:
     runs-on: ubuntu-latest
@@ -126,7 +128,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: coverageComment
-            })`
+            })
 
   lighthouse:
     runs-on: ubuntu-latest
