@@ -231,7 +231,8 @@ jobs:
             return { reviewers: reviews.users.map(user => user.login) };
 
       - name: Debug Reviewers Output
-        run: echo "Reviewers: ${{ steps.check_reviewers.outputs.reviewers }}"
+        run: |
+          echo "Reviewers: ${{ steps.check_reviewers.outputs.reviewers }}"
 
       - name: Assign random reviewer
         if: steps.check_reviewers.outputs.reviewers == ''
