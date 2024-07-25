@@ -100,11 +100,16 @@ jobs:
         run: |
           COVERAGE_FILE="packages/assignment-6/coverage/coverage-final.json"
           echo "Using coverage file: $COVERAGE_FILE"
-          cat $COVERAGE_FILE
+
           LINE_COVERAGE=$(jq '.total.lines.pct' $COVERAGE_FILE)
+          echo "line_coverage: $LINE_COVERAGE"
           BRANCH_COVERAGE=$(jq '.total.branches.pct' $COVERAGE_FILE)
+          echo "branch_coverage: $BRANCH_COVERAGE"
           FUNCTION_COVERAGE=$(jq '.total.functions.pct' $COVERAGE_FILE)
+          echo "function_coverage: $FUNCTION_COVERAGE"
           STATEMENT_COVERAGE=$(jq '.total.statements.pct' $COVERAGE_FILE)
+          echo "statement_coverage: $STATEMENT_COVERAGE"
+
           echo "line_coverage=${LINE_COVERAGE}" >> $GITHUB_OUTPUT
           echo "branch_coverage=${BRANCH_COVERAGE}" >> $GITHUB_OUTPUT
           echo "function_coverage=${FUNCTION_COVERAGE}" >> $GITHUB_OUTPUT
@@ -129,10 +134,10 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const lineCoverage = `${{ steps.format_coverage.outputs.line_coverage }}`
-            const functionCoverage = `${{ steps.format_coverage.outputs.function_coverage }}`
-            const statementCoverage = `${{ steps.format_coverage.outputs.statement_coverage }}`
-            const branchCoverage = `${{ steps.format_coverage.outputs.branch_coverage }}`
+            const line_coverage = `${{ steps.format_coverage.outputs.line_coverage }}`
+            const function_coverage = `${{ steps.format_coverage.outputs.function_coverage }}`
+            const statement_coverage = `${{ steps.format_coverage.outputs.statement_coverage }}`
+            const branch_coverage = `${{ steps.format_coverage.outputs.branch_coverage }}`
 
             const { owner, repo } = context.repo
             const pull_number = context.payload.pull_request.number;
@@ -141,7 +146,7 @@ jobs:
               owner,
               repo,
               pull_number,
-              body: `## 테스트 성공 ✅\n ### 커버리지 결과\n 라인 커버리지: ${lineCoverage}\n 함수 커버리지: ${functionCoverage}\n 구문 커버리지: ${statementCoverage}\n 브랜치 커버리지: ${branchCoverage}`,
+              body: `## 테스트 성공 ✅\n ### 커버리지 결과\n 라인 커버리지: ${line_coverage}\n 함수 커버리지: ${function_coverage}\n 구문 커버리지: ${statement_coverage}\n 브랜치 커버리지: ${branch_coverage}`,
               event: 'COMMENT'
             });
 
