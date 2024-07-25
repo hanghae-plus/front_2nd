@@ -100,7 +100,6 @@ jobs:
           echo "branch_coverage=${BRANCH_COVERAGE}" >> $GITHUB_OUTPUT
           echo "function_coverage=${FUNCTION_COVERAGE}" >> $GITHUB_OUTPUT
           echo "statement_coverage=${STATEMENT_COVERAGE}" >> $GITHUB_OUTPUT
-
       - name: Comment PR
         uses: actions/github-script@v6
         with:
@@ -112,10 +111,10 @@ jobs:
               repo: context.repo.repo,
               body: `### 커버리지 결과
 
-              * 라인 커버리지: ${steps.coverage.outputs.line_coverage}%
-              * 브랜치 커버리지: ${steps.coverage.outputs.branch_coverage}%
-              * 함수 커버리지: ${steps.coverage.outputs.function_coverage}%
-              * 구문 커버리지: ${steps.coverage.outputs.statement_coverage}%`
+              * 라인 커버리지: ${{steps.coverage.outputs.line_coverage}}%
+              * 브랜치 커버리지: ${{steps.coverage.outputs.branch_coverage}}%
+              * 함수 커버리지: ${{steps.coverage.outputs.function_coverage}}%
+              * 구문 커버리지: ${{steps.coverage.outputs.statement_coverage}}%`
             })
 
   # job4. lighthouse ci 를 실행하고, 실행 결과를 코멘트에 남긴다.
