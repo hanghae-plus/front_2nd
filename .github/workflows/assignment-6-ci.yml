@@ -1,3 +1,5 @@
+name: CI Assignment 6
+
 on:
   pull_request:
     types: [opened, synchronize, reopened]
