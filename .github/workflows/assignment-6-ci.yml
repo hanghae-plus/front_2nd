@@ -24,10 +24,10 @@ jobs:
         id: job1
         run: |
           if ! output=$(pnpm -F assignment-6 install 2>&1 && pnpm -F assignment-6 build 2>&1); then
-          echo "error<<EOF" >> $GITHUB_OUTPUT
-          echo "$output" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          exit 1
+            echo "error<<EOF" >> $GITHUB_OUTPUT
+            echo "$output" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            exit 1
           fi
       - name: Comment PR on Failure
         if: failure()
