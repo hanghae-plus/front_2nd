@@ -204,7 +204,7 @@ jobs:
     steps:
       - id: choose_reviewer
         run: |
-          TEAM_MEMBERS=("metacode22" "lhk228" "rachel-park-dev")
+          TEAM_MEMBERS=("metacode22" "lhk228")
 
           RANDOM_REVIEWER=${TEAM_MEMBERS[$RANDOM % ${#TEAM_MEMBERS[@]}]}
 
