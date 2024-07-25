@@ -84,8 +84,9 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: |
-          pnpm -F assignment-6 install
-          pnpm -F assignment-6 install -g @vitest/coverage-v8
+          cd packages/assignment-6
+          pnpm install
+          pnpm install -D vitest jsdom @vitest/coverage-v8
       - name: Run tests with coverage
         run: pnpm -F assignment-6 run test
       - name: Extract coverage metrics
