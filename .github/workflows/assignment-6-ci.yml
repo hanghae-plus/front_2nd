@@ -187,6 +187,7 @@ jobs:
     steps:
       - name: 'job5: PR이 open될 때만 실행되고, 팀원 중 한 명을 랜덤으로 선정하여 리뷰어를 지정한 다음에 코멘트에 멘션하여 올린다. 실제로 PR에 리뷰어로 지정도 되어야한다.'
         id: job5
+        uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
