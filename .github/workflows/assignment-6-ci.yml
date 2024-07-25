@@ -51,34 +51,34 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - name: 'job2: eslint를 실행한 다음에, eslint에서 오류가 발생할 경우 report를 코멘트에 남긴다.'
+      - name: 'job2: eslint를 실행'
         id: job2
         run:  |
-          if ! output=$(pnpm -F assignment-6 install 2>&1 && pnpm -F assignment-6 lint 2>&1); then
-            echo "error<<EOF" >> $GITHUB_OUTPUT
-            echo "$output" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-            exit 1
-          fi
-      - name: Comment PR on Failure
+          pnpm -F assignment-6 install
+          pnpm -F assignment-6 lint > lint_result.txt || true
+          echo "LINT_RESULT<<EOF" >> $GITHUB_OUTPUT
+          cat lint_result.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      - name: 'job2-err: eslint에서 오류가 발생할 경우 report를 코멘트에 남긴다.'
         if: failure()
         uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const jobOutput = `${process.env.GITHUB_WORKFLOW} 워크플로우의 job2 단계에서 오류가 발생했습니다:
-            
-            \`\`\`
-            ${{ steps.job2.outputs.stderr }}
-            \`\`\`
-            `
+            const lintResult = `${{ steps.job2.outputs.LINT_RESULT }}`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: jobOutput
-            })
+              body: `ESLint 실행 중 오류가 발생했습니다. 아래는 ESLint 리포트입니다:
+            
+            \`\`\`
+            ${lintResult}
+            \`\`\`
+            
+            위의 lint 오류들을 수정한 후 다시 PR을 업데이트해 주시기 바랍니다.`
+            });
 
   test:
     runs-on: ubuntu-latest
