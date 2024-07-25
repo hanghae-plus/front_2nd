@@ -8,7 +8,6 @@ on:
       - assignment/6
     paths:
       - "packages/assignment-6/**"
-      - ".github/actions/setup-node-dependencies/**"
 
 jobs:
   # job1: tsc, build 실행, 오류 발생하면 코멘트 남김
