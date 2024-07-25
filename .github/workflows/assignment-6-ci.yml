@@ -45,6 +45,21 @@ jobs:
               body: message,
             });
 
+      - name: Comment on PR upon build success
+        if: success()
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const issue_number = context.payload.pull_request.number;
+            const message = `## BUILD PASS ✅ \n 빌드가 성공적으로 완료되었습니다.`;
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: message,
+            });
+
 
 
 
