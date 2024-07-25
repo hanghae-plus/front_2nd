@@ -51,8 +51,9 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Read .nvmrc
+        id: node_version
+        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_ENV
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -70,21 +71,21 @@ jobs:
       - name: Run ESLint
         run: pnpm -F assignment-6 lint > eslint_report.txt 2>&1 || echo "LINT_FAILED=true" >> $GITHUB_ENV
 
-      - name: Comment PR if ESLint errors
-        uses: actions/github-script@v5
+      - name: Comment ESLint results (Warning and Error)
+        if: env.LINT_FAILED == 'true'
+        uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.TOKEN_FOR_CI}}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8');
-            if (eslintResults) {
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `## ESLint FAIL ❌ \n ${eslintReport.trim()}`,
-              });
-            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ESLint FAIL ❌ \n ${eslintReport.trim()}`
+            });
   
 
 
