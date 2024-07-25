@@ -52,9 +52,8 @@ jobs:
       - name: Run ESLint
         working-directory: ./packages/assignment-6
         run: |
-          npm run lint > eslint-output.txt
-          cat eslint-output.txt
-          working-directory: packages/assignment-6
+          npm run lint --workspace=assignment-6 > packages/assignment-6/eslint-output.txt
+          cat packages/assignment-6/eslint-output.txt
 
       - name: Add PR comment on lint errors
         if: failure()
