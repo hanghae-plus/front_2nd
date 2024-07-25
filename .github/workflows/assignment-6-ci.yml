@@ -58,21 +58,40 @@ jobs:
           cache: 'pnpm'
       - run: pnpm -F assignment-6 install
 
-      - name: Run ESLint
-        id: job2
-        run: pnpm -F assignment-6 lint > eslint_output.txt
-
       - name: Set ESLint output to env
-        if: failure() && steps.job2.outcome == 'failure'
+        id: eslint
         run: |
-          output=$(pnpm -F assignment-6 lint 2>&1) || true
+          output=$(pnpm -F assignment-6 lint 2>&1)
           echo "ESLINT_OUTPUT<<EOF" >> $GITHUB_ENV
           echo "$output" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: Comment ESLint results
+      - name: Comment ESLint results when success
         uses: actions/github-script@v6
-        if: failure() && steps.job2.outcome == 'failure'
+        if: success()
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const eslintOutput = process.env.ESLINT_OUTPUT || 'No ESLint output available';
+            const message = `
+            ## ESLint Results
+
+            \`\`\`
+            ${eslintOutput}
+            \`\`\`
+            `;
+
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: owner,
+              repo: repo,
+              body: message
+            })
+
+      - name: Comment ESLint results when failure
+        uses: actions/github-script@v6
+        if: failure()
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
