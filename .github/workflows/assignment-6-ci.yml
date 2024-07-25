@@ -216,10 +216,11 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const reviewer = '${{ steps.choose_reviewer.outputs.reviewer }}';
+
             const { owner, repo } = context.repo;
             const pull_number = context.payload.pull_request.number;
 
-            await github.pulls.requestReviewers({
+            await github.rest.pulls.requestReviewers({
               owner,
               repo,
               pull_number,
@@ -234,9 +235,9 @@ jobs:
             const { owner, repo } = context.repo;
             const pull_number = context.payload.pull_request.number;
 
-            await github.issues.createComment({
+            await github.rest.pulls.createReview({
               owner,
               repo,
-              issue_number: pull_number,
+              pull_number,
               body: `@${reviewer} Please review this PR.`
             });
