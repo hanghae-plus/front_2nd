@@ -53,8 +53,44 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: latest
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4.0.3
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: job2 run lint
+        run: |
+          pnpm -F assignment-6 lint > lint_output.log 2>&1
+
+      - name: job2 error comment
+        if: failure()
+        uses: actions/github-script@v7.0.1
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs')
+            const report = fs.readFileSync('lint_output.log', 'utf8')
+
+            const message = `## ESLint Results\n\n${report}`
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            })
 
   test:
     runs-on: ubuntu-latest
