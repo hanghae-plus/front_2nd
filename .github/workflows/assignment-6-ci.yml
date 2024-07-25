@@ -153,7 +153,7 @@ jobs:
 
       - name: Run Lighthouse
         run: |
-          pnpm i -g @lhci/cli
+          pnpm add -g @lhci/cli
           pnpm -F assignment-6 lhci
 
       - name: Format lighthouse score
