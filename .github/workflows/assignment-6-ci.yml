@@ -65,19 +65,16 @@ jobs:
           script: |
             const fs = require('fs');
             const lintOutput = fs.readFileSync('lint_output.txt', 'utf8');
-            console.log('lintOutput: ', lintOutput)
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `ESLint 실행 중 오류가 발생했습니다.
+              body: `## ESLint 실행 중 오류가 발생했습니다.
     
             \`\`\`
             ${lintOutput}
             \`\`\`
-  
-            위의 lint 오류들을 수정한 후 다시 PR을 업데이트해 주시기 바랍니다.`
             });
 
   test:
