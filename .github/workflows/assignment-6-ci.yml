@@ -112,10 +112,17 @@ jobs:
         run: pnpm install
 
       - name: Run tests
+        run: pnpm -F assignment-6 test:coverage
+
+      - name: List coverage directory
+        run: ls -R packages/assignment-6/coverage
+
+      - name: Print coverage file content
         run: |
-          cd packages/assignment-6
-          pnpm -F assignment-6 test:with_coverage
-          ls -la
+          echo "Coverage file content:"
+          cat packages/assignment-6/coverage/coverage-final.json | head -n 50
+          echo "File structure:"
+          ls -R packages/assignment-6/coverage
 
       - name: Post test results comment
         uses: actions/github-script@v6
