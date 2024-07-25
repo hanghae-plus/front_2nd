@@ -103,7 +103,7 @@ jobs:
       - name: Comment PR
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.TOKEN_FOR_CI }}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -142,7 +142,7 @@ jobs:
           pnpm -F assignment-6 lhci
       - name: Format lighthouse score
         id: format_lighthouse_score
-        uses: actions/github-script@v3
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
@@ -177,7 +177,7 @@ jobs:
       - name: Comment PR
         uses: actions/github-script@v6
         with:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
+          GITHUB_TOKEN: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const comments = ${{ steps.format_lighthouse_score.outputs.result }};
             github.rest.issues.createComment({
@@ -197,7 +197,7 @@ jobs:
       - name: Random Reviewer Assignment
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.TOKEN_FOR_CI }}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const teamMembers = ['Raihyul', 'horang-e', 'lucettin5'];
             const reviewer = teamMembers[Math.floor(Math.random() * teamMembers.length)];
