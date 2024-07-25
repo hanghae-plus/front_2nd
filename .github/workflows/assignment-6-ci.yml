@@ -185,7 +185,7 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
-            const reviewers = ['jasongoose'];
+            const reviewers = ['Joie-Kim', 'lhk228', 'rachel-park-dev'];
             const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
             await github.rest.issues.addAssignees({
               owner: context.repo.owner,
