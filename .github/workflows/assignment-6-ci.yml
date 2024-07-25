@@ -193,5 +193,61 @@ jobs:
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Check if reviewers are already assigned
+        id: check_reviewers
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const { data: reviews } = await github.rest.pulls.listRequestedReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            return { reviewers: reviews.users.map(user => user.login) };
+
+      - name: Assign random reviewer
+        if: steps.check_reviewers.outputs.reviewers == ''
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const reviewers = ['jiwonkim97', 'aauraoys', 'chhw130']; 
+            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [randomReviewer]
+            });
+
+      - name: Comment on assigned reviewer
+        if: steps.check_reviewers.outputs.reviewers == ''
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const reviewers = ['jiwonkim97', 'aauraoys', 'chhw130'];
+            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@${randomReviewer} 님, 리뷰를 부탁드립니다🥺`
+            });
