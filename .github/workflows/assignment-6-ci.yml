@@ -187,14 +187,26 @@ jobs:
     steps:
       - name: 'job5: PR이 open될 때만 실행되고, 팀원 중 한 명을 랜덤으로 선정하여 리뷰어를 지정한 다음에 코멘트에 멘션하여 올린다. 실제로 PR에 리뷰어로 지정도 되어야한다.'
         id: job5
-        run: |
-          REVIEWERS=("AnSuebin" "LucetTin5" "horang-e")
-          SELECTED_REVIEWER=${REVIEWERS[$RANDOM % ${#REVIEWERS[@]}]}
-          
-          # GitHub CLI를 사용하여 리뷰어 할당
-          gh pr edit ${{ github.event.pull_request.number }} --add-reviewer $SELECTED_REVIEWER
-          
-          # 코멘트 작성
-          gh pr comment ${{ github.event.pull_request.number }} --body "@$SELECTED_REVIEWER 님, 리뷰를 부탁드립니다."
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const teamMembers = ["AnSuebin", "LucetTin5", "horang-e"]; // 팀 구성원 깃허브 사용자명 목록
+            
+            // 랜덤하게 리뷰어 선택
+            const assignedReviewer = teamMembers[Math.floor(Math.random()*teamMembers.length)];
+            
+            // 리뷰어 지정
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [assignedReviewer]
+            });
+            
+            // 코멘트 작성
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Reviewer ☺️ \n @${assignedReviewer}님, 리뷰 부탁드립니다.`,
+            });
