@@ -6,7 +6,9 @@ module.exports = {
       startServerCommand: "pnpm run preview",
     },
     upload: {
-      target: "temporary-public-storage",
+      target: "filesystem",
+      outputDir: "./lighthouse-results", // 결과가 저장될 디렉토리
+      reportFilenamePattern: "%%PATHNAME%%-%%DATETIME%%-report.%%EXTENSION%%",
     },
     assert: {
       preset: "lighthouse:recommended",

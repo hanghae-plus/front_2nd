@@ -138,15 +138,8 @@ jobs:
 
       - name: Run Lighthouse CI
         run: |
-          pnpm -F assignment-6 add -g @lhci/cli
-          lhci autorun
-      - name: Generate and Upload Lighthouse Report
-        env:
-          github-token: ${{secrets.TOKEN_FOR_CI }}
-        run: |
-          lhci collect --additive
-          lhci upload --target=filesystem --outputDir=./lighthouse-reports
-          lhci upload --target=temporary-public-storage
+          pnpm -F assignment-6 install @lhci/cli
+          pnpm -F assignment-6 lhci
       - name: Format lighthouse score
         id: format_lighthouse_score
         uses: actions/github-script@v3
