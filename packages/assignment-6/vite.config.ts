@@ -13,7 +13,7 @@ export default mergeConfig(
       setupFiles: "./src/setupTests.ts",
       coverage: {
         provider: "v8",
-        reporter: ["json"],
+        reporter: ["text", "json-summary"],
         reportsDirectory: "./coverage",
       },
     },

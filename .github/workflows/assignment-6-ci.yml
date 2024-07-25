@@ -115,7 +115,7 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs')
-            const coverage = JSON.parse(fs.readFileSync('packages/assignment-6/coverage/coverage-final.json', 'utf8'))
+            const coverage = JSON.parse(fs.readFileSync('packages/assignment-6/coverage/coverage-summary.json', 'utf8'))
             const total = coverage.total
 
             const lineCoverage = ((total.lines.covered / total.lines.total) * 100).toFixed(2)
@@ -171,7 +171,7 @@ jobs:
           github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs')
-            const lighthouseReports = JSON.parse(fs.readFileSync('lhci_reports/manifest.json', 'utf8'))
+            const lighthouseReports = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'))
             const targetReport = lighthouseReport[0]
             const scores = {
               performance: targetReport.summary.performance * 100,
