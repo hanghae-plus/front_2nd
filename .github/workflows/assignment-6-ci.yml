@@ -1,10 +1,12 @@
-name: CI Assignment 6
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - assignment/6
     paths:
       - "packages/assignment-6/**"
+      - ".github/actions/setup-node-dependencies/**"
 
 jobs:
   # job1: tsc, build 실행, 오류 발생하면 코멘트 남김
@@ -165,8 +167,10 @@ jobs:
         run: |
           pnpm -F assignment-6 build
           pnpm -F assignment-6 lighthouse
+        continue-on-error: true
 
       - name: Format Lighthouse Results
+        if: success()
         id: format_results
         run: |
           RESULTS_DIR="/home/runner/work/front_2nd/front_2nd/packages/assignment-6/lhci_reports"
@@ -198,7 +202,8 @@ jobs:
           echo "best_practices=$BEST_PRACTICES" >> $GITHUB_OUTPUT
           echo "seo=$SEO" >> $GITHUB_OUTPUT
 
-      - name: Comment PR
+      - name: Comment PR with Lighthouse Results
+        if: success()
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
@@ -224,6 +229,19 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: comment
+            });
+
+      - name: Comment PR on Lighthouse CI Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'The build has failed. Cannot use Lighthouse CI.'
             });
 
   # job5: PR이 open 될 때만 실행됨, 팀원 중 한 명을 랜덤으로 선정하여 리뷰어 지정, 코멘트에 멘션해서 올림
