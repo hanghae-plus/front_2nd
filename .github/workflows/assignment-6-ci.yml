@@ -135,8 +135,8 @@ jobs:
         run: pnpm -F assignment-6 install
 
       - name: Run Tests and Measure Coverage
-        run: pnpm -F assignment-6 test -- --coverage > test_output.txt
-
+        run: pnpm -F assignment-6 test:coverage > test_output.txt
+        
       - name: Extract Coverage Data
         id: coverage
         run: |
