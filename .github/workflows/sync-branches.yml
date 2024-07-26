@@ -1,0 +1,42 @@
+name: Sync Branches
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      
+      - name: Sync branches
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          
+          # Get the latest commit hash of main branch
+          main_latest_commit=$(git rev-parse origin/main)
+          
+          for branch in $(git branch -r | grep -v '\->' | sed 's,origin/,,'); do
+            if [ "$branch" != "main" ] && [ "$branch" != "HEAD" ]; then
+              git checkout $branch
+              
+              # Check if main branch commits are already in this branch
+              if ! git merge-base --is-ancestor $main_latest_commit $branch; then
+                echo "Merging main into $branch"
+                if git merge origin/main; then
+                  git push origin $branch
+                else
+                  echo "Merge conflict in $branch. Manual intervention required."
+                  git merge --abort
+                fi
+              else
+                echo "$branch is already up to date with main"
+              fi
+            fi
+          done
