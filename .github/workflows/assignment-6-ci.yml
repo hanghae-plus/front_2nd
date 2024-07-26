@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - "packages/assignment-6/**"
+      - 'packages/assignment-6/**'
 
 permissions:
   contents: read
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: '18'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -62,7 +62,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: '18'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -146,6 +146,35 @@ jobs:
           echo "FUNCTION=${FUNCTION}" >> $GITHUB_OUTPUT
           echo "STATEMENT=${STATEMENT}" >> $GITHUB_OUTPUT
 
+      - name: Comment PR with test results
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const coverage = {
+              line: ${{ steps.coverage.outputs.LINE }},
+              branch: ${{ steps.coverage.outputs.BRANCH }},
+              function: ${{ steps.coverage.outputs.FUNCTION }},
+              statement: ${{ steps.coverage.outputs.STATEMENT }}
+            };
+
+            const commentBody = `## 테스트 결과
+
+            테스트가 완료되었습니다. 코드 커버리지 결과는 다음과 같습니다:
+
+            - 라인 커버리지: ${coverage.line}%
+            - 브랜치 커버리지: ${coverage.branch}%
+            - 함수 커버리지: ${coverage.function}%
+            - 구문 커버리지: ${coverage.statement}%
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
+
   lighthouse:
     runs-on: ubuntu-latest
     steps:
@@ -177,12 +206,67 @@ jobs:
         working-directory: packages/assignment-6
 
       - name: Run Lighthouse CI
+        id: lighthouse
         run: |
-          lhci autorun --collect.startServerCommand="pnpm preview" --collect.url="http://localhost:4173" --upload.target=temporary-public-storage
+          lhci autorun --collect.startServerCommand="pnpm preview" --collect.url="http://localhost:4173" --upload.target=temporary-public-storage > lighthouse_output.json
+
+      - name: Parse Lighthouse results
+        id: parse_lighthouse
+        run: |
+          PERFORMANCE=$(jq '.[] | select(.name=="lhci") | .summary.performance' lighthouse_output.json)
+          ACCESSIBILITY=$(jq '.[] | select(.name=="lhci") | .summary.accessibility' lighthouse_output.json)
+          BEST_PRACTICES=$(jq '.[] | select(.name=="lhci") | .summary["best-practices"]' lighthouse_output.json)
+          SEO=$(jq '.[] | select(.name=="lhci") | .summary.seo' lighthouse_output.json)
+          echo "PERFORMANCE=${PERFORMANCE}" >> $GITHUB_OUTPUT
+          echo "ACCESSIBILITY=${ACCESSIBILITY}" >> $GITHUB_OUTPUT
+          echo "BEST_PRACTICES=${BEST_PRACTICES}" >> $GITHUB_OUTPUT
+          echo "SEO=${SEO}" >> $GITHUB_OUTPUT
         working-directory: packages/assignment-6
+
+      - name: Comment PR with Lighthouse results
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const scores = {
+              performance: ${{ steps.parse_lighthouse.outputs.PERFORMANCE }},
+              accessibility: ${{ steps.parse_lighthouse.outputs.ACCESSIBILITY }},
+              bestPractices: ${{ steps.parse_lighthouse.outputs.BEST_PRACTICES }},
+              seo: ${{ steps.parse_lighthouse.outputs.SEO }}
+            };
+
+            const commentBody = `## Lighthouse 결과
+
+            - 성능: ${scores.performance * 100}/100
+            - 접근성: ${scores.accessibility * 100}/100
+            - 최적화: ${scores.bestPractices * 100}/100
+            - SEO: ${scores.seo * 100}/100
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
 
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Assign Reviewer
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const reviewers = ['zhwltlr', 'shiny1912', 'haeji1124'];
+            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [randomReviewer]
+            });
