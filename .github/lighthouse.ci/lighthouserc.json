@@ -1,8 +1,8 @@
 {
   "ci": {
     "collect": {
-      "staticDistDir": "./packages/assignment-6/dist",
-      "numberOfRuns": 3
+      "url": ["http://localhost:5173"],
+      "numberOfRuns": 1
     },
     "assert": {
       "assertions": {

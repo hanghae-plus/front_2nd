@@ -178,11 +178,13 @@ jobs:
           pnpm -F assignment-6 install
           pnpm install -g @lhci/cli
 
-      - name: Project build
-        run: pnpm -F assignment-6 build
+      - name: start dev server
+        run: |
+          pnpm -F assignment-6 start &
+          npx -y wait-on http://localhost:5173
 
-      - name: Run Lighthouse CI
-        id: lighthouse
+      - name: Job4 (lighthouse)
+        id: job4
         run: lhci autorun --config=.github/lighthouse.ci/lighthouserc.json --no-exit-on-failure
 
       - name: Comment the lighthouse result on PR
@@ -201,34 +203,19 @@ jobs:
               return;
             }
 
-            const getScoreEmoji = (score) => {
-              if (score >= 90) return '🟢';
-              if (score >= 50) return '🟠';
-              return '🔴';
-            }
+            const jsonFile = jsonFiles.pop();
+            const resultPath = path.join(lighthouseDir, jsonFile);
+
+            const lighthouseResult = JSON.parse(fs.readFileSync(resultPath, 'utf-8'));
 
             const categoriesWithUpperCase = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
             const categories = ['performance', 'accessibility', 'best-practices', 'seo'];
-
-            let resultTable = '| 카테고리 | 실행 1 | 실행 2 | 실행 3 | 평균 |\n|---|---|---|---|---|\n';
-
-            const scores = categories.map(() => []);
-
-            jsonFiles.forEach((jsonFile) => {
-              const resultPath = path.join(lighthouseDir, jsonFile);
-              const lighthouseResult = JSON.parse(fs.readFileSync(resultPath, 'utf-8'));
-
-              categories.forEach((category, categoryIndex) => {
-                const score = Math.round(lighthouseResult.categories[category].score * 100);
-                scores[categoryIndex].push(score);
-              })
+            let resultTable = '| 카테고리 | 점수 |\n|---|---|\n';
+            categories.forEach(category => {
+              const score = Math.round(lighthouseResult.categories[category].score * 100);
+              resultTable += `| ${categoriesWithUpperCase[categories.indexOf(category)]} | ${score} |\n`;
             })
 
-            categories.forEach((category, categoryIndex) => {
-              const averageScore = Math.round(scores[categoryIndex].reduce((sum, score) => sum + score, 0) / scores[categoryIndex].length);
-              const emoji = getScoreEmoji(averageScore);
-              resultTable += `| ${categoriesWithUpperCase[categoryIndex]} | ${scores[categoryIndex][0]} | ${scores[categoryIndex][1]} | ${scores[categoryIndex][2]} | ${emoji} ${averageScore} |\n`;
-            })
             const lighthouseMessage = `
               ## Lighthouse 성능 측정 결과
               
@@ -242,6 +229,10 @@ jobs:
               repo: repo,
               body: lighthouseMessage
             })
+
+      - name: stop dev server
+        if: always()
+        run: kill $(lsof -t -i:5173) || true
 
   assign_reviewer:
     runs-on: ubuntu-latest
