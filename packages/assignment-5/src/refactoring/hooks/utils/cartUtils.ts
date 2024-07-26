@@ -1,6 +1,7 @@
 import { CartItem, Coupon } from "../../../types";
 
 export const calculateItemTotal = (item: CartItem) => {
+  
   return 0;
 };
 
