@@ -1,11 +1,11 @@
 module.exports = {
   ci: {
     collect: {
-      staticDistDir: "./dist",
-      url: ["http://localhost:5173"],
-      numberOfRuns: 1,
+      startServerCommand: "pnpm run start",
+      numberOfRuns: 3,
     },
     upload: {
+      // 레포트 생성
       target: "filesystem",
       outputDir: "./lhci_reports",
       reportFilenamePattern: "%%PATHNAME%%-%%DATETIME%%-report.%%EXTENSION%%",
