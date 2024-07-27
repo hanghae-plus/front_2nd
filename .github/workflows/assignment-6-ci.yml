@@ -1,0 +1,145 @@
+name: CI Assignment 6
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "packages/assignment-6/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        uses: pnpm/actions-setup@4
+        run: pnpm install
+      - name: Run tsc and build
+        run: |
+          pnpm run tsc
+          pnpm run build
+      - name: Comment build result
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Build failed.'
+            })
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run ESLint
+        run: pnpm run lint
+      - name: Comment ESLint results
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs')
+            const eslintReport = fs.readFileSync('.eslintcache', 'utf8')
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ ESLint found issues:\n\n```\n' + eslintReport + '\n```'
+            })
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run tests with coverage
+        run: pnpm run test:coverage
+      - name: Comment test coverage
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs')
+            const coverage = fs.readFileSync('./coverage/coverage-summary.json', 'utf8')
+            const coverageJson = JSON.parse(coverage)
+            const totalCoverage = coverageJson.total.lines.pct
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `📊 커버리지 결과 \n\n ${totalCoverage}%`
+            })
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run Lighthouse CI
+        run: pnpm dlx lhci autorun
+      - name: Comment Lighthouse CI results
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs')
+            const lhciReport = fs.readFileSync('.lighthouseci/lhci-report.json', 'utf8')
+            const report = JSON.parse(lhciReport)
+            const scores = report.categories
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚦 Lighthouse 성능 측정 결과:\n\nPerformance: ${scores.performance.score * 100}\nAccessibility: ${scores.accessibility.score * 100}\nBest Practices: ${scores['best-practices'].score * 100}\nSEO: ${scores.seo.score * 100}`
+            })
+
+  assign_reviewer:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    steps:
+      - name: Assign random reviewer
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const teamMember = ['member1', 'member2']
+            const randomReviewer = teamMembers[Math.floor(Math.random() * teamMembers.length)]
+
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [randomReviewer]
+            })
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@${randomReviewer} 님, 리뷰를 부탁드립니다.`
+            })
