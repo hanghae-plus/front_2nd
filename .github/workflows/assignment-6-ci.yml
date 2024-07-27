@@ -3,7 +3,9 @@ name: CI Assignment 6
 on:
   pull_request:
     types:
+      - synchronize
       - opened
+      - reopened
     paths:
       - 'packages/assignment-6/**'
 
@@ -11,29 +13,252 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run tsc and build
+        id: build_step
+        run: |
+          pnpm -F assignment-6 build
+        continue-on-error: true
+
+      - name: Comment if build fails
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '빌드 실패 ❌'
+            })
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run ESLint
+        run: |
+          pnpm -F assignment-6 lint > eslint_report.txt
+        continue-on-error: true
+
+      - name: Check ESLint results
+        id: check_eslint
+        run: |
+          if grep -q 'error' eslint_report.txt; then
+            echo "eslint_errors=true" >> $GITHUB_ENV
+          else
+            echo "eslint_errors=false" >> $GITHUB_ENV
+          fi
+      - name: Comment on ESLint results
+        if: env.eslint_errors == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const eslintReport = fs.readFileSync('eslint_report.txt', 'utf8');
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `
+              ## ESLint Results
+              ${eslintReport}
+              `
+            });
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run tests with coverage
+        id: run_tests
+        run: |
+          pnpm -F assignment-6 test:coverage
+
+      - name: Report Coverage
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          json-summary-path: ./coverage/coverage-summary.json
+          json-final-path: ./coverage/coverage-final.json
+          file-coverage-mode: changes
+          working-directory: ./packages/assignment-6
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run Lighthouse
+        run: |
+          pnpm add -g @lhci/cli
+          pnpm -F assignment-6 lhci
+
+      - name: Format lighthouse score
+        id: format_lighthouse
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const resultsPath = path.join(process.env.GITHUB_WORKSPACE, 'packages', 'assignment-6', 'lhci_reports', 'manifest.json');
+
+            let comments = "";
+
+            const details = JSON.parse(fs.readFileSync(resultsPath));
+
+            let representativeRun = details.find(run => run.isRepresentativeRun);
+            if (!representativeRun) {
+              representativeRun = details[0]; // Fallback to the first run if no representative run is found
+            }
+
+            const { summary } = representativeRun;
+            if (!summary) {
+              throw new Error("Summary is missing in the Lighthouse report.");
+            }
+
+            const formatResult = (res) => Math.round(res * 100);
+            const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
+
+            comments = [
+              `⚡️ **Lighthouse report** ⚡️`,
+              `| Category | Score |`,
+              `| --- | --- |`,
+              `| ${score(summary.performance)} Performance | ${formatResult(summary.performance)} |`,
+              `| ${score(summary.accessibility)} Accessibility | ${formatResult(summary.accessibility)} |`,
+              `| ${score(summary['best-practices'])} Best Practices | ${formatResult(summary['best-practices'])} |`,
+              `| ${score(summary.seo)} SEO | ${formatResult(summary.seo)} |`
+            ].join("\n");
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comments
+            });
 
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Check if reviewers are already assigned
+        id: check_reviewers
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const { data: reviews } = await github.rest.pulls.listRequestedReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            return { reviewers: reviews.users.map(user => user.login) };
+
+      - name: Assign random reviewer
+        id: assign_reviewer
+        if: github.event.action == 'opened'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const reviewers = ['jiwonkim97', 'aauraoys', 'chhw130'];
+            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [randomReviewer]
+            });
+            core.setOutput('reviewer', randomReviewer);
+
+      - name: Comment on assigned reviewer
+        if: github.event.action == 'opened'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const reviewer = '${{ steps.assign_reviewer.outputs.reviewer }}';
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `@${reviewer} 님, 리뷰를 부탁드립니다🥺`
+            });
