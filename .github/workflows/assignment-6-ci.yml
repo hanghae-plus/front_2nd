@@ -161,6 +161,7 @@ jobs:
             const commentBody = `## 테스트 결과
 
 
+
             - 라인 커버리지: ${coverage.line}%
             - 브랜치 커버리지: ${coverage.branch}%
             - 함수 커버리지: ${coverage.function}%
@@ -179,7 +180,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Use Node.js 18
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
           node-version: 20
@@ -200,13 +201,16 @@ jobs:
         working-directory: packages/assignment-6
 
       - name: Start server
-        run: pnpm preview &
+        run: pnpm start &
         working-directory: packages/assignment-6
+
+      - name: Wait for server to start
+        run: sleep 5
 
       - name: Run Lighthouse CI
         id: lighthouse
         run: |
-          lhci autorun --collect.startServerCommand="pnpm preview" --collect.url="http://localhost:5173" --upload.target=temporary-public-storage > lighthouse_output.json
+          lhci autorun --collect.url="http://localhost:3000" --upload.target=temporary-public-storage > lighthouse_output.json
 
       - name: Parse Lighthouse results
         id: parse_lighthouse
