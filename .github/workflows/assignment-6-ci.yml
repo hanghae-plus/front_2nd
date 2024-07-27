@@ -152,27 +152,25 @@ jobs:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const coverage = {
-              line: process.env.LINE,
-              branch: process.env.BRANCH,
-              function: process.env.FUNCTION,
-              statement: process.env.STATEMENT
+              line: ${{ steps.coverage.outputs.LINE }},
+              branch: ${{ steps.coverage.outputs.BRANCH }},
+              function: ${{ steps.coverage.outputs.FUNCTION }},
+              statement: ${{ steps.coverage.outputs.STATEMENT }}
             };
 
             const commentBody = `## 테스트 결과
-
-
 
             - 라인 커버리지: ${coverage.line}%
             - 브랜치 커버리지: ${coverage.branch}%
             - 함수 커버리지: ${coverage.function}%
             - 구문 커버리지: ${coverage.statement}%`;
 
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: commentBody
-              });
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
 
   lighthouse:
     runs-on: ubuntu-latest
@@ -244,6 +242,7 @@ jobs:
               repo: context.repo.repo,
               body: comment
             });
+
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
