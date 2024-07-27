@@ -5,35 +5,229 @@ on:
     types:
       - opened
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Set node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run tsc
+        id: tsc
+        run: pnpm -F assignment-6 build
+
+      - name: Post comment if tsc build fails
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "빌드 실패 ❌"
+            })
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Set node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run lint
+        id: lint
+        run: pnpm -F assignment-6 lint -o ./lint.log
+
+      - name: Post report comment, if lint has error
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs')
+            const errorLog = fs.readFileSync('packages/assignment-6/lint.log', 'utf8');
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### ESLint Results
+              ---
+              ${errorLog}`
+            })
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Set node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run test
+        run: pnpm -F assignment-6 test
+
+      - name: Leave coverage comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs')
+            const coverage = JSON.parse(fs.readFileSync('packages/assignment-6/coverage/coverage-summary.json', 'utf8'))
+            const total = coverage.total
+
+            const lineCoverage = ((total.lines.covered / total.lines.total) * 100).toFixed(2)
+            const functionCoverage = ((total.functions.covered / total.functions.total) * 100).toFixed(2)
+            const branchCoverage = ((total.branches.covered / total.branches.total) * 100).toFixed(2)
+            const statementCoverage = ((total.statements.covered / total.statements.total) * 100).toFixed(2)
+
+            const commentBody = `
+              ## 테스트 성공 ✅\n\n
+              ### 커버리지 결과\n\n
+              - 라인 커버리지: ${lineCoverage}%
+              - 함수 커버리지: ${functionCoverage}%
+              - 브랜치 커버리지: ${branchCoverage}%
+              - 구문 커버리지: ${statementCoverage}%
+            `
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            })
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Set node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run lighthouse and create reports
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        run: |
+          pnpm -F assignment-6 lighthouse
+
+      - name: Leave comment with lighthouse report
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs')
+            const lighthouseReports = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'))
+            const targetReport = lighthouseReports[0]
+            const scores = {
+              performance: targetReport.summary.performance * 100,
+              accessibility: targetReport.summary.accessibility * 100,
+              bestPractices: targetReport.summary["best-practices"] * 100,
+              seo: targetReport.summary.seo * 100
+            }
+
+            const commentBody = `
+              ## Lighthouse 성능 측정 결과\n---
+              | 카테고리 | 점수 |
+              |---------|------|
+              | Performance | ${scores.performance}% |
+              | Accessibility | ${scores.accessibility}% |
+              | Best Practices | ${scores.bestPractices}% |
+              | SEO | ${scores.seo}% |
+            `
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            })
 
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Pick a teammate and assign reviewer
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const teammates = [
+              {name:'전창기', github: 'ChanggiJeon'},
+              {name:'신명희', github: 'mh0223'}
+            ]
+
+            const randomIndex = Math.floor(Math.random() * teammates.length)
+            const reviewer = teammates[randomIndex]
+
+            const comment = `
+              ## @${reviewer.github} ${reviewer.name}님 축하드립니다. 리뷰어로 선정 되셨습니다.
+            `
+            await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+             })
+
+            await github.rest.pulls.requestReviewers({
+              pull_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              reviewers: [reviewerGithub]
+            })
