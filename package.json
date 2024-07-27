@@ -1,10 +1,14 @@
 {
   "name": "react-assignment",
   "version": "1.0.0",
-  "description": "",
+  "description": "React Assignment 6",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "build": "lerna run build",
+    "lint": "lerna run lint",
+    "tsc": "lerna run tsc",
+    "test:coverage": "pnpm -F assignment-6 run test:coverage"
   },
   "keywords": [],
   "author": "",
@@ -12,5 +16,18 @@
   "private": true,
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "devDependencies": {
+    "@lhci/cli": "^0.11.x",
+    "@types/jest": "^29.5.2",
+    "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.6",
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "@typescript-eslint/parser": "^5.60.1",
+    "eslint": "^8.43.0",
+    "eslint-plugin-react": "^7.32.2",
+    "jest": "^29.5.0",
+    "lerna": "^7.1.1",
+    "typescript": "^5.1.5"
+  }
 }
