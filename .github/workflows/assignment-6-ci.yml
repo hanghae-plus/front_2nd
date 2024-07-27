@@ -4,36 +4,276 @@ on:
   pull_request:
     types:
       - opened
+      - synchronize
+      - reopened
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Run Typescript Complier & Build
+        run: |
+          pnpm install
+          pnpm -F assignment-6 build
+
+      - name: Add PR comment on failure
+        if: failure()
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "빌드 실패 ❌"
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run ESLint
+        working-directory: ./packages/assignment-6
+        run: |
+          npx eslint . --config ./eslint.config.js 2>&1 | tee result.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+          exit $EXIT_CODE
+
+      - name: Add PR comment on lint errors
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const lintResult = fs.readFileSync('packages/assignment-6/result.txt', 'utf8');
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `ESLint Results:\n\n${lintResult}`
+            });
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Install @vitest/coverage-v8 for CI
+        run: pnpm -F assignment-6 add -D @vitest/coverage-v8
+
+      - name: Run Vitest tests with coverage
+        run: |
+          pnpm -F assignment-6 test --coverage > coverage.txt
+          echo "Test run completed with exit code $?"
+        continue-on-error: true
+
+      - name: Output coverage.txt for debugging
+        if: failure()
+        run: cat coverage.txt
+
+      - name: Check if tests failed
+        id: test-check
+        run: |
+          if grep -q 'FAIL' coverage.txt; then
+            echo "has_test_errors=true" >> $GITHUB_ENV
+          else
+            echo "has_test_errors=false" >> $GITHUB_ENV
+          fi
+
+      - name: test fail
+        if: env.has_test_errors == 'true'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "테스트 실패 ❌"
+          file: coverage.txt
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
+
+      - name: test success
+        if: env.has_test_errors == 'false'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "테스트 성공 ✅"
+          file: coverage.txt
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run Lighthouse CI
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
+        run: |
+          pnpm install -g @lhci/cli
+          pnpm -F assignment-6 lhci || echo "Fail to Run Lighthouse CI!"
+
+      - name: Add PR comment with Lighthouse CI results
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const resultsPath = path.join(process.env.GITHUB_WORKSPACE, 'packages', 'assignment-6', 'lhci_reports', 'manifest.json');
+
+            if (!fs.existsSync(resultsPath)) {
+              console.error("Results path does not exist:", resultsPath);
+              return;
+            }
+
+            const results = JSON.parse(fs.readFileSync(resultsPath));
+            const totalReports = results.length;
+
+            const averageScores = {
+              performance: 0,
+              accessibility: 0,
+              'best-practices': 0,
+              seo: 0,
+              pwa: 0
+            };
+
+            const auditSummaries = {
+            'first-contentful-paint': 0,
+            'largest-contentful-paint': 0,
+            'interactive': 0,
+            'total-blocking-time': 0,
+            'cumulative-layout-shift': 0
+            };
+
+            results.forEach(result => {
+              const { summary } = result;
+              for (const key in averageScores) {
+                averageScores[key] += summary[key];
+            }
+
+            const details = JSON.parse(fs.readFileSync(result.jsonPath));
+            ['first-contentful-paint', 'largest-contentful-paint', 'interactive', 'total-blocking-time', 'cumulative-layout-shift'].forEach(auditName => {
+              if (details.audits[auditName]) {
+                const auditDetails = details.audits[auditName];
+                  auditSummaries[auditName] += parseFloat(auditDetails.displayValue) || 0;
+                }
+              });
+            });
+
+            const formatScore = res => (res >= 90 ? "🟢" : res >= 70 ? "🟠" : "🔴");
+
+            const detailscore = (value, metric) => {
+              switch (metric) {
+              case 'first-contentful-paint':
+                  return value <= 1.8 ? "🟢" : value <= 3 ? "🟠" : "🔴";
+                case 'largest-contentful-paint':
+                  return value <= 2.5 ? "🟢" : value <= 4 ? "🟠" : "🔴";
+                case 'interactive':
+                  return value <= 3.8 ? "🟢" : value <= 7.3 ? "🟠" : "🔴";
+                case 'total-blocking-time':
+                  return value <= 300 ? "🟢" : value <= 600 ? "🟠" : "🔴";
+                case 'cumulative-layout-shift':
+                  return value <= 0.1 ? "🟢" : value <= 0.25 ? "🟠" : "🔴";
+                default:
+                return "🔴"; // Default to red if metric is unknown
+                }
+            };
+
+            let comments = "⚡️ Lighthouse Average Scores Across Reports:\n| Category | Score |\n| --- | --- |\n";
+            Object.keys(averageScores).forEach(key => {
+              const avgScore = Math.round((averageScores[key] / totalReports) * 100);
+              comments += `| ${formatScore(avgScore)}  ${key.replace(/-/g, ' ')} | ${avgScore} |\n`;
+            });
+
+            comments += "\n⚡️ Average Details Across All Reports:\n| Category | Score |\n| --- | --- |\n";
+            Object.keys(auditSummaries).forEach(auditName => {
+              const average = auditSummaries[auditName] / totalReports;
+              const formattedName = auditName.replace(/-/g, ' ');
+              const colorCode = detailscore(average, auditName);
+              const unit = (auditName === 'total-blocking-time' ? 'ms' : auditName === 'cumulative-layout-shift' ? '' : 's')
+              comments += `| ${colorCode}  ${formattedName} | ${average.toFixed(1)}${unit} |\n`;
+                        });
+
+              if (comments && context.issue.number) {
+                const issue_number = context.issue.number;
+                const repo = context.repo.repo;
+                const owner = context.repo.owner;
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number,
+                  body: comments
+                });
+              } else {
+                console.log("No PR COMMENT!");
+              }
 
   assign_reviewer:
     runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+
+      - name: Assign reviewer
+        id: choose-reviewer
+        run: echo "REVIEWER=$(shuf -n 1 -e mh0223 juhongahn)" >> $GITHUB_ENV
+
+      - name: Assign reviewer using GitHub Script
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              reviewers: [process.env.REVIEWER]
+            });
+
+      - name: Add PR comment to mention reviewer
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "@${{ env.REVIEWER }}님, 리뷰를 부탁드립니다."
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
