@@ -3,37 +3,237 @@ name: CI Assignment 6
 on:
   pull_request:
     types:
-      - opened
+      [opened, synchronize]
     paths:
       - 'packages/assignment-6/**'
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run build
+        id: build
+        run: |
+          pnpm -F assignment-6 build > build.log 2>&1
+          exit_code=$?
+          echo "build_exit_code=$exit_code" >> $GITHUB_OUTPUT
+
+      - name: Comment build results
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const buildStatus = '${{ steps.build.outputs.build_exit_code }}' === '0' ? 'Successed' : 'Failed';
+            const buildEmoji = buildStatus === 'Successed' ? '✅' : '❌';
+            const buildLog = fs.readFileSync('build.log', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Build ${buildStatus} ${buildEmoji}\n\`\`\`\n${buildLog}\n\`\`\``
+            });
+
+      - name: Check build result
+        if: steps.build.outputs.build_exit_code != '0'
+        run: exit 1
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies.
+        run: pnpm install 
+
+      - name: run lint
+        run: |
+          pnpm -F assignment-6 lint 2>&1 | tee lint.log
+          exit ${PIPESTATUS[0]}
+      - name: Comment on PR if lint fails
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const log = fs.readFileSync('lint.log', 'utf8');
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `### ❌ Lint Failed\n\`\`\`\n${log}\n\`\`\``
+            });
+
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests
+        run: pnpm -F assignment-6 test:coverage
+
+      - name: List coverage directory
+        run: ls -R packages/assignment-6/coverage
+
+      - name: Print coverage file content
+        run: |
+          echo "Coverage file content:"
+          cat packages/assignment-6/coverage/coverage-final.json | head -n 50
+          echo "File structure:"
+          ls -R packages/assignment-6/coverage
+
+      - name: Post test results comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const path = "packages/assignment-6/coverage/coverage-summary.json";
+            let message = ``;
+            const coverage = JSON.parse(fs.readFileSync(path, 'utf8'));          
+            const { total } = coverage;
+            message += `
+            - 라인 커버리지: ${total.lines.pct}%
+            - 브랜치 커버리지: ${total.branches.pct}%
+            - 함수 커버리지: ${total.functions.pct}%
+            - 구문 커버리지: ${total.statements.pct}%`;
+            message = '${{ job.status }}' === 'success' ?
+              `## 테스트 성공 ✅\n### 커버리지 결과\n${message}` :
+              `## 테스트 실패 :x:\n### 커버리지 결과\n${message}`;
+            // PR에 코멘트를 남김
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message,
+            });
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Lighthouse
+        run: pnpm -F assignment-6 lhci
+
+      - name: Report Lighthouse
+        if: success()
+        uses: actions/github-script@v6
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync("packages/assignment-6/lhci_reports/manifest.json", 'utf-8'))
+            
+            const summaries = results.map(({ summary }) => summary);
+            
+            const headers = Object.keys(summaries[0]);
+            const headerRow = `| ${headers.join(' | ')} |`;
+            const separatorRow = `| ${headers.map(() => '---').join(' | ')} |`;
+          
+            // 테이블의 데이터 행 생성
+            const dataRows = summaries.map(obj => {
+              return `| ${headers.map(header => obj[header] * 100).join(' | ')} |`;
+            })
+              
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: [headerRow, separatorRow, ...dataRows].join('\n'),
+            });
 
   assign_reviewer:
     runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - name: Assign random reviewer
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const teams = ["bbbjihan", "soojjung", "hhyewon", "hyesung99", "shiny1912"];
+            const randomReviewer = teams[Math.floor(Math.random() * teams.length)];
+            
+            // PR 코멘트 작성
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `### 🙏🏻 랜덤 리뷰 요청 \n@${randomReviewer} 님에게 리뷰를 요청드립니다.`
+            });
+            
+            // 리뷰어 할당
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                reviewers: [randomReviewer]
+              });
+              console.log(`Successfully assigned ${randomReviewer} as a reviewer.`);
+            } catch (error) {
+              console.error(`Failed to assign reviewer: ${error.message}`);
+              // 리뷰어 할당 실패 시 코멘트 추가
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `리뷰어 할당에 실패했습니다. 수동으로 리뷰어를 추가해주세요.`
+              });
+            }
