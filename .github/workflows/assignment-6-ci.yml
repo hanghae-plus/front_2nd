@@ -210,7 +210,7 @@ jobs:
       - name: Run Lighthouse CI
         id: lighthouse
         run: |
-          lhci autorun --collect.url="http://localhost:3000" --upload.target=temporary-public-storage > lighthouse_output.json
+          lhci autorun --collect.url="http://localhost:5173" --upload.target=temporary-public-storage > lighthouse_output.json
 
       - name: Parse Lighthouse results
         id: parse_lighthouse
