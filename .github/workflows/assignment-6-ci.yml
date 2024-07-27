@@ -118,43 +118,75 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: latest
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'pnpm'
+
       - name: Install dependencies
         run: pnpm install
-      - name: Run tests
-        run: pnpm -F assignment-6 test:coverage
-      - name: test pwd
-        run: pwd
-      - name: Comment test results
-        if: success()
+        working-directory: packages/assignment-6
+
+      - name: Run tests with coverage
+        run: pnpm test:coverage
+        working-directory: packages/assignment-6
+
+      - name: Comment PR with coverage results
         uses: actions/github-script@v7
+        if: always()
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const fs = require('fs');
             const path = require('path');
-            const coverageJson = JSON.parse(fs.readFileSync(`packages/assignment-6/coverage/coverage-summary.json`, 'utf8'));
-            const {lines, branches, functions, statements} = coverageJson.total;
+            
+            const coveragePath = path.join('packages', 'assignment-6', 'coverage', 'coverage-summary.json');
+            
+            let coverageData;
+            try {
+              if (fs.existsSync(coveragePath)) {
+                const coverageJson = fs.readFileSync(coveragePath, 'utf8');
+                coverageData = JSON.parse(coverageJson);
+              } else {
+                throw new Error('Coverage file not found');
+              }
+            } catch (error) {
+              console.error('Error reading coverage file:', error);
+              return github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '## 테스트 결과\n\n커버리지 데이터를 읽는 데 실패했습니다. 자세한 내용은 CI 로그를 확인해주세요.'
+              });
+            }
+            
+            const { total } = coverageData;
+            const formatPercentage = (pct) => pct.toFixed(2);
+            
+            const commentBody = `## 테스트 커버리지 결과
+            
+            | 항목 | 커버리지 |
+            |------|----------|
+            | 라인 | ${formatPercentage(total.lines.pct)}% |
+            | 구문 | ${formatPercentage(total.statements.pct)}% |
+            | 함수 | ${formatPercentage(total.functions.pct)}% |
+            | 브랜치 | ${formatPercentage(total.branches.pct)}% |
+            
+            자세한 내용은 CI 로그를 확인해주세요.`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## 테스트 성공✅ 
-              \n ### 커버리지 결과 \n
-            
-              • 라인 커버리지: ${lines.pct}%
-              • 브랜치 커버리지: ${branches.pct}%
-              • 함수 커버리지: ${functions.pct}%
-              • 구문 커버리지: ${statements.pct}%
-            `})
+              body: commentBody
+            });
             
 
   lighthouse:
