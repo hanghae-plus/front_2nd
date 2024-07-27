@@ -3,28 +3,135 @@ name: CI Assignment 6
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    # paths:
-    #   - 'packages/assignment-6/**'
+    paths:
+      - 'packages/assignment-6/**'
+
+  push:
+    branches: [develop]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: job1 구현
-        run: npm run tsc
-      working-directory: ./packages/assignment-6
 
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v2
+
+      - name: pnpm 설치
+        run: npm install -g pnpm
+
+      - name: 의존성 설치
+        run: pnpm install
+
+      - name: job1 구현
+        run: echo "job1 tsc, build 를 실행한다. 오류가 발생하면 코멘트를 남긴다"
+
+      - name: tsc 빌드
+        run: |
+          set -o pipefail
+          pnpm -F assignment-6 build 2>&1 | tee build.log
+
+      # 실패시 코멘트 작성
+      - name: 빌드 오류 코멘트
+        if: ${{ failure() }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI  }}
+          script: |
+            const fs = require('fs');
+            const pull_number = ${{ github.event.pull_request.number }};
+            const buildLog = fs.readFileSync('packages/assignment-6/build.log', 'utf-8');
+
+
+            // PR에 리뷰 남기기
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull_number,
+              body: `빌드 오류 발생:\n\`\`\`\n${buildLog}\n\`\`\``,
+              event: 'REQUEST_CHANGES'
+            });
   lint:
     runs-on: ubuntu-latest
-    steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
 
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v2
+
+      - name: pnpm 설치
+        run: npm install -g pnpm
+
+      - name: 의존성 설치
+        run: pnpm install
+
+      - name: job2 구현
+        run: echo "job2  eslint를 실행한 다음에, eslint에서 오류가 발생할 경우 report를 코멘트에 남긴다."
+
+      - name: eslint 실행
+        run: |
+          set -o pipefail
+          pnpm run lint 2>&1 | tee lint.log
+
+        # 실패시 코멘트 작성
+      - name: eslint 오류 코멘트
+        if: ${{ failure() }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI  }}
+          script: |
+            const fs = require('fs');
+            const pull_number = ${{ github.event.pull_request.number }};
+            const Log = fs.readFileSync('packages/assignment-6/lint.log', 'utf-8');
+
+            // PR에 리뷰 남기기
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull_number,
+              body: `ESLINT :\n\`\`\`\n${Log}\n\`\`\``,
+              event: 'REQUEST_CHANGES'
+            });
   test:
     runs-on: ubuntu-latest
     steps:
       - name: job3 구현
         run: echo "job3의 내용을 구현해주세요"
+
+      - name: 체크아웃
+        uses: actions/checkout@v2
+
+      - name: pnpm 설치
+        run: npm install -g pnpm
+
+      - name: 의존성 설치
+        run: pnpm install
+
+      - name: 테스트 실행 및 커버리지 리포트 생성
+        id: test
+        run: |
+          pnpm -F assignment-6 test:with_coverage 2>&1 | tee coverage.log
+
+      - name: 커버리지 코멘트
+        if: ${{ failure() || success() }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const log = fs.readFileSync('coverage.log', 'utf8');
+            const pull_number = ${{ github.event.pull_request.number }};
+
+            // PR에 리뷰 남기기
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull_number,
+              body: `
+                
+                커버리지 결과:\n\`\`\`\n${log}\n\`\`\`
+              `,
+              event: 'REQUEST_CHANGES'
+            });
 
   lighthouse:
     runs-on: ubuntu-latest
