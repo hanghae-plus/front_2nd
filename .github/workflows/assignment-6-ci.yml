@@ -185,48 +185,65 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - name: 'job4: lighthouse ci 를 실행'
-        id: job4
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: packages/assignment-6
+
+      - name: Build project
+        run: pnpm build
+        working-directory: packages/assignment-6
+
+      - name: Run Lighthouse CI
         run: |
-          pnpm -F assignment-6 install
-          pnpm -F assignment-6 lhci
-      - name: 'job4-res: 실행 결과를 코멘트에 남긴다.'
+          npm install -g @lhci/cli@0.14.x
+          lhci autorun
+        working-directory: packages/assignment-6
+
+      - name: Format Lighthouse results
+        id: format_results
+        run: |
+          REPORT_PATH=$(ls packages/assignment-6/lhci_reports/*.json | head -n 1)
+          PERFORMANCE=$(jq '.categories.performance.score' $REPORT_PATH)
+          ACCESSIBILITY=$(jq '.categories.accessibility.score' $REPORT_PATH)
+          BEST_PRACTICES=$(jq '.categories["best-practices"].score' $REPORT_PATH)
+          SEO=$(jq '.categories.seo.score' $REPORT_PATH)
+          
+          echo "PERFORMANCE=$PERFORMANCE" >> $GITHUB_OUTPUT
+          echo "ACCESSIBILITY=$ACCESSIBILITY" >> $GITHUB_OUTPUT
+          echo "BEST_PRACTICES=$BEST_PRACTICES" >> $GITHUB_OUTPUT
+          echo "SEO=$SEO" >> $GITHUB_OUTPUT
+
+      - name: Comment PR
         uses: actions/github-script@v7
         with:
-          github-token: ${{secrets.TOKEN_FOR_CI}}
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const fs = require('fs');
-            const lighthouseReport = JSON.parse(fs.readFileSync('packages/assignment-6/lhci_reports/manifest.json', 'utf8'));
-            const formatResult = (res) => Math.round(res * 100);
+            const scores = {
+              performance: ${{ steps.format_results.outputs.PERFORMANCE }},
+              accessibility: ${{ steps.format_results.outputs.ACCESSIBILITY }},
+              bestPractices: ${{ steps.format_results.outputs.BEST_PRACTICES }},
+              seo: ${{ steps.format_results.outputs.SEO }}
+            };
             
-            // 첫 번째 결과만 사용
-            const result = lighthouseReport[0];
-            const { summary } = result;
-            const finalSummary = Object.fromEntries(
-            Object.entries(summary).map(([key, value]) => [key, formatResult(value)])
-            );
+            const formatScore = (score) => Math.round(score * 100);
             
-            const comment = [
-              "| 카테고리 | 점수 |",
-              "| --- | --- |",
-              `| Performance | ${finalSummary.performance}% |`,
-              `| Accessibility | ${finalSummary.accessibility}% |`,
-              `| Best practices | ${finalSummary['best-practices']}% |`,
-              `| SEO | ${finalSummary.seo}% |`,
-              "\n",
-            ].join("\n");
+            const comment = `## Lighthouse 성능 측정 결과
             
-            const lighthouseComment = `## Lighthouse 성능 측정 결과
-            
-            ${comment}`;
+            | 카테고리 | 점수 |
+            | --- | --- |
+            | Performance | ${formatScore(scores.performance)}% |
+            | Accessibility | ${formatScore(scores.accessibility)}% |
+            | Best practices | ${formatScore(scores.bestPractices)}% |
+            | SEO | ${formatScore(scores.seo)}% |
+            `;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: lighthouseComment
+              body: comment
             });
-
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
