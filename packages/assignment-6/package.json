@@ -1,38 +1,270 @@
-{
-  "name": "assignment-6",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "start": "vite",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage.enabled true",
-    "build": "tsc -b && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@lhci/cli": "^0.14.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
-  "devDependencies": {
-    "@testing-library/jest-dom": "^6.4.5",
-    "@testing-library/react": "^15.0.7",
-    "@testing-library/user-event": "^14.5.2",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@typescript-eslint/eslint-plugin": "^7.13.1",
-    "@typescript-eslint/parser": "^7.13.1",
-    "@vitejs/plugin-react-swc": "^3.5.0",
-    "@vitest/coverage-v8": "^2.0.4",
-    "@vitest/ui": "^1.6.0",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "eslint-plugin-react-refresh": "^0.4.7",
-    "typescript": "^5.2.2",
-    "vite": "^5.3.1",
-    "vitest": "^2.0.2"
-  }
-}
+name: CI Assignment 6
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'packages/assignment-6/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run TypeScript compiler
+        run: pnpm tsc
+        working-directory: packages/assignment-6
+        continue-on-error: true
+
+      - name: Build project
+        run: pnpm build
+        working-directory: packages/assignment-6
+        continue-on-error: true
+
+      - name: Check for errors
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '빌드 과정에서 오류가 발생했습니다. 로그를 확인해 주세요.'
+            })
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run ESLint
+        run: pnpm lint
+        continue-on-error: true
+        working-directory: packages/assignment-6
+
+      - name: Check ESLint results
+        id: eslint-check
+        run: |
+          if [ -s eslint_report.json ]; then
+            echo "ESLINT_FAILED=true" >> $GITHUB_ENV
+          fi
+        working-directory: packages/assignment-6
+
+      - name: Comment PR with ESLint report
+        if: env.ESLINT_FAILED == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs');
+            const eslintReport = JSON.parse(fs.readFileSync('packages/assignment-6/eslint_report.json', 'utf8'));
+
+            let commentBody = '## ESLint 검사 결과\n\n';
+            commentBody += 'ESLint 검사 중 다음과 같은 문제가 발견되었습니다:\n\n';
+
+            eslintReport.forEach(file => {
+              if (file.messages.length > 0) {
+                commentBody += `### ${file.filePath}\n\n`;
+                file.messages.forEach(message => {
+                  commentBody += `- **${message.ruleId}**: ${message.message} (${message.line}:${message.column})\n`;
+                });
+                commentBody += '\n';
+              }
+            });
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            })
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: |
+          cd packages/assignment-6
+          pnpm install
+          pnpm install -D vitest jsdom @vitest/coverage-v8
+      - name: Run tests and generate coverage
+        run: |
+          cd packages/assignment-6
+          pnpm run test
+      - name: Generate coverage report
+        id: coverage
+        run: |
+          LINE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.lines.pct')
+          BRANCH=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.branches.pct')
+          FUNCTION=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.functions.pct')
+          STATEMENT=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.statements.pct')
+          echo "LINE=${LINE}" >> $GITHUB_OUTPUT
+          echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
+          echo "FUNCTION=${FUNCTION}" >> $GITHUB_OUTPUT
+          echo "STATEMENT=${STATEMENT}" >> $GITHUB_OUTPUT
+
+      - name: Comment PR with test results
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const coverage = {
+              line: process.env.LINE,
+              branch: process.env.BRANCH,
+              function: process.env.FUNCTION,
+              statement: process.env.STATEMENT
+            };
+
+            const commentBody = `## 테스트 결과
+
+
+            - 라인 커버리지: ${coverage.line}%
+            - 브랜치 커버리지: ${coverage.branch}%
+            - 함수 커버리지: ${coverage.function}%
+            - 구문 커버리지: ${coverage.statement}%`;
+
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install Packages
+        run: |
+          pnpm install
+          npm install -g @lhci/cli@0.8.x
+        working-directory: packages/assignment-6
+
+      - name: Build
+        run: pnpm build
+        working-directory: packages/assignment-6
+
+      - name: Start server
+        run: pnpm preview &
+        working-directory: packages/assignment-6
+
+      - name: Run Lighthouse CI
+        id: lighthouse
+        run: |
+          lhci autorun --collect.startServerCommand="pnpm preview" --collect.url="http://localhost:5173" --upload.target=temporary-public-storage > lighthouse_output.json
+
+      - name: Parse Lighthouse results
+        id: parse_lighthouse
+        run: |
+          PERFORMANCE=$(jq '.[] | select(.name=="lhci") | .summary.performance' lighthouse_output.json)
+          ACCESSIBILITY=$(jq '.[] | select(.name=="lhci") | .summary.accessibility' lighthouse_output.json)
+          BEST_PRACTICES=$(jq '.[] | select(.name=="lhci") | .summary["best-practices"]' lighthouse_output.json)
+          SEO=$(jq '.[] | select(.name=="lhci") | .summary.seo' lighthouse_output.json)
+          echo "PERFORMANCE=${PERFORMANCE}" >> $GITHUB_OUTPUT
+          echo "ACCESSIBILITY=${ACCESSIBILITY}" >> $GITHUB_OUTPUT
+          echo "BEST_PRACTICES=${BEST_PRACTICES}" >> $GITHUB_OUTPUT
+          echo "SEO=${SEO}" >> $GITHUB_OUTPUT
+        working-directory: packages/assignment-6
+
+      - name: Comment PR with Lighthouse results
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const scores = {
+              performance: ${{ steps.parse_lighthouse.outputs.PERFORMANCE }},
+              accessibility: ${{ steps.parse_lighthouse.outputs.ACCESSIBILITY }},
+              bestPractices: ${{ steps.parse_lighthouse.outputs.BEST_PRACTICES }},
+              seo: ${{ steps.parse_lighthouse.outputs.SEO }}
+            };
+
+            const commentBody = `## Lighthouse 결과
+
+            - 성능: ${scores.performance * 100}/100
+            - 접근성: ${scores.accessibility * 100}/100
+            - 최적화: ${scores.bestPractices * 100}/100
+            - SEO: ${scores.seo * 100}/100
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
+
+  assign_reviewer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Assign Reviewer
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const reviewers = ['zhwltlr', 'shiny1912', 'haeji1124'];
+            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [randomReviewer]
+            });
