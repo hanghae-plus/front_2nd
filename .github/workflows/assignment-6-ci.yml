@@ -145,32 +145,33 @@ jobs:
           echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
           echo "FUNCTION=${FUNCTION}" >> $GITHUB_OUTPUT
           echo "STATEMENT=${STATEMENT}" >> $GITHUB_OUTPUT
-
+  
       - name: Comment PR with test results
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const coverage = {
-              line: ${{ steps.coverage.outputs.LINE }},
-              branch: ${{ steps.coverage.outputs.BRANCH }},
-              function: ${{ steps.coverage.outputs.FUNCTION }},
-              statement: ${{ steps.coverage.outputs.STATEMENT }}
+              line: parseFloat(process.env.LINE),
+              branch: parseFloat(process.env.BRANCH),
+              function: parseFloat(process.env.FUNCTION),
+              statement: parseFloat(process.env.STATEMENT)
             };
-
+  
             const commentBody = `## 테스트 결과
-
+  
             - 라인 커버리지: ${coverage.line}%
             - 브랜치 커버리지: ${coverage.branch}%
             - 함수 커버리지: ${coverage.function}%
             - 구문 커버리지: ${coverage.statement}%`;
-
-            github.rest.issues.createComment({
+  
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: commentBody
             });
+            
 
   lighthouse:
     runs-on: ubuntu-latest
