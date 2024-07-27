@@ -149,13 +149,15 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const testOutput = `${{ steps.run-tests.outputs.test_output }}`;
+            const status = '${{ steps.run-tests.outputs.status }}';
+            const summary = `${{ steps.run-tests.outputs.summary }}`;
             
             const commentBody = `## 테스트 결과
 
-            \`\`\`
-            ${testOutput}
-            \`\`\`
+            상태: ${status === 'success' ? '성공 ✅' : '실패 ❌'}
+
+            요약:
+            ${summary}
 
             자세한 내용은 CI 로그를 확인해주세요.`;
             
