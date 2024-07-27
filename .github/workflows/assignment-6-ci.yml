@@ -117,60 +117,44 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: latest
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Install dependencies
-        run: |
-          cd packages/assignment-6
-          pnpm install
-          pnpm install -D vitest jsdom @vitest/coverage-v8
-      - name: Run tests and generate coverage
-        run: |
-          cd packages/assignment-6
-          pnpm run test
-      - name: Generate coverage report
-        id: coverage
-        run: |
-          LINE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.lines.pct')
-          BRANCH=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.branches.pct')
-          FUNCTION=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.functions.pct')
-          STATEMENT=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.statements.pct')
-          echo "LINE=${LINE}" >> $GITHUB_OUTPUT
-          echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
-          echo "FUNCTION=${FUNCTION}" >> $GITHUB_OUTPUT
-          echo "STATEMENT=${STATEMENT}" >> $GITHUB_OUTPUT
-  
-      - name: Comment PR with test results
-        uses: actions/github-script@v6
+        run: pnpm install
+      - name: Run tests
+        run: pnpm -F assignment-6 test:coverage
+      - name: test pwd
+        run: pwd
+      - name: Comment test results
+        if: success()
+        uses: actions/github-script@v7
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
-            const coverage = {
-              line: parseFloat(process.env.LINE),
-              branch: parseFloat(process.env.BRANCH),
-              function: parseFloat(process.env.FUNCTION),
-              statement: parseFloat(process.env.STATEMENT)
-            };
-  
-            const commentBody = `## 테스트 결과
-  
-            - 라인 커버리지: ${coverage.line}%
-            - 브랜치 커버리지: ${coverage.branch}%
-            - 함수 커버리지: ${coverage.function}%
-            - 구문 커버리지: ${coverage.statement}%`;
-  
-            await github.rest.issues.createComment({
+            const fs = require('fs');
+            const path = require('path');
+            const coverageJson = JSON.parse(fs.readFileSync(`packages/assignment-6/coverage/coverage-summary.json`, 'utf8'));
+            const {lines, branches, functions, statements} = coverageJson.total;
+            
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: commentBody
-            });
+              body: `## 테스트 성공✅ 
+              \n ### 커버리지 결과 \n
+            
+              • 라인 커버리지: ${lines.pct}%
+              • 브랜치 커버리지: ${branches.pct}%
+              • 함수 커버리지: ${functions.pct}%
+              • 구문 커버리지: ${statements.pct}%
+            `})
             
 
   lighthouse:
