@@ -1,0 +1,17 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["http://localhost:5173"],
+      "numberOfRuns": 1
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": "off",
+        "categories:accessibility": "off",
+        "categories:best-practices": "off",
+        "categories:seo": "off"
+      }
+    },
+    "output": ["json", "html"]
+  }
+}

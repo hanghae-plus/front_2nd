@@ -1,0 +1,11 @@
+# auto-assign.yml
+
+addReviewers: true
+addAssignees: author
+numberOfReviewers: 1
+
+reviewers:
+  - JunilHwang
+  - AnSuebin
+  - horang-e
+  - Raihyul

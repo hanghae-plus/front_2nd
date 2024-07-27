@@ -4,6 +4,8 @@ on:
   pull_request:
     types:
       - opened
+      - synchronize
+      - reopened
     paths:
       - 'packages/assignment-6/**'
 
@@ -11,29 +13,263 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Job1 (Build)
+        id: job1
+        run: |
+          pnpm -F assignment-6 install
+          pnpm -F assignment-6 build
+
+      - name: Comment on Error
+        if: failure() && steps.job1.outcome == 'failure'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            github.rest.issues.createComment({
+              owner: owner,
+              repo: repo,
+              issue_number: context.issue.number,
+              body: `
+                ## Build Error Result
+                
+                Build failed. Please check the error message and fix it.
+              `
+            })
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm -F assignment-6 install
+
+      - name: Set ESLint output to env
+        id: eslint
+        run: |
+          output=$(pnpm -F assignment-6 lint 2>&1)
+          echo "ESLINT_OUTPUT<<EOF" >> $GITHUB_ENV
+          echo "$output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Comment ESLint results when success
+        uses: actions/github-script@v6
+        if: success()
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const eslintOutput = process.env.ESLINT_OUTPUT || 'No ESLint output available';
+            const message = `
+            ## ESLint Results
+
+            \`\`\`
+            ${eslintOutput}
+            \`\`\`
+            `;
+
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: owner,
+              repo: repo,
+              body: message
+            })
+
+      - name: Comment ESLint results when failure
+        uses: actions/github-script@v6
+        if: failure()
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const eslintOutput = process.env.ESLINT_OUTPUT || 'No ESLint output available';
+            const errorMessage = `
+            ## ESLint Results
+
+            \`\`\`
+            ${eslintOutput}
+            \`\`\`
+            `;
+
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: owner,
+              repo: repo,
+              body: errorMessage
+            })
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm -F assignment-6 install
+
+      - name: Job3 (Test)
+        id: job3
+        run: pnpm -F assignment-6 test:coverage > coverage.txt
+
+      - name: Parse coverage and comment
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            // Parse Coverage.txt
+            const fs = require('fs');
+            const coverage = fs.readFileSync('coverage.txt', 'utf-8');
+            const scoreOfAllFiles = coverage.split('\n').find((line) => line.includes('All files'));
+            const scores = scoreOfAllFiles.match(/\d+\.\d+/g);
+            const [statements, branches, functions, lines] = scores.map(parseFloat);
+
+            // Comment on PR
+            const coverageMessage = `
+              ## 테스트 성공 ✅
+              
+              ### 커버리지 결과
+
+              - 라인 커버리지: ${lines}%
+              - 브랜치 커버리지: ${branches}%
+              - 함수 커버리지: ${functions}%
+              - 구문 커버리지: ${statements}%
+            `
+
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: owner,
+              repo: repo,
+              body: coverageMessage
+            })
 
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: install dependencies
+        run: |
+          pnpm -F assignment-6 install
+          pnpm install -g @lhci/cli
+
+      - name: start dev server
+        run: |
+          pnpm -F assignment-6 start &
+          npx -y wait-on http://localhost:5173
+
+      - name: Job4 (lighthouse)
+        id: job4
+        run: lhci autorun --config=.github/lighthouse.ci/lighthouserc.json --no-exit-on-failure
+
+      - name: Comment the lighthouse result on PR
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const lighthouseDir = path.join(process.env.GITHUB_WORKSPACE, '.lighthouseci')
+            const jsonFiles = fs.readdirSync(lighthouseDir).filter(file => file.endsWith('.json'));
+            if (jsonFiles.length === 0) {
+              console.error("No JSON files found");
+              return;
+            }
+
+            const jsonFile = jsonFiles.pop();
+            const resultPath = path.join(lighthouseDir, jsonFile);
+
+            const lighthouseResult = JSON.parse(fs.readFileSync(resultPath, 'utf-8'));
+
+            const categoriesWithUpperCase = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
+            const categories = ['performance', 'accessibility', 'best-practices', 'seo'];
+            let resultTable = '| 카테고리 | 점수 |\n|---|---|\n';
+            categories.forEach(category => {
+              const score = Math.round(lighthouseResult.categories[category].score * 100);
+              resultTable += `| ${categoriesWithUpperCase[categories.indexOf(category)]} | ${score} |\n`;
+            })
+
+            const lighthouseMessage = `
+              ## Lighthouse 성능 측정 결과
+              
+              ${resultTable}
+            `;
+
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: owner,
+              repo: repo,
+              body: lighthouseMessage
+            })
+
+      - name: stop dev server
+        if: always()
+        run: kill $(lsof -t -i:5173) || true
 
   assign_reviewer:
     runs-on: ubuntu-latest
     steps:
-      - name: job5 구현
-        run: echo "job5의 내용을 구현해주세요"
+      - uses: actions/checkout@v4
+      - uses: kentaro-m/auto-assign-action@v2.0.0
+        if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened')
+        with:
+          repo-token: ${{ secrets.TOKEN_FOR_CI }}
+          configuration-path: .github/auto-assign.yml
+
+      - name: Comment the review request on PR
+        if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened')
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            const pr = await github.rest.pulls.get({
+              owner: owner,
+              repo: repo,
+              pull_number: context.issue.number
+            });
+
+            const assignedReviewers = pr.data.requested_reviewers;
+
+            if (assignedReviewers.length > 0) {
+              const reviewerMentions = assignedReviewers.map(reviewer => `@${reviewer.login}`).join(' ');
+              const message = `${reviewerMentions} 리뷰를 부탁드립니다.`;
+
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: owner,
+                repo: repo,
+                body: message
+              })
+              console.log('Review request comment posted successfully.');
+            } else {
+              console.log('No reviewers assigned to this PR.');
+            }
