@@ -1,0 +1,60 @@
+name: 'PNPM Install with Cache'
+description: 'Install dependencies using pnpm with caching'
+inputs:
+  working-directory:
+    description: 'Directory containing package.json'
+    required: false
+    default: '.'
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '20'
+  pnpm-version:
+    description: 'PNPM version to use'
+    required: true
+outputs:
+  cache-hit:
+    description: 'Boolean cache key'
+    value: ${{ steps.pnpm-cache.outputs.cache-hit }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Install PNPM
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ inputs.pnpm-version }}
+
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    #pnpm modules 캐시
+    - name: Cache pnpm modules
+      uses: actions/cache@v4
+      id: pnpm-cache
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        #캐시 미적중시 '${{ runner.os }}-pnpm-store-'와 일치하는 최근파일 캐시 가져오기
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Check cache status
+      shell: bash
+      run: |
+        if [ "${{ steps.pnpm-cache.outputs.cache-hit }}" == "true" ]; then
+          echo "Cache hit"
+        else
+          echo "Cache miss"
+        fi
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: pnpm install --prefer-frozen-lockfile
