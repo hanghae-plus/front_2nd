@@ -113,7 +113,7 @@ jobs:
               repo: context.repo.repo,
               body: commentBody
             })
-
+  
   test:
     runs-on: ubuntu-latest
     steps:
@@ -145,35 +145,35 @@ jobs:
           echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
           echo "FUNCTION=${FUNCTION}" >> $GITHUB_OUTPUT
           echo "STATEMENT=${STATEMENT}" >> $GITHUB_OUTPUT
-
+  
       - name: Comment PR with test results
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.TOKEN_FOR_CI}}
           script: |
             const coverage = {
-              line: ${{ steps.coverage.outputs.LINE }},
-              branch: ${{ steps.coverage.outputs.BRANCH }},
-              function: ${{ steps.coverage.outputs.FUNCTION }},
-              statement: ${{ steps.coverage.outputs.STATEMENT }}
+              line: process.env.LINE,
+              branch: process.env.BRANCH,
+              function: process.env.FUNCTION,
+              statement: process.env.STATEMENT
             };
-
+  
             const commentBody = `## 테스트 결과
-
-            테스트가 완료되었습니다. 코드 커버리지 결과는 다음과 같습니다:
-
-            - 라인 커버리지: ${coverage.line}%
-            - 브랜치 커버리지: ${coverage.branch}%
-            - 함수 커버리지: ${coverage.function}%
-            - 구문 커버리지: ${coverage.statement}%
-            `;
-
+  
+  테스트가 완료되었습니다. 코드 커버리지 결과는 다음과 같습니다:
+  
+  - 라인 커버리지: ${coverage.line}%
+  - 브랜치 커버리지: ${coverage.branch}%
+  - 함수 커버리지: ${coverage.function}%
+  - 구문 커버리지: ${coverage.statement}%`;
+  
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: commentBody
             });
+
 
   lighthouse:
     runs-on: ubuntu-latest
