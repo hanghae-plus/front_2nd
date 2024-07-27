@@ -1,0 +1,262 @@
+name: CI Assignment 6
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'packages/assignment-6/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run TypeScript compiler
+        run: pnpm tsc
+        working-directory: packages/assignment-6
+        continue-on-error: true
+
+      - name: Build project
+        run: pnpm build
+        working-directory: packages/assignment-6
+        continue-on-error: true
+
+      - name: Check for errors
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '빌드 과정에서 오류가 발생했습니다. 로그를 확인해 주세요.'
+            })
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run ESLint
+        run: pnpm lint
+        continue-on-error: true
+        working-directory: packages/assignment-6
+
+      - name: Check ESLint results
+        id: eslint-check
+        run: |
+          if [ -s eslint_report.json ]; then
+            echo "ESLINT_FAILED=true" >> $GITHUB_ENV
+          fi
+        working-directory: packages/assignment-6
+
+      - name: Comment PR with ESLint report
+        if: env.ESLINT_FAILED == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs');
+            const eslintReport = JSON.parse(fs.readFileSync('packages/assignment-6/eslint_report.json', 'utf8'));
+
+            let commentBody = '## ESLint 검사 결과\n\n';
+            commentBody += 'ESLint 검사 중 다음과 같은 문제가 발견되었습니다:\n\n';
+
+            eslintReport.forEach(file => {
+              if (file.messages.length > 0) {
+                commentBody += `### ${file.filePath}\n\n`;
+                file.messages.forEach(message => {
+                  commentBody += `- **${message.ruleId}**: ${message.message} (${message.line}:${message.column})\n`;
+                });
+                commentBody += '\n';
+              }
+            });
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            })
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies
+        run: pnpm -F assignment-6 install
+
+      - name: Run Tests and Measure Coverage
+        run: pnpm -F assignment-6 test -- --coverage > test_output.txt
+
+      - name: Extract Coverage Data
+        id: coverage
+        run: |
+          echo "lines=$(grep -oP 'All files.*?\|\s*\K[0-9.]+(?=\s*\|)' test_output.txt)" >> $GITHUB_OUTPUT
+          echo "statements=$(grep -oP 'All files.*?\|.*?\|\s*\K[0-9.]+(?=\s*\|)' test_output.txt)" >> $GITHUB_OUTPUT
+          echo "functions=$(grep -oP 'All files.*?\|.*?\|.*?\|\s*\K[0-9.]+(?=\s*\|)' test_output.txt)" >> $GITHUB_OUTPUT
+          echo "branches=$(grep -oP 'All files.*?\|.*?\|.*?\|.*?\|\s*\K[0-9.]+(?=\s*\|)' test_output.txt)" >> $GITHUB_OUTPUT
+      - name: Post Test Coverage comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_FOR_CI }}
+          header: Test Coverage Report
+          message: |
+            ## 테스트 성공 ✅
+            **커버리지 결과**
+            - 라인 커버리지: ${{ steps.coverage.outputs.lines }}%
+            - 구문 커버리지: ${{ steps.coverage.outputs.statements }}%
+            - 함수 커버리지: ${{ steps.coverage.outputs.functions }}%
+            - 브랜치 커버리지: ${{ steps.coverage.outputs.branches }}%
+            
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: packages/assignment-6
+
+      - name: Build project
+        run: pnpm build
+        working-directory: packages/assignment-6
+
+      - name: Run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli@0.14.x
+          lhci autorun
+        working-directory: packages/assignment-6
+
+      - name: Format Lighthouse results
+        id: format_results
+        run: |
+          REPORT_PATH=$(ls packages/assignment-6/lhci_reports/*.json | head -n 1)
+          PERFORMANCE=$(jq '.categories.performance.score' $REPORT_PATH)
+          ACCESSIBILITY=$(jq '.categories.accessibility.score' $REPORT_PATH)
+          BEST_PRACTICES=$(jq '.categories["best-practices"].score' $REPORT_PATH)
+          SEO=$(jq '.categories.seo.score' $REPORT_PATH)
+          
+          echo "PERFORMANCE=$PERFORMANCE" >> $GITHUB_OUTPUT
+          echo "ACCESSIBILITY=$ACCESSIBILITY" >> $GITHUB_OUTPUT
+          echo "BEST_PRACTICES=$BEST_PRACTICES" >> $GITHUB_OUTPUT
+          echo "SEO=$SEO" >> $GITHUB_OUTPUT
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const scores = {
+              performance: ${{ steps.format_results.outputs.PERFORMANCE }},
+              accessibility: ${{ steps.format_results.outputs.ACCESSIBILITY }},
+              bestPractices: ${{ steps.format_results.outputs.BEST_PRACTICES }},
+              seo: ${{ steps.format_results.outputs.SEO }}
+            };
+            
+            const formatScore = (score) => Math.round(score * 100);
+            
+            const comment = `## Lighthouse 성능 측정 결과
+            
+            | 카테고리 | 점수 |
+            | --- | --- |
+            | Performance | ${formatScore(scores.performance)}% |
+            | Accessibility | ${formatScore(scores.accessibility)}% |
+            | Best practices | ${formatScore(scores.bestPractices)}% |
+            | SEO | ${formatScore(scores.seo)}% |
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  assign_reviewer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Assign Reviewer
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const reviewers = ['zhwltlr', 'shiny1912', 'haeji1124'];
+            const randomReviewer = reviewers[Math.floor(Math.random() * reviewers.length)];
+
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: [randomReviewer]
+            });
