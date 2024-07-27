@@ -16,11 +16,12 @@ jobs:
         with:
           node-version: "20"
       - name: Install dependencies
-        run: npm ci
+        uses: pnpm/actions-setup@4
+        run: pnpm install
       - name: Run tsc and build
         run: |
-          npm run tsc
-          npm run build
+          pnpm run tsc
+          pnpm run build
       - name: Comment build result
         if: failure()
         uses: actions/github-script@v6
@@ -43,9 +44,9 @@ jobs:
         with:
           node-version: "20"
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
       - name: Run ESLint
-        run: npm run lint
+        run: pnpm run lint
       - name: Comment ESLint results
         if: failure()
         uses: actions/github-script@v6
@@ -70,9 +71,9 @@ jobs:
         with:
           node-version: "20"
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
       - name: Run tests with coverage
-        run: npm run test:coverage
+        run: pnpm run test:coverage
       - name: Comment test coverage
         uses: actions/github-script@v6
         with:
@@ -98,9 +99,9 @@ jobs:
         with:
           node-version: "20"
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
       - name: Run Lighthouse CI
-        run: npx lhci autorun
+        run: pnpm dlx lhci autorun
       - name: Comment Lighthouse CI results
         uses: actions/github-script@v6
         with:
