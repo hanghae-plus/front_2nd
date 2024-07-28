@@ -1,5 +1,8 @@
-import { afterAll, beforeAll, describe, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { serviceWorker } from "../../mock/worker";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import App from "../App";
 
 const server = serviceWorker;
 
@@ -14,13 +17,21 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
   });
 
   describe("일정 뷰 및 필터링", () => {
+    const user = userEvent.setup();
     beforeAll(() => server.listen());
 
     afterAll(() => server.close());
+
     test.only("주별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.", async () => {
-      const response = await fetch("/api/events");
-      const data = await response.json();
-      console.log(data);
+      render(<App />);
+
+      const selectBox = screen.getByRole("combobox", {
+        name: "view",
+      }) as HTMLSelectElement;
+
+      await user.selectOptions(selectBox, "week");
+
+      expect(selectBox).toHaveValue("week");
     });
 
     test.fails("주별 뷰에 일정이 정확히 표시되는지 확인한다");

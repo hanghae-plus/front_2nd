@@ -40,6 +40,7 @@ import {
   DeleteIcon,
   EditIcon,
 } from "@chakra-ui/icons";
+import { getDaysInMonth } from "./utils/date-utils";
 
 type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
 
@@ -387,10 +388,6 @@ function App() {
     setNotificationTime(event.notificationTime);
   };
 
-  const getDaysInMonth = (year: number, month: number) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
   const getWeekDates = (date: Date) => {
     const day = date.getDay();
     const diff = date.getDate() - day + (day === 0 ? -6 : 1);
@@ -427,6 +424,9 @@ function App() {
     );
   };
 
+  /**
+   * 일정에 따라 filter된 이벤트들 목록
+   */
   const filteredEvents = (() => {
     const filtered = searchEvents(searchTerm);
     return filtered.filter((event) => {
