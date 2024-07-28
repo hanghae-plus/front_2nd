@@ -11,6 +11,7 @@
   "license": "ISC",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ]
 }
