@@ -22,7 +22,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
     afterAll(() => server.close());
 
-    test.only("주별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.", async () => {
+    test("주별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.", async () => {
       render(<App />);
 
       const selectBox = screen.getByRole("combobox", {
