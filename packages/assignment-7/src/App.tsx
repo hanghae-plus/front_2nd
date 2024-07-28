@@ -40,7 +40,12 @@ import {
   DeleteIcon,
   EditIcon,
 } from "@chakra-ui/icons";
-import { formatWeek, getDaysInMonth, getWeekDates } from "./utils/date-utils";
+import {
+  formatMonth,
+  formatWeek,
+  getDaysInMonth,
+  getWeekDates,
+} from "./utils/date-utils";
 
 type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
 
@@ -430,12 +435,6 @@ function App() {
       return true;
     });
   })();
-
-  const formatMonth = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    return `${year}년 ${month}월`;
-  };
 
   const renderWeekView = () => {
     const weekDates = getWeekDates(currentDate);

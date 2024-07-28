@@ -39,7 +39,7 @@ const formatWeek = (date: Date): string => {
 };
 
 /**
- *
+ * date에 따라 현재 `년 월`형식으로 반환하는 함수
  * @param date
  * @returns
  */
