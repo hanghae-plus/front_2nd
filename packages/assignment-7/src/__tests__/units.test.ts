@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getDaysInMonth, getWeekDates } from "../utils/date-utils";
+import { formatWeek, getDaysInMonth, getWeekDates } from "../utils/date-utils";
 
 describe("단위 테스트: 날짜 및 시간 관리", () => {
   describe("getDaysInMonth 함수", () => {
@@ -10,7 +10,7 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
     });
   });
 
-  describe.only("getWeekDates 함수", () => {
+  describe("getWeekDates 함수", () => {
     const getWeekByISO = (currentDate: Date) => {
       return getWeekDates(currentDate).map((date) => date.toISOString());
     };
@@ -58,8 +58,18 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
     });
   });
 
-  describe("formatWeek 함수", () => {
-    test.fails("주어진 날짜의 주 정보를 올바른 형식으로 반환한다");
+  describe.only("formatWeek 함수", () => {
+    test("주어진 날짜의 주 정보를 올바른 형식으로 반환한다", () => {
+      expect(formatWeek(new Date("2023-07-24"))).toBe("2023년 7월 4주");
+    });
+
+    test("주어진 날짜의 주 정보가 현재달과 다음달의 날짜가 포함된다면 현재달을 기준으로 표현한다.", () => {
+      expect(formatWeek(new Date("2023-07-31"))).toBe("2023년 7월 5주");
+    });
+
+    test("주어진 날짜의 주 정보가 다음년도가 넘어가도 현재 달의 주를 기준으로 표현한다.", () => {
+      expect(formatWeek(new Date("2023-12-31"))).toBe("2023년 12월 5주");
+    });
   });
 
   describe("formatMonth 함수", () => {

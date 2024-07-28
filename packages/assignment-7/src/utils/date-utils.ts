@@ -26,4 +26,27 @@ const getWeekDates = (date: Date) => {
   return weekDates;
 };
 
-export { getDaysInMonth, getWeekDates };
+/**
+ * date에 따라 현재 `년 월 주`형식으로 반환하는 함수
+ * @param date
+ * @returns
+ */
+const formatWeek = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const weekNumber = Math.ceil(date.getDate() / 7);
+  return `${year}년 ${month}월 ${weekNumber}주`;
+};
+
+/**
+ *
+ * @param date
+ * @returns
+ */
+const formatMonth = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  return `${year}년 ${month}월`;
+};
+
+export { getDaysInMonth, getWeekDates, formatWeek, formatMonth };
