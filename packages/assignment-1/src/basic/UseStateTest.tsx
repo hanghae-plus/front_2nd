@@ -6,8 +6,13 @@ export default function UseStateTest() {
   const [state, setState] = useState({ bar: { count: 1 } });
 
   const increment = () => {
-    state.bar.count += 1;
-    setState(state);
+    setState(prevState => ({
+      ...prevState, // 기존 상태 복사
+      bar: {
+        ...prevState.bar, // bar 객체를 복사
+        count: prevState.bar.count + 1
+      }
+    }));
   }
 
   return (

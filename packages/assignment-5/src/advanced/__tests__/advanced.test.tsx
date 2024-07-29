@@ -1,8 +1,12 @@
 import { useState } from "react";
-import { describe, expect, test } from 'vitest';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { CartPage } from '../../refactoring/components/CartPage';
+import { describe, expect, test, it } from 'vitest';
+import { act, fireEvent, render, screen, within, renderHook } from '@testing-library/react';
+import { CartPage, getMaxDiscount, getAppliedDiscount } from '../../refactoring/components/CartPage';
 import { AdminPage } from "../../refactoring/components/AdminPage";
+import { calculateRemainingStock } from '../../refactoring/hooks/useCart';
+import { useEditingProduct } from '../../refactoring/hooks/useEditingProduct';
+import { useLocalStorage } from '../../refactoring/hooks/useLocalStorage';
+import { useCouponForm } from '../../refactoring/hooks/useCouponForm';
 import { Coupon, Product } from '../../types';
 
 const mockProducts: Product[] = [
@@ -231,14 +235,319 @@ describe('advanced > ', () => {
     })
   })
 
-  describe('자유롭게 작성해보세요.', () => {
-    test('새로운 유틸 함수를 만든 후에 테스트 코드를 작성해서 실행해보세요', () => {
-      expect(true).toBe(false);
-    })
+  describe('getMaxDiscount', () => {
+    it('빈 배열에 대해 0을 반환해야 합니다', () => {
+      expect(getMaxDiscount([])).toBe(0);
+    });
+  
+    it('가장 높은 할인율을 반환해야 합니다', () => {
+      const discounts = [
+        { quantity: 2, rate: 0.1 },
+        { quantity: 3, rate: 0.15 },
+        { quantity: 5, rate: 0.2 }
+      ];
+      expect(getMaxDiscount(discounts)).toBe(0.2);
+    });
+  });
 
-    test('새로운 hook 함수르 만든 후에 테스트 코드를 작성해서 실행해보세요', () => {
-      expect(true).toBe(false);
-    })
-  })
+  describe('calculateRemainingStock', () => {
+    it('카트에 상품이 없을 때 전체 재고를 반환해야 합니다', () => {
+      const product: Product = { id: '1', name: 'Test Product', price: 1000, stock: 10, discounts: [] };
+      const cart: CartItem[] = [];
+      expect(calculateRemainingStock(product, cart)).toBe(10);
+    });
+  
+    it('카트에 상품이 있을 때 남은 재고를 정확히 계산해야 합니다', () => {
+      const product: Product = { id: '1', name: 'Test Product', price: 1000, stock: 10, discounts: [] };
+      const cart: CartItem[] = [{ product: product, quantity: 3 }];
+      expect(calculateRemainingStock(product, cart)).toBe(7);
+    });
+  });
+  
+  describe('getAppliedDiscount', () => {
+    it('수량이 할인 기준에 미치지 못할 때 0을 반환해야 합니다', () => {
+      const product: Product = {
+        id: '1',
+        name: 'Test Product',
+        price: 1000,
+        stock: 10,
+        discounts: [{ quantity: 3, rate: 0.1 }]
+      };
+      const cartItem: CartItem = { product, quantity: 2 };
+      expect(getAppliedDiscount(cartItem)).toBe(0);
+    });
+  
+    it('수량에 따라 적용 가능한 최대 할인율을 반환해야 합니다', () => {
+      const product: Product = {
+        id: '1',
+        name: 'Test Product',
+        price: 1000,
+        stock: 10,
+        discounts: [
+          { quantity: 3, rate: 0.1 },
+          { quantity: 5, rate: 0.15 }
+        ]
+      };
+      const cartItem: CartItem = { product, quantity: 4 };
+      expect(getAppliedDiscount(cartItem)).toBe(0.1);
+    });
+  
+    it('수량이 가장 높은 할인 기준을 초과할 때도 최대 할인율을 반환해야 합니다', () => {
+      const product: Product = {
+        id: '1',
+        name: 'Test Product',
+        price: 1000,
+        stock: 10,
+        discounts: [
+          { quantity: 3, rate: 0.1 },
+          { quantity: 5, rate: 0.15 }
+        ]
+      };
+      const cartItem: CartItem = { product, quantity: 6 };
+      expect(getAppliedDiscount(cartItem)).toBe(0.15);
+    });
+  });
+
+  describe('useEditingProduct', () => {
+    const mockProduct: Product = {
+      id: '1',
+      name: 'Test Product',
+      price: 1000,
+      stock: 10,
+      discounts: []
+    };
+  
+    it('초기 상태는 null이어야 합니다', () => {
+      const { result } = renderHook(() => useEditingProduct());
+      expect(result.current.editingProduct).toBeNull();
+    });
+  
+    it('edit 함수는 상품을 설정해야 합니다', () => {
+      const { result } = renderHook(() => useEditingProduct());
+      act(() => {
+        result.current.edit(mockProduct);
+      });
+      expect(result.current.editingProduct).toEqual(mockProduct);
+    });
+  
+    it('updateName 함수는 상품 이름을 업데이트해야 합니다', () => {
+      const { result } = renderHook(() => useEditingProduct());
+      act(() => {
+        result.current.edit(mockProduct);
+      });
+      act(() => {
+        result.current.updateName('Updated Product');
+      });
+      expect(result.current.editingProduct?.name).toBe('Updated Product');
+    });
+  
+    it('updatePrice 함수는 상품 가격을 업데이트해야 합니다', () => {
+      const { result } = renderHook(() => useEditingProduct());
+      act(() => {
+        result.current.edit(mockProduct);
+      });
+      act(() => {
+        result.current.updatePrice(1500);
+      });
+      expect(result.current.editingProduct?.price).toBe(1500);
+    });
+  
+    it('updateStock 함수는 상품 재고를 업데이트해야 합니다', () => {
+      const { result } = renderHook(() => useEditingProduct());
+      act(() => {
+        result.current.edit(mockProduct);
+      });
+      act(() => {
+        result.current.updateStock(15);
+      });
+      expect(result.current.editingProduct?.stock).toBe(15);
+    });
+  
+    it('addDiscount 함수는 새로운 할인을 추가해야 합니다', () => {
+      const { result } = renderHook(() => useEditingProduct());
+      act(() => {
+        result.current.edit(mockProduct);
+      });
+      act(() => {
+        result.current.setNewDiscount({ quantity: 5, rate: 0.1 });
+      });
+      act(() => {
+        result.current.addDiscount();
+      });
+      expect(result.current.editingProduct?.discounts).toEqual([{ quantity: 5, rate: 0.1 }]);
+    });
+  
+    it('removeDiscount 함수는 할인을 제거해야 합니다', () => {
+      const productWithDiscount = { ...mockProduct, discounts: [{ quantity: 5, rate: 0.1 }] };
+      const { result } = renderHook(() => useEditingProduct());
+      act(() => {
+        result.current.edit(productWithDiscount);
+      });
+      act(() => {
+        result.current.removeDiscount(0);
+      });
+      expect(result.current.editingProduct?.discounts).toEqual([]);
+    });
+  
+    it('clearEditingProduct 함수는 편집 중인 상품을 null로 설정해야 합니다', () => {
+      const { result } = renderHook(() => useEditingProduct());
+      act(() => {
+        result.current.edit(mockProduct);
+      });
+      act(() => {
+        result.current.clearEditingProduct();
+      });
+      expect(result.current.editingProduct).toBeNull();
+    });
+  });
+
+  describe('useLocalStorage', () => {
+    // 테스트를 위한 로컬 스토리지 모킹
+    const mockLocalStorage = (() => {
+      let store: { [key: string]: string } = {};
+      return {
+        getItem: (key: string) => store[key] || null,
+        setItem: (key: string, value: string) => {
+          store[key] = value.toString();
+        },
+        removeItem: (key: string) => {
+          delete store[key];
+        },
+        clear: () => {
+          store = {};
+        }
+      };
+    })();
+
+    beforeAll(() => {
+      Object.defineProperty(window, 'localStorage', {
+        value: mockLocalStorage
+      });
+    });
+
+    beforeEach(() => {
+      window.localStorage.clear();
+    });
+
+    it('초기값을 정확히 설정해야 합니다', () => {
+      const { result } = renderHook(() => useLocalStorage('test', 'initial'));
+      expect(result.current[0]).toBe('initial');
+    });
+
+    it('값을 업데이트하고 로컬 스토리지에 저장해야 합니다', () => {
+      const { result } = renderHook(() => useLocalStorage('test', 'initial'));
+
+      act(() => {
+        result.current[1]('updated');
+      });
+
+      expect(result.current[0]).toBe('updated');
+      expect(window.localStorage.getItem('test')).toBe(JSON.stringify('updated'));
+    });
+
+    it('로컬 스토리지에서 기존 값을 불러와야 합니다', () => {
+      window.localStorage.setItem('test', JSON.stringify('existing'));
+
+      const { result } = renderHook(() => useLocalStorage('test', 'initial'));
+      expect(result.current[0]).toBe('existing');
+    });
+
+    it('함수를 사용하여 값을 업데이트할 수 있어야 합니다', () => {
+      const { result } = renderHook(() => useLocalStorage<number>('test', 0));
+
+      act(() => {
+        result.current[1](prev => prev + 1);
+      });
+
+      expect(result.current[0]).toBe(1);
+      expect(window.localStorage.getItem('test')).toBe(JSON.stringify(1));
+    });
+
+    it('객체 값을 저장하고 불러올 수 있어야 합니다', () => {
+      const testObject = { name: 'Test', value: 42 };
+      const { result } = renderHook(() => useLocalStorage('test', testObject));
+
+      expect(result.current[0]).toEqual(testObject);
+
+      act(() => {
+        result.current[1]({ ...testObject, value: 43 });
+      });
+
+      expect(result.current[0]).toEqual({ name: 'Test', value: 43 });
+      expect(JSON.parse(window.localStorage.getItem('test') as string)).toEqual({ name: 'Test', value: 43 });
+    });
+  });
+
+  describe('useCouponForm', () => {
+    const mockOnAddCoupon = vi.fn();
+  
+    beforeEach(() => {
+      mockOnAddCoupon.mockClear();
+    });
+  
+    it('초기 상태를 올바르게 설정해야 합니다', () => {
+      const { result } = renderHook(() => useCouponForm(mockOnAddCoupon));
+      expect(result.current.coupon).toEqual({
+        name: '',
+        code: '',
+        discountType: 'percentage',
+        discountValue: 0
+      });
+    });
+  
+    it('쿠폰 필드를 올바르게 업데이트해야 합니다', () => {
+      const { result } = renderHook(() => useCouponForm(mockOnAddCoupon));
+  
+      act(() => {
+        result.current.updateCouponField('name', 'Test Coupon');
+      });
+      expect(result.current.coupon.name).toBe('Test Coupon');
+  
+      act(() => {
+        result.current.updateCouponField('code', 'TEST123');
+      });
+      expect(result.current.coupon.code).toBe('TEST123');
+  
+      act(() => {
+        result.current.updateCouponField('discountType', 'amount');
+      });
+      expect(result.current.coupon.discountType).toBe('amount');
+  
+      act(() => {
+        result.current.updateCouponField('discountValue', 1000);
+      });
+      expect(result.current.coupon.discountValue).toBe(1000);
+    });
+  
+    it('handleAddCoupon 함수가 쿠폰을 추가하고 폼을 초기화해야 합니다', () => {
+      const { result } = renderHook(() => useCouponForm(mockOnAddCoupon));
+  
+      act(() => {
+        result.current.updateCouponField('name', 'Test Coupon');
+        result.current.updateCouponField('code', 'TEST123');
+        result.current.updateCouponField('discountType', 'amount');
+        result.current.updateCouponField('discountValue', 1000);
+      });
+  
+      act(() => {
+        result.current.handleAddCoupon();
+      });
+  
+      expect(mockOnAddCoupon).toHaveBeenCalledWith({
+        name: 'Test Coupon',
+        code: 'TEST123',
+        discountType: 'amount',
+        discountValue: 1000
+      });
+  
+      expect(result.current.coupon).toEqual({
+        name: '',
+        code: '',
+        discountType: 'percentage',
+        discountValue: 0
+      });
+    });
+  });
+
 })
 
