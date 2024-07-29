@@ -36,39 +36,55 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     test.only("새로운 일정을 생성하고 모든 필드가 정확히 저장되는지 확인한다", async () => {
       render(<App />);
 
+      const newData = {
+        title: "항해 플러스 파티",
+        date: "2024-07-23",
+        startTime: "06:30",
+        endTime: "11:30",
+        category: "기타",
+        description: "파티는 끝나지 않아..",
+        location: "선릉역",
+        notificationTime: "120",
+        repeat: {
+          endDate: "2024-07-29",
+          interval: 10,
+          type: "weekly",
+        },
+      };
+
       //초기 데이터
       // expect(await screen.findByText("팀 회의")).toBeInTheDocument();
       // expect(await screen.findByText("점심 약속")).toBeInTheDocument();
 
       // Name이 label이지만 Input요소 접근이 가능..?
       const titleInput = screen.getByRole("textbox", { name: "제목" });
-      await user.type(titleInput, "항해 플러스 파티");
-      expect(titleInput).toHaveValue("항해 플러스 파티");
+      await user.type(titleInput, newData.title);
+      expect(titleInput).toHaveValue(newData.title);
 
       const dateInput = screen.getByLabelText("날짜");
-      await user.type(dateInput, "2024-07-23");
-      expect(dateInput).toHaveValue("2024-07-23");
+      await user.type(dateInput, newData.date);
+      expect(dateInput).toHaveValue(newData.date);
 
       const startTimeInput = screen.getByLabelText("시작 시간");
-      await user.type(startTimeInput, "06:30");
-      expect(startTimeInput).toHaveValue("06:30");
+      await user.type(startTimeInput, newData.startTime);
+      expect(startTimeInput).toHaveValue(newData.startTime);
 
       const endTimeInput = screen.getByLabelText("종료 시간");
-      await user.type(endTimeInput, "11:30");
-      expect(endTimeInput).toHaveValue("11:30");
+      await user.type(endTimeInput, newData.endTime);
+      expect(endTimeInput).toHaveValue(newData.endTime);
 
       const descriptionInput = screen.getByLabelText("설명");
-      await user.type(descriptionInput, "파티는 끝나지 않아..");
-      expect(descriptionInput).toHaveValue("파티는 끝나지 않아..");
+      await user.type(descriptionInput, newData.description);
+      expect(descriptionInput).toHaveValue(newData.description);
 
       const positionInput = screen.getByLabelText("위치");
-      await user.type(positionInput, "선릉역");
-      expect(positionInput).toHaveValue("선릉역");
+      await user.type(positionInput, newData.location);
+      expect(positionInput).toHaveValue(newData.location);
 
       const categoryInput = screen.getByLabelText("카테고리");
       expect(categoryInput).toHaveValue("");
-      await user.selectOptions(categoryInput, "기타");
-      expect(categoryInput).toHaveValue("기타");
+      await user.selectOptions(categoryInput, newData.category);
+      expect(categoryInput).toHaveValue(newData.category);
 
       const repeatCheckbox = screen.getByRole("checkbox");
       await user.click(repeatCheckbox);
@@ -78,12 +94,12 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const alarmSelectBox = screen.getByLabelText("알림 설정");
       expect(alarmSelectBox).toHaveValue("10");
       await user.selectOptions(alarmSelectBox, "2시간 전");
-      expect(alarmSelectBox).toHaveValue("120");
+      expect(alarmSelectBox).toHaveValue(newData.notificationTime);
 
       const repeatTypeSelectBox = screen.getByLabelText("반복 유형");
       expect(repeatTypeSelectBox).toHaveValue("daily");
       await user.selectOptions(repeatTypeSelectBox, "매주");
-      expect(repeatTypeSelectBox).toHaveValue("weekly");
+      expect(repeatTypeSelectBox).toHaveValue(newData.repeat.type);
 
       // 이건 왜 spinbutton이래..?
       const alarmTermInput = screen.getByRole("spinbutton", {
@@ -101,8 +117,19 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const submitButton = screen.getByTestId("event-submit-button");
       await user.click(submitButton);
 
-      const newEventElement = await screen.findByText("항해 플러스 파티");
-      expect(newEventElement).toBeInTheDocument();
+      const res = await fetch("/api/events");
+      const data = await res.json();
+
+      expect(data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            title: newData.title,
+            date: newData.date,
+            startTime: newData.startTime,
+            endTime: newData.endTime,
+          }),
+        ])
+      );
     });
 
     test.fails(
