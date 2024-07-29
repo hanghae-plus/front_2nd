@@ -620,6 +620,7 @@ function App() {
   return (
     <Box w="full" h="100vh" m="auto" p={5}>
       <Flex gap={6} h="full">
+        {/* form 영역 */}
         <VStack w="400px" spacing={5} align="stretch">
           <Heading>{editingEvent ? "일정 수정" : "일정 추가"}</Heading>
 
@@ -886,6 +887,7 @@ function App() {
         </VStack>
       </Flex>
 
+      {/* 일정 겹침 알람 dialog */}
       <AlertDialog
         isOpen={isOverlapDialogOpen}
         leastDestructiveRef={cancelRef}

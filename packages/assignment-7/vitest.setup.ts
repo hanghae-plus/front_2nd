@@ -1,15 +1,18 @@
 import { beforeAll, afterEach, afterAll } from "vitest";
-import { serviceWorker } from "./mock/worker";
+import { setupServer } from "msw/node";
+import { handlers } from "./mock/handler";
+
+const worker = setupServer(...handlers);
 
 beforeAll(() => {
   console.log("server start");
-  serviceWorker.listen();
+  worker.listen();
 });
 
 afterEach(() => {
-  serviceWorker.resetHandlers();
+  worker.resetHandlers();
 });
 
 afterAll(() => {
-  serviceWorker.close();
+  worker.close();
 });

@@ -33,6 +33,8 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
         "2023-07-30T00:00:00.000Z",
       ]);
     });
+
+    // 경계값에 대해 체크
     test("달이 넘어가는 날짜를 정확히 처리한다.", () => {
       const date = new Date("2023-07-31");
       const weekData = getWeekByISO(date);
@@ -47,6 +49,8 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
         "2023-08-06T00:00:00.000Z",
       ]);
     });
+
+    // 경계값에 대해 체크
     test("연도가 넘어가는 날짜를 정확히 처리한다.", () => {
       const date = new Date("2023-12-31");
       const weekData = getWeekByISO(date);
@@ -68,10 +72,12 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
       expect(formatWeek(new Date("2023-07-24"))).toBe("2023년 7월 4주");
     });
 
+    // 경계값에 대해 체크
     test("주어진 날짜의 주 정보가 현재달과 다음달의 날짜가 포함된다면 현재달을 기준으로 표현한다.", () => {
       expect(formatWeek(new Date("2023-07-31"))).toBe("2023년 7월 5주");
     });
 
+    // 경계값에 대해 체크
     test("주어진 날짜의 주 정보가 다음년도가 넘어가도 현재 달의 주를 기준으로 표현한다.", () => {
       expect(formatWeek(new Date("2023-12-31"))).toBe("2023년 12월 5주");
     });
@@ -80,7 +86,7 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
   describe.only("formatMonth 함수", () => {
     test("주어진 날짜의 월 정보를 올바른 형식으로 반환한다", () => {
       expect(formatMonth(new Date("2023-07-24"))).toBe("2023년 7월");
-      expect(formatMonth(new Date("2024-07-24"))).toBe("2024년 7월");
+      expect(formatMonth(new Date("2024-07-31"))).toBe("2024년 7월");
       expect(formatMonth(new Date("2024-12-24"))).toBe("2024년 12월");
     });
   });

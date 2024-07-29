@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { Event } from "../src/App";
 
 let events: Event[] = [
@@ -93,27 +93,26 @@ let events: Event[] = [
 ];
 
 export const handlers = [
+  // delay를 주니 통과를 못함..
+  // http.all("*", async () => {
+  //   await delay(300);
+  // }),
   http.get("/api/events", async () => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
     return HttpResponse.json(events);
   }),
 
-  http.post("api/events", async ({ request }) => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    const body: Omit<Event, "id"> = request.body as unknown as Event;
+  http.post("/api/events", async ({ request }) => {
+    const body = (await request.json()) as Event;
 
     const newEvent: Event = {
-      id: Date.now(),
       ...body,
     };
     events.push(newEvent);
+
+    return HttpResponse.json(newEvent, { status: 201 });
   }),
 
-  http.put("api/events", async ({ request }) => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
+  http.put("/api/events", async ({ request }) => {
     const url = new URL(request.url);
 
     const id = parseInt(url.searchParams.get("id") as string);
@@ -131,9 +130,7 @@ export const handlers = [
     }
   }),
 
-  http.delete("api/events", async ({ request }) => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
+  http.delete("/api/events", async ({ request }) => {
     const url = new URL(request.url);
     const id = parseInt(url.searchParams.get("id") as string);
 
