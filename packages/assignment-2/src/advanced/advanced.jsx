@@ -1,13 +1,51 @@
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
+import { shallowEquals } from "../basic/basic.js";
+// 캐싱 기능 검증 (클로저 활용)
+export const memo1 = (() => {
+  const cache = new Map(); // 자유 변수
 
-export const memo1 = (fn) => fn();
+  // 즉시실행함수가 반환한 함수는 memo1에 할당
+  return (fn) => {
+    if (!cache.has(fn)) {
+      cache.set(fn, fn());
+    }
+    return cache.get(fn);
+  };
+})();
 
-export const memo2 = (fn) => fn();
+export const memo2 = (() => {
+  const cache = new Map();
 
+  return (fn, ...args) => {
+    const key = `${fn}${args}`;
+
+    if (!cache.has(key)) {
+      cache.set(key, fn());
+    }
+    return cache.get(key);
+  };
+})();
 
 export const useCustomState = (initValue) => {
-  return useState(initValue);
-}
+  const [state, setState] = useState(initValue);
+
+  const memoizedSetState = useCallback(
+    (newValue) => {
+      if (!shallowEquals(state, newValue)) {
+        setState(newValue);
+      }
+    },
+    [initValue],
+  );
+
+  return [state, memoizedSetState];
+};
 
 const textContextDefaultValue = {
   user: null,
@@ -27,36 +65,27 @@ export const TestContextProvider = ({ children }) => {
     <TestContext.Provider value={{ value, setValue }}>
       {children}
     </TestContext.Provider>
-  )
-}
+  );
+};
 
-const useTestContext = () => {
-  return useContext(TestContext);
-}
+const useTestContext = (key) => {
+  const { value, setValue } = useContext(TestContext);
+  const [state, setState] = useState(value[key]);
 
-export const useUser = () => {
-  const { value, setValue } = useTestContext();
+  const memoizedSetValue = useCallback(
+    (newValue) => setValue({ state, newValue }),
+    [value[key]],
+  );
 
-  return [
-    value.user,
-    (user) => setValue({ ...value, user })
-  ];
-}
+  const memoizedValue = useMemo(() => {
+    return [state, setState];
+  }, [value[key], memoizedSetValue]);
 
-export const useCounter = () => {
-  const { value, setValue } = useTestContext();
+  return memoizedValue;
+};
 
-  return [
-    value.count,
-    (count) => setValue({ ...value, count })
-  ];
-}
+export const useUser = () => useTestContext("user");
 
-export const useTodoItems = () => {
-  const { value, setValue } = useTestContext();
+export const useCounter = () => useTestContext("count");
 
-  return [
-    value.todoItems,
-    (todoItems) => setValue({ ...value, todoItems })
-  ];
-}
+export const useTodoItems = () => useTestContext("todoItems");
