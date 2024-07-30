@@ -1,55 +1,44 @@
 import { http, HttpResponse } from "msw";
 import { Event } from "../src/App";
 
-let events: Event[] = [
-  {
-    id: 1,
-    title: "팀 회의",
-    date: "2024-07-20",
-    startTime: "10:00",
-    endTime: "11:00",
-    description: "주간 팀 미팅",
-    location: "회의실 A",
-    category: "업무",
-    repeat: { type: "weekly", interval: 1 },
-    notificationTime: 1,
-  },
-  {
-    id: 2,
-    title: "점심 약속",
-    date: "2024-07-21",
-    startTime: "12:30",
-    endTime: "13:30",
-    description: "동료와 점심 식사",
-    location: "회사 근처 식당",
-    category: "개인",
-    repeat: { type: "none", interval: 0 },
-    notificationTime: 1,
-  },
-  {
-    id: 3,
-    title: "프로젝트 마감",
-    date: "2024-07-25",
-    startTime: "09:00",
-    endTime: "18:00",
-    description: "분기별 프로젝트 마감",
-    location: "사무실",
-    category: "업무",
-    repeat: { type: "none", interval: 0 },
-    notificationTime: 1,
-  },
-  {
-    id: 4,
-    title: "생일 파티",
-    date: "2024-07-28",
-    startTime: "19:00",
-    endTime: "22:00",
-    description: "친구 생일 축하",
-    location: "친구 집",
-    category: "개인",
-    repeat: { type: "yearly", interval: 1 },
-    notificationTime: 1,
-  },
+export let events: Event[] = [
+  // {
+  //   id: 1,
+  //   title: "팀 회의",
+  //   date: "2024-07-20",
+  //   startTime: "10:00",
+  //   endTime: "11:00",
+  //   description: "주간 팀 미팅",
+  //   location: "회의실 A",
+  //   category: "업무",
+  //   repeat: { type: "weekly", interval: 1 },
+  //   notificationTime: 1,
+  // },
+  // {
+  //   id: 2,
+  //   title: "점심 약속",
+  //   date: "2024-07-21",
+  //   startTime: "12:30",
+  //   endTime: "13:30",
+  //   description: "동료와 점심 식사",
+  //   location: "회사 근처 식당",
+  //   category: "개인",
+  //   repeat: { type: "none", interval: 0 },
+  //   notificationTime: 1,
+  // },
+  // {
+  //   id: 3,
+  //   title: "프로젝트 마감",
+  //   date: "2024-07-25",
+  //   startTime: "09:00",
+  //   endTime: "18:00",
+  //   description: "분기별 프로젝트 마감",
+  //   location: "사무실",
+  //   category: "업무",
+  //   repeat: { type: "none", interval: 0 },
+  //   notificationTime: 1,
+  // },
+
   {
     id: 5,
     title: "운동",
@@ -90,6 +79,18 @@ let events: Event[] = [
       };
     })(),
   },
+  {
+    id: 7,
+    title: "생일 파티",
+    date: "2024-08-05",
+    startTime: "19:00",
+    endTime: "22:00",
+    description: "친구 생일 축하",
+    location: "친구 집",
+    category: "개인",
+    repeat: { type: "yearly", interval: 1 },
+    notificationTime: 1,
+  },
 ];
 
 export const handlers = [
@@ -112,13 +113,11 @@ export const handlers = [
     return HttpResponse.json(newEvent, { status: 201 });
   }),
 
-  http.put("/api/events", async ({ request }) => {
-    const url = new URL(request.url);
-
-    const id = parseInt(url.searchParams.get("id") as string);
+  http.put("/api/events/:id", async ({ request, params }) => {
+    const id = parseInt(params.id as string);
     const eventIndex = events.findIndex((event) => event.id === id);
 
-    const body: Omit<Event, "id"> = request.body as unknown as Event;
+    const body = (await request.json()) as Event;
 
     if (eventIndex > -1) {
       events[eventIndex] = { ...events[eventIndex], ...body };
@@ -130,9 +129,8 @@ export const handlers = [
     }
   }),
 
-  http.delete("/api/events", async ({ request }) => {
-    const url = new URL(request.url);
-    const id = parseInt(url.searchParams.get("id") as string);
+  http.delete("/api/events/:id", async ({ params }) => {
+    const id = parseInt(params.id as string);
 
     events = events.filter((event) => event.id !== id);
 

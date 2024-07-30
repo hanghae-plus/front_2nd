@@ -829,6 +829,7 @@ function App() {
                         <BellIcon color="red.500" />
                       )}
                       <Text
+                        data-testid="event-title"
                         fontWeight={
                           notifiedEvents.includes(event.id) ? "bold" : "normal"
                         }

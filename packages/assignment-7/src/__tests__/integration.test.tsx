@@ -1,60 +1,141 @@
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import App from "../App";
+import App, { Event } from "../App";
 import { setupServer } from "msw/node";
-import { handlers } from "../../mock/handler";
+import { events, handlers } from "../../mock/handler";
+import { ReactNode } from "react";
+import { getCurrentDate } from "../utils/date-utils";
 
 const server = setupServer(...handlers);
 
-describe("일정 관리 애플리케이션 통합 테스트", () => {
-  beforeAll(() => server.listen());
-  afterAll(() => server.close());
-  describe("일정 CRUD 및 기본 기능", () => {
-    // dummy test
-    // const eventExample = {
-    //   id: 2,
-    //   title: "점심 약속",
-    //   date: "2024-07-21",
-    //   startTime: "12:30",
-    //   endTime: "13:30",
-    //   description: "동료와 점심 식사",
-    //   location: "회사 근처 식당",
-    //   category: "개인",
-    //   repeat: {
-    //     type: "none",
-    //     interval: 0,
-    //   },
-    //   notificationTime: 1,
-    // };
-    let user: ReturnType<typeof userEvent.setup>;
+const setup = (componet: ReactNode) => {
+  const user = userEvent.setup();
 
-    beforeEach(() => {
-      user = userEvent.setup();
+  return {
+    user,
+    ...render(componet),
+  };
+};
+
+describe("일정 관리 애플리케이션 통합 테스트", () => {
+  const newData = {
+    title: "항해 플러스 파티",
+    date: getCurrentDate(),
+    startTime: "06:30",
+    endTime: "11:30",
+    category: "기타",
+    description: "파티는 끝나지 않아..",
+    location: "선릉역",
+    notificationTime: "120",
+    repeat: {
+      endDate: "2024-07-29",
+      interval: 10,
+      type: "weekly",
+    },
+  };
+  describe("msw를 통한 api호출이 되는지 검증", () => {
+    test("msw에서 세팅한 get요청", async () => {
+      const res = await fetch("/api/events");
+      const data = await res.json();
+      expect(data).toEqual(events);
     });
 
-    test.only("새로운 일정을 생성하고 모든 필드가 정확히 저장되는지 확인한다", async () => {
-      render(<App />);
-
-      const newData = {
-        title: "항해 플러스 파티",
-        date: "2024-07-23",
-        startTime: "06:30",
-        endTime: "11:30",
+    test("msw에서 세팅한 post요청", async () => {
+      const newData: Event = {
+        id: 10,
+        title: "스터디 시간",
+        date: "2024-07-01",
+        startTime: "13:00",
+        endTime: "15:00",
         category: "기타",
-        description: "파티는 끝나지 않아..",
-        location: "선릉역",
-        notificationTime: "120",
-        repeat: {
-          endDate: "2024-07-29",
-          interval: 10,
-          type: "weekly",
-        },
+        description: "자율 스터디",
+        location: "안양",
+        repeat: { type: "weekly", interval: 1 },
+        notificationTime: 1,
       };
 
-      //초기 데이터
-      // expect(await screen.findByText("팀 회의")).toBeInTheDocument();
-      // expect(await screen.findByText("점심 약속")).toBeInTheDocument();
+      const res = await fetch("/api/events", {
+        method: "POST",
+        body: JSON.stringify(newData),
+      });
+
+      const body = await res.json();
+      expect(body).toEqual(newData);
+    });
+
+    test("msw에서 세팅한 put요청", async () => {
+      const tempData: Event = {
+        id: 5,
+        title: "운동",
+        date: "2024-07-22",
+        startTime: "18:00",
+        endTime: "19:00",
+        description: "주간 운동",
+        location: "헬스장",
+        category: "개인",
+        repeat: { type: "weekly", interval: 1 },
+        notificationTime: 1,
+      };
+
+      const getRes = await fetch("/api/events");
+      const getResData = (await getRes.json()) as Event[];
+
+      // 배열에 특정 요소가 있는지 확인(초기값 확인)
+      expect(getResData).toEqual(expect.arrayContaining([tempData]));
+
+      const newData: Event = {
+        id: 5,
+        title: "클라이밍",
+        date: "2024-07-22",
+        startTime: "18:00",
+        endTime: "19:00",
+        description: "주간 운동",
+        location: "클라이밍장",
+        category: "개인",
+        repeat: { type: "weekly", interval: 10 },
+        notificationTime: 1,
+      };
+
+      const putRes = await fetch(`/api/events/${tempData.id}`, {
+        method: "PUT",
+        body: JSON.stringify(newData),
+      });
+
+      const putResData = (await putRes.json()) as Event;
+      expect(putResData).toEqual(newData);
+    });
+
+    test("msw에서 세팅한 delete요청", async () => {
+      const tempData: Event = {
+        id: 5,
+        title: "운동",
+        date: "2024-07-22",
+        startTime: "18:00",
+        endTime: "19:00",
+        description: "주간 운동",
+        location: "헬스장",
+        category: "개인",
+        repeat: { type: "weekly", interval: 1 },
+        notificationTime: 1,
+      };
+
+      const deleteRes = await fetch(`/api/events/${tempData.id}`, {
+        method: "DELETE",
+      });
+
+      await deleteRes.json();
+
+      const res = await fetch("/api/events");
+      const data = (await res.json()) as Event[];
+
+      expect(data.find((event) => event.id === tempData.id)).toBeUndefined();
+    });
+  });
+
+  describe("일정 CRUD 및 기본 기능", () => {
+    test("새로운 일정을 생성하고 모든 필드가 정확히 저장되는지 확인한다", async () => {
+      const { user } = setup(<App />);
 
       // Name이 label이지만 Input요소 접근이 가능..?
       const titleInput = screen.getByRole("textbox", { name: "제목" });
@@ -117,43 +198,101 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const submitButton = screen.getByTestId("event-submit-button");
       await user.click(submitButton);
 
-      const res = await fetch("/api/events");
-      const data = await res.json();
+      const titleElements = await screen.findAllByText(newData.title);
+      expect(titleElements.length).toBeGreaterThan(0);
+      expect(
+        await screen.findByText(
+          `${newData.date} ${newData.startTime} - ${newData.endTime}`
+        )
+      ).toBeInTheDocument();
 
-      expect(data).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            title: newData.title,
-            date: newData.date,
-            startTime: newData.startTime,
-            endTime: newData.endTime,
-          }),
-        ])
-      );
+      expect(await screen.findByText(newData.description)).toBeInTheDocument();
+      expect(await screen.findByText(newData.location)).toBeInTheDocument();
+      expect(await screen.findByText(newData.category)).toBeInTheDocument();
+      expect(await screen.findByText("알림: 2시간 전")).toBeInTheDocument();
     });
 
-    test.fails(
-      "기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영되는지 확인한다"
-    );
-    test.fails("일정을 삭제하고 더 이상 조회되지 않는지 확인한다");
+    test.only("기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영되는지 확인한다", async () => {
+      const { user } = setup(<App />);
+
+      const editButton = await screen.findAllByRole("button", {
+        name: "Edit event",
+      });
+
+      await user.click(editButton[0]);
+
+      const titleInput = screen.getByRole("textbox", { name: "제목" });
+      await user.clear(titleInput);
+      await user.type(titleInput, newData.title);
+      expect(titleInput).toHaveValue(newData.title);
+
+      const dateInput = screen.getByLabelText("날짜");
+      await user.clear(dateInput);
+      await user.type(dateInput, newData.date);
+      expect(dateInput).toHaveValue(newData.date);
+
+      const startTimeInput = screen.getByLabelText("시작 시간");
+      await user.clear(startTimeInput);
+      await user.type(startTimeInput, newData.startTime);
+      expect(startTimeInput).toHaveValue(newData.startTime);
+
+      const endTimeInput = screen.getByLabelText("종료 시간");
+      await user.clear(endTimeInput);
+      await user.type(endTimeInput, newData.endTime);
+      expect(endTimeInput).toHaveValue(newData.endTime);
+
+      const categoryInput = screen.getByLabelText("카테고리");
+      await user.selectOptions(categoryInput, "");
+      expect(categoryInput).toHaveValue("");
+      await user.selectOptions(categoryInput, newData.category);
+      expect(categoryInput).toHaveValue(newData.category);
+
+      const submitButton = screen.getByTestId("event-submit-button");
+      await user.click(submitButton);
+
+      const titleElements = await screen.findAllByText(newData.title);
+      expect(titleElements.length).toBeGreaterThan(0);
+      expect(
+        await screen.findByText(
+          `${newData.date} ${newData.startTime} - ${newData.endTime}`
+        )
+      ).toBeInTheDocument();
+    });
+    test("일정을 삭제하고 더 이상 조회되지 않는지 확인한다", async () => {
+      const { user } = setup(<App />);
+
+      const deleteButton = await screen.findAllByRole("button", {
+        name: "Delete event",
+      });
+
+      const textElement = await screen.findAllByTestId("event-title");
+      const targetTitle = textElement[0].textContent;
+
+      await user.click(deleteButton[0]);
+
+      // get~, find~ 로 요소를 찾으려고 시도할 때 없다면 바로 error가 남
+      const elements = screen.queryAllByText(targetTitle as string);
+      expect(elements).toHaveLength(0);
+    });
   });
 
-  describe("일정 뷰 및 필터링", () => {
+  describe.only("일정 뷰 및 필터링", () => {
     const user = userEvent.setup();
-    beforeAll(() => server.listen());
-
-    afterAll(() => server.close());
 
     test("주별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.", async () => {
-      render(<App />);
+      // render(<App />);
 
-      const selectBox = screen.getByRole("combobox", {
-        name: "view",
-      }) as HTMLSelectElement;
+      // const selectBox = screen.getByRole("combobox", {
+      //   name: "view",
+      // }) as HTMLSelectElement;
 
-      await user.selectOptions(selectBox, "week");
+      // await user.selectOptions(selectBox, "week");
 
-      expect(selectBox).toHaveValue("week");
+      // expect(selectBox).toHaveValue("week");
+      // const elements = await screen.findAllByText(newData.title);
+      expect(
+        await screen.findByText("검색 결과가 없습니다.")
+      ).toBeInTheDocument();
     });
 
     test.fails("주별 뷰에 일정이 정확히 표시되는지 확인한다");

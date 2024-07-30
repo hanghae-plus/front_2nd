@@ -49,4 +49,23 @@ const formatMonth = (date: Date): string => {
   return `${year}년 ${month}월`;
 };
 
-export { getDaysInMonth, getWeekDates, formatWeek, formatMonth };
+// 현재 날짜 'YYYY-MM-DD' 포맷 맞추기
+const getCurrentDate = (): string => {
+  const today = new Date();
+
+  const year = today.getFullYear();
+  const month = (today.getMonth() + 1).toString().padStart(2, "0");
+  const day = today.getDate().toString().padStart(2, "0");
+
+  const dateString = year + "-" + month + "-" + day;
+
+  return dateString;
+};
+
+export {
+  getDaysInMonth,
+  getWeekDates,
+  formatWeek,
+  formatMonth,
+  getCurrentDate,
+};

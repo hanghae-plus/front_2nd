@@ -83,7 +83,7 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
     });
   });
 
-  describe.only("formatMonth 함수", () => {
+  describe("formatMonth 함수", () => {
     test("주어진 날짜의 월 정보를 올바른 형식으로 반환한다", () => {
       expect(formatMonth(new Date("2023-07-24"))).toBe("2023년 7월");
       expect(formatMonth(new Date("2024-07-31"))).toBe("2024년 7월");
