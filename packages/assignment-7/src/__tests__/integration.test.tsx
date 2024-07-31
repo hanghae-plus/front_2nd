@@ -2,6 +2,7 @@ import {
   afterAll,
   afterEach,
   beforeAll,
+  beforeEach,
   describe,
   expect,
   test,
@@ -11,20 +12,32 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import App from '../App';
-import { mockServer } from '../lib/services/mockWorker';
+import { setupServer } from 'msw/node';
+import { events as originalEvents } from '../lib/services/mockData';
 import { getWeekDates } from '../lib/utils/date';
 import { Event } from '../types/types';
+import { createHandlers } from '../lib/services/mockHandlers';
+
+const mockServer = setupServer();
+
+beforeAll(() => {
+  mockServer.listen();
+});
+
+beforeEach(() => {
+  const handlers = createHandlers(originalEvents);
+  mockServer.use(...handlers);
+});
+
+afterEach(() => {
+  mockServer.resetHandlers();
+});
+
+afterAll(() => {
+  mockServer.close();
+});
 
 describe('일정 관리 애플리케이션 통합 테스트', () => {
-  beforeAll(() => {
-    mockServer.listen();
-  });
-  afterEach(() => {
-    mockServer.resetHandlers();
-  });
-  afterAll(() => {
-    mockServer.close();
-  });
   describe('일정 CRUD 및 기본 기능', () => {
     test('새로운 일정을 생성하고 모든 필드가 정확히 저장되는지 확인한다', async () => {
       render(<App />);
@@ -282,7 +295,6 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
       // 일정 생성
       await userEvent.type(screen.getByLabelText(/제목/), 'Test 일정');
-      console.log('일정 입력');
       await userEvent.type(screen.getByLabelText(/날짜/), eventDateString);
       await userEvent.type(screen.getByLabelText(/시작 시간/), eventTimeString);
       await userEvent.type(
@@ -417,11 +429,76 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       repeat: { type: 'weekly', interval: 1 },
       notificationTime: 1,
     };
+    const testEventToCompare: Event = {
+      id: 2,
+      title: '점심 약속',
+      date: '2024-07-21',
+      startTime: '12:30',
+      endTime: '13:30',
+      description: '동료와 점심 식사',
+      location: '회사 근처 식당',
+      category: '개인',
+      repeat: { type: 'none', interval: 0 },
+      notificationTime: 1,
+    };
     test('겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다', async () => {
       render(<App />);
+
+      // 테스트용 일정 추가
+      await userEvent.type(screen.getByLabelText(/제목/), 'Test 일정');
+      await userEvent.type(screen.getByLabelText(/날짜/), testEvent.date);
+      await userEvent.type(
+        screen.getByLabelText(/시작 시간/),
+        testEvent.startTime
+      );
+      await userEvent.type(
+        screen.getByLabelText(/종료 시간/),
+        testEvent.endTime
+      );
+
+      const submitButton = screen.getByTestId('event-submit-button');
+      await userEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('일정 겹침 경고')).toBeInTheDocument();
+      });
     });
-    test(
-      '기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다'
-    );
+    test('기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다', async () => {
+      render(<App />);
+
+      const eventList = screen.getByTestId('event-list');
+      await waitFor(() => {
+        expect(eventList).toHaveTextContent(testEvent.title);
+        expect(eventList).toHaveTextContent(testEventToCompare.title);
+      });
+
+      // 수정할 이벤트 선택 testEvent는 첫번째 이벤트이므로
+      const editButton = screen.getAllByLabelText('Edit event')[0];
+      await userEvent.click(editButton);
+
+      // 충돌이 발생할 날짜, 시간으로 변경
+      await userEvent.clear(screen.getByLabelText(/날짜/));
+      await userEvent.type(
+        screen.getByLabelText(/날짜/),
+        testEventToCompare.date
+      );
+      await userEvent.clear(screen.getByLabelText(/시작 시간/));
+      await userEvent.type(
+        screen.getByLabelText(/시작 시간/),
+        testEventToCompare.startTime
+      );
+      await userEvent.clear(screen.getByLabelText(/종료 시간/));
+      await userEvent.type(
+        screen.getByLabelText(/종료 시간/),
+        testEventToCompare.endTime
+      );
+
+      const submitButton = screen.getByTestId('event-submit-button');
+      await userEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('일정 겹침 경고')).toBeInTheDocument();
+      });
+    });
   });
 });
