@@ -849,6 +849,7 @@ function App() {
             filteredEvents.map((event) => (
               <Box
                 key={event.id}
+                data-testid={`event-${event.id}`}
                 borderWidth={1}
                 borderRadius='lg'
                 p={3}
