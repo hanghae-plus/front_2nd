@@ -11,7 +11,10 @@
   "license": "ISC",
   "private": true,
   "workspaces": [
-    "packages/*",
-    "examples/*"
-  ]
+    "packages/*"
+  ],
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "msw": "^0.49.1"
+  }
 }

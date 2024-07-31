@@ -1,8 +1,8 @@
 function main() {
   var p = [
-    {id: 'p1', n: '상품1', p: 10000 },
-    {id: 'p2', n: '상품2', p: 20000 },
-    {id: 'p3', n: '상품3', p: 30000 }
+    { id: 'p1', n: '상품1', p: 10000 },
+    { id: 'p2', n: '상품2', p: 20000 },
+    { id: 'p3', n: '상품3', p: 30000 },
   ];
 
   var a = document.getElementById('app');
@@ -19,7 +19,8 @@ function main() {
   s.id = 'product-select';
   ab.id = 'add-to-cart';
   w.className = 'bg-gray-100 p-8';
-  b.className = 'max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8';
+  b.className =
+    'max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8';
   h.className = 'text-2xl font-bold mb-4';
   tt.className = 'text-xl font-bold my-4';
   s.className = 'border rounded p-2 mr-2';
@@ -42,7 +43,6 @@ function main() {
   w.appendChild(b);
   a.appendChild(w);
 
-
   function uc() {
     var t = 0;
     var tq = 0;
@@ -57,7 +57,9 @@ function main() {
           break;
         }
       }
-      var quantity = parseInt(items[m].querySelector('span').textContent.split('x ')[1]);
+      var quantity = parseInt(
+        items[m].querySelector('span').textContent.split('x ')[1],
+      );
       var itemTotal = item.p * quantity;
       var disc = 0;
 
@@ -94,7 +96,7 @@ function main() {
     }
   }
 
-  ab.onclick = function() {
+  ab.onclick = function () {
     var v = s.value;
     var i;
     for (var k = 0; k < p.length; k++) {
@@ -106,7 +108,8 @@ function main() {
     if (i) {
       var e = document.getElementById(i.id);
       if (e) {
-        var q = parseInt(e.querySelector('span').textContent.split('x ')[1]) + 1;
+        var q =
+          parseInt(e.querySelector('span').textContent.split('x ')[1]) + 1;
         e.querySelector('span').textContent = i.n + ' - ' + i.p + '원 x ' + q;
       } else {
         var d = document.createElement('div');
@@ -118,11 +121,13 @@ function main() {
         d.id = i.id;
         d.className = 'flex justify-between items-center mb-2';
         sp.textContent = i.n + ' - ' + i.p + '원 x 1';
-        mb.className = 'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1';
+        mb.className =
+          'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1';
         mb.textContent = '-';
         mb.dataset.productId = i.id;
         mb.dataset.change = '-1';
-        pb.className = 'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1';
+        pb.className =
+          'quantity-change bg-blue-500 text-white px-2 py-1 rounded mr-1';
         pb.textContent = '+';
         pb.dataset.productId = i.id;
         pb.dataset.change = '1';
@@ -140,16 +145,24 @@ function main() {
     }
   };
 
-  ct.onclick = function(event) {
+  ct.onclick = function (event) {
     var target = event.target;
-    if (target.classList.contains('quantity-change') || target.classList.contains('remove-item')) {
+    if (
+      target.classList.contains('quantity-change') ||
+      target.classList.contains('remove-item')
+    ) {
       var productId = target.dataset.productId;
       var item = document.getElementById(productId);
       if (target.classList.contains('quantity-change')) {
         var change = parseInt(target.dataset.change);
-        var quantity = parseInt(item.querySelector('span').textContent.split('x ')[1]) + change;
+        var quantity =
+          parseInt(item.querySelector('span').textContent.split('x ')[1]) +
+          change;
         if (quantity > 0) {
-          item.querySelector('span').textContent = item.querySelector('span').textContent.split('x ')[0] + 'x ' + quantity;
+          item.querySelector('span').textContent =
+            item.querySelector('span').textContent.split('x ')[0] +
+            'x ' +
+            quantity;
         } else {
           item.remove();
         }
