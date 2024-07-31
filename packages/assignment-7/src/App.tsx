@@ -643,13 +643,18 @@ function App() {
 
           <FormControl>
             <FormLabel>제목</FormLabel>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input
+              name='title'
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </FormControl>
 
           <FormControl>
             <FormLabel>날짜</FormLabel>
             <Input
               type='date'
+              name='date'
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
@@ -665,6 +670,7 @@ function App() {
               >
                 <Input
                   type='time'
+                  name='startTime'
                   value={startTime}
                   onChange={handleStartTimeChange}
                   onBlur={() => validateTime(startTime, endTime)}
@@ -681,6 +687,7 @@ function App() {
               >
                 <Input
                   type='time'
+                  name='endTime'
                   value={endTime}
                   onChange={handleEndTimeChange}
                   onBlur={() => validateTime(startTime, endTime)}
@@ -693,6 +700,7 @@ function App() {
           <FormControl>
             <FormLabel>설명</FormLabel>
             <Input
+              name='description'
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -701,6 +709,7 @@ function App() {
           <FormControl>
             <FormLabel>위치</FormLabel>
             <Input
+              name='location'
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
@@ -709,6 +718,7 @@ function App() {
           <FormControl>
             <FormLabel>카테고리</FormLabel>
             <Select
+              name='category'
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
@@ -724,6 +734,7 @@ function App() {
           <FormControl>
             <FormLabel>반복 설정</FormLabel>
             <Checkbox
+              name='repeat'
               isChecked={isRepeating}
               onChange={(e) => setIsRepeating(e.target.checked)}
             >
@@ -734,6 +745,7 @@ function App() {
           <FormControl>
             <FormLabel>알림 설정</FormLabel>
             <Select
+              name='notificationTime'
               value={notificationTime}
               onChange={(e) => setNotificationTime(Number(e.target.value))}
             >
@@ -750,6 +762,7 @@ function App() {
               <FormControl>
                 <FormLabel>반복 유형</FormLabel>
                 <Select
+                  name='repeatType'
                   value={repeatType}
                   onChange={(e) => setRepeatType(e.target.value as RepeatType)}
                 >
@@ -764,6 +777,7 @@ function App() {
                   <FormLabel>반복 간격</FormLabel>
                   <Input
                     type='number'
+                    name='repeatInterval'
                     value={repeatInterval}
                     onChange={(e) => setRepeatInterval(Number(e.target.value))}
                     min={1}
@@ -773,6 +787,7 @@ function App() {
                   <FormLabel>반복 종료일</FormLabel>
                   <Input
                     type='date'
+                    name='repeatEndDate'
                     value={repeatEndDate}
                     onChange={(e) => setRepeatEndDate(e.target.value)}
                   />
