@@ -1,4 +1,6 @@
-export const events: EventType[] = [
+import { Event } from '../../types/types';
+
+export const events: Event[] = [
   {
     id: 1,
     title: '팀 회의',
@@ -73,25 +75,4 @@ export const events: EventType[] = [
   },
 ];
 
-type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
-
-type RepeatInfo = {
-  type: RepeatType;
-  interval: number;
-  endDate?: string;
-};
-
-export type EventType = {
-  id: number;
-  title: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  description?: string;
-  location?: string;
-  category?: string;
-  repeat: RepeatInfo;
-  notificationTime: number;
-};
-
-export type NewEventType = Omit<EventType, 'id'>;
+export type NewEventType = Omit<Event, 'id'>;

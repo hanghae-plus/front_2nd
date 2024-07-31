@@ -32,3 +32,15 @@ export const isDateInRange = (
   }
   return true;
 };
+
+export const formatDateString = (yyyymmdd: string) => {
+  if (!/^d{8}$/.test(yyyymmdd)) {
+    throw new Error('입력값은 8자리 날짜여야 합니다.');
+  }
+
+  const year = yyyymmdd.substring(0, 4);
+  const month = yyyymmdd.substring(4, 6);
+  const day = yyyymmdd.substring(6, 8);
+
+  return `${year}-${month}-${day}`;
+};

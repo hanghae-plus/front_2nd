@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
-import { events, type EventType, type NewEventType } from './mockData';
+import { events, type NewEventType } from './mockData';
+import type { Event } from '../../types/types';
 
 export const handlers = [
   // GET /api/events
@@ -10,7 +11,7 @@ export const handlers = [
   // POST /api/events
   http.post('/api/events', async ({ request }) => {
     const body = (await request.json()) as NewEventType;
-    const newEvent: EventType = {
+    const newEvent: Event = {
       id: Date.now(),
       ...body,
     };
@@ -21,7 +22,7 @@ export const handlers = [
   // PUT /api/events/:id
   http.put('/api/events/:id', async ({ params, request }) => {
     const { id } = params;
-    const body = (await request.json()) as Partial<EventType>;
+    const body = (await request.json()) as Partial<Event>;
     const eventIndex = events.findIndex((event) => event.id === Number(id));
     if (eventIndex > -1) {
       events[eventIndex] = { ...events[eventIndex], ...body };
