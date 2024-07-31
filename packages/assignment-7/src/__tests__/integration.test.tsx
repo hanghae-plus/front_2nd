@@ -13,6 +13,7 @@ import { userEvent } from '@testing-library/user-event';
 import App from '../App';
 import { mockServer } from '../lib/services/mockWorker';
 import { getWeekDates } from '../lib/utils/date';
+import { Event } from '../types/types';
 
 describe('일정 관리 애플리케이션 통합 테스트', () => {
   beforeAll(() => {
@@ -317,18 +318,108 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
   });
 
   describe('검색 기능', () => {
-    test('제목으로 일정을 검색하고 정확한 결과가 반환되는지 확인한다');
-    test('제목으로 일정을 검색하고 정확한 결과가 반환되는지 확인한다');
-    test('검색어를 지우면 모든 일정이 다시 표시되어야 한다');
+    test('제목으로 일정을 검색하고 정확한 결과가 반환되는지 확인한다', async () => {
+      render(<App />);
+
+      // 목데이터에 존재하는 찾아볼 일정 '점심 약속'
+      const query = '점심 약속';
+      const eventList = screen.getByTestId('event-list');
+
+      const searchInput = screen.getByLabelText(/일정 검색/);
+      await userEvent.type(searchInput, query);
+
+      await waitFor(() => {
+        expect(eventList).toHaveTextContent(query);
+        expect(eventList).not.toHaveTextContent('검색 결과가 없습니다.');
+      });
+    });
+    test('검색어를 지우면 모든 일정이 다시 표시되어야 한다', async () => {
+      render(<App />);
+
+      const eventList = screen.getByTestId('event-list');
+      // 검색어 없는 이벤트리스트 스냅샷
+      const eventListSnapshot = eventList.innerHTML;
+      const searchInput = screen.getByLabelText(/일정 검색/);
+
+      // 검색어 입력
+      await userEvent.type(searchInput, '점심 약속');
+
+      await waitFor(() => {
+        expect(eventList).toHaveTextContent('점심 약속');
+        expect(eventList).not.toHaveTextContent('검색 결과가 없습니다.');
+      });
+
+      await userEvent.clear(searchInput);
+      await waitFor(() => {
+        expect(eventList).matchSnapshot(eventListSnapshot);
+      });
+    });
   });
 
   describe('공휴일 표시', () => {
-    test('달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다');
-    test('달력에 5월 5일(어린이날)이 공휴일로 표시되는지 확인한다');
+    test('달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다', async () => {
+      render(<App />);
+
+      const viewSelect = screen.getByLabelText('view');
+      await userEvent.selectOptions(viewSelect, 'Month');
+
+      const monthView = screen.getByTestId('month-view');
+      const prevMonthButton = screen.getByLabelText('Previous');
+
+      let monthInfo = monthView.querySelector('h2')?.textContent as string;
+
+      while (!monthInfo.includes('1월')) {
+        await userEvent.click(prevMonthButton);
+        monthInfo = monthView.querySelector('h2')?.textContent as string;
+      }
+
+      const dayCells = monthView.querySelectorAll('td');
+      const newYearDay = Array.from(dayCells).find((cell) =>
+        cell.textContent?.includes('1')
+      );
+      expect(newYearDay).toHaveTextContent('신정');
+    });
+    test('달력에 5월 5일(어린이날)이 공휴일로 표시되는지 확인한다', async () => {
+      render(<App />);
+
+      const viewSelect = screen.getByLabelText('view');
+      await userEvent.selectOptions(viewSelect, 'Month');
+
+      const monthView = screen.getByTestId('month-view');
+      const prevMonthButton = screen.getByLabelText('Previous');
+
+      let monthInfo = monthView.querySelector('h2')?.textContent as string;
+
+      while (!monthInfo.includes('5월')) {
+        await userEvent.click(prevMonthButton);
+        monthInfo = monthView.querySelector('h2')?.textContent as string;
+      }
+
+      const dayCells = monthView.querySelectorAll('td');
+      const childrenDay = Array.from(dayCells).find((cell) =>
+        cell.textContent?.includes('5')
+      );
+      expect(childrenDay).toHaveTextContent('어린이날');
+    });
   });
 
   describe('일정 충돌 감지', () => {
-    test('겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다');
+    // 테스트용 일정 (이미 존재하는 일정)
+    const testEvent: Event = {
+      id: 1,
+      title: '팀 회의',
+      date: '2024-07-20',
+      startTime: '10:00',
+      endTime: '11:00',
+      description: '주간 팀 미팅',
+      location: '회의실 A',
+      category: '업무',
+      repeat: { type: 'weekly', interval: 1 },
+      notificationTime: 1,
+    };
+    test('겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다', async () => {
+      render(<App />);
+    });
     test(
       '기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다'
     );
