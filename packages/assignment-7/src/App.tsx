@@ -439,6 +439,7 @@ function App() {
               {weekDates.map((date) => (
                 <Td
                   key={date.toISOString()}
+                  data-testid={`week-date-${date.toISOString().split('T')[0]}`}
                   height="100px"
                   verticalAlign="top"
                   width="14.28%"
@@ -797,6 +798,7 @@ function App() {
             filteredEvents.map((event) => (
               <Box
                 key={event.id}
+                data-testid={`event-item-${event.id}`}
                 borderWidth={1}
                 borderRadius="lg"
                 p={3}
@@ -817,6 +819,7 @@ function App() {
                             ? 'red.500'
                             : 'inherit'
                         }
+                        as="h3"
                       >
                         {event.title}
                       </Text>
