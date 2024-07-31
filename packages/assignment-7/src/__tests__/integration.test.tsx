@@ -1,13 +1,10 @@
-import { describe, expect, test } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, expect, test, vi } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App, { Event } from "../App";
-import { setupServer } from "msw/node";
-import { events, handlers } from "../../mock/handler";
+import { events } from "../../mock/handler";
 import { ReactNode } from "react";
 import { getCurrentDate } from "../utils/date-utils";
-
-const server = setupServer(...handlers);
 
 const setup = (componet: ReactNode) => {
   const user = userEvent.setup();
@@ -135,6 +132,9 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
   describe("일정 CRUD 및 기본 기능", () => {
     test("새로운 일정을 생성하고 모든 필드가 정확히 저장되는지 확인한다", async () => {
+      const date = new Date("2024-07-01");
+
+      vi.setSystemTime(date);
       const { user } = setup(<App />);
 
       // Name이 label이지만 Input요소 접근이 가능..?
@@ -212,7 +212,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       expect(await screen.findByText("알림: 2시간 전")).toBeInTheDocument();
     });
 
-    test.only("기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영되는지 확인한다", async () => {
+    test("기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영되는지 확인한다", async () => {
       const { user } = setup(<App />);
 
       const editButton = await screen.findAllByRole("button", {
@@ -277,27 +277,57 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
   });
 
   describe.only("일정 뷰 및 필터링", () => {
-    const user = userEvent.setup();
-
     test("주별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.", async () => {
-      // render(<App />);
+      const date = new Date("2024-07-01");
 
-      // const selectBox = screen.getByRole("combobox", {
-      //   name: "view",
-      // }) as HTMLSelectElement;
+      vi.setSystemTime(date);
+      const { user } = setup(<App />);
 
-      // await user.selectOptions(selectBox, "week");
+      // 주별 뷰로 전환
+      const viewSelect = screen.getByLabelText("view");
+      await user.selectOptions(viewSelect, "week");
 
-      // expect(selectBox).toHaveValue("week");
-      // const elements = await screen.findAllByText(newData.title);
       expect(
         await screen.findByText("검색 결과가 없습니다.")
       ).toBeInTheDocument();
     });
 
-    test.fails("주별 뷰에 일정이 정확히 표시되는지 확인한다");
-    test.fails("월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.");
-    test.fails("월별 뷰에 일정이 정확히 표시되는지 확인한다");
+    test("주별 뷰에 일정이 정확히 표시되는지 확인한다", async () => {
+      const date = new Date("2024-07-30");
+      vi.setSystemTime(date);
+      const { user } = setup(<App />);
+
+      // 주별 뷰로 전환
+      const viewSelect = screen.getByLabelText("view");
+      await user.selectOptions(viewSelect, "week");
+
+      const elements = screen.queryAllByText("검색 결과가 없습니다.");
+
+      expect(elements).toHaveLength(0);
+    });
+    test("월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.", async () => {
+      const date = new Date("2024-06-01");
+      vi.setSystemTime(date);
+      const { user } = setup(<App />);
+
+      const viewSelect = screen.getByLabelText("view");
+      await user.selectOptions(viewSelect, "month");
+
+      expect(
+        await screen.findByText("검색 결과가 없습니다.")
+      ).toBeInTheDocument();
+    });
+    test("월별 뷰에 일정이 정확히 표시되는지 확인한다", async () => {
+      vi.setSystemTime(new Date("2024-07-24"));
+      const { user } = setup(<App />);
+
+      // 초기 화면 불러올 때 Month 세팅인데..?
+      const viewSelect = screen.getByLabelText("view");
+      await user.selectOptions(viewSelect, "month");
+
+      const elements = screen.queryAllByText("검색 결과가 없습니다.");
+      expect(elements).toHaveLength(0);
+    });
   });
 
   describe("알림 기능", () => {

@@ -2,43 +2,6 @@ import { http, HttpResponse } from "msw";
 import { Event } from "../src/App";
 
 export let events: Event[] = [
-  // {
-  //   id: 1,
-  //   title: "팀 회의",
-  //   date: "2024-07-20",
-  //   startTime: "10:00",
-  //   endTime: "11:00",
-  //   description: "주간 팀 미팅",
-  //   location: "회의실 A",
-  //   category: "업무",
-  //   repeat: { type: "weekly", interval: 1 },
-  //   notificationTime: 1,
-  // },
-  // {
-  //   id: 2,
-  //   title: "점심 약속",
-  //   date: "2024-07-21",
-  //   startTime: "12:30",
-  //   endTime: "13:30",
-  //   description: "동료와 점심 식사",
-  //   location: "회사 근처 식당",
-  //   category: "개인",
-  //   repeat: { type: "none", interval: 0 },
-  //   notificationTime: 1,
-  // },
-  // {
-  //   id: 3,
-  //   title: "프로젝트 마감",
-  //   date: "2024-07-25",
-  //   startTime: "09:00",
-  //   endTime: "18:00",
-  //   description: "분기별 프로젝트 마감",
-  //   location: "사무실",
-  //   category: "업무",
-  //   repeat: { type: "none", interval: 0 },
-  //   notificationTime: 1,
-  // },
-
   {
     id: 5,
     title: "운동",
