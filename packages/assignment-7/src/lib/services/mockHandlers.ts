@@ -3,7 +3,7 @@ import { type NewEventType } from './mockData';
 import type { Event } from '../../types/types';
 
 export const createHandlers = (initialEvents: Event[]) => {
-  let events: Event[] = [...initialEvents];
+  const events: Event[] = [...initialEvents];
 
   return [
     // GET /api/events
