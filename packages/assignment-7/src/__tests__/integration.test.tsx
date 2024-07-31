@@ -14,7 +14,7 @@ const setup = (component: ReactNode) => {
 
 describe('일정 관리 애플리케이션 통합 테스트', () => {
   describe('일정 CRUD 및 기본 기능', () => {
-    test('초기 일정 목록이 올바르게 렌더링 되어 검색 목록에 노출된다.', async () => {
+    test('초기 일정 목록이 올바르게 렌더링 되어 목록에 노출된다.', async () => {
       // 테스트를 위한 환경 (렌더링)
       setup(<App />);
 
@@ -34,7 +34,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       expect(eventListElement).toHaveTextContent('주간 팀 미팅');
     });
 
-    test('새로운 일정을 생성하면 검색 목록에 추가된다.', async () => {
+    test('새로운 일정을 생성하면 목록에 추가된다.', async () => {
       // 테스트를 위한 환경 (렌더링)
       const { user } = setup(<App />);
 
@@ -63,9 +63,14 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       });
     });
 
-    test('기존 일정을 수정하면 수정된 일정이 검색 목록에 노출된다.', async () => {
+    test('기존 일정을 수정하면 수정된 일정이 목록에 노출된다.', async () => {
       // 테스트를 위한 환경 (렌더링)
       const { user } = setup(<App />);
+
+      // 기존 일정 로드 대기
+      await waitFor(() => {
+        expect(screen.getByTestId('event-list')).toBeInTheDocument();
+      });
 
       // id가 1인 일정의 수정 버튼 찾기
       const eventList = await screen.findByTestId('event-list');
@@ -104,6 +109,32 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
         expect(updatedEventBox).toHaveTextContent(
           '주간 팀 미팅 // 이번 주만 일정 변경'
         );
+      });
+    });
+
+    test('기존 일정을 삭제하면 해당 일정이 목록에서 사라진다', async () => {
+      // 테스트를 위한 환경 (렌더링)
+      const { user } = setup(<App />);
+
+      // 기존 일정 로드 대기
+      await waitFor(() => {
+        expect(screen.getByTestId('event-list')).toBeInTheDocument();
+      });
+
+      // id가 2인 일정 찾기
+      const eventList = screen.getByTestId('event-list');
+      const targetEventBox = within(eventList).getByTestId('event-2');
+      expect(targetEventBox).toBeInTheDocument();
+
+      // 해당 항목의 삭제 버튼 찾아 클릭
+      const deleteButton =
+        within(targetEventBox).getByLabelText('Delete event');
+      await user.click(deleteButton);
+
+      // event-list 내에 id가 2인 항목이 없는지 확인
+      await waitFor(() => {
+        const deletedEvent = within(eventList).queryByTestId('event-2');
+        expect(deletedEvent).not.toBeInTheDocument();
       });
     });
   });
