@@ -276,7 +276,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
   });
 
-  describe.only("일정 뷰 및 필터링", () => {
+  describe("일정 뷰 및 필터링", () => {
     test("주별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.", async () => {
       const date = new Date("2024-07-01");
 
@@ -340,9 +340,19 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     test.fails("검색어를 지우면 모든 일정이 다시 표시되어야 한다");
   });
 
-  describe("공휴일 표시", () => {
-    test.fails("달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다");
-    test.fails("달력에 5월 5일(어린이날)이 공휴일로 표시되는지 확인한다");
+  describe.only("공휴일 표시", () => {
+    test("달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다", async () => {
+      vi.setSystemTime(new Date("2024-01-01"));
+      setup(<App />);
+
+      expect(await screen.findByText("신정")).toBeInTheDocument();
+    });
+    test("달력에 5월 5일(어린이날)이 공휴일로 표시되는지 확인한다", async () => {
+      vi.setSystemTime(new Date("2024-05-05"));
+      setup(<App />);
+
+      expect(await screen.findByText("어린이날")).toBeInTheDocument();
+    });
   });
 
   describe("일정 충돌 감지", () => {
