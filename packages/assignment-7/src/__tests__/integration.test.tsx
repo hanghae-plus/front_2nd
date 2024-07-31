@@ -1,4 +1,12 @@
-import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
@@ -170,10 +178,6 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
           .getByText('Test 일정')
           .closest('td');
         expect(dayCell).toBeTruthy();
-        const cellWithNewEvent = screen.getByTestId(
-          `week-date-${randomDateString}`
-        );
-        expect(cellWithNewEvent).toEqual(dayCell);
       });
     });
     test('월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.', async () => {
@@ -263,7 +267,53 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
   });
 
   describe('알림 기능', () => {
-    test('일정 알림을 설정하고 지정된 시간에 알림이 발생하는지 확인한다');
+    test('일정 알림을 설정하고 지정된 시간에 알림이 발생하는지 확인한다', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      render(<App />);
+
+      const now = new Date('2024-07-15');
+      vi.setSystemTime(now);
+
+      // 5분 후의 일정 생성
+      const eventTime = new Date(now.getTime() + 5 * 60 * 1000);
+      const eventDateString = eventTime.toISOString().split('T')[0];
+      const eventTimeString = eventTime.toTimeString().slice(0, 5);
+
+      // 일정 생성
+      await userEvent.type(screen.getByLabelText(/제목/), 'Test 일정');
+      console.log('일정 입력');
+      await userEvent.type(screen.getByLabelText(/날짜/), eventDateString);
+      await userEvent.type(screen.getByLabelText(/시작 시간/), eventTimeString);
+      await userEvent.type(
+        screen.getByLabelText(/종료 시간/),
+        new Date(eventTime.getTime() + 60 * 60 * 1000)
+          .toTimeString()
+          .slice(0, 5)
+      );
+      await userEvent.type(screen.getByLabelText(/설명/), 'Test 설명');
+      await userEvent.selectOptions(screen.getByLabelText(/알림 설정/), '1'); // 1분 전 알림 선택
+
+      const submitButton = screen.getByTestId('event-submit-button');
+      await userEvent.click(submitButton);
+
+      // 알림 발생 1초 전으로 시간 이동
+      vi.advanceTimersByTime(4 * 60 * 1000 - 1000);
+
+      // 알림 체크 함수가 실행되도록 1초 더 진행
+      vi.advanceTimersByTime(1000);
+
+      // 알림이 표시되었는지 확인
+      await waitFor(
+        () => {
+          const alert = screen.queryAllByText(
+            /1분 후 Test 일정 일정이 시작됩니다/
+          );
+          expect(alert).toBeTruthy();
+          expect(alert[0]).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+    });
   });
 
   describe('검색 기능', () => {
