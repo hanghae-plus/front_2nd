@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { Event } from "../src/App";
 
-export let events: Event[] = [
+export const DUMMY_DATA: Event[] = [
   {
     id: 5,
     title: "운동",
@@ -55,6 +55,12 @@ export let events: Event[] = [
     notificationTime: 1,
   },
 ];
+
+let events = [...DUMMY_DATA];
+
+export const initializeHandler = () => {
+  events = [...DUMMY_DATA];
+};
 
 export const handlers = [
   // delay를 주니 통과를 못함..

@@ -1,10 +1,10 @@
 import { describe, expect, test, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import App, { Event } from "../App";
-import { events } from "../../mock/handler";
+import App from "../App";
 import { ReactNode } from "react";
 import { getCurrentDate } from "../utils/date-utils";
+import { DUMMY_DATA, events } from "../../mock/handler";
 
 const setup = (componet: ReactNode) => {
   const user = userEvent.setup();
@@ -35,7 +35,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     test("msw에서 세팅한 get요청", async () => {
       const res = await fetch("/api/events");
       const data = await res.json();
-      expect(data).toEqual(events);
+      expect(data).toEqual(DUMMY_DATA);
     });
 
     test("msw에서 세팅한 post요청", async () => {
@@ -278,14 +278,14 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
   describe("일정 뷰 및 필터링", () => {
     test("주별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.", async () => {
-      const date = new Date("2024-07-01");
-
+      const date = new Date("2024-07-03");
       vi.setSystemTime(date);
       const { user } = setup(<App />);
 
       // 주별 뷰로 전환
       const viewSelect = screen.getByLabelText("view");
       await user.selectOptions(viewSelect, "week");
+      expect(viewSelect.value).toBe("week");
 
       expect(
         await screen.findByText("검색 결과가 없습니다.")
@@ -331,16 +331,84 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
   });
 
   describe("알림 기능", () => {
-    test.fails("일정 알림을 설정하고 지정된 시간에 알림이 발생하는지 확인한다");
+    test("일정 알림을 설정하고 지정된 시간에 알림이 발생하는지 확인한다", async () => {
+      const date = new Date("2024-07-22T17:59:15");
+      vi.setSystemTime(date);
+
+      const { user } = setup(<App />);
+
+      // 주별 뷰로 전환
+      const viewSelect = screen.getByLabelText("view");
+      await user.selectOptions(viewSelect, "month");
+      expect(viewSelect.value).toBe("month");
+
+      expect(
+        await screen.findByText("1분 후 운동 일정이 시작됩니다.")
+      ).toBeInTheDocument();
+    });
   });
 
   describe("검색 기능", () => {
-    test.fails("제목으로 일정을 검색하고 정확한 결과가 반환되는지 확인한다");
-    test.fails("제목으로 일정을 검색하고 정확한 결과가 반환되는지 확인한다");
-    test.fails("검색어를 지우면 모든 일정이 다시 표시되어야 한다");
+    test("제목으로 일정을 검색하고 정확한 결과가 반환되는지 확인한다", async () => {
+      const date = new Date("2024-07-24");
+
+      vi.setSystemTime(date);
+      const { user } = setup(<App />);
+
+      // 주별 뷰로 전환
+      const viewSelect = screen.getByLabelText("view");
+      await user.selectOptions(viewSelect, "month");
+      expect(viewSelect.value).toBe("month");
+
+      const searchInput = screen.getByRole("textbox", {
+        name: "일정 검색",
+      });
+
+      await user.clear(searchInput);
+      await user.type(searchInput, "운동");
+      expect(searchInput.value).toBe("운동");
+
+      const eventTitleElements = screen.getAllByTestId("event-title");
+
+      const exerciseEvent = eventTitleElements.find((element) =>
+        within(element).getByText("운동")
+      );
+
+      expect(exerciseEvent?.textContent).toBe("운동");
+    });
+    test("검색어를 지우면 모든 일정이 다시 표시되어야 한다", async () => {
+      const date = new Date("2024-07-01");
+
+      vi.setSystemTime(date);
+      const { user } = setup(<App />);
+
+      const searchInput = screen.getByRole("textbox", {
+        name: "일정 검색",
+      });
+
+      await user.clear(searchInput);
+      await user.type(searchInput, "운동");
+      expect(searchInput.value).toBe("운동");
+
+      const eventTitleElements = screen.getAllByTestId("event-title");
+
+      const exerciseEvent = eventTitleElements.find((element) =>
+        within(element).getByText("운동")
+      );
+
+      expect(exerciseEvent?.textContent).toBe("운동");
+      await user.clear(searchInput);
+
+      const originEventTitleElements = screen.getAllByTestId("event-title");
+      const [excersizeTitleElement, alarmTestTitleElement] =
+        originEventTitleElements;
+
+      expect(excersizeTitleElement.textContent).toBe("운동");
+      expect(alarmTestTitleElement.textContent).toBe("알림 테스트");
+    });
   });
 
-  describe.only("공휴일 표시", () => {
+  describe("공휴일 표시", () => {
     test("달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다", async () => {
       vi.setSystemTime(new Date("2024-01-01"));
       setup(<App />);
@@ -355,10 +423,10 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
   });
 
-  describe("일정 충돌 감지", () => {
-    test.fails("겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다");
-    test.fails(
-      "기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다"
-    );
-  });
+  // describe("일정 충돌 감지", () => {
+  // test.fails("겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다");
+  // test.fails(
+  //   "기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다"
+  // );
+  // });
 });
