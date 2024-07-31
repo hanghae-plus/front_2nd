@@ -1,9 +1,10 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import App from '../App';
 import { mockServer } from '../lib/services/mockWorker';
+import { getWeekDates } from '../lib/utils/date';
 
 describe('일정 관리 애플리케이션 통합 테스트', () => {
   beforeAll(() => {
@@ -73,14 +74,192 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
         expect(eventList).toHaveTextContent('개인');
       });
     });
-    test('일정을 삭제하고 더 이상 조회되지 않는지 확인한다');
+    test('일정을 삭제하고 더 이상 조회되지 않는지 확인한다', async () => {
+      render(<App />);
+
+      const eventItems = await screen.findAllByTestId(/^event-item-/);
+      // 삭제할 이벤트가 없으면 테스트를 종료합니다.
+      if (eventItems.length === 0) {
+        return;
+      }
+
+      const randomIndex = Math.floor(Math.random() * eventItems.length);
+      const eventToDelete = eventItems[randomIndex];
+      const eventId = eventToDelete.getAttribute('data-testid') as string;
+
+      const eventTitle = eventToDelete.querySelector('h3')
+        ?.textContent as string;
+
+      const deleteButton = within(eventToDelete).getByLabelText('Delete event');
+      await userEvent.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId(eventId)).not.toBeInTheDocument();
+        expect(screen.queryByText(eventTitle)).not.toBeInTheDocument();
+      });
+    });
   });
 
   describe('일정 뷰 및 필터링', () => {
-    test('주별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.');
-    test('주별 뷰에 일정이 정확히 표시되는지 확인한다');
-    test('월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.');
-    test('월별 뷰에 일정이 정확히 표시되는지 확인한다');
+    test('주별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.', async () => {
+      render(<App />);
+
+      const viewSelect = screen.getByLabelText('view');
+      await userEvent.selectOptions(viewSelect, 'Week');
+
+      const nextWeekButton = screen.getByLabelText('Next');
+      let hasEvent = true;
+
+      while (hasEvent) {
+        await userEvent.click(nextWeekButton);
+
+        const weekViewTable = screen
+          .getByTestId('week-view')
+          .querySelector('table');
+        const dayTds = weekViewTable?.querySelectorAll('td');
+        hasEvent = Array.from(dayTds ?? []).some((td) =>
+          td.querySelector('div')
+        );
+      }
+
+      // 주별 뷰에 이젠 이벤트가 없습니다
+      const eventList = screen.getByTestId('event-list');
+      expect(eventList).toHaveTextContent('검색 결과가 없습니다.');
+    });
+    test('주별 뷰에 일정이 정확히 표시되는지 확인한다', async () => {
+      render(<App />);
+
+      const viewSelect = screen.getByLabelText('view');
+      await userEvent.selectOptions(viewSelect, 'Week');
+
+      const weekView = screen.getByTestId('week-view');
+      const weekInfo = weekView.querySelector('h2')?.textContent as string;
+      expect(weekInfo).toBeTruthy();
+
+      const match = weekInfo.match(/(\d{4})년\s+(\d{1,2})월\s+(\d)주/);
+      expect(match).toBeTruthy();
+      const [_, year, month] = match as RegExpMatchArray;
+
+      const firstDay = (
+        weekView.querySelector('td')?.textContent as string
+      ).match(/\d+/)?.[0];
+      const firstDate = new Date(`${year}-${month}-${firstDay}`);
+      const weekDates = getWeekDates(firstDate);
+      // weekDates.length는 항상 7
+      const randomDateIndex = Math.floor(Math.random() * weekDates.length);
+      const randomDate = weekDates[randomDateIndex];
+      const randomDateString = randomDate.toISOString().split('T')[0];
+
+      // Create new Event
+      await userEvent.type(screen.getByLabelText(/제목/), 'Test 일정');
+      await userEvent.type(screen.getByLabelText(/날짜/), randomDateString);
+      await userEvent.type(screen.getByLabelText(/시작 시간/), '13:00');
+      await userEvent.type(screen.getByLabelText(/종료 시간/), '15:00');
+      await userEvent.type(screen.getByLabelText(/설명/), 'Test 설명');
+      await userEvent.type(screen.getByLabelText(/위치/), 'Test 위치');
+      await userEvent.selectOptions(screen.getByLabelText(/카테고리/), '업무');
+
+      const submitButton = screen.getByTestId('event-submit-button');
+      await userEvent.click(submitButton);
+
+      await waitFor(() => {
+        const updatedWeekView = screen.getByTestId('week-view');
+        expect(updatedWeekView).toHaveTextContent('Test 일정');
+        // use 'within' to query element within weekView have 'Test 일정'
+        const dayCell = within(updatedWeekView)
+          .getByText('Test 일정')
+          .closest('td');
+        expect(dayCell).toBeTruthy();
+        const cellWithNewEvent = screen.getByTestId(
+          `week-date-${randomDateString}`
+        );
+        expect(cellWithNewEvent).toEqual(dayCell);
+      });
+    });
+    test('월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.', async () => {
+      render(<App />);
+
+      const viewSelect = screen.getByLabelText('view');
+      await userEvent.selectOptions(viewSelect, 'Month');
+
+      const monthView = screen.getByTestId('month-view');
+      let hasEvent = true;
+      while (hasEvent) {
+        const cells = monthView.querySelectorAll('td');
+        hasEvent = Array.from(cells).some((cell) => cell.querySelector('div'));
+        if (hasEvent) {
+          const nextMonthButton = screen.getByLabelText('Next');
+          await userEvent.click(nextMonthButton);
+        }
+      }
+
+      const eventList = screen.getByTestId('event-list');
+      expect(eventList).toHaveTextContent('검색 결과가 없습니다.');
+    });
+    test('월별 뷰에 일정이 정확히 표시되는지 확인한다', async () => {
+      render(<App />);
+
+      const viewSelect = screen.getByLabelText('view');
+      await userEvent.selectOptions(viewSelect, 'Month');
+
+      // 일정이 없는 월로 이동
+      let hasEvent = true;
+      while (hasEvent) {
+        const monthView = screen.getByTestId('month-view');
+        const cells = monthView.querySelectorAll('td');
+        hasEvent = Array.from(cells).some((cell) => cell.querySelector('div'));
+        if (hasEvent) {
+          const nextMonthButton = screen.getByLabelText('Next');
+          await userEvent.click(nextMonthButton);
+        }
+      }
+
+      const monthView = screen.getByTestId('month-view');
+      const monthInfo = monthView.querySelector('h2')?.textContent as string;
+      expect(monthInfo).toBeTruthy();
+
+      const match = monthInfo.match(/(\d{4})년\s+(\d{1,2})월/);
+      expect(match).toBeTruthy();
+      const [_, year, month] = match as RegExpMatchArray;
+
+      // 랜덤 날짜 생성 (1일부터 28일까지)
+      const randomDate = Math.ceil(Math.random() * 28);
+      const randomDateString = `${year}-${month.padStart(2, '0')}-${randomDate.toString().padStart(2, '0')}`;
+
+      // 새 일정 생성
+      await userEvent.type(screen.getByLabelText(/제목/), 'Test 일정');
+      await userEvent.type(screen.getByLabelText(/날짜/), randomDateString);
+      await userEvent.type(screen.getByLabelText(/시작 시간/), '13:00');
+      await userEvent.type(screen.getByLabelText(/종료 시간/), '15:00');
+      await userEvent.type(screen.getByLabelText(/설명/), 'Test 설명');
+      await userEvent.type(screen.getByLabelText(/위치/), 'Test 위치');
+      await userEvent.selectOptions(screen.getByLabelText(/카테고리/), '업무');
+
+      const submitButton = screen.getByTestId('event-submit-button');
+      await userEvent.click(submitButton);
+
+      // 이벤트 추가 후 상태 업데이트 대기
+      await waitFor(
+        () => {
+          const updatedMonthView = screen.getByTestId('month-view');
+          const eventList = screen.getByTestId('event-list');
+
+          // 일정 목록에서 새 일정 확인
+          expect(eventList).toHaveTextContent('Test 일정');
+
+          // 월별 뷰에서 새 일정 확인
+          const dayCell = within(updatedMonthView)
+            .getByText('Test 일정')
+            .closest('td');
+          expect(dayCell).toBeInTheDocument();
+
+          // 올바른 날짜 셀에 일정이 추가되었는지 확인
+          const cellDate = dayCell?.querySelector('p')?.textContent;
+          expect(cellDate).toBe(randomDate.toString());
+        },
+        { timeout: 5000 }
+      ); // 타임아웃 증가
+    });
   });
 
   describe('알림 기능', () => {
