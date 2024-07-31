@@ -370,15 +370,15 @@ importers:
       '@emotion/styled':
         specifier: ^11.11.5
         version: 11.13.0(@emotion/react@11.13.0(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1)
+      '@testing-library/react-hooks':
+        specifier: ^8.0.1
+        version: 8.0.1(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       express:
         specifier: ^4.19.2
         version: 4.19.2
       framer-motion:
         specifier: ^11.3.2
         version: 11.3.18(@emotion/is-prop-valid@1.3.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      msw:
-        specifier: ^2.3.1
-        version: 2.3.4(typescript@5.4.5)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -387,8 +387,8 @@ importers:
         version: 18.3.1(react@18.3.1)
     devDependencies:
       '@testing-library/jest-dom':
-        specifier: ^6.4.5
-        version: 6.4.5(vitest@2.0.2(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0))
+        specifier: ^6.4.8
+        version: 6.4.8
       '@testing-library/react':
         specifier: ^15.0.7
         version: 15.0.7(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -412,10 +412,13 @@ importers:
         version: 3.7.0(vite@5.3.3(@types/node@20.14.12))
       '@vitest/coverage-v8':
         specifier: ^2.0.3
-        version: 2.0.4(vitest@2.0.2(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0))
+        version: 2.0.4(vitest@2.0.4(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0))
       '@vitest/ui':
         specifier: ^1.6.0
-        version: 1.6.0(vitest@2.0.2)
+        version: 1.6.0(vitest@2.0.4)
+      axios:
+        specifier: ^1.7.2
+        version: 1.7.2
       concurrently:
         specifier: ^8.2.2
         version: 8.2.2
@@ -428,6 +431,12 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.7
         version: 0.4.7(eslint@8.57.0)
+      jsdom:
+        specifier: ^24.0.0
+        version: 24.0.0
+      msw:
+        specifier: ^2.3.4
+        version: 2.3.4(typescript@5.4.5)
       typescript:
         specifier: ^5.2.2
         version: 5.4.5
@@ -435,13 +444,16 @@ importers:
         specifier: ^5.3.1
         version: 5.3.3(@types/node@20.14.12)
       vitest:
-        specifier: ^2.0.2
-        version: 2.0.2(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0)
+        specifier: ^2.0.4
+        version: 2.0.4(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0)
 
 packages:
 
   '@adobe/css-tools@4.3.3':
     resolution: {integrity: sha512-rE0Pygv0sEZ4vBWHlAgJLGDU7Pm8xoO6p3wsEceb7GYAjScrOHpEo8KK/eVkAcnSM+slAEtXjA2JpdjLp4fJQQ==}
+
+  '@adobe/css-tools@4.4.0':
+    resolution: {integrity: sha512-Ff9+ksdQQB3rMncgqDK78uLznstjyfIf2Arnh22pW8kBpLs6rpKDwgnZT46hin5Hl1WzazzK64DOrhSwYpS7bQ==}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -1530,6 +1542,26 @@ packages:
       vitest:
         optional: true
 
+  '@testing-library/jest-dom@6.4.8':
+    resolution: {integrity: sha512-JD0G+Zc38f5MBHA4NgxQMR5XtO5Jx9g86jqturNTt2WUfRmLDIY7iKkWHDCCTiDuFMre6nxAD5wHw9W5kI4rGw==}
+    engines: {node: '>=14', npm: '>=6', yarn: '>=1'}
+
+  '@testing-library/react-hooks@8.0.1':
+    resolution: {integrity: sha512-Aqhl2IVmLt8IovEVarNDFuJDVWVvhnr9/GCU6UUnrYXwgDFF9h2L2o2P9KBni1AST5sT6riAyoukFLyjQUgD/g==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      '@types/react': ^16.9.0 || ^17.0.0
+      react: ^16.9.0 || ^17.0.0
+      react-dom: ^16.9.0 || ^17.0.0
+      react-test-renderer: ^16.9.0 || ^17.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react-dom:
+        optional: true
+      react-test-renderer:
+        optional: true
+
   '@testing-library/react@15.0.7':
     resolution: {integrity: sha512-cg0RvEdD1TIhhkm1IeYMQxrzy0MtUNfa3minv4MjbgcYzJAZ7yD0i0lwoPOTPr+INtiXFezt2o8xMSnyHhEn2Q==}
     engines: {node: '>=18'}
@@ -1742,8 +1774,14 @@ packages:
   '@vitest/expect@2.0.2':
     resolution: {integrity: sha512-nKAvxBYqcDugYZ4nJvnm5OR8eDJdgWjk4XM9owQKUjzW70q0icGV2HVnQOyYsp906xJaBDUXw0+9EHw2T8e0mQ==}
 
+  '@vitest/expect@2.0.4':
+    resolution: {integrity: sha512-39jr5EguIoanChvBqe34I8m1hJFI4+jxvdOpD7gslZrVQBKhh8H9eD7J/LJX4zakrw23W+dITQTDqdt43xVcJw==}
+
   '@vitest/pretty-format@2.0.2':
     resolution: {integrity: sha512-SBCyOXfGVvddRd9r2PwoVR0fonQjh9BMIcBMlSzbcNwFfGr6ZhOhvBzurjvi2F4ryut2HcqiFhNeDVGwru8tLg==}
+
+  '@vitest/pretty-format@2.0.4':
+    resolution: {integrity: sha512-RYZl31STbNGqf4l2eQM1nvKPXE0NhC6Eq0suTTePc4mtMQ1Fn8qZmjV4emZdEdG2NOWGKSCrHZjmTqDCDoeFBw==}
 
   '@vitest/runner@1.6.0':
     resolution: {integrity: sha512-P4xgwPjwesuBiHisAVz/LSSZtDjOTPYZVmNAnpHHSR6ONrf8eCJOFRvUwdHn30F5M1fxhqtl7QZQUk2dprIXAg==}
@@ -1751,17 +1789,26 @@ packages:
   '@vitest/runner@2.0.2':
     resolution: {integrity: sha512-OCh437Vi8Wdbif1e0OvQcbfM3sW4s2lpmOjAE7qfLrpzJX2M7J1IQlNvEcb/fu6kaIB9n9n35wS0G2Q3en5kHg==}
 
+  '@vitest/runner@2.0.4':
+    resolution: {integrity: sha512-Gk+9Su/2H2zNfNdeJR124gZckd5st4YoSuhF1Rebi37qTXKnqYyFCd9KP4vl2cQHbtuVKjfEKrNJxHHCW8thbQ==}
+
   '@vitest/snapshot@1.6.0':
     resolution: {integrity: sha512-+Hx43f8Chus+DCmygqqfetcAZrDJwvTj0ymqjQq4CvmpKFSTVteEOBzCusu1x2tt4OJcvBflyHUE0DZSLgEMtQ==}
 
   '@vitest/snapshot@2.0.2':
     resolution: {integrity: sha512-Yc2ewhhZhx+0f9cSUdfzPRcsM6PhIb+S43wxE7OG0kTxqgqzo8tHkXFuFlndXeDMp09G3sY/X5OAo/RfYydf1g==}
 
+  '@vitest/snapshot@2.0.4':
+    resolution: {integrity: sha512-or6Mzoz/pD7xTvuJMFYEtso1vJo1S5u6zBTinfl+7smGUhqybn6VjzCDMhmTyVOFWwkCMuNjmNNxnyXPgKDoPw==}
+
   '@vitest/spy@1.6.0':
     resolution: {integrity: sha512-leUTap6B/cqi/bQkXUu6bQV5TZPx7pmMBKBQiI0rJA8c3pB56ZsaTbREnF7CJfmvAS4V2cXIBAh/3rVwrrCYgw==}
 
   '@vitest/spy@2.0.2':
     resolution: {integrity: sha512-MgwJ4AZtCgqyp2d7WcQVE8aNG5vQ9zu9qMPYQHjsld/QVsrvg78beNrXdO4HYkP0lDahCO3P4F27aagIag+SGQ==}
+
+  '@vitest/spy@2.0.4':
+    resolution: {integrity: sha512-uTXU56TNoYrTohb+6CseP8IqNwlNdtPwEO0AWl+5j7NelS6x0xZZtP0bDWaLvOfUbaYwhhWp1guzXUxkC7mW7Q==}
 
   '@vitest/ui@1.6.0':
     resolution: {integrity: sha512-k3Lyo+ONLOgylctiGovRKy7V4+dIN2yxstX3eY5cWFXH6WP+ooVX79YSyi0GagdTQzLmT43BF27T0s6dOIPBXA==}
@@ -1773,6 +1820,9 @@ packages:
 
   '@vitest/utils@2.0.2':
     resolution: {integrity: sha512-pxCY1v7kmOCWYWjzc0zfjGTA3Wmn8PKnlPvSrsA643P1NHl1fOyXj2Q9SaNlrlFE+ivCsxM80Ov3AR82RmHCWQ==}
+
+  '@vitest/utils@2.0.4':
+    resolution: {integrity: sha512-Zc75QuuoJhOBnlo99ZVUkJIuq4Oj0zAkrQ2VzCqNCx6wAwViHEh5Fnp4fiJTE9rA+sAoXRf00Z9xGgfEzV6fzQ==}
 
   '@zag-js/dom-query@0.16.0':
     resolution: {integrity: sha512-Oqhd6+biWyKnhKwFFuZrrf6lxBz2tX2pRQe6grUnYwO6HJ8BcbqZomy2lpOdr+3itlaUqx+Ywj5E5ZZDr/LBfQ==}
@@ -2920,6 +2970,12 @@ packages:
     peerDependencies:
       react: ^18.3.1
 
+  react-error-boundary@3.1.4:
+    resolution: {integrity: sha512-uM9uPzZJTF6wRQORmSrvOIgt4lJ9MC1sNgEOj2XGsDTRE4kmpWxg7ENK9EWNKJRMAOY9z0MuF4yIfl6gp4sotA==}
+    engines: {node: '>=10', npm: '>=6'}
+    peerDependencies:
+      react: '>=16.13.1'
+
   react-fast-compare@3.2.2:
     resolution: {integrity: sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==}
 
@@ -3336,6 +3392,11 @@ packages:
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
 
+  vite-node@2.0.4:
+    resolution: {integrity: sha512-ZpJVkxcakYtig5iakNeL7N3trufe3M6vGuzYAr4GsbCTwobDeyPJpE4cjDhhPluv8OvQCFzu2LWp6GkoKRITXA==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+
   vite@5.3.3:
     resolution: {integrity: sha512-NPQdeCU0Dv2z5fu+ULotpuq5yfCS1BzKUIPhNbP3YBfAMGJXbt2nS+sbTFu+qchaqWTD+H3JK++nRwr6XIcp6A==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -3414,6 +3475,31 @@ packages:
       jsdom:
         optional: true
 
+  vitest@2.0.4:
+    resolution: {integrity: sha512-luNLDpfsnxw5QSW4bISPe6tkxVvv5wn2BBs/PuDRkhXZ319doZyLOBr1sjfB5yCEpTiU7xCAdViM8TNVGPwoog==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@types/node': ^18.0.0 || >=20.0.0
+      '@vitest/browser': 2.0.4
+      '@vitest/ui': 2.0.4
+      happy-dom: '*'
+      jsdom: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@types/node':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+
   w3c-xmlserializer@5.0.0:
     resolution: {integrity: sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==}
     engines: {node: '>=18'}
@@ -3441,6 +3527,11 @@ packages:
 
   why-is-node-running@2.2.2:
     resolution: {integrity: sha512-6tSwToZxTOcotxHeA+qGCq1mVzKR3CwcJGmVcY+QE8SHy6TnpFnh8PAvPNHYr7EcuVeG0QSMxtYCuO1ta/G/oA==}
+    engines: {node: '>=8'}
+    hasBin: true
+
+  why-is-node-running@2.3.0:
+    resolution: {integrity: sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w==}
     engines: {node: '>=8'}
     hasBin: true
 
@@ -3516,6 +3607,8 @@ packages:
 snapshots:
 
   '@adobe/css-tools@4.3.3': {}
+
+  '@adobe/css-tools@4.4.0': {}
 
   '@ampproject/remapping@2.3.0':
     dependencies:
@@ -4799,6 +4892,26 @@ snapshots:
     optionalDependencies:
       vitest: 2.0.2(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0)
 
+  '@testing-library/jest-dom@6.4.8':
+    dependencies:
+      '@adobe/css-tools': 4.4.0
+      '@babel/runtime': 7.24.6
+      aria-query: 5.3.0
+      chalk: 3.0.0
+      css.escape: 1.5.1
+      dom-accessibility-api: 0.6.3
+      lodash: 4.17.21
+      redent: 3.0.0
+
+  '@testing-library/react-hooks@8.0.1(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@babel/runtime': 7.24.6
+      react: 18.3.1
+      react-error-boundary: 3.1.4(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.3.3
+      react-dom: 18.3.1(react@18.3.1)
+
   '@testing-library/react@15.0.7(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.24.6
@@ -5055,7 +5168,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@2.0.4(vitest@2.0.2(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0))':
+  '@vitest/coverage-v8@2.0.4(vitest@2.0.4(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -5069,7 +5182,7 @@ snapshots:
       std-env: 3.7.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.0.2(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0)
+      vitest: 2.0.4(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -5086,7 +5199,18 @@ snapshots:
       chai: 5.1.1
       tinyrainbow: 1.2.0
 
+  '@vitest/expect@2.0.4':
+    dependencies:
+      '@vitest/spy': 2.0.4
+      '@vitest/utils': 2.0.4
+      chai: 5.1.1
+      tinyrainbow: 1.2.0
+
   '@vitest/pretty-format@2.0.2':
+    dependencies:
+      tinyrainbow: 1.2.0
+
+  '@vitest/pretty-format@2.0.4':
     dependencies:
       tinyrainbow: 1.2.0
 
@@ -5101,6 +5225,11 @@ snapshots:
       '@vitest/utils': 2.0.2
       pathe: 1.1.2
 
+  '@vitest/runner@2.0.4':
+    dependencies:
+      '@vitest/utils': 2.0.4
+      pathe: 1.1.2
+
   '@vitest/snapshot@1.6.0':
     dependencies:
       magic-string: 0.30.10
@@ -5113,11 +5242,21 @@ snapshots:
       magic-string: 0.30.10
       pathe: 1.1.2
 
+  '@vitest/snapshot@2.0.4':
+    dependencies:
+      '@vitest/pretty-format': 2.0.4
+      magic-string: 0.30.10
+      pathe: 1.1.2
+
   '@vitest/spy@1.6.0':
     dependencies:
       tinyspy: 2.2.1
 
   '@vitest/spy@2.0.2':
+    dependencies:
+      tinyspy: 3.0.0
+
+  '@vitest/spy@2.0.4':
     dependencies:
       tinyspy: 3.0.0
 
@@ -5143,6 +5282,17 @@ snapshots:
       sirv: 2.0.4
       vitest: 2.0.2(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0)
 
+  '@vitest/ui@1.6.0(vitest@2.0.4)':
+    dependencies:
+      '@vitest/utils': 1.6.0
+      fast-glob: 3.3.2
+      fflate: 0.8.2
+      flatted: 3.3.1
+      pathe: 1.1.2
+      picocolors: 1.0.1
+      sirv: 2.0.4
+      vitest: 2.0.4(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0)
+
   '@vitest/utils@1.6.0':
     dependencies:
       diff-sequences: 29.6.3
@@ -5153,6 +5303,13 @@ snapshots:
   '@vitest/utils@2.0.2':
     dependencies:
       '@vitest/pretty-format': 2.0.2
+      estree-walker: 3.0.3
+      loupe: 3.1.1
+      tinyrainbow: 1.2.0
+
+  '@vitest/utils@2.0.4':
+    dependencies:
+      '@vitest/pretty-format': 2.0.4
       estree-walker: 3.0.3
       loupe: 3.1.1
       tinyrainbow: 1.2.0
@@ -6338,6 +6495,11 @@ snapshots:
       react: 18.3.1
       scheduler: 0.23.2
 
+  react-error-boundary@3.1.4(react@18.3.1):
+    dependencies:
+      '@babel/runtime': 7.24.6
+      react: 18.3.1
+
   react-fast-compare@3.2.2: {}
 
   react-focus-lock@2.12.1(@types/react@18.3.3)(react@18.3.1):
@@ -6744,6 +6906,23 @@ snapshots:
       - supports-color
       - terser
 
+  vite-node@2.0.4(@types/node@20.14.12):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.5
+      pathe: 1.1.2
+      tinyrainbow: 1.2.0
+      vite: 5.3.3(@types/node@20.14.12)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
   vite@5.3.3(@types/node@20.14.12):
     dependencies:
       esbuild: 0.21.5
@@ -6822,6 +7001,40 @@ snapshots:
       - supports-color
       - terser
 
+  vitest@2.0.4(@types/node@20.14.12)(@vitest/ui@1.6.0)(jsdom@24.0.0):
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@vitest/expect': 2.0.4
+      '@vitest/pretty-format': 2.0.4
+      '@vitest/runner': 2.0.4
+      '@vitest/snapshot': 2.0.4
+      '@vitest/spy': 2.0.4
+      '@vitest/utils': 2.0.4
+      chai: 5.1.1
+      debug: 4.3.5
+      execa: 8.0.1
+      magic-string: 0.30.10
+      pathe: 1.1.2
+      std-env: 3.7.0
+      tinybench: 2.8.0
+      tinypool: 1.0.0
+      tinyrainbow: 1.2.0
+      vite: 5.3.3(@types/node@20.14.12)
+      vite-node: 2.0.4(@types/node@20.14.12)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 20.14.12
+      '@vitest/ui': 1.6.0(vitest@2.0.4)
+      jsdom: 24.0.0
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
   w3c-xmlserializer@5.0.0:
     dependencies:
       xml-name-validator: 5.0.0
@@ -6844,6 +7057,11 @@ snapshots:
       isexe: 2.0.0
 
   why-is-node-running@2.2.2:
+    dependencies:
+      siginfo: 2.0.0
+      stackback: 0.0.2
+
+  why-is-node-running@2.3.0:
     dependencies:
       siginfo: 2.0.0
       stackback: 0.0.2
