@@ -2,7 +2,7 @@ import { describe, test } from "vitest";
 
 describe('단위 테스트: 날짜 및 시간 관리', () => {
   describe('getDaysInMonth 함수', () => {
-    test.fails('주어진 월의 일 수를 정확히 반환한다');
+    test.fails('getDaysInMonth 함수')
   });
 
   describe('getWeekDates 함수', () => {
