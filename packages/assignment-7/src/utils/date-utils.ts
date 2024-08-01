@@ -100,6 +100,23 @@ const findOverlappingEvents = (oldEvent: Event[], newEvent: Event): Event[] => {
   );
 };
 
+/**
+ * 이벤트 검색 함수
+ * @param events
+ * @param term
+ * @returns
+ */
+const searchEvents = (events: Event[], term: string) => {
+  if (!term.trim()) return events;
+
+  return events.filter(
+    (event) =>
+      event.title.toLowerCase().includes(term.toLowerCase()) ||
+      event.description.toLowerCase().includes(term.toLowerCase()) ||
+      event.location.toLowerCase().includes(term.toLowerCase())
+  );
+};
+
 export {
   getDaysInMonth,
   getWeekDates,
@@ -109,4 +126,5 @@ export {
   parseDateTime,
   isOverlapping,
   findOverlappingEvents,
+  searchEvents,
 };

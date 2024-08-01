@@ -1,6 +1,5 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { Event, RepeatType } from "../../../App";
-import { useToast } from "@chakra-ui/react";
 
 export const useEventForm = (editingEvent: Event | null) => {
   const [eventFormValue, setEventFormValue] = useState({
