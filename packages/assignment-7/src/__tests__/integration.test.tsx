@@ -21,15 +21,6 @@ afterAll(() => {
   server.close();
 });
 
-const formatDate = (date: Date): string => {
-  const dateString = date.toLocaleDateString();
-  const [year, month, day] = dateString.split('.').map((part) => part.trim());
-  const formattedMonth = month.padStart(2, '0');
-  const formattedDay = day.padStart(2, '0');
-
-  return `${year}-${formattedMonth}-${formattedDay}`;
-};
-
 describe('일정 관리 애플리케이션 통합 테스트', () => {
   describe('일정 CRUD 및 기본 기능', () => {
     let user: ReturnType<typeof userEvent.setup>;
@@ -43,7 +34,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     test('새로운 일정을 생성하고 모든 필드가 정확히 저장되는지 확인한다', async () => {
       render(<App />);
 
-      const today = formatDate(new Date());
+      const today = '2024-08-02';
       const title = '새 테스트 일정';
 
       await user.type(screen.getByLabelText('제목'), title);
@@ -93,7 +84,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
       // 먼저 새 일정을 생성
       await user.type(screen.getByLabelText('제목'), '수정할 일정');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '09:00');
       await user.type(screen.getByLabelText('종료 시간'), '10:00');
       await user.type(screen.getByLabelText('설명'), '테스트 설명');
@@ -133,7 +124,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 새 일정 생성
       await user.click(screen.getByTestId('event-submit-button'));
       await user.type(screen.getByLabelText('제목'), '삭제할 일정');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '09:00');
       await user.type(screen.getByLabelText('종료 시간'), '10:00');
       await user.type(screen.getByLabelText('설명'), '테스트 설명');
@@ -173,7 +164,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 새 일정 생성
       await user.click(screen.getByTestId('event-submit-button'));
       await user.type(screen.getByLabelText('제목'), '주간 일정');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '09:00');
       await user.type(screen.getByLabelText('종료 시간'), '10:00');
       await user.click(screen.getByTestId('event-submit-button'));
@@ -200,7 +191,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 새 일정 생성
       await user.click(screen.getByTestId('event-submit-button'));
       await user.type(screen.getByLabelText('제목'), '월간 일정');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '09:00');
       await user.type(screen.getByLabelText('종료 시간'), '10:00');
       await user.click(screen.getByTestId('event-submit-button'));
@@ -228,14 +219,14 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 두 개의 일정 생성
       await user.click(screen.getByTestId('event-submit-button'));
       await user.type(screen.getByLabelText('제목'), '검색용 일정 1');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '09:00');
       await user.type(screen.getByLabelText('종료 시간'), '10:00');
       await user.click(screen.getByTestId('event-submit-button'));
 
       await user.click(screen.getByTestId('event-submit-button'));
       await user.type(screen.getByLabelText('제목'), '다른 일정');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '11:00');
       await user.type(screen.getByLabelText('종료 시간'), '12:00');
       await user.click(screen.getByTestId('event-submit-button'));
@@ -255,14 +246,14 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 두 개의 일정 생성
       await user.click(screen.getByTestId('event-submit-button'));
       await user.type(screen.getByLabelText('제목'), '일정 1');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '09:00');
       await user.type(screen.getByLabelText('종료 시간'), '10:00');
       await user.click(screen.getByTestId('event-submit-button'));
 
       await user.click(screen.getByTestId('event-submit-button'));
       await user.type(screen.getByLabelText('제목'), '일정 2');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '11:00');
       await user.type(screen.getByLabelText('종료 시간'), '12:00');
       await user.click(screen.getByTestId('event-submit-button'));
@@ -343,7 +334,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 첫 번째 일정 생성
       await user.click(screen.getByTestId('event-submit-button'));
       await user.type(screen.getByLabelText('제목'), '기존 일정');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '09:00');
       await user.type(screen.getByLabelText('종료 시간'), '10:00');
       await user.click(screen.getByTestId('event-submit-button'));
@@ -351,7 +342,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 겹치는 시간에 새 일정 추가
       await user.click(screen.getByTestId('event-submit-button'));
       await user.type(screen.getByLabelText('제목'), '겹치는 일정');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '09:30');
       await user.type(screen.getByLabelText('종료 시간'), '10:30');
       await user.click(screen.getByTestId('event-submit-button'));
@@ -367,7 +358,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 첫 번째 일정 생성
       await user.click(screen.getByTestId('event-submit-button'));
       await user.type(screen.getByLabelText('제목'), '일정 1');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '09:00');
       await user.type(screen.getByLabelText('종료 시간'), '10:00');
       await user.click(screen.getByTestId('event-submit-button'));
@@ -375,7 +366,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 두 번째 일정 생성
       await user.click(screen.getByTestId('event-submit-button'));
       await user.type(screen.getByLabelText('제목'), '일정 2');
-      await user.type(screen.getByLabelText('날짜'), formatDate(new Date()));
+      await user.type(screen.getByLabelText('날짜'), '2024-08-02');
       await user.type(screen.getByLabelText('시작 시간'), '11:00');
       await user.type(screen.getByLabelText('종료 시간'), '12:00');
       await user.click(screen.getByTestId('event-submit-button'));
