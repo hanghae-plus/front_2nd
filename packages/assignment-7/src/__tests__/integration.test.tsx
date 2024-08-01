@@ -24,9 +24,8 @@ const setup = (component: ReactNode) => {
 };
 
 describe('일정 관리 애플리케이션 통합 테스트', () => {
-  describe.skip('일정 CRUD 및 기본 기능', () => {
-    beforeEach(resetEvents);
-
+  beforeEach(resetEvents);
+  describe('일정 CRUD 및 기본 기능', () => {
     test('새로운 일정을 생성하고 모든 필드가 정확히 저장되는지 확인한다', async () => {
       const TEST_EVENT = {
         title: '새로운 일정',
@@ -93,11 +92,8 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
       const eventList = screen.getByTestId(TEST_IDS.eventList);
 
-      // 이벤트 아이템들이 비동기적으로 로드되기를 기다림
-      await waitFor(() => {
-        const eventItem = within(eventList).getByText('테스트 일정 1');
-        expect(eventItem).toBeInTheDocument();
-      });
+      const eventItem = await within(eventList).findByText('테스트 일정 1');
+      expect(eventItem).toBeInTheDocument();
 
       const [editButton] = screen.getAllByLabelText('Edit event');
       await user.click(editButton);
@@ -124,12 +120,10 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       expect(titleInput).toHaveValue('');
       expect(dateInput).toHaveValue('');
 
-      const eventItem = within(eventList).getByText(TEST_EVENT.title);
-      const eventItemDate = within(eventList).getByText(
-        `${TEST_EVENT.date} ${TEST_EVENT.startTime} - ${TEST_EVENT.endTime}`
-      );
-      expect(eventItem).toBeInTheDocument();
-      expect(eventItemDate).toBeInTheDocument();
+      expect(await within(eventList).findByText(TEST_EVENT.title)).toBeInTheDocument();
+      expect(
+        await within(eventList).findByText(`${TEST_EVENT.date} ${TEST_EVENT.startTime} - ${TEST_EVENT.endTime}`)
+      ).toBeInTheDocument();
     });
 
     test('일정을 삭제하고 더 이상 조회되지 않는지 확인한다', async () => {
@@ -213,13 +207,54 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
   });
 
   describe('알림 기능', () => {
-    test.fails('일정 알림을 설정하고 지정된 시간에 알림이 발생하는지 확인한다');
+    test('일정 알림을 설정하고 지정된 시간에 알림이 발생하는지 확인한다', async () => {
+      vi.setSystemTime(new Date('2024-08-15 08:30'));
+      setup(<App />);
+
+      const eventList = screen.getByTestId(TEST_IDS.eventList);
+      expect(await within(eventList).findByText('테스트 일정 1')).toBeInTheDocument();
+
+      vi.setSystemTime(new Date('2024-08-15 08:52'));
+
+      expect(await screen.findByRole('alert')).toBeInTheDocument();
+    });
   });
 
   describe('검색 기능', () => {
-    test.fails('제목으로 일정을 검색하고 정확한 결과가 반환되는지 확인한다');
-    test.fails('제목으로 일정을 검색하고 정확한 결과가 반환되는지 확인한다');
-    test.fails('검색어를 지우면 모든 일정이 다시 표시되어야 한다');
+    async function setupSearchTest() {
+      vi.setSystemTime(new Date('2024-08-01'));
+      const { user } = setup(<App />);
+
+      const eventList = screen.getByTestId(TEST_IDS.eventList);
+      expect(await within(eventList).findByText('테스트 일정 1')).toBeInTheDocument();
+      expect(await within(eventList).findByText('테스트 일정 2')).toBeInTheDocument();
+
+      const searchField = screen.getByRole('textbox', { name: '일정 검색' });
+
+      return { user, eventList, searchField };
+    }
+
+    test('제목으로 일정을 검색하고 정확한 결과가 반환되는지 확인한다', async () => {
+      const { user, eventList, searchField } = await setupSearchTest();
+
+      await user.type(searchField, '테스트 일정 2');
+
+      expect(await within(eventList).findByText('테스트 일정 2')).toBeInTheDocument();
+      expect(within(eventList).queryByText('테스트 일정 1')).not.toBeInTheDocument();
+    });
+    test('검색어를 지우면 모든 일정이 다시 표시되어야 한다', async () => {
+      const { user, eventList, searchField } = await setupSearchTest();
+
+      await user.type(searchField, '테스트 일정 2');
+
+      expect(await within(eventList).findByText('테스트 일정 2')).toBeInTheDocument();
+      expect(within(eventList).queryByText('테스트 일정 1')).not.toBeInTheDocument();
+
+      await user.clear(searchField);
+
+      expect(await within(eventList).findByText('테스트 일정 1')).toBeInTheDocument();
+      expect(await within(eventList).findByText('테스트 일정 2')).toBeInTheDocument();
+    });
   });
 
   describe('공휴일 표시', () => {
