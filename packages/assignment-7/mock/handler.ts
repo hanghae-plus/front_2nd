@@ -102,6 +102,7 @@ export const handlers = [
 
     if (eventIndex > -1) {
       events[eventIndex] = { ...events[eventIndex], ...body };
+
       return HttpResponse.json(events[eventIndex]);
     } else {
       return HttpResponse.json("Event not found", {

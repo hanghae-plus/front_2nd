@@ -1,13 +1,15 @@
-import { useState } from "react";
 import { Event } from "../../../App";
 import { useToast } from "@chakra-ui/react";
 
-export const useSaveEvent = () => {
-  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-
+/**
+ * 일정 Mutation 커스텀 훅
+ * @param fetchEvents
+ * @returns
+ */
+export const useSaveEvent = (fetchEvents: () => Promise<void>) => {
   const toast = useToast();
 
-  const saveEvent = async (eventData: Event) => {
+  const saveEvent = async (eventData: Event, editingEvent?: Event | null) => {
     try {
       let response;
       if (editingEvent) {
@@ -33,7 +35,7 @@ export const useSaveEvent = () => {
       }
 
       // 이벤트 목록 새로고침
-      setEditingEvent(null);
+      await fetchEvents();
       toast({
         title: editingEvent?.title
           ? "일정이 수정되었습니다."
@@ -53,5 +55,7 @@ export const useSaveEvent = () => {
     }
   };
 
-  return { saveEvent, editingEvent, setEditingEvent };
+  return {
+    saveEvent,
+  };
 };
