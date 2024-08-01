@@ -41,7 +41,12 @@ import {
   EditIcon,
 } from '@chakra-ui/icons';
 import { Event, RepeatType } from './types/event';
-import { formatMonth, formatWeek, getDaysInMonth, getWeekDates } from './utils/date';
+import {
+  formatMonth,
+  formatWeek,
+  getDaysInMonth,
+  getWeekDates,
+} from './utils/date';
 
 const categories = ['업무', '개인', '가족', '기타'];
 
