@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { getDaysInMonth, getWeekDates, formatMonth, formatWeek, isDateInRange } from '../App';
+import { getDaysInMonth, getWeekDates, formatMonth, formatWeek, isDateInRange } from '../utils/date';
 
 describe('단위 테스트: 날짜 및 시간 관리', () => {
   const DAYS_TEST_CASES = [
