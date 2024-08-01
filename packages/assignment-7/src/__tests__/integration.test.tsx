@@ -271,6 +271,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       ).toBeInTheDocument();
       expect(await screen.findByText(newData.category)).toBeInTheDocument();
     });
+
     test("일정을 삭제하고 더 이상 조회되지 않는지 확인한다", async () => {
       const { user } = setup(<App />);
 

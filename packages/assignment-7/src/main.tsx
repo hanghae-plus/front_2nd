@@ -7,7 +7,7 @@ async function prepare() {
   const { setupWorker } = await import("msw/browser");
   const { handlers } = await import("../mock/handler.ts");
   const worker = setupWorker(...handlers);
-  return worker.start();
+  // return worker.start();
 }
 
 prepare().then(() => {

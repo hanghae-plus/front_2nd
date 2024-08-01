@@ -46,6 +46,9 @@ import {
   getDaysInMonth,
   getWeekDates,
 } from "./utils/date-utils";
+import { useClosure } from "./components/alert/hooks/useClosure";
+import { useSaveEvent } from "./components/event/hooks/useSaveEvent";
+import { useGetEvent } from "./components/event/hooks/useGetEvent";
 
 type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
 
@@ -80,8 +83,6 @@ const notificationOptions = [
   { value: 1440, label: "1일 전" },
 ];
 
-const dummyEvents: Event[] = [];
-
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -107,28 +108,7 @@ const fetchHolidays = (year: number, month: number) => {
 };
 
 function App() {
-  const [events, setEvents] = useState<Event[]>(dummyEvents);
-
-  const fetchEvents = async () => {
-    try {
-      const response = await fetch("/api/events");
-      if (!response.ok) {
-        throw new Error("Failed to fetch events");
-      }
-
-      const data = await response.json();
-
-      setEvents(data);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-      toast({
-        title: "이벤트 로딩 실패",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
+  const { events, fetchEvents } = useGetEvent();
 
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
@@ -138,7 +118,6 @@ function App() {
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
   const [view, setView] = useState<"week" | "month">("month");
-  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isRepeating, setIsRepeating] = useState(false);
   const [repeatType, setRepeatType] = useState<RepeatType>("none");
   const [repeatInterval, setRepeatInterval] = useState(1);
@@ -149,7 +128,12 @@ function App() {
   >([]);
   const [notifiedEvents, setNotifiedEvents] = useState<number[]>([]);
 
-  const [isOverlapDialogOpen, setIsOverlapDialogOpen] = useState(false);
+  const {
+    isOpen: isOverlapDialogOpen,
+    onOpen: onOpenOverlapDialog,
+    onClose: onCloseOverlapDialog,
+  } = useClosure();
+
   const [overlappingEvents, setOverlappingEvents] = useState<Event[]>([]);
 
   const [startTimeError, setStartTimeError] = useState<string | null>(null);
@@ -163,6 +147,8 @@ function App() {
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   const toast = useToast();
+
+  const { saveEvent, editingEvent, setEditingEvent } = useSaveEvent();
 
   const addOrUpdateEvent = async () => {
     if (!title || !date || !startTime || !endTime) {
@@ -204,60 +190,63 @@ function App() {
     };
 
     const overlapping = findOverlappingEvents(eventData);
+
     if (overlapping.length > 0) {
       setOverlappingEvents(overlapping);
-      setIsOverlapDialogOpen(true);
+      onOpenOverlapDialog();
     } else {
       await saveEvent(eventData);
-    }
-  };
-
-  const saveEvent = async (eventData: Event) => {
-    try {
-      let response;
-      if (editingEvent) {
-        response = await fetch(`/api/events/${eventData.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(eventData),
-        });
-      } else {
-        response = await fetch("/api/events", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(eventData),
-        });
-      }
-
-      if (!response.ok) {
-        throw new Error("Failed to save event");
-      }
-
-      await fetchEvents(); // 이벤트 목록 새로고침
-      setEditingEvent(null);
+      await fetchEvents();
       resetForm();
-      toast({
-        title: editingEvent
-          ? "일정이 수정되었습니다."
-          : "일정이 추가되었습니다.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error("Error saving event:", error);
-      toast({
-        title: "일정 저장 실패",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
     }
   };
+
+  // const saveEvent = async (eventData: Event) => {
+  //   try {
+  //     let response;
+  //     if (editingEvent) {
+  //       response = await fetch(`/api/events/${eventData.id}`, {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(eventData),
+  //       });
+  //     } else {
+  //       response = await fetch("/api/events", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(eventData),
+  //       });
+  //     }
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to save event");
+  //     }
+
+  //     await fetchEvents(); // 이벤트 목록 새로고침
+  //     setEditingEvent(null);
+  //     resetForm();
+  //     toast({
+  //       title: editingEvent
+  //         ? "일정이 수정되었습니다."
+  //         : "일정이 추가되었습니다.",
+  //       status: "success",
+  //       duration: 3000,
+  //       isClosable: true,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error saving event:", error);
+  //     toast({
+  //       title: "일정 저장 실패",
+  //       status: "error",
+  //       duration: 3000,
+  //       isClosable: true,
+  //     });
+  //   }
+  // };
 
   const deleteEvent = async (id: number) => {
     try {
@@ -615,9 +604,9 @@ function App() {
     setHolidays(newHolidays);
   }, [currentDate]);
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
+  // useEffect(() => {
+  //   fetchEvents();
+  // }, []);
 
   return (
     <Box w="full" h="100vh" m="auto" p={5}>
@@ -894,7 +883,7 @@ function App() {
       <AlertDialog
         isOpen={isOverlapDialogOpen}
         leastDestructiveRef={cancelRef}
-        onClose={() => setIsOverlapDialogOpen(false)}
+        onClose={() => onCloseOverlapDialog()}
       >
         <AlertDialogOverlay>
           <AlertDialogContent>
@@ -913,17 +902,14 @@ function App() {
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button
-                ref={cancelRef}
-                onClick={() => setIsOverlapDialogOpen(false)}
-              >
+              <Button ref={cancelRef} onClick={() => onCloseOverlapDialog()}>
                 취소
               </Button>
               <Button
                 colorScheme="red"
-                onClick={() => {
-                  setIsOverlapDialogOpen(false);
-                  saveEvent({
+                onClick={async () => {
+                  onCloseOverlapDialog();
+                  await saveEvent({
                     id: editingEvent ? editingEvent.id : Date.now(),
                     title,
                     date,
@@ -939,6 +925,7 @@ function App() {
                     },
                     notificationTime,
                   });
+                  await fetchEvents();
                 }}
                 ml={3}
               >
