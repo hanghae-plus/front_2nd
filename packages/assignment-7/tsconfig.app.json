@@ -21,7 +21,34 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "types": ["vitest/globals"],
+
+    /** */
+    "baseUrl": "./src",
+    "paths": {
+      "~app": ["./app"],
+      "~app/*": ["./app/*"],
+
+      "~pages": ["./pages"],
+      "~pages/*": ["./pages/*"],
+
+      "~widgets": ["./widgets"],
+      "~widgets/*": ["./widgets/*"],
+
+      "~features": ["./features"],
+      "~features/*": ["./features/*"],
+
+      "~entities": ["./entities"],
+      "~entities/*": ["./entities/*"],
+
+      "~shared": ["./shared"],
+      "~shared/*": ["./shared/*"],
+
+      "vite-plugin-eslint": [
+        "./node_modules/vite-plugin-eslint/dist/index.d.ts"
+      ]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "server.js"]
 }
