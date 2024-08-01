@@ -258,8 +258,18 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
   });
 
   describe('공휴일 표시', () => {
-    test.fails('달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다');
-    test.fails('달력에 5월 5일(어린이날)이 공휴일로 표시되는지 확인한다');
+    test('달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다', () => {
+      vi.setSystemTime(new Date('2024-01-01'));
+      setup(<App />);
+
+      expect(screen.getByText('신정')).toBeInTheDocument();
+    });
+    test('달력에 5월 5일(어린이날)이 공휴일로 표시되는지 확인한다', () => {
+      vi.setSystemTime(new Date('2024-05-05'));
+      setup(<App />);
+
+      expect(screen.getByText('어린이날')).toBeInTheDocument();
+    });
   });
 
   describe('일정 충돌 감지', () => {
