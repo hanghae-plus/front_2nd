@@ -2,6 +2,10 @@
  * @NOTE
  * jsx 객체를 반환한다.
  */
+/**
+ * @NOTE
+ * jsx 객체를 반환한다.
+ */
 export function jsx(type, props, ...children) {
   return { type, props, children: children.flat() };
 }
@@ -17,39 +21,9 @@ export function jsx(type, props, ...children) {
  * @returns
  */
 export function createElement(node) {
-  let $el;
-  //1.Text => textNode
-  //2.나머지 => Element
-  if (typeof node === 'string') {
-    $el = document.createTextNode(node);
-  } else {
-    $el = document.createElement(node.type);
-  }
-
-  //3. 속성값 세팅
-  if (node.props) {
-    for (const [attr, value] of Object.entries(node.props)) {
-      $el.setAttribute(attr, value);
-    }
-  }
-
-  //4. children 붙이기
-  if (node.children) {
-    for (const child of node.children) {
-      $el.appendChild(createElement(child));
-    }
-  }
-
-  return $el;
+  // jsx를 dom으로 변환
 }
 
-/**
- * @NOTE ReactElement에 Props를 갱신한다.
- * 이전 Props와 새로운 Props를 비교하여 있다면 set, 없다면 delete
- * @param {*} target
- * @param {*} newProps
- * @param {*} oldProps
- */
 function updateAttributes(target, newProps, oldProps) {
   const allProps = { ...newProps, ...oldProps };
 
@@ -86,26 +60,16 @@ export function render(parent, newNode, oldNode, index = 0) {
     return parent.removeChild(parent.childNodes[index]);
   }
 
-  //3. 변경 되었을 때
-  if (newNode.type !== oldNode.type) {
-    return parent.replaceChild(
-      createElement(newNode),
-      parent.childNodes[index]
-    );
-  }
+  // 3. 만약 newNode와 oldNode 둘 다 문자열이고 서로 다르다면
+  //   oldNode를 newNode로 교체
+  //   종료
 
-  //4. 속성 갱신
-  updateAttributes(
-    parent.childNodes[index],
-    newNode.props || {},
-    oldNode.props || {}
-  );
+  // 4. 만약 newNode와 oldNode의 타입이 다르다면
+  //   oldNode를 newNode로 교체
+  //   종료
 
-  //5. 자식노드 재귀
-  const newChildren = newNode.children || [];
-  const oldChildren = oldNode.children || [];
-  const MAX = Math.max(newChildren.length, oldChildren.length);
-  for (let i = 0; i < MAX; i++) {
-    render(parent.childNodes[index], newChildren[i], oldChildren[i], i);
-  }
+  // 5. newNode와 oldNode에 대해 updateAttributes 실행
+
+  // 6. newNode와 oldNode 자식노드들 중 더 긴 길이를 가진 것을 기준으로 반복
+  //   각 자식노드에 대해 재귀적으로 render 함수 호출
 }

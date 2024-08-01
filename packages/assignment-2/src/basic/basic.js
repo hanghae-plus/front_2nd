@@ -7,120 +7,23 @@
  * @param {*} target2
  * @returns
  */
-export function shallowEquals(target1, target2) {
-<<<<<<< HEAD
-=======
-  //1. 타입+값이 같을 경우(null 포함)
->>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
-  if (target1 === target2) {
-    return true;
-  }
-
-<<<<<<< HEAD
-  if (Array.isArray(target1) && Array.isArray(target2) && target1.length === target2.length) {
-    return target1.every((value, idx) => value === target2[idx]);
-  }
-
-  if (target1.constructor === Object && target2.constructor === Object) {
-    const keys1 = Object.keys(target1);
-    const keys2 = Object.keys(target2);
-    if (keys1.length !== keys2.length) {
-      return false;
-    }
-
-    return keys1.every((key) => target1[key] === target2[key]);
-  }
-
-  return false;
-=======
-  //2. Wrapper class
-  // 객체 타입 비교는 instanceof 원시형은 typeof로 비교한다.
-  if (
-    target1 instanceof Number ||
-    target1 instanceof String ||
-    target1 instanceof Boolean ||
-    target2 instanceof Number ||
-    target2 instanceof String ||
-    target2 instanceof Boolean
-  ) {
-    return target1 == target2;
-  }
-
-  if (target1.constructor === Object && target2.constructor === Object) {
-    const keys1 = Object.keys(target1);
-    const keys2 = Object.keys(target2);
-    if (keys1.length !== keys2.length) {
-      return false;
-    }
-
-    return keys1.every((key) => target1[key] === target2[key]);
-  }
-  return target1 == target2;
->>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
-}
-
 /**
- * @NOTE 얕은 비교를 재귀로 호출하여 객체를 깊은 비교한다.
+ * @NOTE
+ * 1. 원시값 비교
+ * 2. Array 비교
+ * 3. 객체 비교
  * @param {*} target1
  * @param {*} target2
  * @returns
  */
+export function shallowEquals(target1, target2) {
+  return target1 === target2;
+}
+
 export function deepEquals(target1, target2) {
-  if (target1 === target2) {
-    return true;
-  }
-
-<<<<<<< HEAD
-  if (Array.isArray(target1) && Array.isArray(target2) && target1.length === target2.length) {
-    return target1.every((value, idx) => deepEquals(value, target2[idx]));
-  }
-
-  if (target1.constructor === Object && target2.constructor === Object) {
-    const keys1 = Object.keys(target1);
-    const keys2 = Object.keys(target2);
-    if (keys1.length !== keys2.length) {
-      return false;
-    }
-
-    return keys1.every((key) => deepEquals(target1[key], target2[key]));
-  }
-
-  return false;
+  return target1 === target2;
 }
 
-/**
- * @NOTE 객체의 연산 순서 => toPrimitive => valueOf => toString
- * @param {*} n
- * @returns
-=======
-  if (
-    target1 instanceof Number ||
-    target1 instanceof String ||
-    target1 instanceof Boolean ||
-    target2 instanceof Number ||
-    target2 instanceof String ||
-    target2 instanceof Boolean
-  ) {
-    return target1 == target2;
-  }
-
-  if (target1.constructor === Object && target2.constructor === Object) {
-    const keys1 = Object.keys(target1);
-    const keys2 = Object.keys(target2);
-    if (keys1.length !== keys2.length) {
-      return false;
-    }
-
-    return keys1.every((key) => deepEquals(target1[key], target2[key]));
-  }
-
-  return false;
-}
-
-/**
- * 객체의 연산 순서 => toPrimitive => valueOf => toString
->>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
- */
 export function createNumber1(n) {
   const numberObj = {
     value: n,
@@ -151,24 +54,7 @@ export function createNumber1(n) {
  * 객체 안에 메소드를 정의할 경우 덮어 쓰여지게 된다.
  */
 export function createNumber2(n) {
-  const numberObj = {
-    value: n,
-    valueOf() {
-<<<<<<< HEAD
-      return `${this.value}`;
-    },
-    toString() {
-      return `${this.value}`;
-=======
-      return "" + this.value;
-    },
-    toString() {
-      return "" + this.value;
->>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
-    },
-  };
-
-  return numberObj;
+  return n;
 }
 
 /**
@@ -177,108 +63,12 @@ export function createNumber2(n) {
  * ``메소드 => toString() 호출
  */
 export function createNumber3(n) {
-  const numberObj = {
-    value: n,
-    valueOf() {
-      return this.value;
-    },
-    toString() {
-<<<<<<< HEAD
-      return `${this.value}`;
-=======
-      return "" + this.value;
->>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
-    },
-    toJSON() {
-      return `this is createNumber3 => ${this.value}`;
-    },
-  };
-
-  return numberObj;
+  return n;
 }
 
-export class CustomNumber {
-<<<<<<< HEAD
-  static #dataMap = new Map();
-  number;
+export class CustomNumber {}
 
-  constructor(n) {
-    if (CustomNumber.#dataMap.has(n)) {
-      return CustomNumber.#dataMap.get(n);
-    }
-    this.number = n;
-    CustomNumber.#dataMap.set(n, this);
-=======
-  static dataMap = new Map();
-  number;
-
-  constructor(n) {
-    if (CustomNumber.#dataMap.has(n)) {
-      return CustomNumber.#dataMap.get(n);
-    }
-    this.number = n;
-    CustomNumber.dataMap.set(n, this);
->>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
-    return this;
-  }
-
-  valueOf() {
-    return this.number;
-  }
-  toString() {
-<<<<<<< HEAD
-    return `${this.number}`;
-  }
-  toJSON() {
-    return `${this.number}`;
-=======
-    return "" + this.number;
-  }
-  toJSON() {
-    return "" + this.number;
->>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
-  }
-}
-
-/**
-<<<<<<< HEAD
- * @NOTE
- * Object.getOwnPropertyNames vs Object.keys차이점
- * getOwnPropertyNames : 열거 가능 + 불가능한 모든 속성 이름
- * keys : 열거 가능한 모든 속성 이름
- * @param {*} target
-=======
- * Object.getOwnPropertyNames vs Object.keys차이점
- * getOwnPropertyNames : 열거 가능 + 불가능한 모든 속성 이름
- * keys : 열거 가능한 모든 속성 이름
->>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
- * @returns
- */
 export function createUnenumerableObject(target) {
-  //freeze => 속성 추가, 삭제, 변경 불가능 configurable, writable : false
-  //seal=> 속성을 추가, 삭제할 수 없다.(변경 가능) configurable : false
-  const propertyNames = Object.getOwnPropertyNames(target);
-
-  /**
-<<<<<<< HEAD
-   * @NOTE
-=======
->>>>>>> b0653f97 (feat 2주차 basic 문제 구현)
-   * 프로퍼티 플래그 3개 속성
-   * configurable => 속성 삭제, 플래그 수정 가능 여부.
-   * enumeralbe => 속성 열거 가능 여부
-   * writable => 속성 값을 수정 가능 여부
-   */
-  for (let name of propertyNames) {
-    let value = target[name];
-    Object.defineProperty(target, name, {
-      value: value,
-      configurable: true,
-      enumerable: false,
-      writable: true,
-    });
-  }
-
   return target;
 }
 

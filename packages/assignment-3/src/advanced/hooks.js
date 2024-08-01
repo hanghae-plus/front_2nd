@@ -1,4 +1,4 @@
-import { shallowEquals } from '../../../assignment-2/src/basic/basic';
+import { shallowEquals } from "../../../assignment-2/src/basic/basic";
 
 const rebounceOneFrame = (callback) => {
   let currentReRenderPromiseIdx = -1;
@@ -30,46 +30,11 @@ export function createHooks(callback) {
    * @returns
    */
   const useState = (initState) => {
-    let stateIdx = currentStateHookIdx;
-    const rebounceCallback = rebounceOneFrame(callback);
-
-    stateHooks[stateIdx] = stateHooks[stateIdx] || initState;
-
-    const state =
-      typeof stateHooks[stateIdx] === 'object'
-        ? Object.freeze(stateHooks[stateIdx])
-        : stateHooks[stateIdx];
-
-    function setState(updatedState) {
-      if (shallowEquals(stateHooks[stateIdx], updatedState)) return;
-      stateHooks[stateIdx] = updatedState;
-      rebounceCallback();
-    }
-
-    currentStateHookIdx++;
-    return [state, setState];
+    return [];
   };
 
   const useMemo = (fn, refs) => {
-    let memoIdx = currentMemoHookIdx;
-    memoHooks[memoIdx] = memoHooks[memoIdx] || {
-      memoizedValue: fn(),
-      dependency: refs,
-    };
-
-    const { memoizedValue, dependency } = memoHooks[memoIdx];
-
-    if (shallowEquals(dependency, refs)) {
-      return typeof memoizedValue === 'object'
-        ? Object.freeze(memoizedValue)
-        : memoizedValue;
-    }
-
-    const newValue = fn();
-    memoHooks[memoIdx] = { memoizedValue: newValue, dependency: refs };
-
-    currentMemoHookIdx++;
-    return typeof newValue === 'object' ? Object.freeze(newValue) : newValue;
+    return fn();
   };
 
   const resetContext = () => {
