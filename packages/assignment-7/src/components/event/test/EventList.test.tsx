@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, vi } from "vitest";
 import EventList from "../EventList";
-import userEvent, { UserEvent } from "@testing-library/user-event";
+import userEvent from "@testing-library/user-event";
 import { ReactNode } from "react";
 import { Event } from "../../../App";
 
@@ -14,46 +14,37 @@ const setup = (componet: ReactNode) => {
   };
 };
 
-// const fillInputElement = async (
-//   element: HTMLInputElement,
-//   user: UserEvent,
-//   value: string
-// ) => {
-//   await user.clear(element);
-//   await user.type(element, value);
-// };
+const mockEvents = [
+  {
+    id: 1,
+    title: "회의",
+    date: "2024-08-01",
+    startTime: "10:00",
+    endTime: "11:00",
+    description: "팀 미팅",
+    location: "회의실 A",
+    category: "업무",
+    repeat: { type: "none", interval: 0 },
+    notificationTime: 10,
+  },
+  {
+    id: 2,
+    title: "점심 약속",
+    date: "2024-08-03",
+    startTime: "12:00",
+    endTime: "13:00",
+    description: "동료와 점심",
+    location: "레스토랑",
+    category: "개인",
+    repeat: { type: "none", interval: 0 },
+    notificationTime: 60,
+  },
+];
 
 describe("EventList에 대해 테스트를 합니다.", () => {
   const mockSetSearchTerm = vi.fn();
   const mockEditEvent = vi.fn();
   const mockDeleteEvent = vi.fn();
-
-  const mockEvents = [
-    {
-      id: 1,
-      title: "회의",
-      date: "2024-08-01",
-      startTime: "10:00",
-      endTime: "11:00",
-      description: "팀 미팅",
-      location: "회의실 A",
-      category: "업무",
-      repeat: { type: "none", interval: 0 },
-      notificationTime: 10,
-    },
-    {
-      id: 2,
-      title: "점심 약속",
-      date: "2024-08-03",
-      startTime: "12:00",
-      endTime: "13:00",
-      description: "동료와 점심",
-      location: "레스토랑",
-      category: "개인",
-      repeat: { type: "none", interval: 0 },
-      notificationTime: 60,
-    },
-  ];
 
   const defaultProps = {
     searchTerm: "",

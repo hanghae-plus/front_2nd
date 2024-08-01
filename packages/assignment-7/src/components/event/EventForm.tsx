@@ -21,7 +21,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useSaveEvent } from "./hooks/useSaveEvent";
 import { Event } from "../../App";
-import { useClosure } from "../alert/hooks/useClosure";
+import { useClosure } from "./hooks/useClosure";
 import { findOverlappingEvents } from "../../utils/date-utils";
 import { useEventForm } from "./hooks/useEventForm";
 
