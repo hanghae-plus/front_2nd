@@ -1,7 +1,7 @@
+import useCalendarView from "@/hooks/useCalendarView";
+import { Event } from "@/types";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { Heading, HStack, IconButton, Select, VStack } from "@chakra-ui/react";
-import useCalendarView from "../../hooks/useCalendarView";
-import { Event } from "../../types";
 import MonthView from "./MonthView";
 import WeekView from "./WeekView";
 

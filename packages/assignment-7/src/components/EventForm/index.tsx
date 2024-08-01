@@ -1,3 +1,6 @@
+import { categories, notificationOptions } from "@/contants";
+import useEventForm from "@/hooks/useEventForm";
+import { RepeatType } from "@/types";
 import {
   Button,
   Checkbox,
@@ -10,9 +13,6 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react";
-import { categories, notificationOptions } from "../../contants";
-import useEventForm from "../../hooks/useEventForm";
-import { RepeatType } from "../../types";
 
 interface Props {
   addOrUpdateEvent: () => Promise<void>;

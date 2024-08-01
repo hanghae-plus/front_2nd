@@ -1,6 +1,6 @@
+import { Event, RepeatType } from "@/types";
 import { useToast } from "@chakra-ui/react";
 import { ChangeEvent, useMemo, useState } from "react";
-import { Event, RepeatType } from "../types";
 
 const useEventForm = () => {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);

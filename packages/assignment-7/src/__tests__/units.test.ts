@@ -1,9 +1,9 @@
+import formatMonth from "@/utils/formatMonth";
+import formatWeek from "@/utils/formatWeek";
+import getDaysInMonth from "@/utils/getDaysInMonth";
+import getWeekDates from "@/utils/getWeekDates";
+import isDateInRange from "@/utils/isDateInRange";
 import { describe, expect, test } from "vitest";
-import formatMonth from "../utils/formatMonth";
-import formatWeek from "../utils/formatWeek";
-import getDaysInMonth from "../utils/getDaysInMonth";
-import getWeekDates from "../utils/getWeekDates";
-import isDateInRange from "../utils/isDateInRange";
 
 describe("단위 테스트: 날짜 및 시간 관리", () => {
   describe("getDaysInMonth 함수", () => {

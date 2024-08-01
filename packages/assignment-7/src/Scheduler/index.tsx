@@ -1,9 +1,9 @@
+import CalendarView from "@/components/CalendarView";
+import EventForm from "@/components/EventForm";
+import EventList from "@/components/EventList";
+import NotificationAlert from "@/components/NotificationAlert";
+import OverlappingAlert from "@/components/OverlappingAlert";
 import { Box, Flex } from "@chakra-ui/react";
-import CalendarView from "../components/CalendarView";
-import EventForm from "../components/EventForm";
-import EventList from "../components/EventList";
-import NotificationAlert from "../components/NotificationAlert";
-import OverlappingAlert from "../components/OverlappingAlert";
 import useScheduler from "./useScheduler";
 
 const Scheduler = () => {

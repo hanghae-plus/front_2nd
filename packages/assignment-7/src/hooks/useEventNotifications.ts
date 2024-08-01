@@ -1,6 +1,6 @@
+import { Event, Notification } from "@/types";
 import { useInterval } from "@chakra-ui/react";
 import { useState } from "react";
-import { Event, Notification } from "../types";
 
 interface Props {
   events: Array<Event>;

@@ -1,4 +1,4 @@
-import { Event } from "../../types";
+import { Event } from "@/types";
 
 const events: Array<Event> = [
   {

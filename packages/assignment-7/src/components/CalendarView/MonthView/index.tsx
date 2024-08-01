@@ -1,3 +1,7 @@
+import { weekDays } from "@/contants";
+import { Event } from "@/types";
+import formatMonth from "@/utils/formatMonth";
+import getDaysInMonth from "@/utils/getDaysInMonth";
 import { BellIcon } from "@chakra-ui/icons";
 import {
   Box,
@@ -12,10 +16,6 @@ import {
   Tr,
   VStack,
 } from "@chakra-ui/react";
-import { weekDays } from "../../../contants";
-import { Event } from "../../../types";
-import formatMonth from "../../../utils/formatMonth";
-import getDaysInMonth from "../../../utils/getDaysInMonth";
 
 interface Props {
   currentDate: Date;

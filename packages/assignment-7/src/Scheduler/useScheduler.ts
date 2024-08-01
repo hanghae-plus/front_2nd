@@ -1,11 +1,11 @@
+import useCalendarView from "@/hooks/useCalendarView";
+import useEventForm from "@/hooks/useEventForm";
+import useEventManager from "@/hooks/useEventManager";
+import useEventNotifications from "@/hooks/useEventNotifications";
+import useEventSearch from "@/hooks/useEventSearch";
+import useOverlappingEvents from "@/hooks/useOverlappingEvents";
+import { Event } from "@/types";
 import { useState } from "react";
-import useCalendarView from "../hooks/useCalendarView";
-import useEventForm from "../hooks/useEventForm";
-import useEventManager from "../hooks/useEventManager";
-import useEventNotifications from "../hooks/useEventNotifications";
-import useEventSearch from "../hooks/useEventSearch";
-import useOverlappingEvents from "../hooks/useOverlappingEvents";
-import { Event } from "../types";
 
 const useScheduler = () => {
   const [events, setEvents] = useState<Event[]>([]);

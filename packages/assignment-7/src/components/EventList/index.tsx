@@ -1,3 +1,6 @@
+import { notificationOptions } from "@/contants";
+import useEventSearch from "@/hooks/useEventSearch";
+import { Event } from "@/types";
 import { BellIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import {
   Box,
@@ -9,9 +12,6 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { notificationOptions } from "../../contants";
-import useEventSearch from "../../hooks/useEventSearch";
-import { Event } from "../../types";
 
 interface Props {
   eventSearch: ReturnType<typeof useEventSearch>;

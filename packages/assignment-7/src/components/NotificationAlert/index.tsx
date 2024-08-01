@@ -1,3 +1,4 @@
+import { Notification, SetState } from "@/types";
 import {
   Alert,
   AlertIcon,
@@ -6,7 +7,6 @@ import {
   CloseButton,
   VStack,
 } from "@chakra-ui/react";
-import { Notification, SetState } from "../../types";
 
 interface Props {
   notifications: Array<Notification>;

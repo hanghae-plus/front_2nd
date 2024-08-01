@@ -1,5 +1,5 @@
+import { Event } from "@/types";
 import { http, HttpResponse } from "msw";
-import { Event } from "../../types";
 import events from "../mockdata/events";
 
 export const createHandlers = (mockEvents?: Array<Event>) => {

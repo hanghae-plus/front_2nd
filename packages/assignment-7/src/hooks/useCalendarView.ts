@@ -1,6 +1,6 @@
+import { fetchHolidays } from "@/contants";
+import { ViewType } from "@/types";
 import { useEffect, useState } from "react";
-import { fetchHolidays } from "../contants";
-import { ViewType } from "../types";
 
 const useCalendarView = () => {
   const [view, setView] = useState<ViewType>("month");

@@ -1,6 +1,6 @@
+import { Event, ViewType } from "@/types";
+import getWeekDates from "@/utils/getWeekDates";
 import { useState } from "react";
-import { Event, ViewType } from "../types";
-import getWeekDates from "../utils/getWeekDates";
 
 interface Props {
   events: Array<Event>;

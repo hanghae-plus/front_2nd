@@ -1,6 +1,6 @@
+import { Event, SetState } from "@/types";
 import { useToast } from "@chakra-ui/react";
 import { useEffect } from "react";
-import { Event, SetState } from "../types";
 
 interface Props {
   validateSubmitEventForm: () => Promise<boolean>;

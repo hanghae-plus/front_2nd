@@ -1,5 +1,5 @@
+import { Event } from "@/types";
 import { useState } from "react";
-import { Event } from "../types";
 
 interface Props {
   events: Array<Event>;

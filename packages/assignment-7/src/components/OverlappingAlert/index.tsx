@@ -1,3 +1,4 @@
+import { Event, SetState } from "@/types";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -9,7 +10,6 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useRef } from "react";
-import { Event, SetState } from "../../types";
 
 interface Props {
   isOverlapDialogOpen: boolean;
