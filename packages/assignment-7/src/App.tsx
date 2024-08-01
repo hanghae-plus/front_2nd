@@ -91,7 +91,9 @@ function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [holidays, setHolidays] = useState<Record<string, string>>({});
+  const [holidays] = useState<Record<string, string>>(() =>
+    fetchHolidays(2024, 1)
+  );
 
   const cancelRef = useRef<HTMLButtonElement>(null);
 
@@ -351,13 +353,6 @@ function App() {
   })();
 
   useInterval(checkUpcomingEvents, 1000); // 1초마다 체크
-
-  useEffect(() => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1;
-    const newHolidays = fetchHolidays(year, month);
-    setHolidays(newHolidays);
-  }, [currentDate]);
 
   useEffect(() => {
     fetchEvents();
