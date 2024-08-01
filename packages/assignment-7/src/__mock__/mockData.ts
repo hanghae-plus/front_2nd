@@ -1,7 +1,4 @@
-import { http, HttpResponse } from 'msw';
-import { Event } from './App';
-
-let events = [
+const initialEvents = [
   {
     id: 1,
     title: '팀 회의',
@@ -92,28 +89,21 @@ let events = [
   },
 ];
 
-export const mockEventApiHandlers = [
-  http.get('/api/events', () => {
-    return HttpResponse.json(events);
-  }),
+const initialHolidays = {
+  '2024-01-01': '신정',
+  '2024-02-09': '설날',
+  '2024-02-10': '설날',
+  '2024-02-11': '설날',
+  '2024-03-01': '삼일절',
+  '2024-05-05': '어린이날',
+  '2024-06-06': '현충일',
+  '2024-08-15': '광복절',
+  '2024-09-16': '추석',
+  '2024-09-17': '추석',
+  '2024-09-18': '추석',
+  '2024-10-03': '개천절',
+  '2024-10-09': '한글날',
+  '2024-12-25': '크리스마스',
+};
 
-  http.post('/api/events', async ({ request }) => {
-    const event = (await request.json()) as Event;
-    const newEvent = { ...event };
-    events.push(event);
-    return HttpResponse.json(newEvent, { status: 201 });
-  }),
-
-  http.put('/api/events/:id', async ({ params, request }) => {
-    const { id } = params;
-    const updates = (await request.json()) as Record<string, unknown>;
-    events = events.map((event) => (event.id === Number(id) ? { ...event, ...updates } : event));
-    return HttpResponse.json(events.find((event) => event.id === Number(id)));
-  }),
-
-  http.delete('/api/events/:id', ({ params }) => {
-    const { id } = params;
-    events = events.filter((event) => event.id !== Number(id));
-    return new HttpResponse(null, { status: 204 });
-  }),
-];
+export { initialEvents, initialHolidays };
