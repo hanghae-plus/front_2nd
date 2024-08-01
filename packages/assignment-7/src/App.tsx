@@ -1,8 +1,6 @@
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Box,
-  Button,
-  Checkbox,
   Flex,
   FormControl,
   FormLabel,
@@ -12,7 +10,6 @@ import {
   Input,
   Select,
   Text,
-  Tooltip,
   useDisclosure,
   useInterval,
   useToast,
@@ -21,12 +18,12 @@ import {
 import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { NotificationView } from './components/NotificationView';
 import { AlertView } from './components/AlertView';
-import { Event, RepeatType } from './types/types';
-import { notificationOptions, categories } from './constants/constants';
+import { Event } from './types/types';
 import { EventDetailView } from './components/EventDetailView';
 import { WeekView } from './components/WeekView';
 import { MonthView } from './components/MonthView';
 import { isDateInRange } from './lib/utils/date';
+import { EventForm } from './components/EventForm';
 
 const dummyEvents: Event[] = [];
 
@@ -34,7 +31,7 @@ const dummyEvents: Event[] = [];
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const fetchHolidays = (year: number, month: number) => {
-  // 실제로는 API를 호출하여 공휴일 정보를 가져와야 합니다.
+  // 공공API를 붙여보려 하였으나 serviceKey를 숨길 방법이 없어 이대로 유지합니다.
   // 여기서는 예시로 하드코딩된 데이터를 사용합니다.
   return {
     '2024-01-01': '신정',
@@ -54,22 +51,28 @@ const fetchHolidays = (year: number, month: number) => {
   };
 };
 
+const initialFormData = {
+  title: '',
+  date: '',
+  startTime: '',
+  endTime: '',
+};
+
 function App() {
   const [events, setEvents] = useState<Event[]>(dummyEvents);
-  const [title, setTitle] = useState('');
-  const [date, setDate] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
-  const [category, setCategory] = useState('');
+  const [formData, setFormData] = useState<Omit<Event, 'id'>>(initialFormData);
+  const updateFormData = <K extends keyof Event>(key: K, value: Event[K]) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+  const [timeError, setTimeError] = useState<{
+    start: string | null;
+    end: string | null;
+  }>({ start: null, end: null });
+  const updateTimeError = (type: 'start' | 'end', message: string | null) => {
+    setTimeError((prev) => ({ ...prev, [type]: message }));
+  };
   const [view, setView] = useState<'week' | 'month'>('month');
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-  const [isRepeating, setIsRepeating] = useState(false);
-  const [repeatType, setRepeatType] = useState<RepeatType>('none');
-  const [repeatInterval, setRepeatInterval] = useState(1);
-  const [repeatEndDate, setRepeatEndDate] = useState('');
-  const [notificationTime, setNotificationTime] = useState(10);
   const [notifications, setNotifications] = useState<
     { id: number; message: string }[]
   >([]);
@@ -84,9 +87,6 @@ function App() {
   // overlapDialogDisclosure
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [overlappingEvents, setOverlappingEvents] = useState<Event[]>([]);
-
-  const [startTimeError, setStartTimeError] = useState<string | null>(null);
-  const [endTimeError, setEndTimeError] = useState<string | null>(null);
 
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -117,7 +117,12 @@ function App() {
   };
 
   const addOrUpdateEvent = async () => {
-    if (!title || !date || !startTime || !endTime) {
+    if (
+      !formData.title ||
+      !formData.date ||
+      !formData.startTime ||
+      !formData.endTime
+    ) {
       toast({
         title: '필수 정보를 모두 입력해주세요.',
         status: 'error',
@@ -127,8 +132,8 @@ function App() {
       return;
     }
 
-    validateTime(startTime, endTime);
-    if (startTimeError || endTimeError) {
+    validateTime(formData.startTime, formData.endTime);
+    if (timeError.start || timeError.end) {
       toast({
         title: '시간 설정을 확인해주세요.',
         status: 'error',
@@ -140,19 +145,12 @@ function App() {
 
     const eventData: Event = {
       id: editingEvent ? editingEvent.id : Date.now(),
-      title,
-      date,
-      startTime,
-      endTime,
-      description,
-      location,
-      category,
+      ...formData,
       repeat: {
-        type: isRepeating ? repeatType : 'none',
-        interval: repeatInterval,
-        endDate: repeatEndDate || undefined,
+        type: formData.repeat?.type || 'none',
+        interval: formData.repeat?.interval || 1,
+        endDate: formData.repeat?.endDate || '',
       },
-      notificationTime,
     };
 
     const overlapping = findOverlappingEvents(eventData);
@@ -214,19 +212,7 @@ function App() {
   const continueSaving = () => {
     saveEvent({
       id: editingEvent ? editingEvent.id : Date.now(),
-      title,
-      date,
-      startTime,
-      endTime,
-      description,
-      location,
-      category,
-      repeat: {
-        type: isRepeating ? repeatType : 'none',
-        interval: repeatInterval,
-        endDate: repeatEndDate || undefined,
-      },
-      notificationTime,
+      ...formData,
     });
     onClose();
   };
@@ -262,6 +248,7 @@ function App() {
   const checkUpcomingEvents = async () => {
     const now = new Date();
     const upcomingEvents = events.filter((event) => {
+      if (event.notificationTime === undefined) return false;
       const eventStart = new Date(`${event.date}T${event.startTime}`);
       const timeDiff = (eventStart.getTime() - now.getTime()) / (1000 * 60);
       return (
@@ -287,31 +274,19 @@ function App() {
     }
   };
 
-  const validateTime = (start: string, end: string) => {
+  const validateTime = (start?: string, end?: string) => {
     if (!start || !end) return;
 
     const startDate = new Date(`2000-01-01T${start}`);
     const endDate = new Date(`2000-01-01T${end}`);
 
     if (startDate >= endDate) {
-      setStartTimeError('시작 시간은 종료 시간보다 빨라야 합니다.');
-      setEndTimeError('종료 시간은 시작 시간보다 늦어야 합니다.');
+      updateTimeError('start', '시작 시간은 종료 시간보다 빨라야 합니다.');
+      updateTimeError('end', '종료 시간은 시작 시간보다 늦어야 합니다.');
     } else {
-      setStartTimeError(null);
-      setEndTimeError(null);
+      updateTimeError('start', null);
+      updateTimeError('end', null);
     }
-  };
-
-  const handleStartTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newStartTime = e.target.value;
-    setStartTime(newStartTime);
-    validateTime(newStartTime, endTime);
-  };
-
-  const handleEndTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newEndTime = e.target.value;
-    setEndTime(newEndTime);
-    validateTime(startTime, newEndTime);
   };
 
   // 날짜 문자열을 Date 객체로 변환하는 함수
@@ -337,34 +312,11 @@ function App() {
   };
 
   const resetForm = () => {
-    setTitle('');
-    setDate('');
-    setStartTime('');
-    setEndTime('');
-    setDescription('');
-    setLocation('');
-    setCategory('');
-    setEditingEvent(null);
-    setIsRepeating(false);
-    setRepeatType('none');
-    setRepeatInterval(1);
-    setRepeatEndDate('');
+    setFormData(initialFormData);
   };
 
   const editEvent = (event: Event) => {
-    setEditingEvent(event);
-    setTitle(event.title);
-    setDate(event.date);
-    setStartTime(event.startTime);
-    setEndTime(event.endTime);
-    setDescription(event.description);
-    setLocation(event.location);
-    setCategory(event.category);
-    setIsRepeating(event.repeat.type !== 'none');
-    setRepeatType(event.repeat.type);
-    setRepeatInterval(event.repeat.interval);
-    setRepeatEndDate(event.repeat.endDate || '');
-    setNotificationTime(event.notificationTime);
+    setFormData(event);
   };
 
   const navigate = (direction: 'prev' | 'next') => {
@@ -385,8 +337,8 @@ function App() {
     return events.filter(
       (event) =>
         event.title.toLowerCase().includes(term.toLowerCase()) ||
-        event.description.toLowerCase().includes(term.toLowerCase()) ||
-        event.location.toLowerCase().includes(term.toLowerCase())
+        event?.description?.toLowerCase().includes(term.toLowerCase()) ||
+        event?.location?.toLowerCase().includes(term.toLowerCase())
     );
   };
 
@@ -414,160 +366,17 @@ function App() {
   return (
     <Box w="full" h="100vh" m="auto" p={5}>
       <Flex gap={6} h="full">
-        <VStack w="400px" spacing={5} align="stretch">
-          <Heading>{editingEvent ? '일정 수정' : '일정 추가'}</Heading>
-
-          <FormControl>
-            <FormLabel>제목</FormLabel>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>날짜</FormLabel>
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </FormControl>
-
-          <HStack width="100%">
-            <FormControl>
-              <FormLabel>시작 시간</FormLabel>
-              <Tooltip
-                label={startTimeError}
-                isOpen={!!startTimeError}
-                placement="top"
-              >
-                <Input
-                  type="time"
-                  value={startTime}
-                  onChange={handleStartTimeChange}
-                  onBlur={() => validateTime(startTime, endTime)}
-                  isInvalid={!!startTimeError}
-                />
-              </Tooltip>
-            </FormControl>
-            <FormControl>
-              <FormLabel>종료 시간</FormLabel>
-              <Tooltip
-                label={endTimeError}
-                isOpen={!!endTimeError}
-                placement="top"
-              >
-                <Input
-                  type="time"
-                  value={endTime}
-                  onChange={handleEndTimeChange}
-                  onBlur={() => validateTime(startTime, endTime)}
-                  isInvalid={!!endTimeError}
-                />
-              </Tooltip>
-            </FormControl>
-          </HStack>
-
-          <FormControl>
-            <FormLabel>설명</FormLabel>
-            <Input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>위치</FormLabel>
-            <Input
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>카테고리</FormLabel>
-            <Select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              <option value="">카테고리 선택</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>반복 설정</FormLabel>
-            <Checkbox
-              isChecked={isRepeating}
-              onChange={(e) => setIsRepeating(e.target.checked)}
-            >
-              반복 일정
-            </Checkbox>
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>알림 설정</FormLabel>
-            <Select
-              value={notificationTime}
-              onChange={(e) => setNotificationTime(Number(e.target.value))}
-            >
-              {notificationOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-          </FormControl>
-
-          {isRepeating && (
-            <VStack width="100%">
-              <FormControl>
-                <FormLabel>반복 유형</FormLabel>
-                <Select
-                  value={repeatType}
-                  onChange={(e) => setRepeatType(e.target.value as RepeatType)}
-                >
-                  <option value="daily">매일</option>
-                  <option value="weekly">매주</option>
-                  <option value="monthly">매월</option>
-                  <option value="yearly">매년</option>
-                </Select>
-              </FormControl>
-              <HStack width="100%">
-                <FormControl>
-                  <FormLabel>반복 간격</FormLabel>
-                  <Input
-                    type="number"
-                    value={repeatInterval}
-                    onChange={(e) => setRepeatInterval(Number(e.target.value))}
-                    min={1}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>반복 종료일</FormLabel>
-                  <Input
-                    type="date"
-                    value={repeatEndDate}
-                    onChange={(e) => setRepeatEndDate(e.target.value)}
-                  />
-                </FormControl>
-              </HStack>
-            </VStack>
-          )}
-
-          <Button
-            data-testid="event-submit-button"
-            onClick={addOrUpdateEvent}
-            colorScheme="blue"
-          >
-            {editingEvent ? '일정 수정' : '일정 추가'}
-          </Button>
-        </VStack>
-
         <VStack flex={1} spacing={5} align="stretch">
           <Heading>일정 보기</Heading>
+
+          <EventForm
+            formData={formData}
+            updateFormdata={updateFormData}
+            editingEvent={editingEvent}
+            validateTime={validateTime}
+            timeError={timeError}
+            onSave={addOrUpdateEvent}
+          />
 
           <HStack mx="auto" justifyContent="space-between">
             <IconButton
