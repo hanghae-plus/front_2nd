@@ -2,9 +2,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { setupServer } from "msw/node";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import App from "../App";
 import events from "../mocks/mockdata/events";
 import { createHandlers } from "../mocks/mockServiceWorker/handlers";
+import App from "../Scheduler";
 import { Event, RepeatType } from "../types";
 
 let server = setupServer(...createHandlers());

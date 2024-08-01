@@ -12,17 +12,16 @@ import {
 } from "@chakra-ui/react";
 import { categories, notificationOptions } from "../../contants";
 import useEventForm from "../../hooks/useEventForm";
-import { Event, RepeatType } from "../../types";
+import { RepeatType } from "../../types";
 
 interface Props {
-  editingEvent: Event | null;
   addOrUpdateEvent: () => Promise<void>;
   eventForm: ReturnType<typeof useEventForm>;
 }
-const EventForm = ({ editingEvent, addOrUpdateEvent, eventForm }: Props) => {
+const EventForm = ({ addOrUpdateEvent, eventForm }: Props) => {
   return (
     <VStack w="400px" spacing={5} align="stretch">
-      <Heading>{editingEvent ? "일정 수정" : "일정 추가"}</Heading>
+      <Heading>{eventForm.editingEvent ? "일정 수정" : "일정 추가"}</Heading>
 
       <FormControl>
         <FormLabel>제목</FormLabel>
@@ -178,7 +177,7 @@ const EventForm = ({ editingEvent, addOrUpdateEvent, eventForm }: Props) => {
         onClick={addOrUpdateEvent}
         colorScheme="blue"
       >
-        {editingEvent ? "일정 수정" : "일정 추가"}
+        {eventForm.editingEvent ? "일정 수정" : "일정 추가"}
       </Button>
     </VStack>
   );

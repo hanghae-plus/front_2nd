@@ -1,11 +1,10 @@
 import { useToast } from "@chakra-ui/react";
 import { ChangeEvent, useMemo, useState } from "react";
-import { Event, RepeatType, SetState } from "../types";
+import { Event, RepeatType } from "../types";
 
-interface Props {
-  setEditingEvent: SetState<Event | null>;
-}
-const useEventForm = ({ setEditingEvent }: Props) => {
+const useEventForm = () => {
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+
   const toast = useToast();
 
   const [title, setTitle] = useState("");
@@ -157,6 +156,9 @@ const useEventForm = ({ setEditingEvent }: Props) => {
   };
 
   return {
+    editingEvent,
+    setEditingEvent,
+
     title,
     setTitle,
     date,

@@ -10,20 +10,17 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { notificationOptions } from "../../contants";
-import { Event, SetState } from "../../types";
+import useEventSearch from "../../hooks/useEventSearch";
+import { Event } from "../../types";
 
 interface Props {
-  searchTerm: string;
-  setSearchTerm: SetState<string>;
-  filteredEvents: Array<Event>;
+  eventSearch: ReturnType<typeof useEventSearch>;
   notifiedEvents: Array<number>;
   editEvent: (event: Event) => void;
   deleteEvent: (eventId: number) => void;
 }
 const EventList = ({
-  searchTerm,
-  setSearchTerm,
-  filteredEvents,
+  eventSearch,
   notifiedEvents,
   editEvent,
   deleteEvent,
@@ -34,15 +31,15 @@ const EventList = ({
         <FormLabel>일정 검색</FormLabel>
         <Input
           placeholder="검색어를 입력하세요"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={eventSearch.searchTerm}
+          onChange={(e) => eventSearch.setSearchTerm(e.target.value)}
         />
       </FormControl>
 
-      {filteredEvents.length === 0 ? (
+      {eventSearch.filteredEvents.length === 0 ? (
         <Text>검색 결과가 없습니다.</Text>
       ) : (
-        filteredEvents.map((event) => (
+        eventSearch.filteredEvents.map((event) => (
           <Box
             key={event.id}
             borderWidth={1}
