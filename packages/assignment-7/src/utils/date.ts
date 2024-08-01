@@ -31,3 +31,7 @@ export const formatMonth = (date: Date): string => {
   const month = date.getMonth() + 1;
   return `${year}년 ${month}월`;
 };
+
+export const isDateInRange = (date: Date, start: Date, end: Date) => {
+  return date >= start && date <= end;
+};

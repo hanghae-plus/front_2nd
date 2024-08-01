@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import App from "../App";
-import { mockEvents } from "../mockApiHandlers";
+import { mockEvents, resetMockEvents } from "../mockApiHandlers";
 
 const mockToastFn = vi.fn();
 
@@ -15,6 +15,11 @@ vi.mock("@chakra-ui/react", async () => {
 });
 
 describe("일정 관리 애플리케이션 통합 테스트", () => {
+  afterEach(() => {
+    resetMockEvents();
+    vi.useRealTimers();
+  });
+
   describe("일정 CRUD 및 기본 기능", () => {
     beforeEach(() => {
       vi.setSystemTime(new Date("2024-07-25"));
@@ -271,9 +276,13 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
   });
 
-  // describe("알림 기능", () => {
-  //   it.fails("일정 알림을 설정하고 지정된 시간에 알림이 발생하는지 확인한다");
-  // });
+  describe("알림 기능", () => {
+    it("일정 알림을 설정하고 지정된 시간에 알림이 발생하는지 확인한다", async () => {
+      render(<App />);
+
+      expect(await screen.findByRole("alert")).toBeInTheDocument();
+    });
+  });
 
   describe("검색 기능", () => {
     beforeEach(() => {

@@ -286,6 +286,7 @@ function App() {
 
   const checkUpcomingEvents = async () => {
     const now = new Date();
+
     const upcomingEvents = events.filter((event) => {
       const eventStart = new Date(`${event.date}T${event.startTime}`);
       const timeDiff = (eventStart.getTime() - now.getTime()) / (1000 * 60);

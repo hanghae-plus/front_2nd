@@ -13,7 +13,7 @@ interface Event {
   notificationTime: number;
 }
 
-export let mockEvents: Event[] = [
+export const originalMockEvents: Event[] = [
   {
     id: 1,
     title: "팀 회의",
@@ -103,6 +103,13 @@ export let mockEvents: Event[] = [
     })(),
   },
 ];
+
+export let mockEvents = [...originalMockEvents];
+
+// mockEvents를 초기화하는 함수
+export const resetMockEvents = () => {
+  mockEvents = [...originalMockEvents];
+};
 
 export const mockApiHandlers = [
   http.get("/api/events", () => {

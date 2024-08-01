@@ -4,7 +4,8 @@ import {
   formatWeek,
   getDaysInMonth,
   getWeekDates,
-} from "../utils/date";
+  isDateInRange,
+} from "./date";
 
 describe("단위 테스트: 날짜 및 시간 관리", () => {
   describe("getDaysInMonth 함수", () => {
@@ -124,6 +125,24 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
     it("유효하지 않은 날짜 데이터를 넘길경우 빈 문자열이 반환된다.", () => {
       const date = new Date("0000-13-99");
       expect(formatMonth(date)).toBe("");
+    });
+  });
+
+  describe("isDateInRange 함수", () => {
+    it("특정 날짜가 주어진 범위에 속하면 true를 반환한다.", () => {
+      const date = new Date("2024-07-21");
+      const start = new Date("2024-07-21");
+      const end = new Date("2024-07-21");
+
+      expect(isDateInRange(date, start, end)).toBe(true);
+    });
+
+    it("주어진 날짜가 주어진 범위에 속하지 않으면 false를 반환한다.", () => {
+      const date = new Date("2024-07-21");
+      const start = new Date("2024-07-22");
+      const end = new Date("2024-07-23");
+
+      expect(isDateInRange(date, start, end)).toBe(false);
     });
   });
 });
