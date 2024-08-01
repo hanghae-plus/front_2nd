@@ -13,5 +13,10 @@
   "workspaces": [
     "packages/*",
     "examples/*"
-  ]
+  ],
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
 }

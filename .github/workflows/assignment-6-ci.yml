@@ -12,6 +12,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: assignment-6-basic
+        run: |
+          pnpm install
+      - name: tsc 실행 및 build
+        run: |
+          cd packages/assignment-6
+          npm install tsc
+          npm run build
+        continue-on-error: true 
     - uses: actions/checkout@v3
     - uses: pnpm/action-setup@v4
       with:

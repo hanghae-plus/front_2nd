@@ -1,3 +1,7 @@
+import { describe, expect, test } from "vitest";
+  describe('isDateInRange 함수', () => {
+    describe('주어진 날짜가 특정 범위 내에 있는지 정확히 판단한다', async () => {
+    });
 import { describe, test } from "vitest";
 
 describe('단위 테스트: 날짜 및 시간 관리', () => {
