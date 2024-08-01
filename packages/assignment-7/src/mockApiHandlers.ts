@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { type Event } from './App';
 
-let events = [
+let initialEvents = [
   {
     id: 1,
     title: '팀 회의',
@@ -91,6 +91,12 @@ let events = [
     })(),
   },
 ];
+
+let events = [...initialEvents];
+
+export const resetEvents = () => {
+  events = [...initialEvents];
+}
 
 export const mockApiHandlers = [
   // 일정 조회

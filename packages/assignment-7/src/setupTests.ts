@@ -1,10 +1,12 @@
 import '@testing-library/jest-dom';
 import { setupServer } from 'msw/node';
-import { mockApiHandlers } from './mockApiHandlers';
+import { mockApiHandlers, resetEvents } from './mockApiHandlers';
 
 export const server = setupServer(...mockApiHandlers);
 
 beforeEach(() => {
+  resetEvents();
+
   vi.useFakeTimers({
     shouldAdvanceTime: true,
   });
