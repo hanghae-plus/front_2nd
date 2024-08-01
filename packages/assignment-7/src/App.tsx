@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   AlertDialog,
@@ -32,16 +32,16 @@ import {
   useInterval,
   useToast,
   VStack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 import {
   BellIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   DeleteIcon,
   EditIcon,
-} from "@chakra-ui/icons";
+} from '@chakra-ui/icons';
 
-export type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
+export type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 export interface RepeatInfo {
   type: RepeatType;
@@ -62,16 +62,16 @@ export interface Event {
   notificationTime: number; // 분 단위로 저장
 }
 
-const categories = ["업무", "개인", "가족", "기타"];
+const categories = ['업무', '개인', '가족', '기타'];
 
-const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
+const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
 
 const notificationOptions = [
-  { value: 1, label: "1분 전" },
-  { value: 10, label: "10분 전" },
-  { value: 60, label: "1시간 전" },
-  { value: 120, label: "2시간 전" },
-  { value: 1440, label: "1일 전" },
+  { value: 1, label: '1분 전' },
+  { value: 10, label: '10분 전' },
+  { value: 60, label: '1시간 전' },
+  { value: 120, label: '2시간 전' },
+  { value: 1440, label: '1일 전' },
 ];
 
 const dummyEvents: Event[] = [];
@@ -83,38 +83,38 @@ const fetchHolidays = (year: number, month: number) => {
   // 실제로는 API를 호출하여 공휴일 정보를 가져와야 합니다.
   // 여기서는 예시로 하드코딩된 데이터를 사용합니다.
   return {
-    "2024-01-01": "신정",
-    "2024-02-09": "설날",
-    "2024-02-10": "설날",
-    "2024-02-11": "설날",
-    "2024-03-01": "삼일절",
-    "2024-05-05": "어린이날",
-    "2024-06-06": "현충일",
-    "2024-08-15": "광복절",
-    "2024-09-16": "추석",
-    "2024-09-17": "추석",
-    "2024-09-18": "추석",
-    "2024-10-03": "개천절",
-    "2024-10-09": "한글날",
-    "2024-12-25": "크리스마스",
+    '2024-01-01': '신정',
+    '2024-02-09': '설날',
+    '2024-02-10': '설날',
+    '2024-02-11': '설날',
+    '2024-03-01': '삼일절',
+    '2024-05-05': '어린이날',
+    '2024-06-06': '현충일',
+    '2024-08-15': '광복절',
+    '2024-09-16': '추석',
+    '2024-09-17': '추석',
+    '2024-09-18': '추석',
+    '2024-10-03': '개천절',
+    '2024-10-09': '한글날',
+    '2024-12-25': '크리스마스',
   };
 };
 
 function App() {
   const [events, setEvents] = useState<Event[]>(dummyEvents);
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [category, setCategory] = useState("");
-  const [view, setView] = useState<"week" | "month">("month");
+  const [title, setTitle] = useState('');
+  const [date, setDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [description, setDescription] = useState('');
+  const [location, setLocation] = useState('');
+  const [category, setCategory] = useState('');
+  const [view, setView] = useState<'week' | 'month'>('month');
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isRepeating, setIsRepeating] = useState(false);
-  const [repeatType, setRepeatType] = useState<RepeatType>("none");
+  const [repeatType, setRepeatType] = useState<RepeatType>('none');
   const [repeatInterval, setRepeatInterval] = useState(1);
-  const [repeatEndDate, setRepeatEndDate] = useState("");
+  const [repeatEndDate, setRepeatEndDate] = useState('');
   const [notificationTime, setNotificationTime] = useState(10);
   const [notifications, setNotifications] = useState<
     { id: number; message: string }[]
@@ -129,7 +129,7 @@ function App() {
 
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [holidays, setHolidays] = useState<{ [key: string]: string }>({});
 
   const cancelRef = useRef<HTMLButtonElement>(null);
@@ -138,17 +138,17 @@ function App() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch("/api/events");
+      const response = await fetch('/api/events');
       if (!response.ok) {
-        throw new Error("Failed to fetch events");
+        throw new Error('Failed to fetch events');
       }
       const data = await response.json();
       setEvents(data);
     } catch (error) {
-      console.error("Error fetching events:", error);
+      console.error('Error fetching events:', error);
       toast({
-        title: "이벤트 로딩 실패",
-        status: "error",
+        title: '이벤트 로딩 실패',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
@@ -158,8 +158,8 @@ function App() {
   const addOrUpdateEvent = async () => {
     if (!title || !date || !startTime || !endTime) {
       toast({
-        title: "필수 정보를 모두 입력해주세요.",
-        status: "error",
+        title: '필수 정보를 모두 입력해주세요.',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
@@ -169,8 +169,8 @@ function App() {
     validateTime(startTime, endTime);
     if (startTimeError || endTimeError) {
       toast({
-        title: "시간 설정을 확인해주세요.",
-        status: "error",
+        title: '시간 설정을 확인해주세요.',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
@@ -187,7 +187,7 @@ function App() {
       location,
       category,
       repeat: {
-        type: isRepeating ? repeatType : "none",
+        type: isRepeating ? repeatType : 'none',
         interval: repeatInterval,
         endDate: repeatEndDate || undefined,
       },
@@ -208,24 +208,24 @@ function App() {
       let response;
       if (editingEvent) {
         response = await fetch(`/api/events/${eventData.id}`, {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify(eventData),
         });
       } else {
-        response = await fetch("/api/events", {
-          method: "POST",
+        response = await fetch('/api/events', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify(eventData),
         });
       }
 
       if (!response.ok) {
-        throw new Error("Failed to save event");
+        throw new Error('Failed to save event');
       }
 
       await fetchEvents(); // 이벤트 목록 새로고침
@@ -233,17 +233,17 @@ function App() {
       resetForm();
       toast({
         title: editingEvent
-          ? "일정이 수정되었습니다."
-          : "일정이 추가되었습니다.",
-        status: "success",
+          ? '일정이 수정되었습니다.'
+          : '일정이 추가되었습니다.',
+        status: 'success',
         duration: 3000,
         isClosable: true,
       });
     } catch (error) {
-      console.error("Error saving event:", error);
+      console.error('Error saving event:', error);
       toast({
-        title: "일정 저장 실패",
-        status: "error",
+        title: '일정 저장 실패',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
@@ -253,25 +253,25 @@ function App() {
   const deleteEvent = async (id: number) => {
     try {
       const response = await fetch(`/api/events/${id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete event");
+        throw new Error('Failed to delete event');
       }
 
       await fetchEvents(); // 이벤트 목록 새로고침
       toast({
-        title: "일정이 삭제되었습니다.",
-        status: "info",
+        title: '일정이 삭제되었습니다.',
+        status: 'info',
         duration: 3000,
         isClosable: true,
       });
     } catch (error) {
-      console.error("Error deleting event:", error);
+      console.error('Error deleting event:', error);
       toast({
-        title: "일정 삭제 실패",
-        status: "error",
+        title: '일정 삭제 실패',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
@@ -301,7 +301,7 @@ function App() {
         ]);
         setNotifiedEvents((prev) => [...prev, event.id]);
       } catch (error) {
-        console.error("Error updating notification status:", error);
+        console.error('Error updating notification status:', error);
       }
     }
   };
@@ -313,8 +313,8 @@ function App() {
     const endDate = new Date(`2000-01-01T${end}`);
 
     if (startDate >= endDate) {
-      setStartTimeError("시작 시간은 종료 시간보다 빨라야 합니다.");
-      setEndTimeError("종료 시간은 시작 시간보다 늦어야 합니다.");
+      setStartTimeError('시작 시간은 종료 시간보다 빨라야 합니다.');
+      setEndTimeError('종료 시간은 시작 시간보다 늦어야 합니다.');
     } else {
       setStartTimeError(null);
       setEndTimeError(null);
@@ -356,18 +356,18 @@ function App() {
   };
 
   const resetForm = () => {
-    setTitle("");
-    setDate("");
-    setStartTime("");
-    setEndTime("");
-    setDescription("");
-    setLocation("");
-    setCategory("");
+    setTitle('');
+    setDate('');
+    setStartTime('');
+    setEndTime('');
+    setDescription('');
+    setLocation('');
+    setCategory('');
     setEditingEvent(null);
     setIsRepeating(false);
-    setRepeatType("none");
+    setRepeatType('none');
     setRepeatInterval(1);
-    setRepeatEndDate("");
+    setRepeatEndDate('');
   };
 
   const editEvent = (event: Event) => {
@@ -379,10 +379,10 @@ function App() {
     setDescription(event.description);
     setLocation(event.location);
     setCategory(event.category);
-    setIsRepeating(event.repeat.type !== "none");
+    setIsRepeating(event.repeat.type !== 'none');
     setRepeatType(event.repeat.type);
     setRepeatInterval(event.repeat.interval);
-    setRepeatEndDate(event.repeat.endDate || "");
+    setRepeatEndDate(event.repeat.endDate || '');
     setNotificationTime(event.notificationTime);
   };
 
@@ -403,13 +403,13 @@ function App() {
     return weekDates;
   };
 
-  const navigate = (direction: "prev" | "next") => {
+  const navigate = (direction: 'prev' | 'next') => {
     setCurrentDate((prevDate) => {
       const newDate = new Date(prevDate);
-      if (view === "week") {
-        newDate.setDate(newDate.getDate() + (direction === "next" ? 7 : -7));
-      } else if (view === "month") {
-        newDate.setMonth(newDate.getMonth() + (direction === "next" ? 1 : -1));
+      if (view === 'week') {
+        newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+      } else if (view === 'month') {
+        newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
       }
       return newDate;
     });
@@ -430,10 +430,10 @@ function App() {
     const filtered = searchEvents(searchTerm);
     return filtered.filter((event) => {
       const eventDate = new Date(event.date);
-      if (view === "week") {
+      if (view === 'week') {
         const weekDates = getWeekDates(currentDate);
         return eventDate >= weekDates[0] && eventDate <= weekDates[6];
-      } else if (view === "month") {
+      } else if (view === 'month') {
         return (
           eventDate.getMonth() === currentDate.getMonth() &&
           eventDate.getFullYear() === currentDate.getFullYear()
@@ -459,13 +459,13 @@ function App() {
   const renderWeekView = () => {
     const weekDates = getWeekDates(currentDate);
     return (
-      <VStack data-testid="week-view" align="stretch" w="full" spacing={4}>
-        <Heading size="md">{formatWeek(currentDate)}</Heading>
-        <Table variant="simple" w="full">
+      <VStack data-testid='week-view' align='stretch' w='full' spacing={4}>
+        <Heading size='md'>{formatWeek(currentDate)}</Heading>
+        <Table variant='simple' w='full'>
           <Thead>
             <Tr>
               {weekDays.map((day) => (
-                <Th key={day} width="14.28%">
+                <Th key={day} width='14.28%'>
                   {day}
                 </Th>
               ))}
@@ -476,12 +476,12 @@ function App() {
               {weekDates.map((date) => (
                 <Td
                   key={date.toISOString()}
-                  height="100px"
-                  verticalAlign="top"
-                  width="14.28%"
+                  height='100px'
+                  verticalAlign='top'
+                  width='14.28%'
                   data-testid={`week-cell-${date.getDate()}`}
                 >
-                  <Text fontWeight="bold">{date.getDate()}</Text>
+                  <Text fontWeight='bold'>{date.getDate()}</Text>
                   {filteredEvents
                     .filter(
                       (event) =>
@@ -496,14 +496,14 @@ function App() {
                           data-testid={`event-${event.id}`}
                           p={1}
                           my={1}
-                          bg={isNotified ? "red.100" : "gray.100"}
-                          borderRadius="md"
-                          fontWeight={isNotified ? "bold" : "normal"}
-                          color={isNotified ? "red.500" : "inherit"}
+                          bg={isNotified ? 'red.100' : 'gray.100'}
+                          borderRadius='md'
+                          fontWeight={isNotified ? 'bold' : 'normal'}
+                          color={isNotified ? 'red.500' : 'inherit'}
                         >
                           <HStack spacing={1}>
                             {isNotified && <BellIcon />}
-                            <Text fontSize="sm" noOfLines={1}>
+                            <Text fontSize='sm' noOfLines={1}>
                               {event.title}
                             </Text>
                           </HStack>
@@ -547,13 +547,13 @@ function App() {
     }
 
     return (
-      <VStack data-testid="month-view" align="stretch" w="full" spacing={4}>
-        <Heading size="md">{formatMonth(currentDate)}</Heading>
-        <Table variant="simple" w="full">
+      <VStack data-testid='month-view' align='stretch' w='full' spacing={4}>
+        <Heading size='md'>{formatMonth(currentDate)}</Heading>
+        <Table variant='simple' w='full'>
           <Thead>
             <Tr>
               {weekDays.map((day) => (
-                <Th key={day} width="14.28%">
+                <Th key={day} width='14.28%'>
                   {day}
                 </Th>
               ))}
@@ -564,24 +564,24 @@ function App() {
               <Tr key={weekIndex}>
                 {week.map((day, dayIndex) => {
                   const dateString = day
-                    ? `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-                    : "";
+                    ? `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                    : '';
                   const holiday = holidays[dateString];
 
                   return (
                     <Td
                       key={dayIndex}
-                      height="100px"
-                      verticalAlign="top"
-                      width="14.28%"
-                      position="relative"
-                      data-testid={`month-cell-${dayIndex}`}
+                      height='100px'
+                      verticalAlign='top'
+                      width='14.28%'
+                      position='relative'
+                      data-testid={`month-cell-${day}`}
                     >
                       {day && (
                         <>
-                          <Text fontWeight="bold">{day}</Text>
+                          <Text fontWeight='bold'>{day}</Text>
                           {holiday && (
-                            <Text color="red.500" fontSize="sm">
+                            <Text color='red.500' fontSize='sm'>
                               {holiday}
                             </Text>
                           )}
@@ -599,14 +599,14 @@ function App() {
                                   data-testid={`event-${event.id}`}
                                   p={1}
                                   my={1}
-                                  bg={isNotified ? "red.100" : "gray.100"}
-                                  borderRadius="md"
-                                  fontWeight={isNotified ? "bold" : "normal"}
-                                  color={isNotified ? "red.500" : "inherit"}
+                                  bg={isNotified ? 'red.100' : 'gray.100'}
+                                  borderRadius='md'
+                                  fontWeight={isNotified ? 'bold' : 'normal'}
+                                  color={isNotified ? 'red.500' : 'inherit'}
                                 >
                                   <HStack spacing={1}>
                                     {isNotified && <BellIcon />}
-                                    <Text fontSize="sm" noOfLines={1}>
+                                    <Text fontSize='sm' noOfLines={1}>
                                       {event.title}
                                     </Text>
                                   </HStack>
@@ -640,15 +640,15 @@ function App() {
   }, []);
 
   return (
-    <Box w="full" h="100vh" m="auto" p={5}>
-      <Flex gap={6} h="full">
-        <VStack w="400px" spacing={5} align="stretch">
-          <Heading>{editingEvent ? "일정 수정" : "일정 추가"}</Heading>
+    <Box w='full' h='100vh' m='auto' p={5}>
+      <Flex gap={6} h='full'>
+        <VStack w='400px' spacing={5} align='stretch'>
+          <Heading>{editingEvent ? '일정 수정' : '일정 추가'}</Heading>
 
           <FormControl>
             <FormLabel>제목</FormLabel>
             <Input
-              name="title"
+              name='title'
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -657,24 +657,24 @@ function App() {
           <FormControl>
             <FormLabel>날짜</FormLabel>
             <Input
-              type="date"
-              name="date"
+              type='date'
+              name='date'
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
           </FormControl>
 
-          <HStack width="100%">
+          <HStack width='100%'>
             <FormControl>
               <FormLabel>시작 시간</FormLabel>
               <Tooltip
                 label={startTimeError}
                 isOpen={!!startTimeError}
-                placement="top"
+                placement='top'
               >
                 <Input
-                  type="time"
-                  name="startTime"
+                  type='time'
+                  name='startTime'
                   value={startTime}
                   onChange={handleStartTimeChange}
                   onBlur={() => validateTime(startTime, endTime)}
@@ -687,11 +687,11 @@ function App() {
               <Tooltip
                 label={endTimeError}
                 isOpen={!!endTimeError}
-                placement="top"
+                placement='top'
               >
                 <Input
-                  type="time"
-                  name="endTime"
+                  type='time'
+                  name='endTime'
                   value={endTime}
                   onChange={handleEndTimeChange}
                   onBlur={() => validateTime(startTime, endTime)}
@@ -704,7 +704,7 @@ function App() {
           <FormControl>
             <FormLabel>설명</FormLabel>
             <Input
-              name="description"
+              name='description'
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -713,7 +713,7 @@ function App() {
           <FormControl>
             <FormLabel>위치</FormLabel>
             <Input
-              name="location"
+              name='location'
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
@@ -722,11 +722,11 @@ function App() {
           <FormControl>
             <FormLabel>카테고리</FormLabel>
             <Select
-              name="category"
+              name='category'
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
-              <option value="">카테고리 선택</option>
+              <option value=''>카테고리 선택</option>
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
@@ -738,7 +738,7 @@ function App() {
           <FormControl>
             <FormLabel>반복 설정</FormLabel>
             <Checkbox
-              name="repeat"
+              name='repeat'
               isChecked={isRepeating}
               onChange={(e) => setIsRepeating(e.target.checked)}
             >
@@ -749,7 +749,7 @@ function App() {
           <FormControl>
             <FormLabel>알림 설정</FormLabel>
             <Select
-              name="notificationTime"
+              name='notificationTime'
               value={notificationTime}
               onChange={(e) => setNotificationTime(Number(e.target.value))}
             >
@@ -762,26 +762,26 @@ function App() {
           </FormControl>
 
           {isRepeating && (
-            <VStack width="100%">
+            <VStack width='100%'>
               <FormControl>
                 <FormLabel>반복 유형</FormLabel>
                 <Select
-                  name="repeatType"
+                  name='repeatType'
                   value={repeatType}
                   onChange={(e) => setRepeatType(e.target.value as RepeatType)}
                 >
-                  <option value="daily">매일</option>
-                  <option value="weekly">매주</option>
-                  <option value="monthly">매월</option>
-                  <option value="yearly">매년</option>
+                  <option value='daily'>매일</option>
+                  <option value='weekly'>매주</option>
+                  <option value='monthly'>매월</option>
+                  <option value='yearly'>매년</option>
                 </Select>
               </FormControl>
-              <HStack width="100%">
+              <HStack width='100%'>
                 <FormControl>
                   <FormLabel>반복 간격</FormLabel>
                   <Input
-                    type="number"
-                    name="repeatInterval"
+                    type='number'
+                    name='repeatInterval'
                     value={repeatInterval}
                     onChange={(e) => setRepeatInterval(Number(e.target.value))}
                     min={1}
@@ -790,8 +790,8 @@ function App() {
                 <FormControl>
                   <FormLabel>반복 종료일</FormLabel>
                   <Input
-                    type="date"
-                    name="repeatEndDate"
+                    type='date'
+                    name='repeatEndDate'
                     value={repeatEndDate}
                     onChange={(e) => setRepeatEndDate(e.target.value)}
                   />
@@ -801,47 +801,47 @@ function App() {
           )}
 
           <Button
-            data-testid="event-submit-button"
+            data-testid='event-submit-button'
             onClick={addOrUpdateEvent}
-            colorScheme="blue"
+            colorScheme='blue'
           >
-            {editingEvent ? "일정 수정" : "일정 추가"}
+            {editingEvent ? '일정 수정' : '일정 추가'}
           </Button>
         </VStack>
 
-        <VStack flex={1} spacing={5} align="stretch">
+        <VStack flex={1} spacing={5} align='stretch'>
           <Heading>일정 보기</Heading>
 
-          <HStack mx="auto" justifyContent="space-between">
+          <HStack mx='auto' justifyContent='space-between'>
             <IconButton
-              aria-label="Previous"
+              aria-label='Previous'
               icon={<ChevronLeftIcon />}
-              onClick={() => navigate("prev")}
+              onClick={() => navigate('prev')}
             />
             <Select
-              aria-label="view"
+              aria-label='view'
               value={view}
-              onChange={(e) => setView(e.target.value as "week" | "month")}
+              onChange={(e) => setView(e.target.value as 'week' | 'month')}
             >
-              <option value="week">Week</option>
-              <option value="month">Month</option>
+              <option value='week'>Week</option>
+              <option value='month'>Month</option>
             </Select>
             <IconButton
-              aria-label="Next"
+              aria-label='Next'
               icon={<ChevronRightIcon />}
-              onClick={() => navigate("next")}
+              onClick={() => navigate('next')}
             />
           </HStack>
 
-          {view === "week" && renderWeekView()}
-          {view === "month" && renderMonthView()}
+          {view === 'week' && renderWeekView()}
+          {view === 'month' && renderMonthView()}
         </VStack>
 
-        <VStack data-testid="event-list" w="500px" h="full" overflowY="auto">
+        <VStack data-testid='event-list' w='500px' h='full' overflowY='auto'>
           <FormControl>
             <FormLabel>일정 검색</FormLabel>
             <Input
-              placeholder="검색어를 입력하세요"
+              placeholder='검색어를 입력하세요'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -855,24 +855,24 @@ function App() {
                 key={event.id}
                 data-testid={`event-${event.id}`}
                 borderWidth={1}
-                borderRadius="lg"
+                borderRadius='lg'
                 p={3}
-                width="100%"
+                width='100%'
               >
-                <HStack justifyContent="space-between">
-                  <VStack align="start">
+                <HStack justifyContent='space-between'>
+                  <VStack align='start'>
                     <HStack>
                       {notifiedEvents.includes(event.id) && (
-                        <BellIcon color="red.500" />
+                        <BellIcon color='red.500' />
                       )}
                       <Text
                         fontWeight={
-                          notifiedEvents.includes(event.id) ? "bold" : "normal"
+                          notifiedEvents.includes(event.id) ? 'bold' : 'normal'
                         }
                         color={
                           notifiedEvents.includes(event.id)
-                            ? "red.500"
-                            : "inherit"
+                            ? 'red.500'
+                            : 'inherit'
                         }
                       >
                         {event.title}
@@ -884,20 +884,20 @@ function App() {
                     <Text>{event.description}</Text>
                     <Text>{event.location}</Text>
                     <Text>카테고리: {event.category}</Text>
-                    {event.repeat.type !== "none" && (
+                    {event.repeat.type !== 'none' && (
                       <Text>
                         반복: {event.repeat.interval}
-                        {event.repeat.type === "daily" && "일"}
-                        {event.repeat.type === "weekly" && "주"}
-                        {event.repeat.type === "monthly" && "월"}
-                        {event.repeat.type === "yearly" && "년"}
+                        {event.repeat.type === 'daily' && '일'}
+                        {event.repeat.type === 'weekly' && '주'}
+                        {event.repeat.type === 'monthly' && '월'}
+                        {event.repeat.type === 'yearly' && '년'}
                         마다
                         {event.repeat.endDate &&
                           ` (종료: ${event.repeat.endDate})`}
                       </Text>
                     )}
                     <Text>
-                      알림:{" "}
+                      알림:{' '}
                       {
                         notificationOptions.find(
                           (option) => option.value === event.notificationTime
@@ -907,12 +907,12 @@ function App() {
                   </VStack>
                   <HStack>
                     <IconButton
-                      aria-label="Edit event"
+                      aria-label='Edit event'
                       icon={<EditIcon />}
                       onClick={() => editEvent(event)}
                     />
                     <IconButton
-                      aria-label="Delete event"
+                      aria-label='Delete event'
                       icon={<DeleteIcon />}
                       onClick={() => deleteEvent(event.id)}
                     />
@@ -931,7 +931,7 @@ function App() {
       >
         <AlertDialogOverlay>
           <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
               일정 겹침 경고
             </AlertDialogHeader>
 
@@ -953,7 +953,7 @@ function App() {
                 취소
               </Button>
               <Button
-                colorScheme="red"
+                colorScheme='red'
                 onClick={() => {
                   setIsOverlapDialogOpen(false);
                   saveEvent({
@@ -966,7 +966,7 @@ function App() {
                     location,
                     category,
                     repeat: {
-                      type: isRepeating ? repeatType : "none",
+                      type: isRepeating ? repeatType : 'none',
                       interval: repeatInterval,
                       endDate: repeatEndDate || undefined,
                     },
@@ -983,12 +983,12 @@ function App() {
       </AlertDialog>
 
       {notifications.length > 0 && (
-        <VStack position="fixed" top={4} right={4} spacing={2} align="flex-end">
+        <VStack position='fixed' top={4} right={4} spacing={2} align='flex-end'>
           {notifications.map((notification, index) => (
-            <Alert key={index} status="info" variant="solid" width="auto">
+            <Alert key={index} status='info' variant='solid' width='auto'>
               <AlertIcon />
-              <Box flex="1">
-                <AlertTitle fontSize="sm">{notification.message}</AlertTitle>
+              <Box flex='1'>
+                <AlertTitle fontSize='sm'>{notification.message}</AlertTitle>
               </Box>
               <CloseButton
                 onClick={() =>

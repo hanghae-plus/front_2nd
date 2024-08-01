@@ -92,11 +92,11 @@ let initialEvents = [
   },
 ];
 
-let events = [...initialEvents];
+export let events = [...initialEvents];
 
 export const resetEvents = () => {
   events = [...initialEvents];
-}
+};
 
 export const mockApiHandlers = [
   // 일정 조회
