@@ -370,17 +370,16 @@ function App() {
   return (
     <Box w="full" h="100vh" m="auto" p={5}>
       <Flex gap={6} h="full">
+        <EventForm
+          formData={formData}
+          updateFormdata={updateFormData}
+          editingEvent={editingEvent}
+          validateTime={validateTime}
+          timeError={timeError}
+          onSave={addOrUpdateEvent}
+        />
         <VStack flex={1} spacing={5} align="stretch">
           <Heading>일정 보기</Heading>
-
-          <EventForm
-            formData={formData}
-            updateFormdata={updateFormData}
-            editingEvent={editingEvent}
-            validateTime={validateTime}
-            timeError={timeError}
-            onSave={addOrUpdateEvent}
-          />
 
           <HStack mx="auto" justifyContent="space-between">
             <IconButton
