@@ -198,13 +198,13 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       const firstDate = new Date(`${year}-${month}-${firstDay}`);
       const weekDates = getWeekDates(firstDate);
       // weekDates.length는 항상 7
-      const randomDateIndex = Math.floor(Math.random() * weekDates.length);
-      const randomDate = weekDates[randomDateIndex];
-      const randomDateString = randomDate.toISOString().split('T')[0];
+      const testDateIndex = 3;
+      const testDate = weekDates[testDateIndex];
+      const testDateString = testDate.toISOString().split('T')[0];
 
       // Create new Event
       await userEvent.type(screen.getByLabelText(/제목/), 'Test 일정');
-      await userEvent.type(screen.getByLabelText(/날짜/), randomDateString);
+      await userEvent.type(screen.getByLabelText(/날짜/), testDateString);
       await userEvent.type(screen.getByLabelText(/시작 시간/), '13:00');
       await userEvent.type(screen.getByLabelText(/종료 시간/), '15:00');
       await userEvent.type(screen.getByLabelText(/설명/), 'Test 설명');

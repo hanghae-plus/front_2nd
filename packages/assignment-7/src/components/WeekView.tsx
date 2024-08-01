@@ -61,7 +61,7 @@ export const WeekView = ({
                     const isNotified = notifiedEvents.includes(event.id);
                     return (
                       <ViewBox
-                        key={event.id}
+                        key={`${event.id}-${event.date}-${event.title}`}
                         isNotified={isNotified}
                         title={event.title}
                       />

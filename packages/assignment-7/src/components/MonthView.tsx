@@ -102,7 +102,7 @@ export const MonthView = ({
                             );
                             return (
                               <ViewBox
-                                key={event.id}
+                                key={`${event.id}-${event.date}-${event.title}`}
                                 isNotified={isNotified}
                                 title={event.title}
                               />

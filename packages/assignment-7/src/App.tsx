@@ -51,11 +51,20 @@ const fetchHolidays = (year: number, month: number) => {
   };
 };
 
-const initialFormData = {
+const initialFormData: Omit<Event, 'id'> = {
   title: '',
   date: '',
   startTime: '',
   endTime: '',
+  description: '',
+  location: '',
+  category: '업무',
+  repeat: {
+    type: 'none',
+    interval: 1,
+    endDate: '',
+  },
+  notificationTime: 10,
 };
 
 function App() {
@@ -426,7 +435,7 @@ function App() {
           ) : (
             filteredEvents.map((event) => (
               <EventDetailView
-                key={event.id}
+                key={`${event.id}-${event.date}-${event.title}`}
                 {...event}
                 notifiedEvents={notifiedEvents}
                 editEvent={editEvent}

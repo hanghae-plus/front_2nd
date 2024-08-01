@@ -42,7 +42,7 @@ export const EventDetailView = ({
           <Text>{event.description}</Text>
           <Text>{event.location}</Text>
           <Text>카테고리: {event.category}</Text>
-          {event.repeat.type !== 'none' && (
+          {event.repeat && event.repeat.type !== 'none' && (
             <Text>
               반복: {event.repeat.interval}
               {event.repeat.type === 'daily' && '일'}
