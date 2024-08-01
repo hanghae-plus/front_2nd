@@ -1,11 +1,11 @@
 import { http, HttpResponse } from 'msw';
 import { Event } from '../App';
 
-let events: Event[] = [
+const INITIAL_EVENTS: Event[] = [
   {
     id: 1,
     title: '테스트 일정 1',
-    date: '2023-06-15',
+    date: '2024-08-15',
     startTime: '09:00',
     endTime: '10:00',
     description: '테스트 설명 1',
@@ -17,7 +17,7 @@ let events: Event[] = [
   {
     id: 2,
     title: '테스트 일정 2',
-    date: '2023-06-16',
+    date: '2024-08-16',
     startTime: '14:00',
     endTime: '15:00',
     description: '테스트 설명 2',
@@ -27,6 +27,12 @@ let events: Event[] = [
     notificationTime: 30,
   },
 ];
+
+let events: Event[] = [...INITIAL_EVENTS];
+
+export const resetEvents = () => {
+  events = [...INITIAL_EVENTS];
+};
 
 export const mockApiHandlers = [
   http.get('/api/events', () => {
