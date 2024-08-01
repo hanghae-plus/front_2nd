@@ -6,7 +6,7 @@ import { findOverlappingEvents } from '../utils/eventUtils';
 // 여러개의 state값을 관리하기 쉽게 하기 위해 useReducer를 사용!
 
 export type EventFormState = Omit<Event, 'id'> & {
-  id?: number;
+  id?: number | null;
   isRepeating: boolean;
   errors: {
     title?: string;
