@@ -83,7 +83,7 @@ export const originalMockEvents: Event[] = [
     repeat: { type: "weekly", interval: 1 },
     notificationTime: 10,
     ...(() => {
-      const now = new Date();
+      const now = new Date("2024-08-01");
       const startTime = new Date(now.getTime() + 5 * 60000); // 5분 후
       const endTime = new Date(startTime.getTime() + 60 * 60000); // 시작시간으로부터 1시간 후
 
