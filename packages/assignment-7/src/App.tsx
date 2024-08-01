@@ -149,7 +149,7 @@ function App() {
     }
   };
 
-  const addOrUpdateEvent = async () => {
+   const addOrUpdateEvent = async () => {
     if (!title || !date || !startTime || !endTime) {
       toast({
         title: "필수 정보를 모두 입력해주세요.",
@@ -731,6 +731,7 @@ function App() {
           <FormControl>
             <FormLabel>일정 검색</FormLabel>
             <Input
+              data-testid="search-input"
               placeholder="검색어를 입력하세요"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -739,7 +740,7 @@ function App() {
 
           {filteredEvents.length === 0 ? (
             <Text>검색 결과가 없습니다.</Text>
-          ) : filteredEvents.map((event) => (
+          ) : filteredEvents.map((event, index) => (
             <Box key={event.id} borderWidth={1} borderRadius="lg" p={3} width="100%">
               <HStack justifyContent="space-between">
                 <VStack align="start">
@@ -769,7 +770,7 @@ function App() {
                 </VStack>
                 <HStack>
                   <IconButton
-                    aria-label="Edit event"
+                    aria-label={`Edit event${index}`}
                     icon={<EditIcon/>}
                     onClick={() => editEvent(event)}
                   />
@@ -786,6 +787,7 @@ function App() {
       </Flex>
 
       <AlertDialog
+        data-testid="alert-dialog"
         isOpen={isOverlapDialogOpen}
         leastDestructiveRef={cancelRef}
         onClose={() => setIsOverlapDialogOpen(false)}
@@ -836,7 +838,7 @@ function App() {
 
       {notifications.length > 0 && <VStack position="fixed" top={4} right={4} spacing={2} align="flex-end">
         {notifications.map((notification, index) => (
-          <Alert key={index} status="info" variant="solid" width="auto">
+          <Alert key={index} status="info" variant="solid" width="auto" data-testid="alert">
             <AlertIcon/>
             <Box flex="1">
               <AlertTitle fontSize="sm">{notification.message}</AlertTitle>
@@ -851,3 +853,5 @@ function App() {
 }
 
 export default App;
+
+
