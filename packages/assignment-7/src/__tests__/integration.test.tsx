@@ -388,7 +388,8 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
       const eventList = screen.getByTestId('event-list');
       // 검색어 없는 이벤트리스트 스냅샷
-      const eventListSnapshot = eventList.innerHTML;
+      const initialEvents = within(eventList).getAllByRole('listitem');
+      const initialEventTexts = initialEvents.map((event) => event.textContent);
       const searchInput = screen.getByLabelText(/일정 검색/);
 
       // 검색어 입력
@@ -401,7 +402,9 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
       await userEvent.clear(searchInput);
       await waitFor(() => {
-        expect(eventList).matchSnapshot(eventListSnapshot);
+        const finalEvents = within(eventList).getAllByRole('listitem');
+        const finalEventTexts = finalEvents.map((event) => event.textContent);
+        expect(finalEventTexts).toEqual(initialEventTexts);
       });
 
       vi.useRealTimers();
