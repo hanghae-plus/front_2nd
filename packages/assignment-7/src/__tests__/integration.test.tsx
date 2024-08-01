@@ -24,8 +24,8 @@ const setup = (component: ReactNode) => {
 };
 
 describe('일정 관리 애플리케이션 통합 테스트', () => {
-  beforeEach(resetEvents);
   describe('일정 CRUD 및 기본 기능', () => {
+    beforeEach(resetEvents);
     test('새로운 일정을 생성하고 모든 필드가 정확히 저장되는지 확인한다', async () => {
       const TEST_EVENT = {
         title: '새로운 일정',
@@ -145,6 +145,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
   });
 
   describe('일정 뷰 및 필터링', () => {
+    beforeEach(resetEvents);
     test('주별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.', async () => {
       // 일정이 있는 주로 설정
       vi.setSystemTime(new Date('2024-08-16'));
@@ -207,6 +208,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
   });
 
   describe('알림 기능', () => {
+    beforeEach(resetEvents);
     test('일정 알림을 설정하고 지정된 시간에 알림이 발생하는지 확인한다', async () => {
       vi.setSystemTime(new Date('2024-08-15 08:30'));
       setup(<App />);
@@ -221,6 +223,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
   });
 
   describe('검색 기능', () => {
+    beforeEach(resetEvents);
     async function setupSearchTest() {
       vi.setSystemTime(new Date('2024-08-01'));
       const { user } = setup(<App />);
@@ -258,6 +261,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
   });
 
   describe('공휴일 표시', () => {
+    beforeEach(resetEvents);
     test('달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다', () => {
       vi.setSystemTime(new Date('2024-01-01'));
       setup(<App />);
@@ -281,7 +285,58 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
   });
 
   describe('일정 충돌 감지', () => {
-    test.fails('겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다');
-    test.fails('기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다');
+    beforeEach(resetEvents);
+    test('겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다', async () => {
+      vi.setSystemTime(new Date('2024-08-01'));
+      const { user } = setup(<App />);
+
+      // 폼 입력
+      const titleInput = screen.getByLabelText('제목');
+      const dateInput = screen.getByLabelText('날짜');
+      const startTimeInput = screen.getByLabelText('시작 시간');
+      const endTimeInput = screen.getByLabelText('종료 시간');
+      const submitButton = screen.getByTestId(TEST_IDS.eventSubmitButton);
+
+      await user.type(titleInput, '테스트 일정');
+      await user.type(dateInput, '2024-08-15');
+      await user.type(startTimeInput, '09:00');
+      await user.type(endTimeInput, '10:00');
+      await user.click(submitButton);
+
+      const alertDialog = screen.getByRole('alertdialog');
+
+      expect(alertDialog).toBeInTheDocument();
+    });
+    test('기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다', async () => {
+      vi.setSystemTime(new Date('2024-08-15'));
+      const { user } = setup(<App />);
+
+      // 기존 일정 찾기
+      const eventList = screen.getByTestId(TEST_IDS.eventList);
+
+      const [editButton] = await within(eventList).findAllByLabelText('Edit event');
+      await user.click(editButton);
+
+      // 날짜 수정
+      const dateInput = screen.getByLabelText('날짜');
+      await user.clear(dateInput);
+      await user.type(dateInput, '2024-08-16');
+
+      // 시간 수정
+      const startTimeInput = screen.getByLabelText('시작 시간');
+      const endTimeInput = screen.getByLabelText('종료 시간');
+      await user.clear(startTimeInput);
+      await user.clear(endTimeInput);
+      await user.type(startTimeInput, '14:00');
+      await user.type(endTimeInput, '15:00');
+
+      // 수정 제출
+      const submitButton = screen.getByTestId(TEST_IDS.eventSubmitButton);
+      await user.click(submitButton);
+
+      // 경고 다이얼로그 확인
+      const alertDialog = screen.getByRole('alertdialog');
+      expect(alertDialog).toBeInTheDocument();
+    });
   });
 });
