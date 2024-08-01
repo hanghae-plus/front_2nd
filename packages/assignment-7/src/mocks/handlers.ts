@@ -1,7 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import { Event } from '../types/event';
 
-export const handlers = [
+export const mockApiHandlers = [
   http.get('/api/events', () => {
     return HttpResponse.json(events);
   }),
@@ -35,11 +35,11 @@ export const handlers = [
     const id = parseInt(params.id as string);
     events = events.filter((event) => event.id !== id);
 
-    return HttpResponse.json(null, { status: 204 });
+    return new Response(null, { status: 204 });
   }),
 ];
 
-let events = [
+const ORIGINAL_EVENTS = [
   {
     id: 1,
     title: '팀 회의',
@@ -91,7 +91,7 @@ let events = [
   {
     id: 5,
     title: '운동',
-    date: '2024-07-22',
+    date: '2024-08-04',
     startTime: '18:00',
     endTime: '19:00',
     description: '주간 운동',
@@ -129,3 +129,9 @@ let events = [
     })(),
   },
 ];
+
+let events = [...ORIGINAL_EVENTS];
+
+export function resetEvents() {
+  events = [...ORIGINAL_EVENTS];
+}
