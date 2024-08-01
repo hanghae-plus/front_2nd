@@ -1,19 +1,8 @@
 import { BellIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  FormControl,
-  FormLabel,
-  HStack,
-  IconButton,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
 import { Event } from "../../App";
 
 interface EventListProps {
-  searchTerm: string;
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   filteredEvents: Event[];
   notifiedEvents: number[];
   editEvent: (event: Event) => void;
@@ -29,24 +18,13 @@ const notificationOptions = [
 ];
 
 const EventList = ({
-  searchTerm,
-  setSearchTerm,
   filteredEvents,
   notifiedEvents,
   editEvent,
   deleteEvent,
 }: EventListProps) => {
   return (
-    <VStack data-testid="event-list" w="500px" h="full" overflowY="auto">
-      <FormControl>
-        <FormLabel>일정 검색</FormLabel>
-        <Input
-          placeholder="검색어를 입력하세요"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </FormControl>
-
+    <>
       {filteredEvents.length === 0 ? (
         <Text>검색 결과가 없습니다.</Text>
       ) : (
@@ -60,7 +38,7 @@ const EventList = ({
           />
         ))
       )}
-    </VStack>
+    </>
   );
 };
 

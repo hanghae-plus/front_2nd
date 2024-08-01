@@ -12,6 +12,7 @@ export const useSaveEvent = (fetchEvents: () => Promise<void>) => {
   const saveEvent = async (eventData: Event, editingEvent?: Event | null) => {
     try {
       let response;
+
       if (editingEvent) {
         response = await fetch(`/api/events/${eventData.id}`, {
           method: "PUT",

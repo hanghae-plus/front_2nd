@@ -6,14 +6,17 @@ import {
   Box,
   CloseButton,
   Flex,
+  FormControl,
+  FormLabel,
+  Input,
   VStack,
 } from "@chakra-ui/react";
-import { getWeekDates, searchEvents } from "./utils/date-utils";
 import { useGetEvent } from "./components/event/hooks/useGetEvent";
 import { useDeleteEvent } from "./components/event/hooks/useDeleteEvent";
 import EventForm from "./components/event/EventForm";
 import EventCalendar from "./components/calendar/EventCalendar";
 import EventList from "./components/event/EventList";
+import { useFilterEvent } from "./components/event/hooks/useFilterEvent";
 
 export type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
 
@@ -33,7 +36,7 @@ export interface Event {
   location: string;
   category: string;
   repeat: RepeatInfo;
-  notificationTime: number; // 분 단위로 저장
+  notificationTime: number;
 }
 
 export type ViewType = "week" | "month";
@@ -41,19 +44,8 @@ export type ViewType = "week" | "month";
 function App() {
   const { events, fetchEvents } = useGetEvent();
 
-  const [view, setView] = useState<ViewType>("month");
-  const [notifications, setNotifications] = useState<
-    { id: number; message: string }[]
-  >([]);
-  const [notifiedEvents, setNotifiedEvents] = useState<number[]>([]);
-
-  const [currentDate, setCurrentDate] = useState(new Date());
-
-  const [searchTerm, setSearchTerm] = useState("");
-
   // 수정 중 이벤트
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-
   const editEvent = (event: Event) => {
     setEditingEvent(event);
   };
@@ -62,6 +54,10 @@ function App() {
   const { deleteEvent } = useDeleteEvent(fetchEvents);
 
   // 다가오는 이벤트
+  const [notifiedEvents, setNotifiedEvents] = useState<number[]>([]);
+  const [notifications, setNotifications] = useState<
+    { id: number; message: string }[]
+  >([]);
   const checkUpcomingEvents = async () => {
     const now = new Date();
     const upcomingEvents = events.filter((event) => {
@@ -90,38 +86,15 @@ function App() {
     }
   };
 
-  // 날짜 이동
-  const navigate = (direction: "prev" | "next") => {
-    setCurrentDate((prevDate) => {
-      const newDate = new Date(prevDate);
-      if (view === "week") {
-        newDate.setDate(newDate.getDate() + (direction === "next" ? 7 : -7));
-      } else if (view === "month") {
-        newDate.setMonth(newDate.getMonth() + (direction === "next" ? 1 : -1));
-      }
-      return newDate;
-    });
-  };
-
-  /**
-   * 일정과 검색에 따라 filter된 이벤트들 목록
-   */
-  const filteredEvents = (() => {
-    const filtered = searchEvents(events, searchTerm);
-    return filtered.filter((event) => {
-      const eventDate = new Date(event.date);
-      if (view === "week") {
-        const weekDates = getWeekDates(currentDate);
-        return eventDate >= weekDates[0] && eventDate <= weekDates[6];
-      } else if (view === "month") {
-        return (
-          eventDate.getMonth() === currentDate.getMonth() &&
-          eventDate.getFullYear() === currentDate.getFullYear()
-        );
-      }
-      return true;
-    });
-  })();
+  const {
+    currentDate,
+    filteredEvents,
+    searchTerm,
+    setSearchTerm,
+    view,
+    setView,
+    navigate,
+  } = useFilterEvent(events);
 
   return (
     <Box w="full" h="100vh" m="auto" p={5}>
@@ -142,20 +115,33 @@ function App() {
           checkUpcomingEvents={checkUpcomingEvents}
         />
 
-        <EventList
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          filteredEvents={filteredEvents}
-          notifiedEvents={notifiedEvents}
-          editEvent={editEvent}
-          deleteEvent={deleteEvent}
-        />
+        <VStack data-testid="event-list" w="500px" h="full" overflowY="auto">
+          <FormControl>
+            <FormLabel>일정 검색</FormLabel>
+            <Input
+              placeholder="검색어를 입력하세요"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </FormControl>
+          <EventList
+            filteredEvents={filteredEvents}
+            notifiedEvents={notifiedEvents}
+            editEvent={editEvent}
+            deleteEvent={deleteEvent}
+          />
+        </VStack>
       </Flex>
 
       {notifications.length > 0 && (
         <VStack position="fixed" top={4} right={4} spacing={2} align="flex-end">
           {notifications.map((notification, index) => (
-            <Alert key={index} status="info" variant="solid" width="auto">
+            <Alert
+              key={notification.id}
+              status="info"
+              variant="solid"
+              width="auto"
+            >
               <AlertIcon />
               <Box flex="1">
                 <AlertTitle fontSize="sm">{notification.message}</AlertTitle>

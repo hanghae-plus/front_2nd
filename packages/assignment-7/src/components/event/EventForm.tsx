@@ -47,6 +47,13 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
   // 수정 및 삭제 관심사
   const { saveEvent } = useSaveEvent(fetchEvents);
 
+  // 수정하기 관심사
+  const [isEditingMode, setIsEditingMode] = useState(false);
+
+  useEffect(() => {
+    setIsEditingMode(!!editingEvent);
+  }, [editingEvent]);
+
   // form 관련 로직
   const {
     eventFormValue,
@@ -127,13 +134,6 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
       resetForm();
     }
   };
-
-  // 수정하기 관심사
-  const [isEditingMode, setIsEditingMode] = useState(false);
-
-  useEffect(() => {
-    setIsEditingMode(!!editingEvent);
-  }, [editingEvent]);
 
   // 중복 관련
   const [overlappingEvents, setOverlappingEvents] = useState<Event[]>([]);
@@ -415,22 +415,25 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
                     notificationTime,
                   } = eventFormValue;
                   onClose();
-                  saveEvent({
-                    id: editingEvent ? editingEvent.id : Date.now(),
-                    title,
-                    date,
-                    startTime,
-                    endTime,
-                    description,
-                    location,
-                    category,
-                    repeat: {
-                      type: isRepeating ? repeatType : "none",
-                      interval: repeatInterval,
-                      endDate: repeatEndDate || undefined,
+                  saveEvent(
+                    {
+                      id: editingEvent ? editingEvent.id : Date.now(),
+                      title,
+                      date,
+                      startTime,
+                      endTime,
+                      description,
+                      location,
+                      category,
+                      repeat: {
+                        type: isRepeating ? repeatType : "none",
+                        interval: repeatInterval,
+                        endDate: repeatEndDate || undefined,
+                      },
+                      notificationTime,
                     },
-                    notificationTime,
-                  });
+                    editingEvent
+                  );
                 }}
                 ml={3}
               >

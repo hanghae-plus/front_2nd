@@ -284,7 +284,6 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       await user.click(deleteButton[0]);
 
-      // get~, find~ 로 요소를 찾으려고 시도할 때 없다면 바로 error가 남
       const elements = screen.queryAllByText(targetTitle as string);
       expect(elements).toHaveLength(0);
     });
