@@ -36,7 +36,9 @@ const addEvent = async ({
 };
 
 describe("일정 관리 애플리케이션 통합 테스트", () => {
-  beforeAll(() => server.listen());
+  beforeAll(() => {
+    server.listen();
+  });
   afterEach(() => {
     server.resetHandlers();
     cleanup();
@@ -369,22 +371,44 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       render(<App />);
 
+      // 테스트를 위한 일정 추가
+      await addEvent({
+        title: "점심 약속",
+        date: "2024-07-15",
+        startTime: "12:00",
+        endTime: "13:00",
+      });
+
+      await addEvent({
+        title: "회의",
+        date: "2024-07-15",
+        startTime: "14:00",
+        endTime: "15:00",
+      });
+
       const eventList = screen.getByTestId("event-list");
-      // 검색어 없는 이벤트리스트 스냅샷
-      const eventListSnapshot = eventList.innerHTML;
       const searchInput = screen.getByLabelText(/일정 검색/);
+
+      // 초기 상태 확인
+      expect(eventList).toHaveTextContent("점심 약속");
+      expect(eventList).toHaveTextContent("회의");
 
       // 검색어 입력
       await userEvent.type(searchInput, "점심 약속");
 
       await waitFor(() => {
         expect(eventList).toHaveTextContent("점심 약속");
-        expect(eventList).not.toHaveTextContent("검색 결과가 없습니다.");
+        expect(eventList).not.toHaveTextContent("회의");
       });
 
+      // 검색어 지우기
       await userEvent.clear(searchInput);
+
+      // 모든 일정이 다시 표시되는지 확인
       await waitFor(() => {
-        expect(eventList).matchSnapshot(eventListSnapshot);
+        expect(eventList).toHaveTextContent("점심 약속");
+        expect(eventList).toHaveTextContent("회의");
+        expect(eventList).not.toHaveTextContent("검색 결과가 없습니다.");
       });
 
       vi.useRealTimers();
