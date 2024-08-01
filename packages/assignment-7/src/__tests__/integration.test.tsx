@@ -3,8 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "../App";
 import { ReactNode } from "react";
-import { getCurrentDate } from "../utils/date-utils";
-import { DUMMY_DATA, events } from "../../mock/handler";
+import { DUMMY_DATA } from "../../mock/handler";
 
 const setup = (componet: ReactNode) => {
   const user = userEvent.setup();
@@ -18,7 +17,7 @@ const setup = (componet: ReactNode) => {
 describe("일정 관리 애플리케이션 통합 테스트", () => {
   const newData = {
     title: "항해 플러스 파티",
-    date: getCurrentDate(),
+    date: "2024-08-24",
     startTime: "06:30",
     endTime: "11:30",
     category: "기타",
@@ -31,6 +30,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       type: "weekly",
     },
   };
+
   describe("msw를 통한 api호출이 되는지 검증", () => {
     test("msw에서 세팅한 get요청", async () => {
       const res = await fetch("/api/events");
@@ -132,7 +132,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
   describe("일정 CRUD 및 기본 기능", () => {
     test("새로운 일정을 생성하고 모든 필드가 정확히 저장되는지 확인한다", async () => {
-      const date = new Date("2024-07-01");
+      const date = new Date("2024-08-01");
 
       vi.setSystemTime(date);
       const { user } = setup(<App />);
@@ -205,7 +205,6 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
           `${newData.date} ${newData.startTime} - ${newData.endTime}`
         )
       ).toBeInTheDocument();
-
       expect(await screen.findByText(newData.description)).toBeInTheDocument();
       expect(await screen.findByText(newData.location)).toBeInTheDocument();
       expect(await screen.findByText(newData.category)).toBeInTheDocument();
@@ -213,8 +212,10 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
 
     test("기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영되는지 확인한다", async () => {
-      const { user } = setup(<App />);
+      const date = new Date("2024-08-01");
 
+      vi.setSystemTime(date);
+      const { user } = setup(<App />);
       const editButton = await screen.findAllByRole("button", {
         name: "Edit event",
       });
@@ -400,11 +401,11 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       await user.clear(searchInput);
 
       const originEventTitleElements = screen.getAllByTestId("event-title");
-      const [excersizeTitleElement, alarmTestTitleElement] =
+      const [travelTitleElement, excersizeTitleElement] =
         originEventTitleElements;
 
+      expect(travelTitleElement.textContent).toBe("여행");
       expect(excersizeTitleElement.textContent).toBe("운동");
-      expect(alarmTestTitleElement.textContent).toBe("알림 테스트");
     });
   });
 
@@ -423,10 +424,153 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
   });
 
-  // describe("일정 충돌 감지", () => {
-  // test.fails("겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다");
-  // test.fails(
-  //   "기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다"
-  // );
-  // });
+  describe("일정 충돌 감지", () => {
+    const duplicateData = {
+      title: "피자 파티",
+      date: "2024-07-22",
+      startTime: "18:00",
+      endTime: "19:00",
+      category: "기타",
+      description: "피자헛...",
+      location: "우리집",
+      notificationTime: "120",
+      repeat: {
+        endDate: "2024-07-29",
+        interval: 10,
+        type: "weekly",
+      },
+    };
+    test("겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다", async () => {
+      const date = new Date("2024-07-01");
+
+      vi.setSystemTime(date);
+      const { user } = setup(<App />);
+
+      // Name이 label이지만 Input요소 접근이 가능..?
+      const titleInput = screen.getByRole("textbox", { name: "제목" });
+      await user.type(titleInput, duplicateData.title);
+      expect(titleInput).toHaveValue(duplicateData.title);
+
+      const dateInput = screen.getByLabelText("날짜");
+      await user.type(dateInput, duplicateData.date);
+      expect(dateInput).toHaveValue(duplicateData.date);
+
+      const startTimeInput = screen.getByLabelText("시작 시간");
+      await user.type(startTimeInput, duplicateData.startTime);
+      expect(startTimeInput).toHaveValue(duplicateData.startTime);
+
+      const endTimeInput = screen.getByLabelText("종료 시간");
+      await user.type(endTimeInput, duplicateData.endTime);
+      expect(endTimeInput).toHaveValue(duplicateData.endTime);
+
+      const descriptionInput = screen.getByLabelText("설명");
+      await user.type(descriptionInput, duplicateData.description);
+      expect(descriptionInput).toHaveValue(duplicateData.description);
+
+      const positionInput = screen.getByLabelText("위치");
+      await user.type(positionInput, duplicateData.location);
+      expect(positionInput).toHaveValue(duplicateData.location);
+
+      const categoryInput = screen.getByLabelText("카테고리");
+      expect(categoryInput).toHaveValue("");
+      await user.selectOptions(categoryInput, duplicateData.category);
+      expect(categoryInput).toHaveValue(duplicateData.category);
+
+      const repeatCheckbox = screen.getByRole("checkbox");
+      await user.click(repeatCheckbox);
+      expect(repeatCheckbox).toBeChecked();
+
+      const alarmSelectBox = screen.getByLabelText("알림 설정");
+      expect(alarmSelectBox).toHaveValue("10");
+      await user.selectOptions(alarmSelectBox, "2시간 전");
+      expect(alarmSelectBox).toHaveValue(duplicateData.notificationTime);
+
+      const repeatTypeSelectBox = screen.getByLabelText("반복 유형");
+      expect(repeatTypeSelectBox).toHaveValue("daily");
+      await user.selectOptions(repeatTypeSelectBox, "매주");
+      expect(repeatTypeSelectBox).toHaveValue(duplicateData.repeat.type);
+
+      // 이건 왜 spinbutton이래..?
+      const alarmTermInput = screen.getByRole("spinbutton", {
+        name: "반복 간격",
+      });
+      expect(alarmTermInput).toHaveValue(1);
+      await user.clear(alarmTermInput);
+      await user.type(alarmTermInput, "10");
+      expect(alarmTermInput).toHaveValue(10);
+
+      const repeatEndDateInput = screen.getByLabelText("반복 종료일");
+      await user.type(repeatEndDateInput, "2024-07-29");
+      expect(repeatEndDateInput).toHaveValue("2024-07-29");
+
+      const submitButton = screen.getByTestId("event-submit-button");
+      await user.click(submitButton);
+
+      // 알림 확인
+      expect(await screen.findByText("일정 겹침 경고")).toBeInTheDocument();
+
+      // 일정 등록
+      const alertProgressButton = screen.getByRole("button", {
+        name: "계속 진행",
+      });
+      await user.click(alertProgressButton);
+
+      // 화면에 나타나는지 확인
+      const titleElements = await screen.findAllByText(duplicateData.title);
+      expect(titleElements.length).toBeGreaterThan(0);
+    });
+    test("기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다", async () => {
+      const date = new Date("2024-07-01");
+
+      vi.setSystemTime(date);
+      const { user } = setup(<App />);
+      const editButton = await screen.findAllByRole("button", {
+        name: "Edit event",
+      });
+
+      await user.click(editButton[0]);
+
+      const titleInput = screen.getByRole("textbox", { name: "제목" });
+      await user.clear(titleInput);
+      await user.type(titleInput, duplicateData.title);
+      expect(titleInput).toHaveValue(duplicateData.title);
+
+      const dateInput = screen.getByLabelText("날짜");
+      await user.clear(dateInput);
+      await user.type(dateInput, duplicateData.date);
+      expect(dateInput).toHaveValue(duplicateData.date);
+
+      const startTimeInput = screen.getByLabelText("시작 시간");
+      await user.clear(startTimeInput);
+      await user.type(startTimeInput, duplicateData.startTime);
+      expect(startTimeInput).toHaveValue(duplicateData.startTime);
+
+      const endTimeInput = screen.getByLabelText("종료 시간");
+      await user.clear(endTimeInput);
+      await user.type(endTimeInput, duplicateData.endTime);
+      expect(endTimeInput).toHaveValue(duplicateData.endTime);
+
+      const categoryInput = screen.getByLabelText("카테고리");
+      await user.selectOptions(categoryInput, "");
+      expect(categoryInput).toHaveValue("");
+      await user.selectOptions(categoryInput, duplicateData.category);
+      expect(categoryInput).toHaveValue(duplicateData.category);
+
+      const submitButton = screen.getByTestId("event-submit-button");
+      await user.click(submitButton);
+
+      // 알림 확인
+      expect(await screen.findByText("일정 겹침 경고")).toBeInTheDocument();
+
+      // 일정 등록
+      const alertProgressButton = screen.getByRole("button", {
+        name: "계속 진행",
+      });
+      await user.click(alertProgressButton);
+
+      // 화면에 나타나는지 확인
+      const titleElements = await screen.findAllByText(duplicateData.title);
+      expect(titleElements.length).toBeGreaterThan(0);
+    });
+  });
 });

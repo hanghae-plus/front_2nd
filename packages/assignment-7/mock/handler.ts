@@ -3,6 +3,18 @@ import { Event } from "../src/App";
 
 export const DUMMY_DATA: Event[] = [
   {
+    id: 4,
+    title: "여행",
+    date: "2024-07-22",
+    startTime: "17:00",
+    endTime: "19:00",
+    description: "강릉여행",
+    location: "강릉",
+    category: "개인",
+    repeat: { type: "weekly", interval: 1 },
+    notificationTime: 1,
+  },
+  {
     id: 5,
     title: "운동",
     date: "2024-07-22",

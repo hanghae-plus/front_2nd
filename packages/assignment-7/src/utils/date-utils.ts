@@ -59,6 +59,7 @@ const getCurrentDate = (): string => {
 
   const dateString = year + "-" + month + "-" + day;
 
+  console.log(dateString);
   return dateString;
 };
 
