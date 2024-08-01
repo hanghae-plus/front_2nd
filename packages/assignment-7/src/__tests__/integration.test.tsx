@@ -262,13 +262,21 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       vi.setSystemTime(new Date('2024-01-01'));
       setup(<App />);
 
-      expect(screen.getByText('신정')).toBeInTheDocument();
+      const target = screen.getByText('1');
+      expect(target).toBeInTheDocument();
+
+      const 신정 = target.nextSibling;
+      expect(신정).toHaveTextContent('신정');
     });
     test('달력에 5월 5일(어린이날)이 공휴일로 표시되는지 확인한다', () => {
       vi.setSystemTime(new Date('2024-05-05'));
       setup(<App />);
 
-      expect(screen.getByText('어린이날')).toBeInTheDocument();
+      const target = screen.getByText('5');
+      expect(target).toBeInTheDocument();
+
+      const 어린이날 = target.nextSibling;
+      expect(어린이날).toHaveTextContent('어린이날');
     });
   });
 
