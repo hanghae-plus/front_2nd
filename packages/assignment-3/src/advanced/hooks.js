@@ -30,11 +30,41 @@ export function createHooks(callback) {
    * @returns
    */
   const useState = (initState) => {
-    return [];
+    let stateIdx = currentStateHookIdx;
+    const rebounceCallback = rebounceOneFrame(callback);
+
+    stateHooks[stateIdx] = stateHooks[stateIdx] || initState;
+
+    const state =
+      typeof stateHooks[stateIdx] === "object"
+        ? Object.freeze(stateHooks[stateIdx])
+        : stateHooks[stateIdx];
+
+    function setState(updatedState) {
+      if (shallowEquals(stateHooks[stateIdx], updatedState)) return;
+      stateHooks[stateIdx] = updatedState;
+      rebounceCallback();
+    }
+
+    currentStateHookIdx++;
+    return [state, setState];
   };
 
   const useMemo = (fn, refs) => {
-    return fn();
+    let memoIdx = currentMemoHookIdx;
+    memoHooks[memoIdx] = memoHooks[memoIdx] || { memoizedValue: fn(), dependency: refs };
+
+    const { memoizedValue, dependency } = memoHooks[memoIdx];
+
+    if (shallowEquals(dependency, refs)) {
+      return typeof memoizedValue === "object" ? Object.freeze(memoizedValue) : memoizedValue;
+    }
+
+    const newValue = fn();
+    memoHooks[memoIdx] = { memoizedValue: newValue, dependency: refs };
+
+    currentMemoHookIdx++;
+    return typeof newValue === "object" ? Object.freeze(newValue) : newValue;
   };
 
   const resetContext = () => {
