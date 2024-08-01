@@ -4,7 +4,8 @@ import {
   formatWeek,
   getDaysInMonth,
   getWeekDates,
-} from "../utils/date-utils";
+  isDateInRange,
+} from "../date-utils";
 
 describe("단위 테스트: 날짜 및 시간 관리", () => {
   describe("getDaysInMonth 함수", () => {
@@ -92,6 +93,43 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
   });
 
   describe("isDateInRange 함수", () => {
-    test.fails("주어진 날짜가 특정 범위 내에 있는지 정확히 판단한다");
+    test("주어진 날짜가 특정 범위 내에 있는지 정확히 판단한다", () => {
+      const startDate = new Date("2023-01-01");
+      const endDate = new Date("2023-12-31");
+
+      expect(isDateInRange(new Date("2023-06-15"), startDate, endDate)).toBe(
+        true
+      );
+
+      expect(isDateInRange(new Date("2023-01-01"), startDate, endDate)).toBe(
+        true
+      );
+
+      expect(isDateInRange(new Date("2023-12-31"), startDate, endDate)).toBe(
+        true
+      );
+
+      expect(isDateInRange(new Date("2022-12-31"), startDate, endDate)).toBe(
+        false
+      );
+
+      expect(isDateInRange(new Date("2024-01-01"), startDate, endDate)).toBe(
+        false
+      );
+    });
+
+    test("시작일이 종료일보다 늦은 경우를 올바르게 처리합니다.", () => {
+      const startDate = new Date("2023-12-31");
+      const endDate = new Date("2023-01-01");
+
+      expect(isDateInRange(new Date("2023-06-15"), startDate, endDate)).toBe(
+        false
+      );
+    });
+
+    test("시작일, 종료일, 확인할 날짜가 모두 같은 경우를 처리합니다.", () => {
+      const sameDate = new Date("2023-05-05");
+      expect(isDateInRange(sameDate, sameDate, sameDate)).toBe(true);
+    });
   });
 });

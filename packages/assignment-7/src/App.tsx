@@ -58,6 +58,7 @@ function App() {
   const [notifications, setNotifications] = useState<
     { id: number; message: string }[]
   >([]);
+
   const checkUpcomingEvents = async () => {
     const now = new Date();
     const upcomingEvents = events.filter((event) => {

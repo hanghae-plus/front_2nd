@@ -117,6 +117,17 @@ const searchEvents = (events: Event[], term: string) => {
   );
 };
 
+/**
+ * 주어진 날짜가 시작일과 종료일 사이에 있는지 확인하는 함수
+ * @param date
+ * @param startDate
+ * @param endDate
+ * @returns boolean 주어진 날짜가 범위 내에 있으면 true, 그렇지 않으면 false
+ */
+const isDateInRange = (date: Date, startDate: Date, endDate: Date): boolean => {
+  return date >= startDate && date <= endDate;
+};
+
 export {
   getDaysInMonth,
   getWeekDates,
@@ -127,4 +138,5 @@ export {
   isOverlapping,
   findOverlappingEvents,
   searchEvents,
+  isDateInRange,
 };

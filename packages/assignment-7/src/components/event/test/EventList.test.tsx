@@ -98,9 +98,6 @@ describe("EventList에 대해 테스트를 합니다.", () => {
       name: "Delete event",
     });
 
-    const textElement = await screen.findAllByTestId("event-title");
-    const targetTitle = textElement[0].textContent;
-
     await user.click(deleteButton[0]);
   });
 });

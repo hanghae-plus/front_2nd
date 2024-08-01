@@ -38,24 +38,20 @@ export const useEventForm = (editingEvent: Event | null) => {
 
   const handleStartTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newStartTime = e.target.value;
-    setEventFormValue((formValue) => {
-      return {
-        ...formValue,
-        startTime: newStartTime,
-      };
+    setEventFormValue((prevValue) => {
+      const newValue = { ...prevValue, startTime: newStartTime };
+      validateTime(newStartTime, newValue.endTime);
+      return newValue;
     });
-    validateTime(newStartTime, eventFormValue.endTime);
   };
 
   const handleEndTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newEndTime = e.target.value;
-    setEventFormValue((formValue) => {
-      return {
-        ...formValue,
-        endTime: newEndTime,
-      };
+    setEventFormValue((prevValue) => {
+      const newValue = { ...prevValue, endTime: newEndTime };
+      validateTime(newValue.startTime, newEndTime);
+      return newValue;
     });
-    validateTime(eventFormValue.startTime, newEndTime);
   };
 
   /**
