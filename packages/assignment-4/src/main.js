@@ -1,3 +1,5 @@
+// prettier-ignore
+/* eslint-disable */
 function main() {
   var p = [
     {id: 'p1', n: '상품1', p: 10000 },

@@ -1,5 +1,3 @@
-function main() {
+import { createCartView } from "./createCartView";
 
-}
-
-main();
+createCartView();
