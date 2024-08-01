@@ -43,7 +43,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       render(<App />);
 
       await userEvent.type(screen.getByLabelText(/제목/), 'Test 일정');
-      await userEvent.type(screen.getByLabelText(/날짜/), '2024-07-31');
+      await userEvent.type(screen.getByLabelText(/날짜/), '2024-08-01');
       await userEvent.type(screen.getByLabelText(/시작 시간/), '13:00');
       await userEvent.type(screen.getByLabelText(/종료 시간/), '15:00');
       await userEvent.type(screen.getByLabelText(/설명/), 'Test 설명');
@@ -56,7 +56,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       const eventList = screen.getByTestId('event-list');
       await waitFor(() => {
         expect(eventList).toHaveTextContent('Test 일정');
-        expect(eventList).toHaveTextContent('2024-07-31');
+        expect(eventList).toHaveTextContent('2024-08-01');
         expect(eventList).toHaveTextContent('13:00 - 15:00');
         expect(eventList).toHaveTextContent('Test 설명');
         expect(eventList).toHaveTextContent('Test 위치');
@@ -66,13 +66,29 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     test('기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영되는지 확인한다', async () => {
       render(<App />);
 
+      await userEvent.type(screen.getByLabelText(/제목/), 'Test 일정');
+      await userEvent.type(screen.getByLabelText(/날짜/), '2024-08-01');
+      await userEvent.type(screen.getByLabelText(/시작 시간/), '13:00');
+      await userEvent.type(screen.getByLabelText(/종료 시간/), '15:00');
+      await userEvent.type(screen.getByLabelText(/설명/), 'Test 설명');
+      await userEvent.type(screen.getByLabelText(/위치/), 'Test 위치');
+      await userEvent.selectOptions(screen.getByLabelText(/카테고리/), '업무');
+
+      const submitButton = screen.getByTestId('event-submit-button');
+      await userEvent.click(submitButton);
+
+      const eventList = screen.getByTestId('event-list');
+      await waitFor(() => {
+        expect(eventList).toHaveTextContent('Test 일정');
+      });
+
       const editButtons = await screen.findAllByLabelText('Edit event');
       await userEvent.click(editButtons[0]);
 
       await userEvent.clear(screen.getByLabelText(/제목/));
       await userEvent.type(screen.getByLabelText(/제목/), '수정된 Test 일정');
       await userEvent.clear(screen.getByLabelText(/날짜/));
-      await userEvent.type(screen.getByLabelText(/날짜/), '2024-07-05');
+      await userEvent.type(screen.getByLabelText(/날짜/), '2024-08-01');
       await userEvent.clear(screen.getByLabelText(/시작 시간/));
       await userEvent.type(screen.getByLabelText(/시작 시간/), '14:00');
       await userEvent.clear(screen.getByLabelText(/종료 시간/));
@@ -83,13 +99,11 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       await userEvent.type(screen.getByLabelText(/위치/), '수정된 Test 위치');
       await userEvent.selectOptions(screen.getByLabelText(/카테고리/), '개인');
 
-      const submitButton = screen.getByTestId('event-submit-button');
       await userEvent.click(submitButton);
 
-      const eventList = screen.getByTestId('event-list');
       await waitFor(() => {
         expect(eventList).toHaveTextContent('수정된 Test 일정');
-        expect(eventList).toHaveTextContent('2024-07-05');
+        expect(eventList).toHaveTextContent('2024-08-01');
         expect(eventList).toHaveTextContent('14:00 - 16:00');
         expect(eventList).toHaveTextContent('수정된 Test 설명');
         expect(eventList).toHaveTextContent('수정된 Test 위치');
@@ -98,6 +112,22 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     });
     test('일정을 삭제하고 더 이상 조회되지 않는지 확인한다', async () => {
       render(<App />);
+
+      await userEvent.type(screen.getByLabelText(/제목/), 'Test 일정');
+      await userEvent.type(screen.getByLabelText(/날짜/), '2024-08-01');
+      await userEvent.type(screen.getByLabelText(/시작 시간/), '13:00');
+      await userEvent.type(screen.getByLabelText(/종료 시간/), '15:00');
+      await userEvent.type(screen.getByLabelText(/설명/), 'Test 설명');
+      await userEvent.type(screen.getByLabelText(/위치/), 'Test 위치');
+      await userEvent.selectOptions(screen.getByLabelText(/카테고리/), '업무');
+
+      const submitButton = screen.getByTestId('event-submit-button');
+      await userEvent.click(submitButton);
+
+      const eventList = screen.getByTestId('event-list');
+      await waitFor(() => {
+        expect(eventList).toHaveTextContent('Test 일정');
+      });
 
       const eventItems = await screen.findAllByTestId(/^event-item-/);
       // 삭제할 이벤트가 없으면 테스트를 종료합니다.
@@ -331,6 +361,9 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
   describe('검색 기능', () => {
     test('제목으로 일정을 검색하고 정확한 결과가 반환되는지 확인한다', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.setSystemTime(new Date('2024-07-15'));
+
       render(<App />);
 
       // 목데이터에 존재하는 찾아볼 일정 '점심 약속'
@@ -344,8 +377,13 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
         expect(eventList).toHaveTextContent(query);
         expect(eventList).not.toHaveTextContent('검색 결과가 없습니다.');
       });
+
+      vi.useRealTimers();
     });
     test('검색어를 지우면 모든 일정이 다시 표시되어야 한다', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.setSystemTime(new Date('2024-07-15'));
+
       render(<App />);
 
       const eventList = screen.getByTestId('event-list');
@@ -365,6 +403,8 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       await waitFor(() => {
         expect(eventList).matchSnapshot(eventListSnapshot);
       });
+
+      vi.useRealTimers();
     });
   });
 
@@ -442,6 +482,9 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       notificationTime: 1,
     };
     test('겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.setSystemTime(new Date('2024-07-15'));
+
       render(<App />);
 
       // 테스트용 일정 추가
@@ -462,8 +505,13 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       await waitFor(() => {
         expect(screen.getByText('일정 겹침 경고')).toBeInTheDocument();
       });
+
+      vi.useRealTimers();
     });
     test('기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.setSystemTime(new Date('2024-07-15'));
+
       render(<App />);
 
       const eventList = screen.getByTestId('event-list');
@@ -499,6 +547,8 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       await waitFor(() => {
         expect(screen.getByText('일정 겹침 경고')).toBeInTheDocument();
       });
+
+      vi.useRealTimers();
     });
   });
 });
