@@ -1,4 +1,10 @@
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import {
+  BellIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  DeleteIcon,
+  EditIcon,
+} from "@chakra-ui/icons";
 import {
   Alert,
   AlertDialog,
@@ -32,40 +38,24 @@ import {
   useInterval,
   useToast,
   VStack,
-} from '@chakra-ui/react';
-import { BellIcon, ChevronLeftIcon, ChevronRightIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
+} from "@chakra-ui/react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { Event, RepeatType } from "./types";
+import formatMonth from "./utils/formatMonth";
+import formatWeek from "./utils/formatWeek";
+import getDaysInMonth from "./utils/getDaysInMonth";
+import getWeekDates from "./utils/getWeekDates";
 
-type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+const categories = ["업무", "개인", "가족", "기타"];
 
-interface RepeatInfo {
-  type: RepeatType;
-  interval: number;
-  endDate?: string;
-}
-
-interface Event {
-  id: number;
-  title: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  description: string;
-  location: string;
-  category: string;
-  repeat: RepeatInfo;
-  notificationTime: number; // 분 단위로 저장
-}
-
-const categories = ['업무', '개인', '가족', '기타'];
-
-const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
 const notificationOptions = [
-  { value: 1, label: '1분 전' },
-  { value: 10, label: '10분 전' },
-  { value: 60, label: '1시간 전' },
-  { value: 120, label: '2시간 전' },
-  { value: 1440, label: '1일 전' },
+  { value: 1, label: "1분 전" },
+  { value: 10, label: "10분 전" },
+  { value: 60, label: "1시간 전" },
+  { value: 120, label: "2시간 전" },
+  { value: 1440, label: "1일 전" },
 ];
 
 const dummyEvents: Event[] = [];
@@ -90,56 +80,59 @@ const fetchHolidays = (year: number, month: number) => {
     "2024-09-18": "추석",
     "2024-10-03": "개천절",
     "2024-10-09": "한글날",
-    "2024-12-25": "크리스마스"
+    "2024-12-25": "크리스마스",
   };
 };
 
 function App() {
   const [events, setEvents] = useState<Event[]>(dummyEvents);
-  const [title, setTitle] = useState('');
-  const [date, setDate] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
-  const [category, setCategory] = useState('');
-  const [view, setView] = useState<'week' | 'month'>('month');
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [category, setCategory] = useState("");
+  const [view, setView] = useState<"week" | "month">("month");
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isRepeating, setIsRepeating] = useState(false);
-  const [repeatType, setRepeatType] = useState<RepeatType>('none');
+  const [repeatType, setRepeatType] = useState<RepeatType>("none");
   const [repeatInterval, setRepeatInterval] = useState(1);
-  const [repeatEndDate, setRepeatEndDate] = useState('');
+  const [repeatEndDate, setRepeatEndDate] = useState("");
   const [notificationTime, setNotificationTime] = useState(10);
-  const [notifications, setNotifications] = useState<{ id: number; message: string }[]>([]);
+  const [notifications, setNotifications] = useState<
+    { id: number; message: string }[]
+  >([]);
   const [notifiedEvents, setNotifiedEvents] = useState<number[]>([]);
 
   const [isOverlapDialogOpen, setIsOverlapDialogOpen] = useState(false);
   const [overlappingEvents, setOverlappingEvents] = useState<Event[]>([]);
-
 
   const [startTimeError, setStartTimeError] = useState<string | null>(null);
   const [endTimeError, setEndTimeError] = useState<string | null>(null);
 
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [holidays, setHolidays] = useState<{ [key: string]: string }>({});
-
 
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   const toast = useToast();
 
+  /**
+   * 서버에서 일정 정보 가져오기
+   */
   const fetchEvents = async () => {
     try {
-      const response = await fetch('/api/events');
+      const response = await fetch("/api/events");
       if (!response.ok) {
-        throw new Error('Failed to fetch events');
+        throw new Error("Failed to fetch events");
       }
       const data = await response.json();
       setEvents(data);
     } catch (error) {
-      console.error('Error fetching events:', error);
+      console.error("Error fetching events:", error);
       toast({
         title: "이벤트 로딩 실패",
         status: "error",
@@ -149,6 +142,9 @@ function App() {
     }
   };
 
+  /**
+   * 일정 추가 혹은 수정
+   */
   const addOrUpdateEvent = async () => {
     if (!title || !date || !startTime || !endTime) {
       toast({
@@ -181,7 +177,7 @@ function App() {
       location,
       category,
       repeat: {
-        type: isRepeating ? repeatType : 'none',
+        type: isRepeating ? repeatType : "none",
         interval: repeatInterval,
         endDate: repeatEndDate || undefined,
       },
@@ -197,42 +193,47 @@ function App() {
     }
   };
 
+  /**
+   * 일정 생성 및 수정 기능 중 저장하기 눌렀을 때
+   */
   const saveEvent = async (eventData: Event) => {
     try {
       let response;
       if (editingEvent) {
         response = await fetch(`/api/events/${eventData.id}`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(eventData),
         });
       } else {
-        response = await fetch('/api/events', {
-          method: 'POST',
+        response = await fetch("/api/events", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(eventData),
         });
       }
 
       if (!response.ok) {
-        throw new Error('Failed to save event');
+        throw new Error("Failed to save event");
       }
 
       await fetchEvents(); // 이벤트 목록 새로고침
       setEditingEvent(null);
       resetForm();
       toast({
-        title: editingEvent ? "일정이 수정되었습니다." : "일정이 추가되었습니다.",
+        title: editingEvent
+          ? "일정이 수정되었습니다."
+          : "일정이 추가되었습니다.",
         status: "success",
         duration: 3000,
         isClosable: true,
       });
     } catch (error) {
-      console.error('Error saving event:', error);
+      console.error("Error saving event:", error);
       toast({
         title: "일정 저장 실패",
         status: "error",
@@ -242,14 +243,17 @@ function App() {
     }
   };
 
+  /**
+   * 일정 삭제 눌렀을 때
+   */
   const deleteEvent = async (id: number) => {
     try {
       const response = await fetch(`/api/events/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete event');
+        throw new Error("Failed to delete event");
       }
 
       await fetchEvents(); // 이벤트 목록 새로고침
@@ -260,7 +264,7 @@ function App() {
         isClosable: true,
       });
     } catch (error) {
-      console.error('Error deleting event:', error);
+      console.error("Error deleting event:", error);
       toast({
         title: "일정 삭제 실패",
         status: "error",
@@ -270,27 +274,40 @@ function App() {
     }
   };
 
+  /**
+   * 이벤트 알림 토스트 노출
+   */
   const checkUpcomingEvents = async () => {
     const now = new Date();
-    const upcomingEvents = events.filter(event => {
+    const upcomingEvents = events.filter((event) => {
       const eventStart = new Date(`${event.date}T${event.startTime}`);
       const timeDiff = (eventStart.getTime() - now.getTime()) / (1000 * 60);
-      return timeDiff > 0 && timeDiff <= event.notificationTime && !notifiedEvents.includes(event.id);
+      return (
+        timeDiff > 0 &&
+        timeDiff <= event.notificationTime &&
+        !notifiedEvents.includes(event.id)
+      );
     });
 
     for (const event of upcomingEvents) {
       try {
-        setNotifications(prev => [...prev, {
-          id: event.id,
-          message: `${event.notificationTime}분 후 ${event.title} 일정이 시작됩니다.`
-        }]);
-        setNotifiedEvents(prev => [...prev, event.id]);
+        setNotifications((prev) => [
+          ...prev,
+          {
+            id: event.id,
+            message: `${event.notificationTime}분 후 ${event.title} 일정이 시작됩니다.`,
+          },
+        ]);
+        setNotifiedEvents((prev) => [...prev, event.id]);
       } catch (error) {
-        console.error('Error updating notification status:', error);
+        console.error("Error updating notification status:", error);
       }
     }
   };
 
+  /**
+   * 시작시간, 종료시간이 관계적으로 성립하는지 확인
+   */
   const validateTime = (start: string, end: string) => {
     if (!start || !end) return;
 
@@ -306,25 +323,34 @@ function App() {
     }
   };
 
+  /**
+   * 시작시간 변경
+   */
   const handleStartTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newStartTime = e.target.value;
     setStartTime(newStartTime);
     validateTime(newStartTime, endTime);
   };
 
+  /**
+   * 종료시간 변경
+   */
   const handleEndTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newEndTime = e.target.value;
     setEndTime(newEndTime);
     validateTime(startTime, newEndTime);
   };
 
-
-  // 날짜 문자열을 Date 객체로 변환하는 함수
+  /**
+   * 날짜 문자열을 Date 객체로 변환하는 함수
+   */
   const parseDateTime = (date: string, time: string): Date => {
     return new Date(`${date}T${time}`);
   };
 
-  // 두 일정이 겹치는지 확인하는 함수
+  /**
+   * 두 일정이 겹치는지 확인하는 함수
+   */
   const isOverlapping = (event1: Event, event2: Event): boolean => {
     const start1 = parseDateTime(event1.date, event1.startTime);
     const end1 = parseDateTime(event1.date, event1.endTime);
@@ -334,28 +360,36 @@ function App() {
     return start1 < end2 && start2 < end1;
   };
 
-  // 겹치는 일정을 찾는 함수
+  /**
+   * 겹치는 일정을 찾는 함수
+   */
   const findOverlappingEvents = (newEvent: Event): Event[] => {
-    return events.filter(event =>
-      event.id !== newEvent.id && isOverlapping(event, newEvent)
+    return events.filter(
+      (event) => event.id !== newEvent.id && isOverlapping(event, newEvent)
     );
   };
 
+  /**
+   * 입력 초기화
+   */
   const resetForm = () => {
-    setTitle('');
-    setDate('');
-    setStartTime('');
-    setEndTime('');
-    setDescription('');
-    setLocation('');
-    setCategory('');
+    setTitle("");
+    setDate("");
+    setStartTime("");
+    setEndTime("");
+    setDescription("");
+    setLocation("");
+    setCategory("");
     setEditingEvent(null);
     setIsRepeating(false);
-    setRepeatType('none');
+    setRepeatType("none");
     setRepeatInterval(1);
-    setRepeatEndDate('');
+    setRepeatEndDate("");
   };
 
+  /**
+   * 특정 일정 수정하기
+   */
   const editEvent = (event: Event) => {
     setEditingEvent(event);
     setTitle(event.title);
@@ -365,79 +399,58 @@ function App() {
     setDescription(event.description);
     setLocation(event.location);
     setCategory(event.category);
-    setIsRepeating(event.repeat.type !== 'none');
+    setIsRepeating(event.repeat.type !== "none");
     setRepeatType(event.repeat.type);
     setRepeatInterval(event.repeat.interval);
-    setRepeatEndDate(event.repeat.endDate || '');
+    setRepeatEndDate(event.repeat.endDate || "");
     setNotificationTime(event.notificationTime);
   };
 
-  const getDaysInMonth = (year: number, month: number) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getWeekDates = (date: Date) => {
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(date.setDate(diff));
-    const weekDates = [];
-    for (let i = 0; i < 7; i++) {
-      const nextDate = new Date(monday);
-      nextDate.setDate(monday.getDate() + i);
-      weekDates.push(nextDate);
-    }
-    return weekDates;
-  };
-
-  const navigate = (direction: 'prev' | 'next') => {
-    setCurrentDate(prevDate => {
+  /**
+   * 달력 전 후 이동
+   */
+  const navigate = (direction: "prev" | "next") => {
+    setCurrentDate((prevDate) => {
       const newDate = new Date(prevDate);
-      if (view === 'week') {
-        newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-      } else if (view === 'month') {
-        newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+      if (view === "week") {
+        newDate.setDate(newDate.getDate() + (direction === "next" ? 7 : -7));
+      } else if (view === "month") {
+        newDate.setMonth(newDate.getMonth() + (direction === "next" ? 1 : -1));
       }
       return newDate;
     });
   };
 
+  /**
+   * 일정 검색하기
+   */
   const searchEvents = (term: string) => {
     if (!term.trim()) return events;
 
-    return events.filter(event =>
-      event.title.toLowerCase().includes(term.toLowerCase()) ||
-      event.description.toLowerCase().includes(term.toLowerCase()) ||
-      event.location.toLowerCase().includes(term.toLowerCase())
+    return events.filter(
+      (event) =>
+        event.title.toLowerCase().includes(term.toLowerCase()) ||
+        event.description.toLowerCase().includes(term.toLowerCase()) ||
+        event.location.toLowerCase().includes(term.toLowerCase())
     );
   };
 
   const filteredEvents = (() => {
     const filtered = searchEvents(searchTerm);
-    return filtered.filter(event => {
+    return filtered.filter((event) => {
       const eventDate = new Date(event.date);
-      if (view === 'week') {
+      if (view === "week") {
         const weekDates = getWeekDates(currentDate);
         return eventDate >= weekDates[0] && eventDate <= weekDates[6];
-      } else if (view === 'month') {
-        return eventDate.getMonth() === currentDate.getMonth() &&
-          eventDate.getFullYear() === currentDate.getFullYear();
+      } else if (view === "month") {
+        return (
+          eventDate.getMonth() === currentDate.getMonth() &&
+          eventDate.getFullYear() === currentDate.getFullYear()
+        );
       }
       return true;
-    })
+    });
   })();
-
-  const formatWeek = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const weekNumber = Math.ceil(date.getDate() / 7);
-    return `${year}년 ${month}월 ${weekNumber}주`;
-  };
-
-  const formatMonth = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    return `${year}년 ${month}월`;
-  };
 
   const renderWeekView = () => {
     const weekDates = getWeekDates(currentDate);
@@ -447,19 +460,30 @@ function App() {
         <Table variant="simple" w="full">
           <Thead>
             <Tr>
-              {weekDays.map(day => (
-                <Th key={day} width="14.28%">{day}</Th>
+              {weekDays.map((day) => (
+                <Th key={day} width="14.28%">
+                  {day}
+                </Th>
               ))}
             </Tr>
           </Thead>
           <Tbody>
             <Tr>
-              {weekDates.map(date => (
-                <Td key={date.toISOString()} height="100px" verticalAlign="top" width="14.28%">
+              {weekDates.map((date) => (
+                <Td
+                  key={date.toISOString()}
+                  height="100px"
+                  verticalAlign="top"
+                  width="14.28%"
+                >
                   <Text fontWeight="bold">{date.getDate()}</Text>
                   {filteredEvents
-                    .filter(event => new Date(event.date).toDateString() === date.toDateString())
-                    .map(event => {
+                    .filter(
+                      (event) =>
+                        new Date(event.date).toDateString() ===
+                        date.toDateString()
+                    )
+                    .map((event) => {
                       const isNotified = notifiedEvents.includes(event.id);
                       return (
                         <Box
@@ -472,13 +496,14 @@ function App() {
                           color={isNotified ? "red.500" : "inherit"}
                         >
                           <HStack spacing={1}>
-                            {isNotified && <BellIcon/>}
-                            <Text fontSize="sm" noOfLines={1}>{event.title}</Text>
+                            {isNotified && <BellIcon />}
+                            <Text fontSize="sm" noOfLines={1}>
+                              {event.title}
+                            </Text>
                           </HStack>
                         </Box>
-                      )
-                    })
-                  }
+                      );
+                    })}
                 </Td>
               ))}
             </Tr>
@@ -489,8 +514,15 @@ function App() {
   };
 
   const renderMonthView = () => {
-    const daysInMonth = getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth());
-    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+    const daysInMonth = getDaysInMonth(
+      currentDate.getFullYear(),
+      currentDate.getMonth()
+    );
+    const firstDayOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    ).getDay();
     const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     const weeks = [];
     let week = Array(7).fill(null);
@@ -514,8 +546,10 @@ function App() {
         <Table variant="simple" w="full">
           <Thead>
             <Tr>
-              {weekDays.map(day => (
-                <Th key={day} width="14.28%">{day}</Th>
+              {weekDays.map((day) => (
+                <Th key={day} width="14.28%">
+                  {day}
+                </Th>
               ))}
             </Tr>
           </Thead>
@@ -523,21 +557,37 @@ function App() {
             {weeks.map((week, weekIndex) => (
               <Tr key={weekIndex}>
                 {week.map((day, dayIndex) => {
-                  const dateString = day ? `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` : '';
+                  const dateString = day
+                    ? `${currentDate.getFullYear()}-${String(
+                        currentDate.getMonth() + 1
+                      ).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+                    : "";
                   const holiday = holidays[dateString];
 
                   return (
-                    <Td key={dayIndex} height="100px" verticalAlign="top" width="14.28%" position="relative">
+                    <Td
+                      key={dayIndex}
+                      height="100px"
+                      verticalAlign="top"
+                      width="14.28%"
+                      position="relative"
+                    >
                       {day && (
                         <>
                           <Text fontWeight="bold">{day}</Text>
                           {holiday && (
-                            <Text color="red.500" fontSize="sm">{holiday}</Text>
+                            <Text color="red.500" fontSize="sm">
+                              {holiday}
+                            </Text>
                           )}
                           {filteredEvents
-                            .filter(event => new Date(event.date).getDate() === day)
-                            .map(event => {
-                              const isNotified = notifiedEvents.includes(event.id);
+                            .filter(
+                              (event) => new Date(event.date).getDate() === day
+                            )
+                            .map((event) => {
+                              const isNotified = notifiedEvents.includes(
+                                event.id
+                              );
                               return (
                                 <Box
                                   key={event.id}
@@ -549,8 +599,10 @@ function App() {
                                   color={isNotified ? "red.500" : "inherit"}
                                 >
                                   <HStack spacing={1}>
-                                    {isNotified && <BellIcon/>}
-                                    <Text fontSize="sm" noOfLines={1}>{event.title}</Text>
+                                    {isNotified && <BellIcon />}
+                                    <Text fontSize="sm" noOfLines={1}>
+                                      {event.title}
+                                    </Text>
                                   </HStack>
                                 </Box>
                               );
@@ -585,22 +637,30 @@ function App() {
     <Box w="full" h="100vh" m="auto" p={5}>
       <Flex gap={6} h="full">
         <VStack w="400px" spacing={5} align="stretch">
-          <Heading>{editingEvent ? '일정 수정' : '일정 추가'}</Heading>
+          <Heading>{editingEvent ? "일정 수정" : "일정 추가"}</Heading>
 
           <FormControl>
             <FormLabel>제목</FormLabel>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)}/>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
           </FormControl>
 
           <FormControl>
             <FormLabel>날짜</FormLabel>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)}/>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
           </FormControl>
 
           <HStack width="100%">
             <FormControl>
               <FormLabel>시작 시간</FormLabel>
-              <Tooltip label={startTimeError} isOpen={!!startTimeError} placement="top">
+              <Tooltip
+                label={startTimeError}
+                isOpen={!!startTimeError}
+                placement="top"
+              >
                 <Input
                   type="time"
                   value={startTime}
@@ -612,7 +672,11 @@ function App() {
             </FormControl>
             <FormControl>
               <FormLabel>종료 시간</FormLabel>
-              <Tooltip label={endTimeError} isOpen={!!endTimeError} placement="top">
+              <Tooltip
+                label={endTimeError}
+                isOpen={!!endTimeError}
+                placement="top"
+              >
                 <Input
                   type="time"
                   value={endTime}
@@ -626,27 +690,41 @@ function App() {
 
           <FormControl>
             <FormLabel>설명</FormLabel>
-            <Input value={description} onChange={(e) => setDescription(e.target.value)}/>
+            <Input
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </FormControl>
 
           <FormControl>
             <FormLabel>위치</FormLabel>
-            <Input value={location} onChange={(e) => setLocation(e.target.value)}/>
+            <Input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
           </FormControl>
 
           <FormControl>
             <FormLabel>카테고리</FormLabel>
-            <Select value={category} onChange={(e) => setCategory(e.target.value)}>
+            <Select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
               <option value="">카테고리 선택</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
               ))}
             </Select>
           </FormControl>
 
           <FormControl>
             <FormLabel>반복 설정</FormLabel>
-            <Checkbox isChecked={isRepeating} onChange={(e) => setIsRepeating(e.target.checked)}>
+            <Checkbox
+              isChecked={isRepeating}
+              onChange={(e) => setIsRepeating(e.target.checked)}
+            >
               반복 일정
             </Checkbox>
           </FormControl>
@@ -657,7 +735,7 @@ function App() {
               value={notificationTime}
               onChange={(e) => setNotificationTime(Number(e.target.value))}
             >
-              {notificationOptions.map(option => (
+              {notificationOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -669,7 +747,10 @@ function App() {
             <VStack width="100%">
               <FormControl>
                 <FormLabel>반복 유형</FormLabel>
-                <Select value={repeatType} onChange={(e) => setRepeatType(e.target.value as RepeatType)}>
+                <Select
+                  value={repeatType}
+                  onChange={(e) => setRepeatType(e.target.value as RepeatType)}
+                >
                   <option value="daily">매일</option>
                   <option value="weekly">매주</option>
                   <option value="monthly">매월</option>
@@ -698,8 +779,12 @@ function App() {
             </VStack>
           )}
 
-          <Button data-testid="event-submit-button" onClick={addOrUpdateEvent} colorScheme="blue">
-            {editingEvent ? '일정 수정' : '일정 추가'}
+          <Button
+            data-testid="event-submit-button"
+            onClick={addOrUpdateEvent}
+            colorScheme="blue"
+          >
+            {editingEvent ? "일정 수정" : "일정 추가"}
           </Button>
         </VStack>
 
@@ -709,22 +794,26 @@ function App() {
           <HStack mx="auto" justifyContent="space-between">
             <IconButton
               aria-label="Previous"
-              icon={<ChevronLeftIcon/>}
-              onClick={() => navigate('prev')}
+              icon={<ChevronLeftIcon />}
+              onClick={() => navigate("prev")}
             />
-            <Select aria-label="view" value={view} onChange={(e) => setView(e.target.value as 'week' | 'month')}>
+            <Select
+              aria-label="view"
+              value={view}
+              onChange={(e) => setView(e.target.value as "week" | "month")}
+            >
               <option value="week">Week</option>
               <option value="month">Month</option>
             </Select>
             <IconButton
               aria-label="Next"
-              icon={<ChevronRightIcon/>}
-              onClick={() => navigate('next')}
+              icon={<ChevronRightIcon />}
+              onClick={() => navigate("next")}
             />
           </HStack>
 
-          {view === 'week' && renderWeekView()}
-          {view === 'month' && renderMonthView()}
+          {view === "week" && renderWeekView()}
+          {view === "month" && renderMonthView()}
         </VStack>
 
         <VStack data-testid="event-list" w="500px" h="full" overflowY="auto">
@@ -739,49 +828,77 @@ function App() {
 
           {filteredEvents.length === 0 ? (
             <Text>검색 결과가 없습니다.</Text>
-          ) : filteredEvents.map((event) => (
-            <Box key={event.id} borderWidth={1} borderRadius="lg" p={3} width="100%">
-              <HStack justifyContent="space-between">
-                <VStack align="start">
-                  <HStack>
-                    {notifiedEvents.includes(event.id) && <BellIcon color="red.500"/>}
-                    <Text fontWeight={notifiedEvents.includes(event.id) ? "bold" : "normal"}
-                          color={notifiedEvents.includes(event.id) ? "red.500" : "inherit"}>
-                      {event.title}
-                    </Text>
-                  </HStack>
-                  <Text>{event.date} {event.startTime} - {event.endTime}</Text>
-                  <Text>{event.description}</Text>
-                  <Text>{event.location}</Text>
-                  <Text>카테고리: {event.category}</Text>
-                  {event.repeat.type !== 'none' && (
+          ) : (
+            filteredEvents.map((event) => (
+              <Box
+                key={event.id}
+                borderWidth={1}
+                borderRadius="lg"
+                p={3}
+                width="100%"
+              >
+                <HStack justifyContent="space-between">
+                  <VStack align="start">
+                    <HStack>
+                      {notifiedEvents.includes(event.id) && (
+                        <BellIcon color="red.500" />
+                      )}
+                      <Text
+                        fontWeight={
+                          notifiedEvents.includes(event.id) ? "bold" : "normal"
+                        }
+                        color={
+                          notifiedEvents.includes(event.id)
+                            ? "red.500"
+                            : "inherit"
+                        }
+                      >
+                        {event.title}
+                      </Text>
+                    </HStack>
                     <Text>
-                      반복: {event.repeat.interval}
-                      {event.repeat.type === 'daily' && '일'}
-                      {event.repeat.type === 'weekly' && '주'}
-                      {event.repeat.type === 'monthly' && '월'}
-                      {event.repeat.type === 'yearly' && '년'}
-                      마다
-                      {event.repeat.endDate && ` (종료: ${event.repeat.endDate})`}
+                      {event.date} {event.startTime} - {event.endTime}
                     </Text>
-                  )}
-                  <Text>알림: {notificationOptions.find(option => option.value === event.notificationTime)?.label}</Text>
-                </VStack>
-                <HStack>
-                  <IconButton
-                    aria-label="Edit event"
-                    icon={<EditIcon/>}
-                    onClick={() => editEvent(event)}
-                  />
-                  <IconButton
-                    aria-label="Delete event"
-                    icon={<DeleteIcon/>}
-                    onClick={() => deleteEvent(event.id)}
-                  />
+                    <Text>{event.description}</Text>
+                    <Text>{event.location}</Text>
+                    <Text>카테고리: {event.category}</Text>
+                    {event.repeat.type !== "none" && (
+                      <Text>
+                        반복: {event.repeat.interval}
+                        {event.repeat.type === "daily" && "일"}
+                        {event.repeat.type === "weekly" && "주"}
+                        {event.repeat.type === "monthly" && "월"}
+                        {event.repeat.type === "yearly" && "년"}
+                        마다
+                        {event.repeat.endDate &&
+                          ` (종료: ${event.repeat.endDate})`}
+                      </Text>
+                    )}
+                    <Text>
+                      알림:{" "}
+                      {
+                        notificationOptions.find(
+                          (option) => option.value === event.notificationTime
+                        )?.label
+                      }
+                    </Text>
+                  </VStack>
+                  <HStack>
+                    <IconButton
+                      aria-label="Edit event"
+                      icon={<EditIcon />}
+                      onClick={() => editEvent(event)}
+                    />
+                    <IconButton
+                      aria-label="Delete event"
+                      icon={<DeleteIcon />}
+                      onClick={() => deleteEvent(event.id)}
+                    />
+                  </HStack>
                 </HStack>
-              </HStack>
-            </Box>
-          ))}
+              </Box>
+            ))
+          )}
         </VStack>
       </Flex>
 
@@ -798,35 +915,44 @@ function App() {
 
             <AlertDialogBody>
               다음 일정과 겹칩니다:
-              {overlappingEvents.map(event => (
-                <Text key={event.id}>{event.title} ({event.date} {event.startTime}-{event.endTime})</Text>
+              {overlappingEvents.map((event) => (
+                <Text key={event.id}>
+                  {event.title} ({event.date} {event.startTime}-{event.endTime})
+                </Text>
               ))}
               계속 진행하시겠습니까?
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={() => setIsOverlapDialogOpen(false)}>
+              <Button
+                ref={cancelRef}
+                onClick={() => setIsOverlapDialogOpen(false)}
+              >
                 취소
               </Button>
-              <Button colorScheme="red" onClick={() => {
-                setIsOverlapDialogOpen(false);
-                saveEvent({
-                  id: editingEvent ? editingEvent.id : Date.now(),
-                  title,
-                  date,
-                  startTime,
-                  endTime,
-                  description,
-                  location,
-                  category,
-                  repeat: {
-                    type: isRepeating ? repeatType : 'none',
-                    interval: repeatInterval,
-                    endDate: repeatEndDate || undefined,
-                  },
-                  notificationTime,
-                });
-              }} ml={3}>
+              <Button
+                colorScheme="red"
+                onClick={() => {
+                  setIsOverlapDialogOpen(false);
+                  saveEvent({
+                    id: editingEvent ? editingEvent.id : Date.now(),
+                    title,
+                    date,
+                    startTime,
+                    endTime,
+                    description,
+                    location,
+                    category,
+                    repeat: {
+                      type: isRepeating ? repeatType : "none",
+                      interval: repeatInterval,
+                      endDate: repeatEndDate || undefined,
+                    },
+                    notificationTime,
+                  });
+                }}
+                ml={3}
+              >
                 계속 진행
               </Button>
             </AlertDialogFooter>
@@ -834,18 +960,23 @@ function App() {
         </AlertDialogOverlay>
       </AlertDialog>
 
-      {notifications.length > 0 && <VStack position="fixed" top={4} right={4} spacing={2} align="flex-end">
-        {notifications.map((notification, index) => (
-          <Alert key={index} status="info" variant="solid" width="auto">
-            <AlertIcon/>
-            <Box flex="1">
-              <AlertTitle fontSize="sm">{notification.message}</AlertTitle>
-            </Box>
-            <CloseButton onClick={() => setNotifications(prev => prev.filter((_, i) => i !== index))}/>
-          </Alert>
-        ))}
-      </VStack>
-      }
+      {notifications.length > 0 && (
+        <VStack position="fixed" top={4} right={4} spacing={2} align="flex-end">
+          {notifications.map((notification, index) => (
+            <Alert key={index} status="info" variant="solid" width="auto">
+              <AlertIcon />
+              <Box flex="1">
+                <AlertTitle fontSize="sm">{notification.message}</AlertTitle>
+              </Box>
+              <CloseButton
+                onClick={() =>
+                  setNotifications((prev) => prev.filter((_, i) => i !== index))
+                }
+              />
+            </Alert>
+          ))}
+        </VStack>
+      )}
     </Box>
   );
 }
