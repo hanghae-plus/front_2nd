@@ -575,6 +575,7 @@ function App() {
                       verticalAlign="top"
                       width="14.28%"
                       position="relative"
+                      data-testid={`month-cell-${dayIndex}`}
                     >
                       {day && (
                         <>

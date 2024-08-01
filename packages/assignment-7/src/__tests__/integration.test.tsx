@@ -274,20 +274,20 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     test("주별 뷰에 일정이 정확히 표시되는지 확인한다", async () => {
       const { user } = setup(<App />);
 
-      // 1. 뷰 모드를 week로 변경
+      // 뷰 모드를 week로 변경
       const viewSelect = screen.getByLabelText("view");
       await user.selectOptions(viewSelect, "week");
 
       // week-view 요소 찾기
       const weekView = await screen.findByTestId("week-view");
 
-      // 2. 7월 3주차로 이동 (Next 버튼 두 번 클릭)
+      // 7월 3주차로 이동 (Next 버튼 두 번 클릭)
       const nextButton = screen.getByLabelText("Next");
       await user.click(nextButton);
       await user.click(nextButton);
       expect(weekView).toHaveTextContent("2024년 7월 3주");
 
-      // 3. 캘린더 셀 확인
+      // 캘린더 셀 확인
       const cell20 = within(weekView).getByTestId("week-cell-20");
       const cell21 = within(weekView).getByTestId("week-cell-21");
 
@@ -299,7 +299,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       expect(cell21).toHaveTextContent("21");
       expect(within(cell21).getByTestId("event-2")).toBeInTheDocument();
 
-      // 4. event-list 확인
+      // event-list 확인
       const eventList = screen.getByTestId("event-list");
       expect(within(eventList).getByTestId("event-1")).toBeInTheDocument();
       expect(within(eventList).getByTestId("event-2")).toBeInTheDocument();
@@ -317,8 +317,111 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       expect(event2).toHaveTextContent("12:30 - 13:30");
     });
 
-    test.fails("월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.");
-    test.fails("월별 뷰에 일정이 정확히 표시되는지 확인한다");
+    test("해당 월에 일정이 없으면, 캘린더 뷰와 목록에 이벤트 항목이 없어야 한다. ('검색 결과가 없습니다.' 문구 노출)", async () => {
+      const { user } = setup(<App />);
+
+      // month-view 요소 찾기
+      const monthView = await screen.findByTestId("month-view");
+      expect(monthView).toHaveTextContent("2024년 7월");
+
+      // 이전 달로 이동
+      const prevButton = screen.getByLabelText("Previous");
+      await user.click(prevButton);
+
+      await waitFor(() => {
+        expect(monthView).toHaveTextContent("2024년 6월");
+      });
+
+      // event-list 요소 찾기
+      const eventList = screen.getByTestId("event-list");
+
+      // week-view 내부의 모든 이벤트 요소 가져오기
+      const eventsInWeekView =
+        within(monthView).queryAllByTestId(/^event-\d+$/);
+
+      // event-list 내부의 모든 이벤트 요소 가져오기
+      const eventsInEventList =
+        within(eventList).queryAllByTestId(/^event-\d+$/);
+
+      // week-view에 이벤트 요소가 없어야 함
+      expect(eventsInWeekView).toHaveLength(0);
+
+      // event-list에 이벤트 요소가 없어야 함
+      expect(eventsInEventList).toHaveLength(0);
+
+      // event-list에 '검색 결과가 없습니다.' 메시지가 있어야 함
+      expect(
+        within(eventList).getByText("검색 결과가 없습니다.")
+      ).toBeInTheDocument();
+    });
+
+    test("월별 뷰에 일정이 정확히 표시되는지 확인한다", async () => {
+      const { user } = setup(<App />);
+
+      const monthView = await screen.findByTestId("month-view");
+
+      // 캘린더 셀 확인
+      const cell20 = within(monthView).getByTestId("month-cell-20");
+      const cell21 = within(monthView).getByTestId("month-cell-21");
+      const cell22 = within(monthView).getByTestId("month-cell-22");
+      const cell25 = within(monthView).getByTestId("month-cell-25");
+      const cell28 = within(monthView).getByTestId("month-cell-28");
+
+      // 20일 셀 확인
+      expect(cell20).toHaveTextContent("20");
+      expect(within(cell20).getByTestId("event-1")).toBeInTheDocument();
+
+      // 21일 셀 확인
+      expect(cell21).toHaveTextContent("21");
+      expect(within(cell21).getByTestId("event-2")).toBeInTheDocument();
+
+      // 22일 셀 확인
+      expect(cell22).toHaveTextContent("22");
+      expect(within(cell22).getByTestId("event-5")).toBeInTheDocument();
+
+      // 25일 셀 확인
+      expect(cell25).toHaveTextContent("25");
+      expect(within(cell25).getByTestId("event-3")).toBeInTheDocument();
+
+      // 28일 셀 확인
+      expect(cell28).toHaveTextContent("28");
+      expect(within(cell28).getByTestId("event-4")).toBeInTheDocument();
+
+      // event-list 확인
+      const eventList = screen.getByTestId("event-list");
+      expect(within(eventList).getByTestId("event-1")).toBeInTheDocument();
+      expect(within(eventList).getByTestId("event-2")).toBeInTheDocument();
+      expect(within(eventList).getByTestId("event-3")).toBeInTheDocument();
+      expect(within(eventList).getByTestId("event-4")).toBeInTheDocument();
+      expect(within(eventList).getByTestId("event-5")).toBeInTheDocument();
+
+      // event-1과 event-2의 내용 확인
+      const event1 = within(eventList).getByTestId("event-1");
+      const event2 = within(eventList).getByTestId("event-2");
+      const event3 = within(eventList).getByTestId("event-3");
+      const event4 = within(eventList).getByTestId("event-4");
+      const event5 = within(eventList).getByTestId("event-5");
+
+      expect(event1).toHaveTextContent("팀 회의");
+      expect(event1).toHaveTextContent("2024-07-20");
+      expect(event1).toHaveTextContent("10:00 - 11:00");
+
+      expect(event2).toHaveTextContent("점심 약속");
+      expect(event2).toHaveTextContent("2024-07-21");
+      expect(event2).toHaveTextContent("12:30 - 13:30");
+
+      expect(event3).toHaveTextContent("프로젝트 마감");
+      expect(event3).toHaveTextContent("2024-07-25");
+      expect(event3).toHaveTextContent("09:00 - 18:00");
+
+      expect(event4).toHaveTextContent("생일 파티");
+      expect(event4).toHaveTextContent("2024-07-28");
+      expect(event4).toHaveTextContent("19:00 - 22:00");
+
+      expect(event5).toHaveTextContent("운동");
+      expect(event5).toHaveTextContent("2024-07-22");
+      expect(event5).toHaveTextContent("18:00 - 19:00");
+    });
   });
 
   describe("알림 기능", () => {
