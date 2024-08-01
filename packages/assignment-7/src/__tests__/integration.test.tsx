@@ -6,6 +6,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { setupServer } from "msw/node";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { getAlarmBoundary } from "./testutils";
 
 let server = setupServer(...createHandlers());
 
@@ -259,24 +260,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       category: "개인",
       repeat: { type: "weekly" as RepeatType, interval: 1 },
       notificationTime: 10,
-      ...(() => {
-        const startTime = new Date(fakeTime.getTime() + 5 * 60000); // 5분 후
-        const endTime = new Date(startTime.getTime() + 60 * 60000); // 시작시간으로부터 1시간 후
-
-        const formatDate = (date: Date) => {
-          return date.toISOString().split("T")[0];
-        };
-
-        const formatTime = (date: Date) => {
-          return date.toTimeString().split(" ")[0].substring(0, 5);
-        };
-
-        return {
-          date: formatDate(fakeTime),
-          startTime: formatTime(startTime),
-          endTime: formatTime(endTime),
-        };
-      })(),
+      ...getAlarmBoundary(fakeTime),
     };
 
     test("초기 진입시 서버에서 받아온 일정 중 알림 조건에 맞는 일정에 대한 알림이 노출된다.", async () => {

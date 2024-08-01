@@ -10,7 +10,7 @@ const useEventNotifications = ({ events }: Props) => {
   const [notifiedEvents, setNotifiedEvents] = useState<number[]>([]);
 
   /**
-   * 이벤트 알림 토스트 노출
+   * 이벤트 알림 설정 기간 내에 현재가 포함되는지 확인하여 반영
    */
   const checkUpcomingEvents = async () => {
     const now = new Date();
@@ -46,6 +46,7 @@ const useEventNotifications = ({ events }: Props) => {
     notifications,
     setNotifications,
     notifiedEvents,
+    checkUpcomingEvents,
   };
 };
 

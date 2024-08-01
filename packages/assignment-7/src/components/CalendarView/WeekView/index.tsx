@@ -1,4 +1,4 @@
-import { weekDays } from "@/contants";
+import { weekDaysWeek } from "@/contants";
 import { Event } from "@/types";
 import formatWeek from "@/utils/formatWeek";
 import getWeekDates from "@/utils/getWeekDates";
@@ -30,7 +30,7 @@ const WeekView = ({ currentDate, filteredEvents, notifiedEvents }: Props) => {
       <Table variant="simple" w="full">
         <Thead>
           <Tr>
-            {weekDays.map((day) => (
+            {weekDaysWeek.map((day) => (
               <Th key={day} width="14.28%">
                 {day}
               </Th>

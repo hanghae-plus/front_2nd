@@ -1,6 +1,6 @@
 import { Event, RepeatType } from "@/types";
 import { useToast } from "@chakra-ui/react";
-import { ChangeEvent, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 
 const useEventForm = () => {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
@@ -47,7 +47,6 @@ const useEventForm = () => {
   const handleStartTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newStartTime = e.target.value;
     setStartTime(newStartTime);
-    validateTime(newStartTime, endTime);
   };
 
   /**
@@ -58,6 +57,10 @@ const useEventForm = () => {
     setEndTime(newEndTime);
     validateTime(startTime, newEndTime);
   };
+
+  useEffect(() => {
+    validateTime(startTime, endTime);
+  }, [startTime, endTime]);
 
   /**
    * 입력 초기화
@@ -164,8 +167,10 @@ const useEventForm = () => {
     date,
     setDate,
     startTime,
+    setStartTime,
     handleStartTimeChange,
     endTime,
+    setEndTime,
     handleEndTimeChange,
     description,
     setDescription,

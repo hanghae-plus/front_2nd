@@ -1,4 +1,4 @@
-import { weekDays } from "@/contants";
+import { weekDaysMonth } from "@/contants";
 import { Event } from "@/types";
 import formatMonth from "@/utils/formatMonth";
 import getDaysInMonth from "@/utils/getDaysInMonth";
@@ -61,7 +61,7 @@ const MonthView = ({
       <Table variant="simple" w="full">
         <Thead>
           <Tr>
-            {weekDays.map((day) => (
+            {weekDaysMonth.map((day) => (
               <Th key={day} width="14.28%">
                 {day}
               </Th>
