@@ -1,4 +1,5 @@
-const initialEvents = [
+import { Event } from '../types/types';
+const initialEvents: Event[] = [
   {
     id: 1,
     title: '팀 회의',
