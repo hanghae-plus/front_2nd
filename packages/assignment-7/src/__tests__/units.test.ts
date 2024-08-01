@@ -24,24 +24,24 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
   describe('getWeekDates 함수', () => {
     test('주어진 날짜가 속한 주의 모든 날짜를 반환한다', () => {
       expect(getWeekDates(new Date('2024-07-29'))).toEqual([
+        new Date('2024-07-28'),
         new Date('2024-07-29'),
         new Date('2024-07-30'),
         new Date('2024-07-31'),
         new Date('2024-08-01'),
         new Date('2024-08-02'),
         new Date('2024-08-03'),
-        new Date('2024-08-04'),
       ]);
     });
     test('연도를 넘어가는 주의 날짜를 정확히 처리한다', () => {
-      expect(getWeekDates(new Date('2022-12-29'))).toEqual([
-        new Date('2022-12-26'),
-        new Date('2022-12-27'),
-        new Date('2022-12-28'),
-        new Date('2022-12-29'),
-        new Date('2022-12-30'),
-        new Date('2022-12-31'),
-        new Date('2023-01-01'),
+      expect(getWeekDates(new Date('2023-12-31'))).toEqual([
+        new Date('2023-12-31'),
+        new Date('2024-01-01'),
+        new Date('2024-01-02'),
+        new Date('2024-01-03'),
+        new Date('2024-01-04'),
+        new Date('2024-01-05'),
+        new Date('2024-01-06'),
       ]);
     });
   });
@@ -67,7 +67,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         expect(isDateInRange(new Date('2024-07-29'), currentDate, 'week')).toBe(
           true
         );
-        expect(isDateInRange(new Date('2024-07-28'), currentDate, 'week')).toBe(
+        expect(isDateInRange(new Date('2024-07-27'), currentDate, 'week')).toBe(
           false
         );
       });
