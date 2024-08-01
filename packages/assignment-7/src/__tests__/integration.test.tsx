@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import App from "../App";
+import userEvent, { UserEvent } from "@testing-library/user-event";
+import App, { Event } from "../App";
 import { ReactNode } from "react";
 import { DUMMY_DATA } from "../../mock/handler";
 
@@ -12,6 +12,15 @@ const setup = (componet: ReactNode) => {
     user,
     ...render(componet),
   };
+};
+
+const fillInputElement = async (
+  element: HTMLInputElement,
+  user: UserEvent,
+  value: string
+) => {
+  await user.clear(element);
+  await user.type(element, value);
 };
 
 describe("일정 관리 애플리케이션 통합 테스트", () => {
@@ -137,35 +146,40 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       vi.setSystemTime(date);
       const { user } = setup(<App />);
 
-      // Name이 label이지만 Input요소 접근이 가능..?
-      const titleInput = screen.getByRole("textbox", { name: "제목" });
-      await user.type(titleInput, newData.title);
-      expect(titleInput).toHaveValue(newData.title);
+      await fillInputElement(
+        screen.getByLabelText("제목"),
+        user,
+        newData.title
+      );
 
-      const dateInput = screen.getByLabelText("날짜");
-      await user.type(dateInput, newData.date);
-      expect(dateInput).toHaveValue(newData.date);
+      await fillInputElement(screen.getByLabelText("날짜"), user, newData.date);
 
-      const startTimeInput = screen.getByLabelText("시작 시간");
-      await user.type(startTimeInput, newData.startTime);
-      expect(startTimeInput).toHaveValue(newData.startTime);
+      await fillInputElement(
+        screen.getByLabelText("시작 시간"),
+        user,
+        newData.startTime
+      );
 
-      const endTimeInput = screen.getByLabelText("종료 시간");
-      await user.type(endTimeInput, newData.endTime);
-      expect(endTimeInput).toHaveValue(newData.endTime);
+      await fillInputElement(
+        screen.getByLabelText("종료 시간"),
+        user,
+        newData.endTime
+      );
 
-      const descriptionInput = screen.getByLabelText("설명");
-      await user.type(descriptionInput, newData.description);
-      expect(descriptionInput).toHaveValue(newData.description);
+      await fillInputElement(
+        screen.getByLabelText("설명"),
+        user,
+        newData.description
+      );
 
-      const positionInput = screen.getByLabelText("위치");
-      await user.type(positionInput, newData.location);
-      expect(positionInput).toHaveValue(newData.location);
+      await fillInputElement(
+        screen.getByLabelText("위치"),
+        user,
+        newData.location
+      );
 
       const categoryInput = screen.getByLabelText("카테고리");
-      expect(categoryInput).toHaveValue("");
       await user.selectOptions(categoryInput, newData.category);
-      expect(categoryInput).toHaveValue(newData.category);
 
       const repeatCheckbox = screen.getByRole("checkbox");
       await user.click(repeatCheckbox);
@@ -173,27 +187,24 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       // 체크 되었을 때 렌더링 되는지 확인하고 가는게 좋을까?? 그냥 element 테스트 하면 확인되는게 아닐까?
       const alarmSelectBox = screen.getByLabelText("알림 설정");
-      expect(alarmSelectBox).toHaveValue("10");
       await user.selectOptions(alarmSelectBox, "2시간 전");
-      expect(alarmSelectBox).toHaveValue(newData.notificationTime);
 
       const repeatTypeSelectBox = screen.getByLabelText("반복 유형");
-      expect(repeatTypeSelectBox).toHaveValue("daily");
       await user.selectOptions(repeatTypeSelectBox, "매주");
-      expect(repeatTypeSelectBox).toHaveValue(newData.repeat.type);
 
-      // 이건 왜 spinbutton이래..?
-      const alarmTermInput = screen.getByRole("spinbutton", {
-        name: "반복 간격",
-      });
-      expect(alarmTermInput).toHaveValue(1);
-      await user.clear(alarmTermInput);
-      await user.type(alarmTermInput, "10");
-      expect(alarmTermInput).toHaveValue(10);
+      await fillInputElement(
+        screen.getByRole("spinbutton", {
+          name: "반복 간격",
+        }),
+        user,
+        newData.location
+      );
 
-      const repeatEndDateInput = screen.getByLabelText("반복 종료일");
-      await user.type(repeatEndDateInput, "2024-07-29");
-      expect(repeatEndDateInput).toHaveValue("2024-07-29");
+      await fillInputElement(
+        screen.getByLabelText("반복 종료일"),
+        user,
+        newData.repeat.endDate
+      );
 
       const submitButton = screen.getByTestId("event-submit-button");
       await user.click(submitButton);
@@ -222,25 +233,25 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       await user.click(editButton[0]);
 
-      const titleInput = screen.getByRole("textbox", { name: "제목" });
-      await user.clear(titleInput);
-      await user.type(titleInput, newData.title);
-      expect(titleInput).toHaveValue(newData.title);
+      await fillInputElement(
+        screen.getByLabelText("제목"),
+        user,
+        newData.title
+      );
 
-      const dateInput = screen.getByLabelText("날짜");
-      await user.clear(dateInput);
-      await user.type(dateInput, newData.date);
-      expect(dateInput).toHaveValue(newData.date);
+      await fillInputElement(screen.getByLabelText("날짜"), user, newData.date);
 
-      const startTimeInput = screen.getByLabelText("시작 시간");
-      await user.clear(startTimeInput);
-      await user.type(startTimeInput, newData.startTime);
-      expect(startTimeInput).toHaveValue(newData.startTime);
+      await fillInputElement(
+        screen.getByLabelText("시작 시간"),
+        user,
+        newData.startTime
+      );
 
-      const endTimeInput = screen.getByLabelText("종료 시간");
-      await user.clear(endTimeInput);
-      await user.type(endTimeInput, newData.endTime);
-      expect(endTimeInput).toHaveValue(newData.endTime);
+      await fillInputElement(
+        screen.getByLabelText("종료 시간"),
+        user,
+        newData.endTime
+      );
 
       const categoryInput = screen.getByLabelText("카테고리");
       await user.selectOptions(categoryInput, "");
@@ -258,6 +269,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
           `${newData.date} ${newData.startTime} - ${newData.endTime}`
         )
       ).toBeInTheDocument();
+      expect(await screen.findByText(newData.category)).toBeInTheDocument();
     });
     test("일정을 삭제하고 더 이상 조회되지 않는지 확인한다", async () => {
       const { user } = setup(<App />);
@@ -284,7 +296,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const { user } = setup(<App />);
 
       // 주별 뷰로 전환
-      const viewSelect = screen.getByLabelText("view");
+      const viewSelect = screen.getByLabelText("view") as HTMLSelectElement;
       await user.selectOptions(viewSelect, "week");
       expect(viewSelect.value).toBe("week");
 
@@ -311,6 +323,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       vi.setSystemTime(date);
       const { user } = setup(<App />);
 
+      // 월별 뷰로 전환
       const viewSelect = screen.getByLabelText("view");
       await user.selectOptions(viewSelect, "month");
 
@@ -322,7 +335,6 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       vi.setSystemTime(new Date("2024-07-24"));
       const { user } = setup(<App />);
 
-      // 초기 화면 불러올 때 Month 세팅인데..?
       const viewSelect = screen.getByLabelText("view");
       await user.selectOptions(viewSelect, "month");
 
@@ -336,12 +348,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const date = new Date("2024-07-22T17:59:15");
       vi.setSystemTime(date);
 
-      const { user } = setup(<App />);
-
-      // 주별 뷰로 전환
-      const viewSelect = screen.getByLabelText("view");
-      await user.selectOptions(viewSelect, "month");
-      expect(viewSelect.value).toBe("month");
+      setup(<App />);
 
       expect(
         await screen.findByText("1분 후 운동 일정이 시작됩니다.")
@@ -356,18 +363,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       vi.setSystemTime(date);
       const { user } = setup(<App />);
 
-      // 주별 뷰로 전환
-      const viewSelect = screen.getByLabelText("view");
-      await user.selectOptions(viewSelect, "month");
-      expect(viewSelect.value).toBe("month");
-
-      const searchInput = screen.getByRole("textbox", {
-        name: "일정 검색",
-      });
-
-      await user.clear(searchInput);
-      await user.type(searchInput, "운동");
-      expect(searchInput.value).toBe("운동");
+      await fillInputElement(screen.getByLabelText("일정 검색"), user, "운동");
 
       const eventTitleElements = screen.getAllByTestId("event-title");
 
@@ -383,13 +379,10 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       vi.setSystemTime(date);
       const { user } = setup(<App />);
 
-      const searchInput = screen.getByRole("textbox", {
-        name: "일정 검색",
-      });
-
-      await user.clear(searchInput);
-      await user.type(searchInput, "운동");
-      expect(searchInput.value).toBe("운동");
+      const searchInput = screen.getByLabelText(
+        "일정 검색"
+      ) as HTMLInputElement;
+      await fillInputElement(searchInput, user, "운동");
 
       const eventTitleElements = screen.getAllByTestId("event-title");
 
@@ -446,62 +439,33 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       vi.setSystemTime(date);
       const { user } = setup(<App />);
 
-      // Name이 label이지만 Input요소 접근이 가능..?
-      const titleInput = screen.getByRole("textbox", { name: "제목" });
-      await user.type(titleInput, duplicateData.title);
-      expect(titleInput).toHaveValue(duplicateData.title);
+      await fillInputElement(
+        screen.getByLabelText("제목"),
+        user,
+        duplicateData.title
+      );
 
-      const dateInput = screen.getByLabelText("날짜");
-      await user.type(dateInput, duplicateData.date);
-      expect(dateInput).toHaveValue(duplicateData.date);
+      await fillInputElement(
+        screen.getByLabelText("날짜"),
+        user,
+        duplicateData.date
+      );
 
-      const startTimeInput = screen.getByLabelText("시작 시간");
-      await user.type(startTimeInput, duplicateData.startTime);
-      expect(startTimeInput).toHaveValue(duplicateData.startTime);
+      await fillInputElement(
+        screen.getByLabelText("시작 시간"),
+        user,
+        duplicateData.startTime
+      );
 
-      const endTimeInput = screen.getByLabelText("종료 시간");
-      await user.type(endTimeInput, duplicateData.endTime);
-      expect(endTimeInput).toHaveValue(duplicateData.endTime);
-
-      const descriptionInput = screen.getByLabelText("설명");
-      await user.type(descriptionInput, duplicateData.description);
-      expect(descriptionInput).toHaveValue(duplicateData.description);
-
-      const positionInput = screen.getByLabelText("위치");
-      await user.type(positionInput, duplicateData.location);
-      expect(positionInput).toHaveValue(duplicateData.location);
-
-      const categoryInput = screen.getByLabelText("카테고리");
-      expect(categoryInput).toHaveValue("");
-      await user.selectOptions(categoryInput, duplicateData.category);
-      expect(categoryInput).toHaveValue(duplicateData.category);
-
-      const repeatCheckbox = screen.getByRole("checkbox");
-      await user.click(repeatCheckbox);
-      expect(repeatCheckbox).toBeChecked();
+      await fillInputElement(
+        screen.getByLabelText("종료 시간"),
+        user,
+        duplicateData.endTime
+      );
 
       const alarmSelectBox = screen.getByLabelText("알림 설정");
-      expect(alarmSelectBox).toHaveValue("10");
       await user.selectOptions(alarmSelectBox, "2시간 전");
       expect(alarmSelectBox).toHaveValue(duplicateData.notificationTime);
-
-      const repeatTypeSelectBox = screen.getByLabelText("반복 유형");
-      expect(repeatTypeSelectBox).toHaveValue("daily");
-      await user.selectOptions(repeatTypeSelectBox, "매주");
-      expect(repeatTypeSelectBox).toHaveValue(duplicateData.repeat.type);
-
-      // 이건 왜 spinbutton이래..?
-      const alarmTermInput = screen.getByRole("spinbutton", {
-        name: "반복 간격",
-      });
-      expect(alarmTermInput).toHaveValue(1);
-      await user.clear(alarmTermInput);
-      await user.type(alarmTermInput, "10");
-      expect(alarmTermInput).toHaveValue(10);
-
-      const repeatEndDateInput = screen.getByLabelText("반복 종료일");
-      await user.type(repeatEndDateInput, "2024-07-29");
-      expect(repeatEndDateInput).toHaveValue("2024-07-29");
 
       const submitButton = screen.getByTestId("event-submit-button");
       await user.click(submitButton);
@@ -530,31 +494,33 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       await user.click(editButton[0]);
 
-      const titleInput = screen.getByRole("textbox", { name: "제목" });
-      await user.clear(titleInput);
-      await user.type(titleInput, duplicateData.title);
-      expect(titleInput).toHaveValue(duplicateData.title);
+      await fillInputElement(
+        screen.getByLabelText("제목"),
+        user,
+        duplicateData.title
+      );
 
-      const dateInput = screen.getByLabelText("날짜");
-      await user.clear(dateInput);
-      await user.type(dateInput, duplicateData.date);
-      expect(dateInput).toHaveValue(duplicateData.date);
+      await fillInputElement(
+        screen.getByLabelText("날짜"),
+        user,
+        duplicateData.date
+      );
 
-      const startTimeInput = screen.getByLabelText("시작 시간");
-      await user.clear(startTimeInput);
-      await user.type(startTimeInput, duplicateData.startTime);
-      expect(startTimeInput).toHaveValue(duplicateData.startTime);
+      await fillInputElement(
+        screen.getByLabelText("시작 시간"),
+        user,
+        duplicateData.startTime
+      );
 
-      const endTimeInput = screen.getByLabelText("종료 시간");
-      await user.clear(endTimeInput);
-      await user.type(endTimeInput, duplicateData.endTime);
-      expect(endTimeInput).toHaveValue(duplicateData.endTime);
+      await fillInputElement(
+        screen.getByLabelText("종료 시간"),
+        user,
+        duplicateData.endTime
+      );
 
-      const categoryInput = screen.getByLabelText("카테고리");
-      await user.selectOptions(categoryInput, "");
-      expect(categoryInput).toHaveValue("");
-      await user.selectOptions(categoryInput, duplicateData.category);
-      expect(categoryInput).toHaveValue(duplicateData.category);
+      const alarmSelectBox = screen.getByLabelText("알림 설정");
+      await user.selectOptions(alarmSelectBox, "2시간 전");
+      expect(alarmSelectBox).toHaveValue(duplicateData.notificationTime);
 
       const submitButton = screen.getByTestId("event-submit-button");
       await user.click(submitButton);

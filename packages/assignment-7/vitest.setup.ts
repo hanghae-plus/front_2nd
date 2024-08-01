@@ -13,6 +13,7 @@ afterEach(() => {
   worker.resetHandlers();
   vi.useRealTimers();
   vi.clearAllMocks();
+  vi.resetModules();
   initializeHandler();
 });
 
