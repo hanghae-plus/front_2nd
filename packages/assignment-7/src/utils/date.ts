@@ -1,3 +1,5 @@
+import { EventType } from "../types/event";
+
 export const getDaysInMonth = (year: number, month: number) => {
   return new Date(year, month + 1, 0).getDate();
 };
@@ -34,4 +36,29 @@ export const formatMonth = (date: Date): string => {
 
 export const isDateInRange = (date: Date, start: Date, end: Date) => {
   return date >= start && date <= end;
+};
+
+export const isOverlapping = (
+  event1: EventType,
+  event2: EventType
+): boolean => {
+  const parseDateTime = (date: string, time: string): Date => {
+    return new Date(`${date}T${time}`);
+  };
+
+  const start1 = parseDateTime(event1.date, event1.startTime);
+  const end1 = parseDateTime(event1.date, event1.endTime);
+  const start2 = parseDateTime(event2.date, event2.startTime);
+  const end2 = parseDateTime(event2.date, event2.endTime);
+
+  return start1 < end2 && start2 < end1;
+};
+
+export const findOverlappingEvents = (
+  events: EventType[],
+  newEvent: EventType
+): EventType[] => {
+  return events.filter(
+    (event) => event.id !== newEvent.id && isOverlapping(event, newEvent)
+  );
 };

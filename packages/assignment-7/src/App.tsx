@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import {
   Alert,
   AlertDialog,
@@ -21,15 +21,8 @@ import {
   IconButton,
   Input,
   Select,
-  Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
   Tooltip,
-  Tr,
-  useInterval,
   useToast,
   VStack,
 } from "@chakra-ui/react";
@@ -40,47 +33,21 @@ import {
   DeleteIcon,
   EditIcon,
 } from "@chakra-ui/icons";
-import {
-  formatMonth,
-  formatWeek,
-  getDaysInMonth,
-  getWeekDates,
-} from "./utils/date";
+
+import useNotifiedEvents from "./hooks/useNotifiedEvents";
+import useGetEvents from "./hooks/useGetEvents";
+import { EventType } from "./types/event";
+import MonthCalendar from "./components/MonthCalendar";
+import useGetFilteredEvents from "./hooks/useGetFilteredEvents";
+import WeekCalendar from "./components/WeekCalendar";
+import { notificationOptions } from "./shared/notification";
+import useDeleteEvents from "./hooks/useDeleteEvents";
+import { findOverlappingEvents } from "./utils/date";
+import useValidateTime from "./hooks/useValidateTime";
 
 type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
 
-interface RepeatInfo {
-  type: RepeatType;
-  interval: number;
-  endDate?: string;
-}
-
-interface Event {
-  id: number;
-  title: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  description: string;
-  location: string;
-  category: string;
-  repeat: RepeatInfo;
-  notificationTime: number; // 분 단위로 저장
-}
-
 const categories = ["업무", "개인", "가족", "기타"];
-
-const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
-
-const notificationOptions = [
-  { value: 1, label: "1분 전" },
-  { value: 10, label: "10분 전" },
-  { value: 60, label: "1시간 전" },
-  { value: 120, label: "2시간 전" },
-  { value: 1440, label: "1일 전" },
-];
-
-const dummyEvents: Event[] = [];
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -107,7 +74,6 @@ const fetchHolidays = (year: number, month: number) => {
 };
 
 function App() {
-  const [events, setEvents] = useState<Event[]>(dummyEvents);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -116,50 +82,34 @@ function App() {
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
   const [view, setView] = useState<"week" | "month">("month");
-  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [editingEvent, setEditingEvent] = useState<EventType | null>(null);
   const [isRepeating, setIsRepeating] = useState(false);
   const [repeatType, setRepeatType] = useState<RepeatType>("none");
   const [repeatInterval, setRepeatInterval] = useState(1);
   const [repeatEndDate, setRepeatEndDate] = useState("");
   const [notificationTime, setNotificationTime] = useState(10);
-  const [notifications, setNotifications] = useState<
-    { id: number; message: string }[]
-  >([]);
-  const [notifiedEvents, setNotifiedEvents] = useState<number[]>([]);
-
   const [isOverlapDialogOpen, setIsOverlapDialogOpen] = useState(false);
-  const [overlappingEvents, setOverlappingEvents] = useState<Event[]>([]);
-
-  const [startTimeError, setStartTimeError] = useState<string | null>(null);
-  const [endTimeError, setEndTimeError] = useState<string | null>(null);
+  const [overlappingEvents, setOverlappingEvents] = useState<EventType[]>([]);
 
   const [currentDate, setCurrentDate] = useState(new Date());
-
   const [searchTerm, setSearchTerm] = useState("");
-  const [holidays, setHolidays] = useState<{ [key: string]: string }>({});
 
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   const toast = useToast();
 
-  const fetchEvents = async () => {
-    try {
-      const response = await fetch("/api/events");
-      if (!response.ok) {
-        throw new Error("Failed to fetch events");
-      }
-      const data = await response.json();
-      setEvents(data);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-      toast({
-        title: "이벤트 로딩 실패",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
+  const { events, fetchEvents } = useGetEvents();
+  const { notifications, notifiedEvents, filterNotifications } =
+    useNotifiedEvents({
+      now: currentDate,
+    });
+  const { deleteEvent } = useDeleteEvents();
+  const { filteredEvents } = useGetFilteredEvents(
+    searchTerm,
+    currentDate,
+    view
+  );
+  const { validateTime, startTimeError, endTimeError } = useValidateTime();
 
   const addOrUpdateEvent = async () => {
     if (!title || !date || !startTime || !endTime) {
@@ -183,7 +133,7 @@ function App() {
       return;
     }
 
-    const eventData: Event = {
+    const eventData: EventType = {
       id: editingEvent ? editingEvent.id : Date.now(),
       title,
       date,
@@ -200,7 +150,7 @@ function App() {
       notificationTime,
     };
 
-    const overlapping = findOverlappingEvents(eventData);
+    const overlapping = findOverlappingEvents(events, eventData);
     if (overlapping.length > 0) {
       setOverlappingEvents(overlapping);
       setIsOverlapDialogOpen(true);
@@ -209,7 +159,7 @@ function App() {
     }
   };
 
-  const saveEvent = async (eventData: Event) => {
+  const saveEvent = async (eventData: EventType) => {
     try {
       let response;
       if (editingEvent) {
@@ -256,78 +206,6 @@ function App() {
     }
   };
 
-  const deleteEvent = async (id: number) => {
-    try {
-      const response = await fetch(`/api/events/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete event");
-      }
-
-      await fetchEvents(); // 이벤트 목록 새로고침
-      toast({
-        title: "일정이 삭제되었습니다.",
-        status: "info",
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      toast({
-        title: "일정 삭제 실패",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
-  const checkUpcomingEvents = async () => {
-    const now = new Date();
-
-    const upcomingEvents = events.filter((event) => {
-      const eventStart = new Date(`${event.date}T${event.startTime}`);
-      const timeDiff = (eventStart.getTime() - now.getTime()) / (1000 * 60);
-      return (
-        timeDiff > 0 &&
-        timeDiff <= event.notificationTime &&
-        !notifiedEvents.includes(event.id)
-      );
-    });
-
-    for (const event of upcomingEvents) {
-      try {
-        setNotifications((prev) => [
-          ...prev,
-          {
-            id: event.id,
-            message: `${event.notificationTime}분 후 ${event.title} 일정이 시작됩니다.`,
-          },
-        ]);
-        setNotifiedEvents((prev) => [...prev, event.id]);
-      } catch (error) {
-        console.error("Error updating notification status:", error);
-      }
-    }
-  };
-
-  const validateTime = (start: string, end: string) => {
-    if (!start || !end) return;
-
-    const startDate = new Date(`2000-01-01T${start}`);
-    const endDate = new Date(`2000-01-01T${end}`);
-
-    if (startDate >= endDate) {
-      setStartTimeError("시작 시간은 종료 시간보다 빨라야 합니다.");
-      setEndTimeError("종료 시간은 시작 시간보다 늦어야 합니다.");
-    } else {
-      setStartTimeError(null);
-      setEndTimeError(null);
-    }
-  };
-
   const handleStartTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newStartTime = e.target.value;
     setStartTime(newStartTime);
@@ -338,28 +216,6 @@ function App() {
     const newEndTime = e.target.value;
     setEndTime(newEndTime);
     validateTime(startTime, newEndTime);
-  };
-
-  // 날짜 문자열을 Date 객체로 변환하는 함수
-  const parseDateTime = (date: string, time: string): Date => {
-    return new Date(`${date}T${time}`);
-  };
-
-  // 두 일정이 겹치는지 확인하는 함수
-  const isOverlapping = (event1: Event, event2: Event): boolean => {
-    const start1 = parseDateTime(event1.date, event1.startTime);
-    const end1 = parseDateTime(event1.date, event1.endTime);
-    const start2 = parseDateTime(event2.date, event2.startTime);
-    const end2 = parseDateTime(event2.date, event2.endTime);
-
-    return start1 < end2 && start2 < end1;
-  };
-
-  // 겹치는 일정을 찾는 함수
-  const findOverlappingEvents = (newEvent: Event): Event[] => {
-    return events.filter(
-      (event) => event.id !== newEvent.id && isOverlapping(event, newEvent)
-    );
   };
 
   const resetForm = () => {
@@ -377,7 +233,7 @@ function App() {
     setRepeatEndDate("");
   };
 
-  const editEvent = (event: Event) => {
+  const editEvent = (event: EventType) => {
     setEditingEvent(event);
     setTitle(event.title);
     setDate(event.date);
@@ -404,218 +260,6 @@ function App() {
       return newDate;
     });
   };
-
-  const searchEvents = (term: string) => {
-    if (!term.trim()) return events;
-    return events.filter(
-      (event) =>
-        event.title.toLowerCase().includes(term.toLowerCase()) ||
-        event.description.toLowerCase().includes(term.toLowerCase()) ||
-        event.location.toLowerCase().includes(term.toLowerCase())
-    );
-  };
-
-  const filteredEvents = (() => {
-    const filtered = searchEvents(searchTerm);
-    return filtered.filter((event) => {
-      const eventDate = new Date(event.date);
-      if (view === "week") {
-        const weekDates = getWeekDates(currentDate);
-        return eventDate >= weekDates[0] && eventDate <= weekDates[6];
-      } else if (view === "month") {
-        return (
-          eventDate.getMonth() === currentDate.getMonth() &&
-          eventDate.getFullYear() === currentDate.getFullYear()
-        );
-      }
-      return true;
-    });
-  })();
-
-  const renderWeekView = () => {
-    const weekDates = getWeekDates(currentDate);
-    return (
-      <VStack data-testid="week-view" align="stretch" w="full" spacing={4}>
-        <Heading size="md">{formatWeek(currentDate)}</Heading>
-        <Table variant="simple" w="full">
-          <Thead>
-            <Tr>
-              {weekDays.map((day) => (
-                <Th key={day} width="14.28%">
-                  {day}
-                </Th>
-              ))}
-            </Tr>
-          </Thead>
-          <Tbody>
-            <Tr>
-              {weekDates.map((date) => (
-                <Td
-                  key={date.toISOString()}
-                  height="100px"
-                  verticalAlign="top"
-                  width="14.28%"
-                >
-                  <Text fontWeight="bold">{date.getDate()}</Text>
-                  {filteredEvents
-                    .filter(
-                      (event) =>
-                        new Date(event.date).toDateString() ===
-                        date.toDateString()
-                    )
-                    .map((event) => {
-                      const isNotified = notifiedEvents.includes(event.id);
-                      return (
-                        <Box
-                          key={event.id}
-                          p={1}
-                          my={1}
-                          bg={isNotified ? "red.100" : "gray.100"}
-                          borderRadius="md"
-                          fontWeight={isNotified ? "bold" : "normal"}
-                          color={isNotified ? "red.500" : "inherit"}
-                        >
-                          <HStack spacing={1}>
-                            {isNotified && <BellIcon />}
-                            <Text fontSize="sm" noOfLines={1}>
-                              {event.title}
-                            </Text>
-                          </HStack>
-                        </Box>
-                      );
-                    })}
-                </Td>
-              ))}
-            </Tr>
-          </Tbody>
-        </Table>
-      </VStack>
-    );
-  };
-
-  const renderMonthView = () => {
-    const daysInMonth = getDaysInMonth(
-      currentDate.getFullYear(),
-      currentDate.getMonth()
-    );
-    const firstDayOfMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    ).getDay();
-    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-    const weeks = [];
-    let week = Array(7).fill(null);
-
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      week[i] = null;
-    }
-
-    for (const day of days) {
-      const dayIndex = (firstDayOfMonth + day - 1) % 7;
-      week[dayIndex] = day;
-      if (dayIndex === 6 || day === daysInMonth) {
-        weeks.push(week);
-        week = Array(7).fill(null);
-      }
-    }
-    return (
-      <VStack data-testid="month-view" align="stretch" w="full" spacing={4}>
-        <Heading size="md">{formatMonth(currentDate)}</Heading>
-        <Table variant="simple" w="full">
-          <Thead>
-            <Tr>
-              {weekDays.map((day) => (
-                <Th key={day} width="14.28%">
-                  {day}
-                </Th>
-              ))}
-            </Tr>
-          </Thead>
-          <Tbody>
-            {weeks.map((week, weekIndex) => (
-              <Tr key={weekIndex}>
-                {week.map((day, dayIndex) => {
-                  const dateString = day
-                    ? `${currentDate.getFullYear()}-${String(
-                        currentDate.getMonth() + 1
-                      ).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-                    : "";
-                  const holiday = holidays[dateString];
-
-                  return (
-                    <Td
-                      key={dayIndex}
-                      height="100px"
-                      verticalAlign="top"
-                      width="14.28%"
-                      position="relative"
-                      data-testid={dateString}
-                    >
-                      {day && (
-                        <>
-                          <Text fontWeight="bold">{day}</Text>
-                          {holiday && (
-                            <Text
-                              color="red.500"
-                              fontSize="sm"
-                              data-testid={holiday}
-                            >
-                              {holiday}
-                            </Text>
-                          )}
-                          {filteredEvents
-                            .filter(
-                              (event) => new Date(event.date).getDate() === day
-                            )
-                            .map((event) => {
-                              const isNotified = notifiedEvents.includes(
-                                event.id
-                              );
-                              return (
-                                <Box
-                                  key={event.id}
-                                  p={1}
-                                  my={1}
-                                  bg={isNotified ? "red.100" : "gray.100"}
-                                  borderRadius="md"
-                                  fontWeight={isNotified ? "bold" : "normal"}
-                                  color={isNotified ? "red.500" : "inherit"}
-                                >
-                                  <HStack spacing={1} data-testid="event-badge">
-                                    {isNotified && <BellIcon />}
-                                    <Text fontSize="sm" noOfLines={1}>
-                                      {event.title}
-                                    </Text>
-                                  </HStack>
-                                </Box>
-                              );
-                            })}
-                        </>
-                      )}
-                    </Td>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </VStack>
-    );
-  };
-
-  useInterval(checkUpcomingEvents, 1000); // 1초마다 체크
-
-  useEffect(() => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1;
-    const newHolidays = fetchHolidays(year, month);
-    setHolidays(newHolidays);
-  }, [currentDate]);
-
-  useEffect(() => {
-    fetchEvents();
-  }, []);
 
   return (
     <Box w="full" h="100vh" m="auto" p={5}>
@@ -797,8 +441,16 @@ function App() {
             />
           </HStack>
 
-          {view === "week" && renderWeekView()}
-          {view === "month" && renderMonthView()}
+          {view === "week" && (
+            <WeekCalendar currentDate={currentDate} searchTerm={searchTerm} />
+          )}
+          {view === "month" && (
+            <MonthCalendar
+              notifiedEvents={notifiedEvents}
+              currentDate={currentDate}
+              searchTerm={searchTerm}
+            />
+          )}
         </VStack>
 
         <VStack data-testid="event-list" w="500px" h="full" overflowY="auto">
@@ -956,11 +608,7 @@ function App() {
               <Box flex="1">
                 <AlertTitle fontSize="sm">{notification.message}</AlertTitle>
               </Box>
-              <CloseButton
-                onClick={() =>
-                  setNotifications((prev) => prev.filter((_, i) => i !== index))
-                }
-              />
+              <CloseButton onClick={() => filterNotifications(index)} />
             </Alert>
           ))}
         </VStack>

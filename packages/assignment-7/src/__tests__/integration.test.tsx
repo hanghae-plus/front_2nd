@@ -278,6 +278,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
   describe("알림 기능", () => {
     it("일정 알림을 설정하고 지정된 시간에 알림이 발생하는지 확인한다", async () => {
+      vi.setSystemTime(new Date("2024-08-01"));
       render(<App />);
 
       expect(await screen.findByRole("alert")).toBeInTheDocument();
