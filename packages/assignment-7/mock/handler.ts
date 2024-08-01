@@ -104,6 +104,10 @@ let events: Event[] = [
   },
 ];
 
+export const resetTestData = () => {
+  events = []; // events를 빈 배열로 초기화
+};
+
 export const mockApiHandlers = [
   http.get('/api/events', () => {
     return HttpResponse.json<Event[]>(events);
