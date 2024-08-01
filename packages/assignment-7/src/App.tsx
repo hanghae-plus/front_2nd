@@ -1,18 +1,8 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import {
-  Alert,
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  AlertIcon,
-  AlertTitle,
   Box,
   Button,
   Checkbox,
-  CloseButton,
   Flex,
   FormControl,
   FormLabel,
@@ -29,52 +19,23 @@ import {
   Thead,
   Tooltip,
   Tr,
+  useDisclosure,
   useInterval,
   useToast,
   VStack,
 } from '@chakra-ui/react';
-import {
-  BellIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  DeleteIcon,
-  EditIcon,
-} from '@chakra-ui/icons';
+import { BellIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { getDaysInMonth, getWeekDates, isDateInRange } from './lib/utils/date';
 import { formatMonth, formatWeek } from './lib/utils/dateFormat';
-
-type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
-
-interface RepeatInfo {
-  type: RepeatType;
-  interval: number;
-  endDate?: string;
-}
-
-interface Event {
-  id: number;
-  title: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  description: string;
-  location: string;
-  category: string;
-  repeat: RepeatInfo;
-  notificationTime: number; // 분 단위로 저장
-}
-
-const categories = ['업무', '개인', '가족', '기타'];
-
-const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
-
-const notificationOptions = [
-  { value: 1, label: '1분 전' },
-  { value: 10, label: '10분 전' },
-  { value: 60, label: '1시간 전' },
-  { value: 120, label: '2시간 전' },
-  { value: 1440, label: '1일 전' },
-];
+import { NotificationView } from './components/NotificationView';
+import { AlertView } from './components/AlertView';
+import { Event, RepeatType } from './types/types';
+import {
+  notificationOptions,
+  categories,
+  weekDays,
+} from './constants/constants';
+import { EventDetailView } from './components/EventDetailView';
 
 const dummyEvents: Event[] = [];
 
@@ -123,7 +84,14 @@ function App() {
   >([]);
   const [notifiedEvents, setNotifiedEvents] = useState<number[]>([]);
 
-  const [isOverlapDialogOpen, setIsOverlapDialogOpen] = useState(false);
+  const closeNotification = (id: number) => {
+    setNotifications((prev) =>
+      prev.filter((notification) => notification.id !== id)
+    );
+  };
+
+  // overlapDialogDisclosure
+  const { isOpen, onClose, onOpen } = useDisclosure();
   const [overlappingEvents, setOverlappingEvents] = useState<Event[]>([]);
 
   const [startTimeError, setStartTimeError] = useState<string | null>(null);
@@ -199,7 +167,7 @@ function App() {
     const overlapping = findOverlappingEvents(eventData);
     if (overlapping.length > 0) {
       setOverlappingEvents(overlapping);
-      setIsOverlapDialogOpen(true);
+      onOpen();
     } else {
       await saveEvent(eventData);
     }
@@ -250,6 +218,26 @@ function App() {
         isClosable: true,
       });
     }
+  };
+
+  const continueSaving = () => {
+    saveEvent({
+      id: editingEvent ? editingEvent.id : Date.now(),
+      title,
+      date,
+      startTime,
+      endTime,
+      description,
+      location,
+      category,
+      repeat: {
+        type: isRepeating ? repeatType : 'none',
+        interval: repeatInterval,
+        endDate: repeatEndDate || undefined,
+      },
+      notificationTime,
+    });
+    onClose();
   };
 
   const deleteEvent = async (id: number) => {
@@ -796,154 +784,31 @@ function App() {
             <Text>검색 결과가 없습니다.</Text>
           ) : (
             filteredEvents.map((event) => (
-              <Box
+              <EventDetailView
                 key={event.id}
-                data-testid={`event-item-${event.id}`}
-                borderWidth={1}
-                borderRadius="lg"
-                p={3}
-                width="100%"
-              >
-                <HStack justifyContent="space-between">
-                  <VStack align="start">
-                    <HStack>
-                      {notifiedEvents.includes(event.id) && (
-                        <BellIcon color="red.500" />
-                      )}
-                      <Text
-                        fontWeight={
-                          notifiedEvents.includes(event.id) ? 'bold' : 'normal'
-                        }
-                        color={
-                          notifiedEvents.includes(event.id)
-                            ? 'red.500'
-                            : 'inherit'
-                        }
-                        as="h3"
-                      >
-                        {event.title}
-                      </Text>
-                    </HStack>
-                    <Text>
-                      {event.date} {event.startTime} - {event.endTime}
-                    </Text>
-                    <Text>{event.description}</Text>
-                    <Text>{event.location}</Text>
-                    <Text>카테고리: {event.category}</Text>
-                    {event.repeat.type !== 'none' && (
-                      <Text>
-                        반복: {event.repeat.interval}
-                        {event.repeat.type === 'daily' && '일'}
-                        {event.repeat.type === 'weekly' && '주'}
-                        {event.repeat.type === 'monthly' && '월'}
-                        {event.repeat.type === 'yearly' && '년'}
-                        마다
-                        {event.repeat.endDate &&
-                          ` (종료: ${event.repeat.endDate})`}
-                      </Text>
-                    )}
-                    <Text>
-                      알림:{' '}
-                      {
-                        notificationOptions.find(
-                          (option) => option.value === event.notificationTime
-                        )?.label
-                      }
-                    </Text>
-                  </VStack>
-                  <HStack>
-                    <IconButton
-                      aria-label="Edit event"
-                      icon={<EditIcon />}
-                      onClick={() => editEvent(event)}
-                    />
-                    <IconButton
-                      aria-label="Delete event"
-                      icon={<DeleteIcon />}
-                      onClick={() => deleteEvent(event.id)}
-                    />
-                  </HStack>
-                </HStack>
-              </Box>
+                {...event}
+                notifiedEvents={notifiedEvents}
+                editEvent={editEvent}
+                deleteEvent={deleteEvent}
+              />
             ))
           )}
         </VStack>
       </Flex>
 
-      <AlertDialog
-        isOpen={isOverlapDialogOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={() => setIsOverlapDialogOpen(false)}
-      >
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              일정 겹침 경고
-            </AlertDialogHeader>
-
-            <AlertDialogBody>
-              다음 일정과 겹칩니다:
-              {overlappingEvents.map((event) => (
-                <Text key={event.id}>
-                  {event.title} ({event.date} {event.startTime}-{event.endTime})
-                </Text>
-              ))}
-              계속 진행하시겠습니까?
-            </AlertDialogBody>
-
-            <AlertDialogFooter>
-              <Button
-                ref={cancelRef}
-                onClick={() => setIsOverlapDialogOpen(false)}
-              >
-                취소
-              </Button>
-              <Button
-                colorScheme="red"
-                onClick={() => {
-                  setIsOverlapDialogOpen(false);
-                  saveEvent({
-                    id: editingEvent ? editingEvent.id : Date.now(),
-                    title,
-                    date,
-                    startTime,
-                    endTime,
-                    description,
-                    location,
-                    category,
-                    repeat: {
-                      type: isRepeating ? repeatType : 'none',
-                      interval: repeatInterval,
-                      endDate: repeatEndDate || undefined,
-                    },
-                    notificationTime,
-                  });
-                }}
-                ml={3}
-              >
-                계속 진행
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
+      <AlertView
+        isOpen={isOpen}
+        onClose={onClose}
+        cancelRef={cancelRef}
+        overlappingEvents={overlappingEvents}
+        continueSaving={continueSaving}
+      />
 
       {notifications.length > 0 && (
-        <VStack position="fixed" top={4} right={4} spacing={2} align="flex-end">
-          {notifications.map((notification, index) => (
-            <Alert key={index} status="info" variant="solid" width="auto">
-              <AlertIcon />
-              <Box flex="1">
-                <AlertTitle fontSize="sm">{notification.message}</AlertTitle>
-              </Box>
-              <CloseButton
-                onClick={() =>
-                  setNotifications((prev) => prev.filter((_, i) => i !== index))
-                }
-              />
-            </Alert>
-          ))}
-        </VStack>
+        <NotificationView
+          notifications={notifications}
+          closeNotification={closeNotification}
+        />
       )}
     </Box>
   );

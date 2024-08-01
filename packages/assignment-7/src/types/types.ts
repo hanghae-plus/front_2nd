@@ -18,3 +18,8 @@ export interface Event {
   repeat: RepeatInfo;
   notificationTime: number; // 분 단위로 저장
 }
+
+export type Notification = {
+  id: number;
+  message: string;
+};
