@@ -25,7 +25,7 @@ jobs:
           cache: 'pnpm'
       - name: assignment-4-basic
         run: |
-          pnpm install
+          pnpm install --no-frozen-lockfile
           pnpm -F assignment-4 test:basic
   advacned:
     runs-on: ubuntu-latest
@@ -40,5 +40,5 @@ jobs:
           cache: 'pnpm'
       - name: assignment-4-advanced
         run: |
-          pnpm install
+          pnpm install --no-frozen-lockfile
           pnpm -F assignment-4 test:advanced
