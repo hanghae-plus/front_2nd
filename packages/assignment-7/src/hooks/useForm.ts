@@ -19,10 +19,12 @@ const useForm = ({ fetchEvents, events }: Props) => {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
+
   const [isRepeating, setIsRepeating] = useState(false);
   const [repeatType, setRepeatType] = useState<RepeatType>("none");
   const [repeatInterval, setRepeatInterval] = useState(1);
   const [repeatEndDate, setRepeatEndDate] = useState("");
+
   const [notificationTime, setNotificationTime] = useState(10);
 
   // 일정 수정 내 수정 내용

@@ -1,25 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  formatWeek,
-  getDaysInMonth,
-  getWeekDates,
-  formatMonth,
-} from "../dateUtils";
-import {
-  Box,
-  Heading,
-  HStack,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  VStack,
-} from "@chakra-ui/react";
+import { getWeekDates } from "../dateUtils";
 import { Event } from "../type/schedule.type";
-import { BellIcon } from "@chakra-ui/icons";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -97,10 +78,6 @@ const useCalender = ({
     });
   };
 
-  // 상단 notification
-  const [notifications, setNotifications] = useState<
-    { id: number; message: string }[]
-  >([]);
   const [notifiedEvents, setNotifiedEvents] = useState<number[]>([]);
 
   useEffect(() => {
@@ -112,10 +89,9 @@ const useCalender = ({
 
   return {
     notifiedEvents,
-    setNotifications,
     currentDate,
     filteredEvents,
-    notifications,
+
     setNotifiedEvents,
     navigate,
     view,
