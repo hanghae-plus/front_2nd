@@ -1,11 +1,5 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  within,
-} from '@testing-library/react';
+import { describe, test, expect, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../App';
 import { resetMockEvents } from '../mockApiHandlers';
@@ -36,9 +30,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       await waitFor(() => {
         const eventElements = screen.getAllByText('테스트 일정');
         expect(eventElements.length).toBeGreaterThan(0);
-        expect(
-          screen.getByText('2024-08-30 09:00 - 10:00')
-        ).toBeInTheDocument();
+        expect(screen.getByText('2024-08-30 09:00 - 10:00')).toBeInTheDocument();
       });
     });
 
@@ -81,9 +73,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       await waitFor(() => {
         const eventElements = screen.getAllByText('수정 후 일정');
         expect(eventElements.length).toBeGreaterThan(0);
-        expect(
-          screen.getByText('2024-08-15 14:00 - 15:00')
-        ).toBeInTheDocument();
+        expect(screen.getByText('2024-08-15 14:00 - 15:00')).toBeInTheDocument();
       });
     });
 

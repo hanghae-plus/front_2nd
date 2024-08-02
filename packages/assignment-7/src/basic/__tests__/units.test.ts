@@ -1,11 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import {
-  getDaysInMonth,
-  getWeekDates,
-  formatWeek,
-  formatMonth,
-  isDateInRange,
-} from '../utils/index';
+import { getDaysInMonth, getWeekDates, formatWeek, formatMonth, isDateInRange } from '../utils/index';
 
 describe('단위 테스트: 날짜 및 시간 관리', () => {
   describe('getDaysInMonth 함수', () => {
@@ -19,12 +13,9 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
     ];
 
     //매개
-    test.each(testCases)(
-      `%i년 %i월은 %i일까지 있다`,
-      (year, month, expectedDays) => {
-        expect(getDaysInMonth(year, month - 1)).toBe(expectedDays);
-      }
-    );
+    test.each(testCases)(`%i년 %i월은 %i일까지 있다`, (year, month, expectedDays) => {
+      expect(getDaysInMonth(year, month - 1)).toBe(expectedDays);
+    });
   });
 
   describe('getWeekDates 함수', () => {
@@ -42,12 +33,9 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       ];
 
       // 주어진 날짜가 속한 주의 월요일부터 일요일까지의 날짜를 확인
-      test.each(testCases)(
-        `2024-08-01의 주의 %i번째 날짜는 %i일이다.`,
-        (index, day) => {
-          expect(weekDates[index].getDate()).toBe(day);
-        }
-      );
+      test.each(testCases)(`2024-08-01의 주의 %i번째 날짜는 %i일이다.`, (index, day) => {
+        expect(weekDates[index].getDate()).toBe(day);
+      });
     });
     describe('연도를 넘어가는 주의 날짜를 정확히 처리한다', () => {
       const date = new Date('2024-12-30'); // 2024년 8월 1일 (목요일)
@@ -63,12 +51,9 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       ];
 
       // 주어진 날짜가 속한 주의 월요일부터 일요일까지의 날짜를 확인
-      test.each(testCases)(
-        `2024-12-30의 주의 %i번째 날짜는 %i일이다.`,
-        (index, day) => {
-          expect(weekDates[index].getDate()).toBe(day);
-        }
-      );
+      test.each(testCases)(`2024-12-30의 주의 %i번째 날짜는 %i일이다.`, (index, day) => {
+        expect(weekDates[index].getDate()).toBe(day);
+      });
     });
   });
 
@@ -81,12 +66,9 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       [new Date('2024-12-25'), '2024년 12월 4주'],
     ];
 
-    test.each(testCases)(
-      '날짜 %s의 주는 %s이다.',
-      (inputDate, expectedOutput) => {
-        expect(formatWeek(inputDate)).toBe(expectedOutput);
-      }
-    );
+    test.each(testCases)('날짜 %s의 주는 %s이다.', (inputDate, expectedOutput) => {
+      expect(formatWeek(inputDate)).toBe(expectedOutput);
+    });
 
     test('월의 마지막 날이 새로운 주의 시작인 경우를 정확히 처리한다', () => {
       const lastDayOfMonth = new Date('2024-01-31'); // 수요일
@@ -105,12 +87,9 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       [new Date('2025-06-01'), '2025년 6월'],
     ];
 
-    test.each(testCases)(
-      '날짜 %s의 월은 %s이다.',
-      (inputDate, expectedOutput) => {
-        expect(formatMonth(inputDate)).toBe(expectedOutput);
-      }
-    );
+    test.each(testCases)('날짜 %s의 월은 %s이다.', (inputDate, expectedOutput) => {
+      expect(formatMonth(inputDate)).toBe(expectedOutput);
+    });
 
     test('연도가 바뀌는 경우를 정확히 처리한다', () => {
       const lastDayOfYear = new Date('2024-12-31');
@@ -127,41 +106,19 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       const endDate = new Date('2024-12-31');
 
       // 범위 내의 날짜들
-      expect(isDateInRange(new Date('2024-06-15'), startDate, endDate)).toBe(
-        true
-      );
-      expect(isDateInRange(new Date('2024-01-01'), startDate, endDate)).toBe(
-        true
-      );
-      expect(isDateInRange(new Date('2024-12-31'), startDate, endDate)).toBe(
-        true
-      );
+      expect(isDateInRange(new Date('2024-06-15'), startDate, endDate)).toBe(true);
+      expect(isDateInRange(new Date('2024-01-01'), startDate, endDate)).toBe(true);
+      expect(isDateInRange(new Date('2024-12-31'), startDate, endDate)).toBe(true);
 
       // 범위 밖의 날짜들
-      expect(isDateInRange(new Date('2023-12-31'), startDate, endDate)).toBe(
-        false
-      );
-      expect(isDateInRange(new Date('2025-01-01'), startDate, endDate)).toBe(
-        false
-      );
+      expect(isDateInRange(new Date('2023-12-31'), startDate, endDate)).toBe(false);
+      expect(isDateInRange(new Date('2025-01-01'), startDate, endDate)).toBe(false);
 
       // 시간을 포함한 날짜 범위
       const startWithTime = new Date('2024-01-01T10:00:00');
       const endWithTime = new Date('2024-01-01T18:00:00');
-      expect(
-        isDateInRange(
-          new Date('2024-01-01T12:00:00'),
-          startWithTime,
-          endWithTime
-        )
-      ).toBe(true);
-      expect(
-        isDateInRange(
-          new Date('2024-01-01T09:59:59'),
-          startWithTime,
-          endWithTime
-        )
-      ).toBe(false);
+      expect(isDateInRange(new Date('2024-01-01T12:00:00'), startWithTime, endWithTime)).toBe(true);
+      expect(isDateInRange(new Date('2024-01-01T09:59:59'), startWithTime, endWithTime)).toBe(false);
 
       // 경계값 테스트
       const sameDate = new Date('2024-03-15');
@@ -170,9 +127,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       // 잘못된 범위 테스트
       const laterStart = new Date('2024-12-31');
       const earlierEnd = new Date('2024-01-01');
-      expect(
-        isDateInRange(new Date('2024-06-15'), laterStart, earlierEnd)
-      ).toBe(false);
+      expect(isDateInRange(new Date('2024-06-15'), laterStart, earlierEnd)).toBe(false);
     });
   });
 });
