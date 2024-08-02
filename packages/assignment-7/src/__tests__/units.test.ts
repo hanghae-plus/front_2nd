@@ -1,5 +1,5 @@
 import { describe, test } from "vitest";
-import {getDaysInMonth, getWeekDates, formatWeek, formatMonth } from "../App.tsx";
+import {getDaysInMonth, getWeekDates, formatWeek, formatMonth } from "../utils/utilsFunc.ts";
 
 describe('단위 테스트: 날짜 및 시간 관리', () => {
   describe('getDaysInMonth 함수', () => {
