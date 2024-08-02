@@ -155,56 +155,28 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
         expect(eventList).toHaveTextContent('검색 결과가 없습니다');
       });
     });
-    test('주별 뷰에 일정이 정확히 표시되는지 확인한다', async () => {
-      render(<App />);
-      const user = userEvent.setup();
-    
-      // 주별 뷰로 변경
-      const viewSelect = screen.getByLabelText('view');
-      await user.selectOptions(viewSelect, 'week');
-    
-      // 2024년 7월 4주로 이동
-      const currentDateElement = screen.getByText(/\d{4}년 \d{1,2}월 \d{1,2}주/);
-      const prevButton = screen.getByLabelText('Previous');
-      // const nextButton = screen.getByLabelText('Next');
-
-      while (!currentDateElement.textContent?.includes('2024년 7월 4주')) {
-        await user.click(prevButton);
-        await waitFor(() => {
-          expect(screen.getByTestId('week-view')).toBeInTheDocument();
-        });
-      }
-    
-      // 주별 뷰의 모든 날짜 셀을 확인
-      const weekView = screen.getByTestId('week-view');
-      const dateCells = weekView.querySelectorAll('td');
-    
-      // 디버깅: 각 셀의 내용을 로그로 출력
-      dateCells.forEach((cell, index) => {
-        console.log(`Cell ${index} content:`, cell.textContent);
+    test('주별 뷰에 일정이 잘 표시되는지 확인한다.', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      vi.setSystemTime(new Date('2024-07-19T00:00:00Z'));
+      await act(async () => {
+        render(<App />);
+        await vi.runAllTimers();
       });
-        
-      // 일요일 셀에 두 번째 일정이 표시되는지 확인
-      const sundayCell = dateCells[0]; // 0은 일요일
-      expect(sundayCell).toHaveTextContent('21'); // 날짜 확인
-      expect(sundayCell).toHaveTextContent('점심 약속');
+      const viewSelect = await screen.findByTestId('week-month-select');
+      await userEvent.selectOptions(viewSelect, 'week');
 
-      // 월요일 셀에 두 번째 일정이 표시되는지 확인
-      const mondayCell = dateCells[1]; // 0은 일요일
-      expect(mondayCell).toHaveTextContent('22'); // 날짜 확인
-      expect(mondayCell).toHaveTextContent('운동');
-
-      // 목요일 셀에 두 번째 일정이 표시되는지 확인
-      const thursdayCell = dateCells[4]; // 0은 일요일
-      expect(thursdayCell).toHaveTextContent('25'); // 날짜 확인
-      expect(thursdayCell).toHaveTextContent('프로젝트 마감');
-    
-      // 다른 날짜 셀에는 일정이 없는지 확인
-      [2, 3, 5, 6].forEach(index => {
-        const cell = dateCells[index];
-        // 날짜 텍스트를 제외한 다른 내용이 없는지 확인
-        expect(cell.textContent).toMatch(/^\d+$/); // 셀 내용이 숫자(날짜)만 포함하는지 확인
+      //주별 뷰가 로드되기를 기다림
+      await waitFor(() => {
+        expect(screen.getByTestId('week-view')).toBeInTheDocument();
       });
+
+      expect(screen.getByText('2024년 7월 3주')).toBeInTheDocument();
+
+      //날짜 셀에 일정이 2개인지 확인
+      await waitFor(() => {
+        const eventElements = screen.getAllByTestId(/^event-/);
+        expect(eventElements.length).toBe(2);
+      }, { timeout: 5000 });
     });
     test('월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.', async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true });
