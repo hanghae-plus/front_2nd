@@ -1,27 +1,22 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Event } from '../types';
-
-interface Notification {
-  id: number;
-  message: string;
-}
+import { useState, useEffect } from 'react';
+import { Event, Notification } from '../types';
 
 export function useNotifications(events: Event[]) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notifiedEvents, setNotifiedEvents] = useState<number[]>([]);
 
-  const addNotification = useCallback((message: string) => {
+  const addNotification = (message: string) => {
     const newNotification = { id: Date.now(), message };
     setNotifications((prev) => [...prev, newNotification]);
-  }, []);
+  };
 
-  const removeNotification = useCallback((id: number) => {
+  const removeNotification = (id: number) => {
     setNotifications((prev) =>
       prev.filter((notification) => notification.id !== id)
     );
-  }, []);
+  };
 
-  const checkUpcomingEvents = useCallback(() => {
+  const checkUpcomingEvents = () => {
     const now = new Date();
     const upcomingEvents = events.filter((event) => {
       const eventStart = new Date(`${event.date}T${event.startTime}`);
@@ -39,12 +34,12 @@ export function useNotifications(events: Event[]) {
       );
       setNotifiedEvents((prev) => [...prev, event.id]);
     });
-  }, [events, notifiedEvents, addNotification]);
+  };
 
   useEffect(() => {
     const intervalId = setInterval(checkUpcomingEvents, 60000); // Check every minute
     return () => clearInterval(intervalId);
-  }, [checkUpcomingEvents]);
+  }, [events, notifiedEvents]);
 
   return {
     notifications,

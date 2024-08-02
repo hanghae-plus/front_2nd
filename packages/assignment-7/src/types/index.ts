@@ -20,7 +20,7 @@ export interface Event {
   startTime: string; // 'HH:mm' 형식
   endTime: string; // 'HH:mm' 형식
   category: EventCategory;
-  location?: string;
+  location: string;
   repeat: RepeatInfo;
   notificationTime: number; // 분 단위
 }
@@ -88,3 +88,8 @@ export type CalendarAction =
   | { type: 'SET_VIEW'; payload: CalendarView }
   | { type: 'SET_CURRENT_DATE'; payload: Date }
   | { type: 'SET_SELECTED_DATE'; payload: Date };
+
+export interface Notification {
+  id: number;
+  message: string;
+}

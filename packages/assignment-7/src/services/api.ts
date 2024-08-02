@@ -1,21 +1,13 @@
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5173/api';
-
-export async function fetchFromAPI<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
-
+export async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    throw new Error(`API call failed: ${response.statusText}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || response.statusText);
+  }
+
+  if (response.status === 204) {
+    return null as T;
   }
 
   return response.json();
 }
+

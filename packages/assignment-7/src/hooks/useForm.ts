@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Event, EventFormData, RepeatType } from '../types';
 
 interface FormErrors {
@@ -9,30 +9,31 @@ interface FormErrors {
 }
 
 export function useForm(initialEvent?: EventFormData) {
-  const createForm = () =>
-    ({
+  const createForm = () => {
+    const form = {
       id: undefined,
       title: '',
       description: '',
-      date: '', // 'YYYY-MM-DD' 형식
-      startTime: '', // 'HH:mm' 형식
-      endTime: '', // 'HH:mm' 형식
+      date: '',
+      startTime: '',
+      endTime: '',
       category: '개인',
       location: '',
-      repeat: undefined,
-      notificationTime: 0, // 분 단위
+      repeat: { type: 'none' as const, interval: 1 },
+      notificationTime: 0,
       isRepeating: false,
-      repeatType: 'none',
-      repeatInterval: undefined,
-      repeatEndDate: undefined,
-    }) as EventFormData;
+      repeatType: 'none' as const,
+      repeatInterval: 1,
+      repeatEndDate: '',
+    } as EventFormData;
 
-  const [event, setEvent] = useState<EventFormData>(
-    initialEvent || createForm()
-  );
+    return form;
+  };
+
+  const [event, setEvent] = useState<EventFormData>(initialEvent || createForm());
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const validateTime = useCallback((start: string, end: string) => {
+  const validateTime = (start: string, end: string) => {
     if (!start || !end) return;
 
     const startDate = new Date(`2000-01-01T${start}`);
@@ -51,42 +52,36 @@ export function useForm(initialEvent?: EventFormData) {
         endTime: undefined,
       }));
     }
-  }, []);
+  };
 
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      setEvent((prev) => ({ ...prev, [name]: value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setEvent((prev) => ({ ...prev, [name]: value }));
 
-      if (name === 'startTime' || name === 'endTime') {
-        validateTime(
-          name === 'startTime' ? value : event.startTime || '',
-          name === 'endTime' ? value : event.endTime || ''
-        );
-      }
-    },
-    [event.startTime, event.endTime]
-  );
+    if (name === 'startTime' || name === 'endTime') {
+      validateTime(
+        name === 'startTime' ? value : event.startTime || '',
+        name === 'endTime' ? value : event.endTime || ''
+      );
+    }
+  };
 
-  const handleCheckboxChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, checked } = e.target;
-      if (name === 'isRepeating') {
-        setEvent((prev) => ({
-          ...prev,
-          repeat: {
-            type: checked ? ('daily' as RepeatType) : ('none' as RepeatType),
-            interval: 1,
-          },
-        }));
-      } else {
-        setEvent((prev) => ({ ...prev, [name]: checked }));
-      }
-    },
-    []
-  );
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    if (name === 'isRepeating') {
+      setEvent((prev) => ({
+        ...prev,
+        repeat: {
+          type: checked ? ('daily' as RepeatType) : ('none' as RepeatType),
+          interval: 1,
+        },
+      }));
+    } else {
+      setEvent((prev) => ({ ...prev, [name]: checked }));
+    }
+  };
 
-  const validateForm = useCallback(() => {
+  const validateForm = () => {
     const newErrors: FormErrors = {};
 
     if (!event.title) {
@@ -116,19 +111,19 @@ export function useForm(initialEvent?: EventFormData) {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [event]);
+  };
 
-  const resetForm = useCallback(() => {
+  const resetForm = () => {
     setEvent(createForm());
     setErrors({});
-  }, []);
+  };
 
-  const editEvent = useCallback((eventToEdit: Event) => {
+  const editEvent = (eventToEdit: Event) => {
     setEvent({
       ...eventToEdit,
       isRepeating: eventToEdit.repeat.type !== 'none',
     });
-  }, []);
+  };
 
   return {
     event,

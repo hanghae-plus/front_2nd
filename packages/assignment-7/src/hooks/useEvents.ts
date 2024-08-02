@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import * as eventService from '../services/eventService';
 import { Event, EventFormData } from '../types';
 import { convertFormDataToEvent } from '../utils/event';
@@ -8,7 +8,7 @@ export function useEvents() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchEvents = useCallback(async () => {
+  const fetchEvents = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -16,13 +16,12 @@ export function useEvents() {
       setEvents(fetchedEvents);
     } catch (err) {
       setError('Failed to fetch events');
-      console.error(err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  const addEvent = useCallback(async (newEventData: EventFormData) => {
+  const addEvent = async (newEventData: EventFormData) => {
     setLoading(true);
     setError(null);
     try {
@@ -35,9 +34,9 @@ export function useEvents() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  const updateEvent = useCallback(async (updatedEventData: EventFormData) => {
+  const updateEvent = async (updatedEventData: EventFormData) => {
     if (!updatedEventData.id) {
       setError('Cannot update event without id');
       return;
@@ -56,9 +55,9 @@ export function useEvents() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  const deleteEvent = useCallback(async (eventId: number) => {
+  const deleteEvent = async (eventId: number) => {
     setLoading(true);
     setError(null);
     try {
@@ -70,7 +69,23 @@ export function useEvents() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
+
+  const saveEvent = async (eventData: EventFormData) => {
+    setLoading(true);
+    try {
+      if (eventData.id) {
+        await updateEvent(eventData);
+      } else {
+        await addEvent(eventData);
+      }
+      return { success: true, message: `일정이 ${eventData.id ? "수정" : "추가"}되었습니다.` };
+    } catch (err) {
+      return { success: false, error: "일정 저장 중 오류가 발생했습니다." };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
     events,
@@ -80,5 +95,6 @@ export function useEvents() {
     addEvent,
     updateEvent,
     deleteEvent,
+    saveEvent
   };
 }

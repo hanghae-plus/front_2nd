@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 type CalendarView = 'week' | 'month';
 
@@ -7,45 +7,40 @@ export function useCalendar() {
   const [view, setView] = useState<CalendarView>('month');
   const [holidays, setHolidays] = useState<{ [key: string]: string }>({});
 
-  const navigate = useCallback(
-    (direction: 'prev' | 'next') => {
-      setCurrentDate((prevDate) => {
-        const newDate = new Date(prevDate);
-        if (view === 'week') {
-          newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-        } else if (view === 'month') {
-          newDate.setMonth(
-            newDate.getMonth() + (direction === 'next' ? 1 : -1)
-          );
-        }
-        return newDate;
-      });
-    },
-    [view]
-  );
+  const navigate = (direction: 'prev' | 'next') => {
+    setCurrentDate((prevDate) => {
+      const newDate = new Date(prevDate);
+      if (view === 'week') {
+        newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+      } else if (view === 'month') {
+        newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+      }
+      return newDate;
+    });
+  };
 
-  const goToToday = useCallback(() => {
+  const goToToday = () => {
     setCurrentDate(new Date());
-  }, []);
+  };
 
-  const changeView = useCallback((newView: CalendarView) => {
+  const changeView = (newView: CalendarView) => {
     setView(newView);
-  }, []);
+  };
 
-  const formatWeek = useCallback((date: Date): string => {
+  const formatWeek = (date: Date): string => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const weekNumber = Math.ceil(date.getDate() / 7);
     return `${year}년 ${month}월 ${weekNumber}주`;
-  }, []);
+  };
 
-  const formatMonth = useCallback((date: Date): string => {
+  const formatMonth = (date: Date): string => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     return `${year}년 ${month}월`;
-  }, []);
+  };
 
-  const getWeekDates = useCallback((date: Date): Date[] => {
+  const getWeekDates = (date: Date): Date[] => {
     const day = date.getDay();
     const diff = date.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(date.setDate(diff));
@@ -56,13 +51,13 @@ export function useCalendar() {
       weekDates.push(nextDate);
     }
     return weekDates;
-  }, []);
+  };
 
-  const getDaysInMonth = useCallback((year: number, month: number): number => {
+  const getDaysInMonth = (year: number, month: number): number => {
     return new Date(year, month + 1, 0).getDate();
-  }, []);
+  };
 
-  const fetchHolidays = useCallback(async (year: number, month: number) => {
+  const fetchHolidays = async (_year: number, _month: number) => {
     // 여기서 실제로 API를 호출하여 휴일 정보를 가져오는 로직을 구현합니다.
     // 예시로 하드코딩된 데이터를 반환합니다.
     return {
@@ -81,18 +76,13 @@ export function useCalendar() {
       '2024-10-09': '한글날',
       '2024-12-25': '크리스마스',
     };
-  }, []);
+  };
 
   useEffect(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth() + 1;
     fetchHolidays(year, month).then(setHolidays);
-  }, [currentDate, fetchHolidays]);
-
-  const weekDays = useMemo(
-    () => ['일', '월', '화', '수', '목', '금', '토'],
-    []
-  );
+  }, [currentDate]);
 
   return {
     currentDate,
@@ -105,6 +95,5 @@ export function useCalendar() {
     formatMonth,
     getWeekDates,
     getDaysInMonth,
-    weekDays,
   };
 }

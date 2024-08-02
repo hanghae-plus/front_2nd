@@ -10,44 +10,41 @@ import {
   Text,
   Box,
   HStack,
-} from '@chakra-ui/react';
-import { BellIcon } from '@chakra-ui/icons';
-import { Event } from '../types';
-import { WEEKDAYS } from '../constants';
+  Select,
+  IconButton,
+} from "@chakra-ui/react";
+import { ChevronLeftIcon, ChevronRightIcon, BellIcon } from "@chakra-ui/icons";
+import { useSchedulerContext } from "../contexts/SchedulerContext";
+import { WEEKDAYS } from "../constants";
+import { useNotifications } from "../hooks/useNotifications";
 
-interface CalendarViewProps {
-  view: 'week' | 'month';
-  currentDate: Date;
-  events: Event[];
-  notifiedEvents: number[];
-  formatWeek: (date: Date) => string;
-  formatMonth: (date: Date) => string;
-  getWeekDates: (date: Date) => Date[];
-  getDaysInMonth: (year: number, month: number) => number;
-  holidays: { [key: string]: string };
-}
+function CalendarView() {
+  const { calendar, events } = useSchedulerContext();
+  const {
+    currentDate,
+    view,
+    holidays,
+    navigate,
+    changeView,
+    formatWeek,
+    formatMonth,
+    getWeekDates,
+    getDaysInMonth,
+  } = calendar;
 
-function CalendarView({
-  view,
-  currentDate,
-  events,
-  notifiedEvents,
-  formatWeek,
-  formatMonth,
-  getWeekDates,
-  getDaysInMonth,
-  holidays,
-}: CalendarViewProps) {
+  const { events: eventList } = events;
+  const { notifiedEvents } = useNotifications(eventList);
+
   function WeekView() {
     const weekDates = getWeekDates(currentDate);
     return (
-      <VStack data-testid='week-view' align='stretch' w='full' spacing={4}>
-        <Heading size='md'>{formatWeek(currentDate)}</Heading>
-        <Table variant='simple' w='full'>
+      <VStack data-testid="week-view" align="stretch" w="full" spacing={4}>
+        <Heading size="md">{formatWeek(currentDate)}</Heading>
+        <Table variant="simple" w="full">
           <Thead>
             <Tr>
               {WEEKDAYS.map((day) => (
-                <Th key={day} width='14.28%'>
+                <Th key={day} width="14.28%">
                   {day}
                 </Th>
               ))}
@@ -58,12 +55,12 @@ function CalendarView({
               {weekDates.map((date) => (
                 <Td
                   key={date.toISOString()}
-                  height='100px'
-                  verticalAlign='top'
-                  width='14.28%'
+                  height="100px"
+                  verticalAlign="top"
+                  width="14.28%"
                   data-testid={`week-cell-${date.getDate()}`}
                 >
-                  <Text fontWeight='bold'>{date.getDate()}</Text>
+                  <Text fontWeight="bold">{date.getDate()}</Text>
                   {renderEvents(date)}
                 </Td>
               ))}
@@ -102,13 +99,13 @@ function CalendarView({
     }
 
     return (
-      <VStack data-testid='month-view' align='stretch' w='full' spacing={4}>
-        <Heading size='md'>{formatMonth(currentDate)}</Heading>
-        <Table variant='simple' w='full'>
+      <VStack data-testid="month-view" align="stretch" w="full" spacing={4}>
+        <Heading size="md">{formatMonth(currentDate)}</Heading>
+        <Table variant="simple" w="full">
           <Thead>
             <Tr>
               {WEEKDAYS.map((day) => (
-                <Th key={day} width='14.28%'>
+                <Th key={day} width="14.28%">
                   {day}
                 </Th>
               ))}
@@ -120,15 +117,15 @@ function CalendarView({
                 {week.map((day, dayIndex) => (
                   <Td
                     key={dayIndex}
-                    height='100px'
-                    verticalAlign='top'
-                    width='14.28%'
-                    position='relative'
+                    height="100px"
+                    verticalAlign="top"
+                    width="14.28%"
+                    position="relative"
                     data-testid={`month-cell-${day}`}
                   >
                     {day && (
                       <>
-                        <Text fontWeight='bold'>{day}</Text>
+                        <Text fontWeight="bold">{day}</Text>
                         {renderHoliday(day)}
                         {renderEvents(
                           new Date(
@@ -150,7 +147,7 @@ function CalendarView({
   }
 
   function renderEvents(date: Date) {
-    return events
+    return eventList
       .filter(
         (event) => new Date(event.date).toDateString() === date.toDateString()
       )
@@ -162,14 +159,14 @@ function CalendarView({
             data-testid={`event-${event.id}`}
             p={1}
             my={1}
-            bg={isNotified ? 'red.100' : 'gray.100'}
-            borderRadius='md'
-            fontWeight={isNotified ? 'bold' : 'normal'}
-            color={isNotified ? 'red.500' : 'inherit'}
+            bg={isNotified ? "red.100" : "gray.100"}
+            borderRadius="md"
+            fontWeight={isNotified ? "bold" : "normal"}
+            color={isNotified ? "red.500" : "inherit"}
           >
             <HStack spacing={1}>
               {isNotified && <BellIcon />}
-              <Text fontSize='sm' noOfLines={1}>
+              <Text fontSize="sm" noOfLines={1}>
                 {event.title}
               </Text>
             </HStack>
@@ -181,12 +178,12 @@ function CalendarView({
   function renderHoliday(day: number) {
     const dateString = `${currentDate.getFullYear()}-${String(
       currentDate.getMonth() + 1
-    ).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    ).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     const holiday = holidays[dateString];
 
     if (holiday) {
       return (
-        <Text color='red.500' fontSize='sm'>
+        <Text color="red.500" fontSize="sm">
           {holiday}
         </Text>
       );
@@ -194,7 +191,34 @@ function CalendarView({
     return null;
   }
 
-  return view === 'week' ? <WeekView /> : <MonthView />;
+  return (
+    <VStack flex={1} spacing={5} align="stretch">
+      <Heading>일정 보기</Heading>
+
+      <HStack mx="auto" justifyContent="space-between">
+        <IconButton
+          aria-label="Previous"
+          icon={<ChevronLeftIcon />}
+          onClick={() => navigate("prev")}
+        />
+        <Select
+          aria-label="view"
+          value={view}
+          onChange={(e) => changeView(e.target.value as "week" | "month")}
+        >
+          <option value="week">Week</option>
+          <option value="month">Month</option>
+        </Select>
+        <IconButton
+          aria-label="Next"
+          icon={<ChevronRightIcon />}
+          onClick={() => navigate("next")}
+        />
+      </HStack>
+
+      {view === "week" ? <WeekView /> : <MonthView />}
+    </VStack>
+  );
 }
 
 export default CalendarView;

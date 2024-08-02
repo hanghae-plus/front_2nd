@@ -5,41 +5,35 @@ import {
   AlertTitle,
   CloseButton,
   Box,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
+import { useSchedulerContext } from "../contexts/SchedulerContext";
 
-interface Notification {
-  id: number;
-  message: string;
-}
+function NotificationList() {
+  const { notifications } = useSchedulerContext();
+  const { notifications: notificationList, removeNotification } = notifications;
 
-interface NotificationListProps {
-  notifications: Notification[];
-  onClose: (id: number) => void;
-}
-
-function NotificationList({ notifications, onClose }: NotificationListProps) {
-  if (notifications.length === 0) {
+  if (notificationList.length === 0) {
     return null;
   }
 
   return (
     <VStack
-      position='fixed'
+      position="fixed"
       top={4}
       right={4}
       spacing={2}
-      align='flex-end'
-      zIndex='toast'
+      align="flex-end"
+      zIndex="toast"
     >
-      {notifications.map((notification) => (
-        <Alert key={notification.id} status='info' variant='solid' width='auto'>
+      {notificationList.map((notification) => (
+        <Alert key={notification.id} status="info" variant="solid" width="auto">
           <AlertIcon />
-          <Box flex='1'>
-            <AlertTitle fontSize='sm'>{notification.message}</AlertTitle>
+          <Box flex="1">
+            <AlertTitle fontSize="sm">{notification.message}</AlertTitle>
           </Box>
           <CloseButton
-            onClick={() => onClose(notification.id)}
-            position='absolute'
+            onClick={() => removeNotification(notification.id)}
+            position="absolute"
             right={1}
             top={1}
           />

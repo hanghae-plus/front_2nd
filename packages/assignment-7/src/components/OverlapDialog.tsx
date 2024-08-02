@@ -1,4 +1,4 @@
-import React from 'react';
+import { useRef } from "react";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -8,39 +8,41 @@ import {
   AlertDialogOverlay,
   Button,
   Text,
-} from '@chakra-ui/react';
-import { Event } from '../types';
+} from "@chakra-ui/react";
+import { useSchedulerContext } from "../contexts/SchedulerContext";
+import { Event } from "../types";
 
-interface OverlapDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onContinue: () => void;
-  overlappingEvents: Event[];
-}
+function OverlapDialog() {
+  const { overlapDialog, events, tempEventData, setTempEventData } =
+    useSchedulerContext();
+  const { state, closeDialog } = overlapDialog;
+  const { saveEvent } = events;
 
-function OverlapDialog({
-  isOpen,
-  onClose,
-  onContinue,
-  overlappingEvents,
-}: OverlapDialogProps) {
-  const cancelRef = React.useRef<HTMLButtonElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
+  const handleContinue = async () => {
+    if (tempEventData) {
+      await saveEvent(tempEventData);
+      setTempEventData(null);
+    }
+    closeDialog();
+  };
 
   return (
     <AlertDialog
-      isOpen={isOpen}
+      isOpen={state.isOpen}
       leastDestructiveRef={cancelRef}
-      onClose={onClose}
+      onClose={closeDialog}
     >
       <AlertDialogOverlay>
         <AlertDialogContent>
-          <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+          <AlertDialogHeader fontSize="lg" fontWeight="bold">
             일정 겹침 경고
           </AlertDialogHeader>
 
           <AlertDialogBody>
             다음 일정과 겹칩니다:
-            {overlappingEvents.map((event) => (
+            {state.overlappingEvents.map((event: Event) => (
               <Text key={event.id}>
                 {event.title} ({event.date} {event.startTime}-{event.endTime})
               </Text>
@@ -49,10 +51,10 @@ function OverlapDialog({
           </AlertDialogBody>
 
           <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={onClose}>
+            <Button ref={cancelRef} onClick={closeDialog}>
               취소
             </Button>
-            <Button colorScheme='red' onClick={onContinue} ml={3}>
+            <Button colorScheme="red" onClick={handleContinue} ml={3}>
               계속 진행
             </Button>
           </AlertDialogFooter>
