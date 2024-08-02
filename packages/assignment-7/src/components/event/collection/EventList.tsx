@@ -1,6 +1,6 @@
 import { BellIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { Box, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
-import { Event } from "../../App";
+import { Event } from "../../../types/types";
 
 interface EventListProps {
   filteredEvents: Event[];
@@ -23,20 +23,31 @@ const EventList = ({
   editEvent,
   deleteEvent,
 }: EventListProps) => {
+  // 이벤트 삭제
+
   return (
     <>
       {filteredEvents.length === 0 ? (
         <Text>검색 결과가 없습니다.</Text>
       ) : (
-        filteredEvents.map((event) => (
-          <ProductCardView
-            key={event.id}
-            event={event}
-            notifiedEvents={notifiedEvents}
-            editEvent={editEvent}
-            deleteEvent={deleteEvent}
-          />
-        ))
+        filteredEvents.map((event) => {
+          const editingEvent = () => {
+            editEvent(event);
+          };
+          const deletingEvent = () => {
+            deleteEvent(event.id);
+          };
+          return (
+            <ProductCardView
+              key={event.id}
+              id={event.id}
+              event={event}
+              notifiedEvents={notifiedEvents}
+              onClickEditEvent={editingEvent}
+              onClickDeleteEvent={deletingEvent}
+            />
+          );
+        })
       )}
     </>
   );
@@ -44,26 +55,28 @@ const EventList = ({
 
 interface productCardView {
   event: Event;
+  id: number;
   notifiedEvents: number[];
-  editEvent: (event: Event) => void;
-  deleteEvent: (id: number) => Promise<void>;
+  onClickEditEvent: () => void;
+  onClickDeleteEvent: () => void;
 }
 
 const ProductCardView = ({
   notifiedEvents,
   event,
-  editEvent,
-  deleteEvent,
+  id,
+  onClickEditEvent,
+  onClickDeleteEvent,
 }: productCardView) => {
   return (
-    <Box key={event.id} borderWidth={1} borderRadius="lg" p={3} width="100%">
+    <Box key={id} borderWidth={1} borderRadius="lg" p={3} width="100%">
       <HStack justifyContent="space-between">
         <VStack align="start">
           <HStack>
-            {notifiedEvents.includes(event.id) && <BellIcon color="red.500" />}
+            {notifiedEvents.includes(id) && <BellIcon color="red.500" />}
             <Text
               data-testid="event-title"
-              fontWeight={notifiedEvents.includes(event.id) ? "bold" : "normal"}
+              fontWeight={notifiedEvents.includes(id) ? "bold" : "normal"}
               color={notifiedEvents.includes(event.id) ? "red.500" : "inherit"}
             >
               {event.title}
@@ -99,12 +112,12 @@ const ProductCardView = ({
           <IconButton
             aria-label="Edit event"
             icon={<EditIcon />}
-            onClick={() => editEvent(event)}
+            onClick={onClickEditEvent}
           />
           <IconButton
             aria-label="Delete event"
             icon={<DeleteIcon />}
-            onClick={() => deleteEvent(event.id)}
+            onClick={onClickDeleteEvent}
           />
         </HStack>
       </HStack>

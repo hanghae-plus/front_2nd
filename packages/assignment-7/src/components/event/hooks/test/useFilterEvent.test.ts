@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
-import { Event } from "../../../../App";
 import { useFilterEvent } from "../useFilterEvent";
 import { vi } from "vitest";
+import { Event } from "../../../../types/types";
 
 const mockEvents: Event[] = [
   {

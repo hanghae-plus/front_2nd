@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Event, ViewType } from "../../../App";
 import { getWeekDates, searchEvents } from "../../../utils/date-utils";
+import { Event, ViewType } from "../../../types/types";
 
 /**
  * 현재 날짜와 필터에 따른 이벤트

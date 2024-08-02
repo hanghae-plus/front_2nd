@@ -1,48 +1,18 @@
 import { useState } from "react";
-import {
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  Box,
-  CloseButton,
-  Flex,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, Flex, useInterval } from "@chakra-ui/react";
 import { useGetEvent } from "./components/event/hooks/useGetEvent";
-import { useDeleteEvent } from "./components/event/hooks/useDeleteEvent";
-import EventForm from "./components/form/EventForm";
-import EventCalendar from "./components/calendar/EventCalendar";
 import { useFilterEvent } from "./components/event/hooks/useFilterEvent";
-import EventPanel from "./components/panel/EventPanel";
-import { useNotification } from "./components/notification/hooks/useNotification";
-
-export type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
-
-interface RepeatInfo {
-  type: RepeatType;
-  interval: number;
-  endDate?: string;
-}
-
-export interface Event {
-  id: number;
-  title: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  description: string;
-  location: string;
-  category: string;
-  repeat: RepeatInfo;
-  notificationTime: number;
-}
-
-export type ViewType = "week" | "month";
+import { useNotification } from "./components/event/notification/hooks/useNotification";
+import EventNotification from "./components/event/notification/EventNotification";
+import { Event } from "./types/types";
+import EventForm from "./components/event/form/EventForm";
+import EventCalendar from "./components/event/calendar/EventCalendar";
+import EventPanel from "./components/event/panel/EventPanel";
+import { useDeleteEvent } from "./components/event/hooks/useDeleteEvent";
 
 function App() {
   const { events, fetchEvents } = useGetEvent();
 
-  // 이벤트 삭제
   const { deleteEvent } = useDeleteEvent(fetchEvents);
 
   const {
@@ -67,6 +37,8 @@ function App() {
   const editEvent = (event: Event) => {
     setEditingEvent(event);
   };
+
+  useInterval(checkUpcomingEvents, 1000); // 1초마다 체크
 
   return (
     <Box w="full" h="100vh" m="auto" p={5}>
@@ -97,28 +69,10 @@ function App() {
         />
       </Flex>
 
-      {notifications.length > 0 && (
-        <VStack position="fixed" top={4} right={4} spacing={2} align="flex-end">
-          {notifications.map((notification, index) => (
-            <Alert
-              key={notification.id}
-              status="info"
-              variant="solid"
-              width="auto"
-            >
-              <AlertIcon />
-              <Box flex="1">
-                <AlertTitle fontSize="sm">{notification.message}</AlertTitle>
-              </Box>
-              <CloseButton
-                onClick={() =>
-                  setNotifications((prev) => prev.filter((_, i) => i !== index))
-                }
-              />
-            </Alert>
-          ))}
-        </VStack>
-      )}
+      <EventNotification
+        notifications={notifications}
+        setNotifications={setNotifications}
+      />
     </Box>
   );
 }

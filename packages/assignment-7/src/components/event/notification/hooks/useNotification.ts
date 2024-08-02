@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Event } from "../../../App";
+import { Event, Notification } from "../../../../types/types";
 /**
  * 다가오는 이벤트와 알림 데이터
  * @param events
@@ -8,9 +8,7 @@ import { Event } from "../../../App";
 export const useNotification = (events: Event[]) => {
   // 다가오는 이벤트
   const [notifiedEvents, setNotifiedEvents] = useState<number[]>([]);
-  const [notifications, setNotifications] = useState<
-    { id: number; message: string }[]
-  >([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   /**
    * 현재 날짜 기준으로의 다가오는 events

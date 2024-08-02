@@ -1,9 +1,10 @@
 import { describe, expect, test, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent, { UserEvent } from "@testing-library/user-event";
-import App, { Event } from "../App";
+import App from "../App";
 import { ReactNode } from "react";
 import { DUMMY_DATA } from "../../mock/handler";
+import { Event } from "../types/types";
 
 const setup = (componet: ReactNode) => {
   const user = userEvent.setup();

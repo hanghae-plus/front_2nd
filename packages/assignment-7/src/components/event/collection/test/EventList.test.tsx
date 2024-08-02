@@ -3,7 +3,7 @@ import { describe, vi } from "vitest";
 import EventList from "../EventList";
 import userEvent from "@testing-library/user-event";
 import { ReactNode } from "react";
-import { Event } from "../../../App";
+import { Event } from "../../../../App";
 
 const setup = (componet: ReactNode) => {
   const user = userEvent.setup();

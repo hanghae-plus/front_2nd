@@ -1,6 +1,6 @@
 import { FormControl, FormLabel, Input, VStack } from "@chakra-ui/react";
-import EventList from "../event/EventList";
-import { Event } from "../../App";
+import EventList from "../collection/EventList";
+import { Event } from "../../../types/types";
 
 interface EventPanelProps {
   searchTerm: string;

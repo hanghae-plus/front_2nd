@@ -19,13 +19,11 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import { useSaveEvent } from "../event/hooks/useSaveEvent";
-import { Event } from "../../App";
-import { useClosure } from "../event/hooks/useClosure";
-import { findOverlappingEvents } from "../../utils/date-utils";
 import { useEventForm } from "./hooks/useEventForm";
-
-type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
+import { useSaveEvent } from "../hooks/useSaveEvent";
+import { Event, RepeatType } from "../../../types/types";
+import { findOverlappingEvents } from "../../../utils/date-utils";
+import { useClosure } from "../hooks/useClosure";
 
 const categories = ["업무", "개인", "가족", "기타"];
 

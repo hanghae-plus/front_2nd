@@ -1,6 +1,6 @@
 import { useToast } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { Event } from "../../../App";
+import { Event } from "../../../types/types";
 
 const dummyEvents: Event[] = [];
 
@@ -32,6 +32,7 @@ export const useGetEvent = () => {
 
   useEffect(() => {
     fetchEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { events, fetchEvents };

@@ -1,5 +1,5 @@
-import { Event } from "../../../App";
 import { useToast } from "@chakra-ui/react";
+import { Event } from "../../../types/types";
 
 /**
  * 일정 Mutation 커스텀 훅
