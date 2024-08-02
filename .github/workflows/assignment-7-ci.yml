@@ -26,4 +26,4 @@ jobs:
       - name: assignment-7-basic
         run: |
           pnpm install
-          pnpm -F assignment-7 test
+          pnpm -F assignment-7 test:basic
