@@ -13,11 +13,27 @@ type TEvents = {
   notificationTime: number;
 };
 
+function getRandomNumber(min: number, max: number) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function getRandomDateString(now: Date) {
+  const randomNumber = getRandomNumber(-14, 14);
+  let randomDate = new Date(now);
+  if (randomNumber !== 0) randomDate.setDate(randomNumber);
+  const year = randomDate.getFullYear();
+  const month = String(randomDate.getMonth() + 1).padStart(2, "0");
+  const date = String(randomDate.getDate()).padStart(2, "0");
+  return `${year}-${month}-${date}`;
+}
+const now = new Date();
+
 let events: TEvents[] = [
   {
     id: 1,
     title: "팀 회의",
-    date: "2024-07-20",
+    date: getRandomDateString(now),
     startTime: "10:00",
     endTime: "11:00",
     description: "주간 팀 미팅",
@@ -29,7 +45,7 @@ let events: TEvents[] = [
   {
     id: 2,
     title: "점심 약속",
-    date: "2024-07-21",
+    date: getRandomDateString(now),
     startTime: "12:30",
     endTime: "13:30",
     description: "동료와 점심 식사",
@@ -41,7 +57,7 @@ let events: TEvents[] = [
   {
     id: 3,
     title: "프로젝트 마감",
-    date: "2024-07-25",
+    date: getRandomDateString(now),
     startTime: "09:00",
     endTime: "18:00",
     description: "분기별 프로젝트 마감",
@@ -53,7 +69,7 @@ let events: TEvents[] = [
   {
     id: 4,
     title: "생일 파티",
-    date: "2024-07-28",
+    date: getRandomDateString(now),
     startTime: "19:00",
     endTime: "22:00",
     description: "친구 생일 축하",
@@ -65,7 +81,7 @@ let events: TEvents[] = [
   {
     id: 5,
     title: "운동",
-    date: "2024-07-22",
+    date: getRandomDateString(now),
     startTime: "18:00",
     endTime: "19:00",
     description: "주간 운동",
