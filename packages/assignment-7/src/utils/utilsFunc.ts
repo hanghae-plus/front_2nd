@@ -1,10 +1,4 @@
-export const notificationOptions = [
-    { value: 1, label: "1분 전" },
-    { value: 10, label: "10분 전" },
-    { value: 60, label: "1시간 전" },
-    { value: 120, label: "2시간 전" },
-    { value: 1440, label: "1일 전" },
-];
+import {Event} from "../types/types.ts";
 
 export const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month, 0).getDate();
@@ -36,17 +30,12 @@ export const formatMonth = (date: Date): string => {
     return `${year}년 ${month}월`;
 };
 
-export const fetchHolidays = (year: number, month: number) => {
-    return {
-        "2024-01-01": "신정",
-        "2024-02-09": "설날",
-    };
-};
-
+// 날짜 문자열을 Date 객체로 변환하는 함수
 export const parseDateTime = (date: string, time: string): Date => {
     return new Date(`${date}T${time}`);
 };
 
+// 두 일정이 겹치는지 확인하는 함수
 export const isOverlapping = (event1: Event, event2: Event): boolean => {
     const start1 = parseDateTime(event1.date, event1.startTime);
     const end1 = parseDateTime(event1.date, event1.endTime);

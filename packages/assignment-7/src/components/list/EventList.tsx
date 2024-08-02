@@ -1,8 +1,8 @@
 import {Box, FormControl, FormLabel, HStack, IconButton, Input, Text, VStack} from "@chakra-ui/react";
 import {BellIcon, DeleteIcon, EditIcon} from "@chakra-ui/icons";
 import { FC } from "react";
-import {NOTIFICATION_OPTION} from "../constants/constants.ts";
-import { Event } from "../types/types.ts";
+import {NOTIFICATION_OPTION} from "../../constants/constants.ts";
+import { Event } from "../../types/types.ts";
 
 interface Props {
     searchTerm: string;
@@ -65,7 +65,7 @@ const EventList: FC<Props> = ({
                         </VStack>
                         <HStack>
                             <IconButton
-                                aria-label={`Edit event${index}`}
+                                aria-label="Edit event"
                                 icon={<EditIcon/>}
                                 onClick={() => editEvent(event)}
                             />

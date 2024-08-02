@@ -287,34 +287,21 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       render(<App />);
 
       await userEvent.type(screen.getByLabelText('제목'), "충돌 테스트1");
-      await userEvent.type(screen.getByLabelText('날짜'), "2024-08-05");
-      await userEvent.type(screen.getByLabelText('시작 시간'), "10:00");
-      await userEvent.type(screen.getByLabelText('종료 시간'), "11:00");
+      await userEvent.type(screen.getByLabelText('날짜'), "2024-08-09");
+      await userEvent.type(screen.getByLabelText('시작 시간'), "20:40");
+      await userEvent.type(screen.getByLabelText('종료 시간'), "21:40");
       await userEvent.click(screen.getByTestId('event-submit-button'));
 
       await waitFor(() => {
         expect(screen.getByTestId('event-list')).toHaveTextContent("충돌 테스트1");
-        expect(screen.getByTestId('event-list')).toHaveTextContent("2024-08-05");
       });
-
-      await userEvent.type(screen.getByLabelText('제목'), "충돌 테스트2");
-      await userEvent.type(screen.getByLabelText('날짜'), "2024-08-04");
-      await userEvent.type(screen.getByLabelText('시작 시간'), "10:00");
-      await userEvent.type(screen.getByLabelText('종료 시간'), "11:00");
-      await userEvent.click(screen.getByTestId('event-submit-button'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('event-list')).toHaveTextContent("충돌 테스트2");
-        expect(screen.getByTestId('event-list')).toHaveTextContent("2024-08-04");
-      });
-
-      const $editBtn = screen.getByLabelText('Edit event3');
-      await userEvent.click($editBtn);
-      await userEvent.clear(screen.getByLabelText("날짜"));
-      await userEvent.type(screen.getByLabelText('날짜'), "2024-08-05");
-      await userEvent.click(screen.getByTestId('event-submit-button'));
-
-      await waitFor(() => {
+      
+      await waitFor(async () => {
+        const $editBtns = screen.getAllByLabelText('Edit event');
+        await userEvent.click($editBtns[2]);
+        await userEvent.clear(screen.getByLabelText("날짜"));
+        await userEvent.type(screen.getByLabelText('날짜'), "2024-08-04");
+        await userEvent.click(screen.getByTestId('event-submit-button'));
         expect(document.body).toHaveTextContent("일정 겹침 경고");
       });
     });

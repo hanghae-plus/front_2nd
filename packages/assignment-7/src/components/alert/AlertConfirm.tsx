@@ -9,7 +9,7 @@ import {
     Text,
 } from "@chakra-ui/react";
 import { FC, useRef } from "react";
-import { Event, RepeatType } from "../types/types.ts";
+import { Event, RepeatType } from "../../types/types.ts";
 
 interface Props {
     isOverlapDialogOpen: boolean;

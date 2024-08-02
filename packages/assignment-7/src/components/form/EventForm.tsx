@@ -10,8 +10,8 @@ import {
     Tooltip,
     VStack
 } from "@chakra-ui/react";
-import {Event, RepeatType} from "../types/types.ts";
-import {NOTIFICATION_OPTION} from "../constants/constants.ts";
+import {Event, RepeatType} from "../../types/types.ts";
+import {NOTIFICATION_OPTION} from "../../constants/constants.ts";
 import { ChangeEvent, FC } from "react";
 
 const categories = ["업무", "개인", "가족", "기타"];
