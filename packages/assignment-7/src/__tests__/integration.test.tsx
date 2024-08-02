@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from "@testing-library/user-event";
 import { setupServer } from 'msw/node';
 import { mockApiHandlers } from './mockApiHandlers';
-import {App} from '../App';
+import App from '../App';
 import {mockEvents} from "./mockEvents.ts";
 import dayjs = require("dayjs");
 
@@ -32,7 +32,7 @@ const testData2 = {
   },
   "notificationTime": 10,
 };
-const noEventText = '일정 검색검색 결과가 없습니다.'
+const noEventText = '검색 결과가 없습니다.'
 
 // Set up mock API server
 const server = setupServer(...mockApiHandlers);
@@ -71,8 +71,8 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     test('기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영되는지 확인한다', async () => {
       render(<App />);
 
-
       await waitFor(async () => {
+
         const firstEvent = screen.getByTestId('event-list').children[1].children[0];
         const $editBtn = firstEvent.children[1].children[0]
 
