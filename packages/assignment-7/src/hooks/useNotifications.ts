@@ -16,7 +16,7 @@ export function useNotifications(events: Event[]) {
     );
   };
 
-  const checkUpcomingEvents = () => {
+  const checkUpcomingEvents = async () => {
     const now = new Date();
     const upcomingEvents = events.filter((event) => {
       const eventStart = new Date(`${event.date}T${event.startTime}`);
@@ -28,16 +28,24 @@ export function useNotifications(events: Event[]) {
       );
     });
 
-    upcomingEvents.forEach((event) => {
-      addNotification(
-        `${event.notificationTime}분 후 ${event.title} 일정이 시작됩니다.`
-      );
-      setNotifiedEvents((prev) => [...prev, event.id]);
-    });
+    for (const event of upcomingEvents) {
+      try {
+        setNotifications((prev) => [
+          ...prev,
+          {
+            id: event.id,
+            message: `${event.notificationTime}분 후 ${event.title} 일정이 시작됩니다.`,
+          },
+        ]);
+        setNotifiedEvents((prev) => [...prev, event.id]);
+      } catch (error) {
+        console.error('Error updating notification status:', error);
+      }
+    }
   };
 
   useEffect(() => {
-    const intervalId = setInterval(checkUpcomingEvents, 60000); // Check every minute
+    const intervalId = setInterval(checkUpcomingEvents, 1000);
     return () => clearInterval(intervalId);
   }, [events, notifiedEvents]);
 

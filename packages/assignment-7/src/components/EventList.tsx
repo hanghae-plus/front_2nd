@@ -1,51 +1,52 @@
-import { ChangeEvent, useMemo, useState } from "react";
-import { VStack, Text } from "@chakra-ui/react";
-import { useSchedulerContext } from "../contexts/SchedulerContext";
-import EventCard from "./EventCard";
-import SearchBar from "./SearchBar";
+import { ChangeEvent, useMemo, useState } from 'react';
+import { VStack, Text } from '@chakra-ui/react';
+import { useSchedulerContext } from '../contexts/SchedulerContext';
+import EventCard from './EventCard';
+import SearchBar from './SearchBar';
+import { Event } from '../types';
+import { searchEvents } from '../utils/event';
+import { getWeekDates } from '../utils/date';
 
 function EventList() {
-  const { events, calendar, notifications } = useSchedulerContext();
+  const { events, calendar, notifications, setSelectedEvent } =
+    useSchedulerContext();
   const { events: eventList, deleteEvent } = events;
   const { currentDate, view } = calendar;
   const { notifiedEvents } = notifications;
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredEvents = useMemo(() => {
-    return eventList.filter((event) => {
+  const filteredEvents = (() => {
+    const filtered = searchEvents(eventList, searchTerm);
+
+    return filtered.filter((event) => {
       const eventDate = new Date(event.date);
-      const matchesSearch =
-        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.location.toLowerCase().includes(searchTerm.toLowerCase());
-
-      if (view === "week") {
-        const weekStart = new Date(currentDate);
-        weekStart.setDate(currentDate.getDate() - currentDate.getDay());
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        return eventDate >= weekStart && eventDate <= weekEnd && matchesSearch;
-      } else if (view === "month") {
+      if (view === 'week') {
+        const weekDates = getWeekDates(currentDate);
+        return eventDate >= weekDates[0] && eventDate <= weekDates[6];
+      } else if (view === 'month') {
         return (
           eventDate.getMonth() === currentDate.getMonth() &&
-          eventDate.getFullYear() === currentDate.getFullYear() &&
-          matchesSearch
+          eventDate.getFullYear() === currentDate.getFullYear()
         );
       }
-      return matchesSearch;
+      return true;
     });
-  }, [eventList, currentDate, view, searchTerm]);
+  })();
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
+  const handleEdit = (event: Event) => {
+    setSelectedEvent(event);
+  };
+
   return (
     <VStack
-      data-testid="event-list"
-      w="500px"
-      h="full"
-      overflowY="auto"
+      data-testid='event-list'
+      w='500px'
+      h='full'
+      overflowY='auto'
       spacing={4}
     >
       <SearchBar searchTerm={searchTerm} onSearchChange={handleSearchChange} />
@@ -58,10 +59,7 @@ function EventList() {
             key={event.id}
             event={event}
             isNotified={notifiedEvents.includes(event.id)}
-            onEdit={(event) => {
-              // 여기서 이벤트 편집을 위한 상태를 설정하거나 모달을 열 수 있습니다.
-              console.log("Edit event:", event);
-            }}
+            onEdit={() => handleEdit(event)}
             onDelete={() => deleteEvent(event.id)}
           />
         ))

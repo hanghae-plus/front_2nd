@@ -1,8 +1,8 @@
-import { createContext, useContext, ReactNode, useState } from "react";
-import { useCalendar } from "../hooks/useCalendar";
-import { useEvents } from "../hooks/useEvents";
-import { useNotifications } from "../hooks/useNotifications";
-import { Event, EventFormData } from "../types";
+import { createContext, useContext, ReactNode, useState } from 'react';
+import { useCalendar } from '../hooks/useCalendar';
+import { useEvents } from '../hooks/useEvents';
+import { useNotifications } from '../hooks/useNotifications';
+import { Event, EventFormData } from '../types';
 
 type CalendarContextType = ReturnType<typeof useCalendar>;
 type EventsContextType = ReturnType<typeof useEvents>;
@@ -36,6 +36,9 @@ interface SchedulerContextType {
   loading: LoadingState;
   tempEventData: EventFormData | null;
   setTempEventData: (data: EventFormData | null) => void;
+  selectedEvent: EventFormData | Event | null;
+  setSelectedEvent: (event: EventFormData | Event | null) => void;
+  clearSelectedEvent: () => void;
 }
 
 const SchedulerContext = createContext<SchedulerContextType | null>(null);
@@ -56,6 +59,11 @@ export function SchedulerProvider({ children }: SchedulerProviderProps) {
   const [tempEventData, setTempEventData] = useState<EventFormData | null>(
     null
   );
+  const [selectedEvent, setSelectedEvent] = useState<
+    EventFormData | Event | null
+  >(null);
+
+  const clearSelectedEvent = () => setSelectedEvent(null);
 
   const contextValue: SchedulerContextType = {
     calendar,
@@ -78,6 +86,9 @@ export function SchedulerProvider({ children }: SchedulerProviderProps) {
     },
     tempEventData,
     setTempEventData,
+    selectedEvent,
+    setSelectedEvent,
+    clearSelectedEvent,
   };
 
   return (
@@ -91,7 +102,7 @@ export function useSchedulerContext(): SchedulerContextType {
   const context = useContext(SchedulerContext);
   if (context === null) {
     throw new Error(
-      "useSchedulerContext must be used within a SchedulerProvider"
+      'useSchedulerContext must be used within a SchedulerProvider'
     );
   }
   return context;

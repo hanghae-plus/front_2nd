@@ -10,33 +10,41 @@ import {
   Tooltip,
   Alert,
   AlertIcon,
-} from "@chakra-ui/react";
-import { useSchedulerContext } from "../contexts/SchedulerContext";
-import { findOverlappingEvents } from "../utils/event";
-import { EVENT_CATEGORIES, NOTIFICATION_OPTIONS } from "../constants";
-import { EventFormData } from "../types";
-import { useForm } from "../hooks/useForm";
+} from '@chakra-ui/react';
+import { useSchedulerContext } from '../contexts/SchedulerContext';
+import { findOverlappingEvents } from '../utils/event';
+import { EVENT_CATEGORIES, NOTIFICATION_OPTIONS } from '../constants';
+import { EventFormData } from '../types';
+import { useForm } from '../hooks/useForm';
+import { useEffect } from 'react';
 
 function EventForm() {
   const {
     events,
-    notifications,
     overlapDialog,
     error,
     loading,
     setTempEventData,
+    selectedEvent,
+    clearSelectedEvent,
   } = useSchedulerContext();
   const { saveEvent } = events;
 
   const {
     event,
     errors,
+    setEvent,
     handleInputChange,
     handleCheckboxChange,
     validateForm,
-    resetForm,
     validateTime,
   } = useForm();
+
+  useEffect(() => {
+    if (selectedEvent) {
+      setEvent(selectedEvent as EventFormData);
+    }
+  }, [selectedEvent, setEvent]);
 
   const handleSubmit = async (eventData: EventFormData) => {
     if (validateForm()) {
@@ -46,17 +54,18 @@ function EventForm() {
         overlapDialog.openDialog(overlapping);
       } else {
         await saveEvent(eventData);
+        clearSelectedEvent();
       }
     }
   };
 
   return (
-    <VStack w="400px" spacing={5} align="stretch">
+    <VStack w='400px' spacing={5} align='stretch'>
       <FormControl>
         <FormLabel>제목</FormLabel>
         <Input
-          name="title"
-          value={event.title || ""}
+          name='title'
+          value={event.title || ''}
           onChange={handleInputChange}
         />
       </FormControl>
@@ -64,28 +73,28 @@ function EventForm() {
       <FormControl>
         <FormLabel>날짜</FormLabel>
         <Input
-          type="date"
-          name="date"
-          value={event.date || ""}
+          type='date'
+          name='date'
+          value={event.date || ''}
           onChange={handleInputChange}
         />
       </FormControl>
 
-      <HStack width="100%">
+      <HStack width='100%'>
         <FormControl>
           <FormLabel>시작 시간</FormLabel>
           <Tooltip
             label={errors.startTime}
             isOpen={!!errors.startTime}
-            placement="top"
+            placement='top'
           >
             <Input
-              type="time"
-              name="startTime"
-              value={event.startTime || ""}
+              type='time'
+              name='startTime'
+              value={event.startTime || ''}
               onChange={handleInputChange}
               onBlur={() =>
-                validateTime(event.startTime || "", event.endTime || "")
+                validateTime(event.startTime || '', event.endTime || '')
               }
               isInvalid={!!errors.startTime}
             />
@@ -96,15 +105,15 @@ function EventForm() {
           <Tooltip
             label={errors.endTime}
             isOpen={!!errors.endTime}
-            placement="top"
+            placement='top'
           >
             <Input
-              type="time"
-              name="endTime"
-              value={event.endTime || ""}
+              type='time'
+              name='endTime'
+              value={event.endTime || ''}
               onChange={handleInputChange}
               onBlur={() =>
-                validateTime(event.startTime || "", event.endTime || "")
+                validateTime(event.startTime || '', event.endTime || '')
               }
               isInvalid={!!errors.endTime}
             />
@@ -115,8 +124,8 @@ function EventForm() {
       <FormControl>
         <FormLabel>설명</FormLabel>
         <Input
-          name="description"
-          value={event.description || ""}
+          name='description'
+          value={event.description || ''}
           onChange={handleInputChange}
         />
       </FormControl>
@@ -124,8 +133,8 @@ function EventForm() {
       <FormControl>
         <FormLabel>위치</FormLabel>
         <Input
-          name="location"
-          value={event.location || ""}
+          name='location'
+          value={event.location || ''}
           onChange={handleInputChange}
         />
       </FormControl>
@@ -133,11 +142,11 @@ function EventForm() {
       <FormControl>
         <FormLabel>카테고리</FormLabel>
         <Select
-          name="category"
-          value={event.category || ""}
+          name='category'
+          value={event.category || ''}
           onChange={handleInputChange}
         >
-          <option value="">카테고리 선택</option>
+          <option value=''>카테고리 선택</option>
           {EVENT_CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
@@ -149,35 +158,35 @@ function EventForm() {
       <FormControl>
         <FormLabel>반복 설정</FormLabel>
         <Checkbox
-          name="isRepeating"
-          isChecked={event.repeat?.type !== "none"}
+          name='isRepeating'
+          isChecked={event.repeat?.type !== 'none'}
           onChange={handleCheckboxChange}
         >
           반복 일정
         </Checkbox>
       </FormControl>
 
-      {event.repeat?.type !== "none" && (
-        <VStack width="100%">
+      {event.repeat?.type !== 'none' && (
+        <VStack width='100%'>
           <FormControl>
             <FormLabel>반복 유형</FormLabel>
             <Select
-              name="repeatType"
+              name='repeatType'
               value={event.repeat?.type}
               onChange={handleInputChange}
             >
-              <option value="daily">매일</option>
-              <option value="weekly">매주</option>
-              <option value="monthly">매월</option>
-              <option value="yearly">매년</option>
+              <option value='daily'>매일</option>
+              <option value='weekly'>매주</option>
+              <option value='monthly'>매월</option>
+              <option value='yearly'>매년</option>
             </Select>
           </FormControl>
-          <HStack width="100%">
+          <HStack width='100%'>
             <FormControl>
               <FormLabel>반복 간격</FormLabel>
               <Input
-                type="number"
-                name="repeatInterval"
+                type='number'
+                name='repeatInterval'
                 value={event.repeat?.interval}
                 onChange={handleInputChange}
                 min={1}
@@ -186,9 +195,9 @@ function EventForm() {
             <FormControl>
               <FormLabel>반복 종료일</FormLabel>
               <Input
-                type="date"
-                name="repeatEndDate"
-                value={event.repeat?.endDate || ""}
+                type='date'
+                name='repeatEndDate'
+                value={event.repeat?.endDate || ''}
                 onChange={handleInputChange}
               />
             </FormControl>
@@ -199,7 +208,7 @@ function EventForm() {
       <FormControl>
         <FormLabel>알림 설정</FormLabel>
         <Select
-          name="notificationTime"
+          name='notificationTime'
           value={event.notificationTime}
           onChange={handleInputChange}
         >
@@ -212,17 +221,17 @@ function EventForm() {
       </FormControl>
 
       <Button
-        data-testid="event-submit-button"
+        data-testid='event-submit-button'
         onClick={() => handleSubmit(event)}
-        colorScheme="blue"
+        colorScheme='blue'
         isLoading={loading.isLoading}
         isDisabled={loading.isLoading}
       >
-        {event.id ? "일정 수정" : "일정 추가"}
+        {event.id ? '일정 수정' : '일정 추가'}
       </Button>
 
       {error.error && (
-        <Alert status="error">
+        <Alert status='error'>
           <AlertIcon />
           {error.error}
         </Alert>
