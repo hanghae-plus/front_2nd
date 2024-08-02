@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { Event } from './types';
 
-let initialEvents = [
+let initialEvents: Event[] = [
   {
     id: 1,
     title: '팀 회의',
@@ -92,7 +92,7 @@ let initialEvents = [
   },
 ];
 
-export let events = [...initialEvents];
+export let events: Event[] = [...initialEvents];
 
 export const resetEvents = () => {
   events = [...initialEvents];

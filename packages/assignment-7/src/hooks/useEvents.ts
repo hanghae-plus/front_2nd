@@ -79,9 +79,12 @@ export function useEvents() {
       } else {
         await addEvent(eventData);
       }
-      return { success: true, message: `일정이 ${eventData.id ? "수정" : "추가"}되었습니다.` };
+      return {
+        success: true,
+        message: `일정이 ${eventData.id ? '수정' : '추가'}되었습니다.`,
+      };
     } catch (err) {
-      return { success: false, error: "일정 저장 중 오류가 발생했습니다." };
+      return { success: false, error: '일정 저장 중 오류가 발생했습니다.' };
     } finally {
       setLoading(false);
     }
@@ -91,10 +94,11 @@ export function useEvents() {
     events,
     loading,
     error,
+    setEvents,
     fetchEvents,
     addEvent,
     updateEvent,
     deleteEvent,
-    saveEvent
+    saveEvent,
   };
 }
