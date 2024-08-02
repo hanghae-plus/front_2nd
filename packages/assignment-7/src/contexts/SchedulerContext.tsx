@@ -23,7 +23,7 @@ interface LoadingState {
   setIsLoading: (isLoading: boolean) => void;
 }
 
-interface SchedulerContextType {
+export interface SchedulerContextType {
   calendar: CalendarContextType;
   events: EventsContextType;
   notifications: NotificationsContextType;

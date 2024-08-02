@@ -22,7 +22,9 @@ function EventCard({ event, isNotified, onEdit, onDelete }: EventCardProps) {
       <HStack justifyContent='space-between'>
         <VStack align='start' spacing={1}>
           <HStack>
-            {isNotified && <BellIcon color='red.500' />}
+            {isNotified && (
+              <BellIcon color='red.500' data-testid='notification-icon' />
+            )}
             <Text
               fontWeight={isNotified ? 'bold' : 'normal'}
               color={isNotified ? 'red.500' : 'inherit'}
