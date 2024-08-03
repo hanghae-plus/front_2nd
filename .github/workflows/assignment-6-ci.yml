@@ -5,20 +5,106 @@ on:
     types:
       - opened
     paths:
-      - 'packages/assignment-6/**'
+      - "packages/assignment-6/**"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: job1 구현
-        run: echo "job1의 내용을 구현해주세요"
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run TypeScript compiler
+        run: pnpm tsc
+        working-directory: packages/assignment-6
+        continue-on-error: true
+
+      - name: Build project
+        run: pnpm build
+        working-directory: packages/assignment-6
+        continue-on-error: true
+
+      - name: Check for errors
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '빌드 과정에서 오류가 발생했습니다. 로그를 확인해 주세요.'
+            })
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: job2 구현
-        run: echo "job2의 내용을 구현해주세요"
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run ESLint
+        run: pnpm lint
+        continue-on-error: true
+        working-directory: packages/assignment-6
+
+      - name: Check ESLint results
+        id: eslint-check
+        run: |
+          if [ -s eslint_report.json ]; then
+            echo "ESLINT_FAILED=true" >> $GITHUB_ENV
+          fi
+        working-directory: packages/assignment-6
+
+      - name: Comment PR with ESLint report
+        if: env.ESLINT_FAILED == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs');
+            const eslintReport = JSON.parse(fs.readFileSync('packages/assignment-6/eslint_report.json', 'utf8'));
+
+            let commentBody = '## ESLint 검사 결과\n\n';
+            commentBody += 'ESLint 검사 중 다음과 같은 문제가 발견되었습니다:\n\n';
+
+            eslintReport.forEach(file => {
+              if (file.messages.length > 0) {
+                commentBody += `### ${file.filePath}\n\n`;
+                file.messages.forEach(message => {
+                  commentBody += `- **${message.ruleId}**: ${message.message} (${message.line}:${message.column})\n`;
+                });
+                commentBody += '\n';
+              }
+            });
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            })
 
   test:
     runs-on: ubuntu-latest
