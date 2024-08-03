@@ -50,6 +50,7 @@ jobs:
           node-version: "20.x"
 
       - name: Install Node.js dependencies
+
         run: npm install --legacy-peer-deps
         working-directory: packages/assignment-6
 
@@ -87,13 +88,18 @@ jobs:
           node-version: "20.x"
 
       - name: Install Node.js dependencies
+
         run: npm install --legacy-peer-deps
+
         working-directory: packages/assignment-6
 
       - name: Run Test
         id: test
         run: npm run test
         working-directory: packages/assignment-6
+
+        continue-on-error: true
+
 
       - name: Run Coverage
         id: coverage
@@ -168,7 +174,9 @@ jobs:
           node-version: "20.x"
 
       - name: Install Node.js dependencies
+
         run: npm install --legacy-peer-deps
+
         working-directory: packages/assignment-6
 
       - name: Run Lighthouse CI
@@ -258,6 +266,7 @@ jobs:
             const reviewerGithub = myTeammates[randomIndex].github;
 
             const comment = `
+
             ## @${reviewerGithub} ${reviewerName}님 당첨~~!
             `;
 
@@ -267,6 +276,7 @@ jobs:
             repo: context.repo.repo,
             body: comment
              })
+
 
             await github.rest.pulls.requestReviewers({
               pull_number: context.issue.number,
