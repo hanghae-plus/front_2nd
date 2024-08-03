@@ -1,13 +1,13 @@
-import { CartItem } from './entities/cartItem.ts';
-import { DiscountDetail, Product } from './types/type.ts';
+import { CartItem } from "./entities/cartItem.ts";
+import { DiscountDetail, Product } from "./types/type.ts";
 
 export const getProductOptionLiteral = (product: Product) =>
-  `<option value="${product.id}">${product.name + ' - ' + product.price + '원'}</option>`;
+  `<option value="${product.id}">${product.name + " - " + product.price + "원"}</option>`;
 
 export const getMainLayoutLiteral = ({ items }: { items: Product[] }) => {
   let optionLiteral;
   if (items) {
-    optionLiteral = items.map((item) => getProductOptionLiteral(item)).join('');
+    optionLiteral = items.map((item) => getProductOptionLiteral(item)).join("");
   }
 
   return `<div class="bg-gray-100 p-8">
@@ -38,7 +38,7 @@ export const getCartTotalLiteral = (discountDetail: DiscountDetail) => {
   const discountText =
     discountDetail.discountRate > 0
       ? `(${(discountDetail.discountRate * 100).toFixed(1)}% 할인 적용)`
-      : '';
+      : "";
 
   return `총액: ${Math.round(discountDetail.total)}원
     <span class="text-green-500 ml-2">
