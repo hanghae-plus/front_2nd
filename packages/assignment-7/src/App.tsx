@@ -45,7 +45,7 @@ import {
   formatWeek,
   getDaysInMonth,
   getWeekDates,
-} from '~shared/model/dateTimeUtils';
+} from '~shared/lib/date/dateTimeUtils';
 
 type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
