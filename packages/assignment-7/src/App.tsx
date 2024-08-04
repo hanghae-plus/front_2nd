@@ -34,6 +34,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { BellIcon, ChevronLeftIcon, ChevronRightIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { getDaysInMonth, getWeekDates, formatWeek, formatMonth } from "./utils.tsx";
 
 type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
@@ -372,23 +373,6 @@ function App() {
     setNotificationTime(event.notificationTime);
   };
 
-  const getDaysInMonth = (year: number, month: number) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getWeekDates = (date: Date) => {
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(date.setDate(diff));
-    const weekDates = [];
-    for (let i = 0; i < 7; i++) {
-      const nextDate = new Date(monday);
-      nextDate.setDate(monday.getDate() + i);
-      weekDates.push(nextDate);
-    }
-    return weekDates;
-  };
-
   const navigate = (direction: 'prev' | 'next') => {
     setCurrentDate(prevDate => {
       const newDate = new Date(prevDate);
@@ -426,19 +410,6 @@ function App() {
     })
   })();
 
-  const formatWeek = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const weekNumber = Math.ceil(date.getDate() / 7);
-    return `${year}년 ${month}월 ${weekNumber}주`;
-  };
-
-  const formatMonth = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    return `${year}년 ${month}월`;
-  };
-
   const renderWeekView = () => {
     const weekDates = getWeekDates(currentDate);
     return (
@@ -472,7 +443,7 @@ function App() {
                           color={isNotified ? "red.500" : "inherit"}
                         >
                           <HStack spacing={1}>
-                            {isNotified && <BellIcon/>}
+                            {isNotified && <BellIcon />}
                             <Text fontSize="sm" noOfLines={1}>{event.title}</Text>
                           </HStack>
                         </Box>
@@ -549,7 +520,7 @@ function App() {
                                   color={isNotified ? "red.500" : "inherit"}
                                 >
                                   <HStack spacing={1}>
-                                    {isNotified && <BellIcon/>}
+                                    {isNotified && <BellIcon />}
                                     <Text fontSize="sm" noOfLines={1}>{event.title}</Text>
                                   </HStack>
                                 </Box>
@@ -589,12 +560,12 @@ function App() {
 
           <FormControl>
             <FormLabel>제목</FormLabel>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)}/>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
           </FormControl>
 
           <FormControl>
             <FormLabel>날짜</FormLabel>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)}/>
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </FormControl>
 
           <HStack width="100%">
@@ -626,12 +597,12 @@ function App() {
 
           <FormControl>
             <FormLabel>설명</FormLabel>
-            <Input value={description} onChange={(e) => setDescription(e.target.value)}/>
+            <Input value={description} onChange={(e) => setDescription(e.target.value)} />
           </FormControl>
 
           <FormControl>
             <FormLabel>위치</FormLabel>
-            <Input value={location} onChange={(e) => setLocation(e.target.value)}/>
+            <Input value={location} onChange={(e) => setLocation(e.target.value)} />
           </FormControl>
 
           <FormControl>
@@ -709,16 +680,16 @@ function App() {
           <HStack mx="auto" justifyContent="space-between">
             <IconButton
               aria-label="Previous"
-              icon={<ChevronLeftIcon/>}
+              icon={<ChevronLeftIcon />}
               onClick={() => navigate('prev')}
             />
-            <Select aria-label="view" value={view} onChange={(e) => setView(e.target.value as 'week' | 'month')}>
+            <Select data-testid="week-month-select" aria-label="view" value={view} onChange={(e) => setView(e.target.value as 'week' | 'month')}>
               <option value="week">Week</option>
               <option value="month">Month</option>
             </Select>
             <IconButton
               aria-label="Next"
-              icon={<ChevronRightIcon/>}
+              icon={<ChevronRightIcon />}
               onClick={() => navigate('next')}
             />
           </HStack>
@@ -744,9 +715,9 @@ function App() {
               <HStack justifyContent="space-between">
                 <VStack align="start">
                   <HStack>
-                    {notifiedEvents.includes(event.id) && <BellIcon color="red.500"/>}
+                    {notifiedEvents.includes(event.id) && <BellIcon color="red.500" />}
                     <Text fontWeight={notifiedEvents.includes(event.id) ? "bold" : "normal"}
-                          color={notifiedEvents.includes(event.id) ? "red.500" : "inherit"}>
+                      color={notifiedEvents.includes(event.id) ? "red.500" : "inherit"}>
                       {event.title}
                     </Text>
                   </HStack>
@@ -770,12 +741,12 @@ function App() {
                 <HStack>
                   <IconButton
                     aria-label="Edit event"
-                    icon={<EditIcon/>}
+                    icon={<EditIcon />}
                     onClick={() => editEvent(event)}
                   />
                   <IconButton
                     aria-label="Delete event"
-                    icon={<DeleteIcon/>}
+                    icon={<DeleteIcon />}
                     onClick={() => deleteEvent(event.id)}
                   />
                 </HStack>
@@ -837,11 +808,11 @@ function App() {
       {notifications.length > 0 && <VStack position="fixed" top={4} right={4} spacing={2} align="flex-end">
         {notifications.map((notification, index) => (
           <Alert key={index} status="info" variant="solid" width="auto">
-            <AlertIcon/>
+            <AlertIcon />
             <Box flex="1">
               <AlertTitle fontSize="sm">{notification.message}</AlertTitle>
             </Box>
-            <CloseButton onClick={() => setNotifications(prev => prev.filter((_, i) => i !== index))}/>
+            <CloseButton onClick={() => setNotifications(prev => prev.filter((_, i) => i !== index))} />
           </Alert>
         ))}
       </VStack>

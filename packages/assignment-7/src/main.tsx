@@ -21,10 +21,3 @@ prepare().then(() => {
     </React.StrictMode>,
   )
 })
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <ChakraProvider>
-      <App />
-    </ChakraProvider>
-  </React.StrictMode>,
-)
