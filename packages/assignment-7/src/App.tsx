@@ -34,8 +34,9 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { BellIcon, ChevronLeftIcon, ChevronRightIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { formatMonth, formatWeek, getDaysInMonth, getWeekDates } from './utils/dateUtils';
 
-type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+export type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 interface RepeatInfo {
   type: RepeatType;
@@ -372,23 +373,6 @@ function App() {
     setNotificationTime(event.notificationTime);
   };
 
-  const getDaysInMonth = (year: number, month: number) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getWeekDates = (date: Date) => {
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(date.setDate(diff));
-    const weekDates = [];
-    for (let i = 0; i < 7; i++) {
-      const nextDate = new Date(monday);
-      nextDate.setDate(monday.getDate() + i);
-      weekDates.push(nextDate);
-    }
-    return weekDates;
-  };
-
   const navigate = (direction: 'prev' | 'next') => {
     setCurrentDate(prevDate => {
       const newDate = new Date(prevDate);
@@ -425,19 +409,6 @@ function App() {
       return true;
     })
   })();
-
-  const formatWeek = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const weekNumber = Math.ceil(date.getDate() / 7);
-    return `${year}년 ${month}월 ${weekNumber}주`;
-  };
-
-  const formatMonth = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    return `${year}년 ${month}월`;
-  };
 
   const renderWeekView = () => {
     const weekDates = getWeekDates(currentDate);
@@ -519,7 +490,7 @@ function App() {
               ))}
             </Tr>
           </Thead>
-          <Tbody>
+          <Tbody data-testid="calendar">
             {weeks.map((week, weekIndex) => (
               <Tr key={weekIndex}>
                 {week.map((day, dayIndex) => {
@@ -589,12 +560,12 @@ function App() {
 
           <FormControl>
             <FormLabel>제목</FormLabel>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)}/>
+            <Input data-testid="title-input" value={title} onChange={(e) => setTitle(e.target.value)}/>
           </FormControl>
 
           <FormControl>
             <FormLabel>날짜</FormLabel>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)}/>
+            <Input data-testid="date-input" type="date" value={date} onChange={(e) => setDate(e.target.value)}/>
           </FormControl>
 
           <HStack width="100%">
@@ -602,6 +573,7 @@ function App() {
               <FormLabel>시작 시간</FormLabel>
               <Tooltip label={startTimeError} isOpen={!!startTimeError} placement="top">
                 <Input
+                  data-testid="start-time-input"
                   type="time"
                   value={startTime}
                   onChange={handleStartTimeChange}
@@ -614,6 +586,7 @@ function App() {
               <FormLabel>종료 시간</FormLabel>
               <Tooltip label={endTimeError} isOpen={!!endTimeError} placement="top">
                 <Input
+                  data-testid="end-time-input"
                   type="time"
                   value={endTime}
                   onChange={handleEndTimeChange}
@@ -626,17 +599,17 @@ function App() {
 
           <FormControl>
             <FormLabel>설명</FormLabel>
-            <Input value={description} onChange={(e) => setDescription(e.target.value)}/>
+            <Input data-testid="description-input" value={description} onChange={(e) => setDescription(e.target.value)}/>
           </FormControl>
 
           <FormControl>
             <FormLabel>위치</FormLabel>
-            <Input value={location} onChange={(e) => setLocation(e.target.value)}/>
+            <Input data-testid="location-input" value={location} onChange={(e) => setLocation(e.target.value)}/>
           </FormControl>
 
           <FormControl>
             <FormLabel>카테고리</FormLabel>
-            <Select value={category} onChange={(e) => setCategory(e.target.value)}>
+            <Select data-testid="category-select" value={category} onChange={(e) => setCategory(e.target.value)}>
               <option value="">카테고리 선택</option>
               {categories.map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
@@ -646,7 +619,7 @@ function App() {
 
           <FormControl>
             <FormLabel>반복 설정</FormLabel>
-            <Checkbox isChecked={isRepeating} onChange={(e) => setIsRepeating(e.target.checked)}>
+            <Checkbox data-testid="repeat-checkbox" isChecked={isRepeating} onChange={(e) => setIsRepeating(e.target.checked)}>
               반복 일정
             </Checkbox>
           </FormControl>
@@ -654,6 +627,7 @@ function App() {
           <FormControl>
             <FormLabel>알림 설정</FormLabel>
             <Select
+              data-testid="alert-select"
               value={notificationTime}
               onChange={(e) => setNotificationTime(Number(e.target.value))}
             >
@@ -669,7 +643,7 @@ function App() {
             <VStack width="100%">
               <FormControl>
                 <FormLabel>반복 유형</FormLabel>
-                <Select value={repeatType} onChange={(e) => setRepeatType(e.target.value as RepeatType)}>
+                <Select data-testid="repeat-type-select" value={repeatType} onChange={(e) => setRepeatType(e.target.value as RepeatType)}>
                   <option value="daily">매일</option>
                   <option value="weekly">매주</option>
                   <option value="monthly">매월</option>
@@ -680,6 +654,7 @@ function App() {
                 <FormControl>
                   <FormLabel>반복 간격</FormLabel>
                   <Input
+                    data-testid="repeat-interval-input"
                     type="number"
                     value={repeatInterval}
                     onChange={(e) => setRepeatInterval(Number(e.target.value))}
@@ -689,6 +664,7 @@ function App() {
                 <FormControl>
                   <FormLabel>반복 종료일</FormLabel>
                   <Input
+                    data-testid="repeat-end-date-input"
                     type="date"
                     value={repeatEndDate}
                     onChange={(e) => setRepeatEndDate(e.target.value)}
@@ -740,7 +716,7 @@ function App() {
           {filteredEvents.length === 0 ? (
             <Text>검색 결과가 없습니다.</Text>
           ) : filteredEvents.map((event) => (
-            <Box key={event.id} borderWidth={1} borderRadius="lg" p={3} width="100%">
+            <Box key={event.id} data-testid={event.id} borderWidth={1} borderRadius="lg" p={3} width="100%">
               <HStack justifyContent="space-between">
                 <VStack align="start">
                   <HStack>
@@ -774,6 +750,7 @@ function App() {
                     onClick={() => editEvent(event)}
                   />
                   <IconButton
+                    data-testid={`delete-button-${event.id}`}
                     aria-label="Delete event"
                     icon={<DeleteIcon/>}
                     onClick={() => deleteEvent(event.id)}
@@ -833,7 +810,6 @@ function App() {
           </AlertDialogContent>
         </AlertDialogOverlay>
       </AlertDialog>
-
       {notifications.length > 0 && <VStack position="fixed" top={4} right={4} spacing={2} align="flex-end">
         {notifications.map((notification, index) => (
           <Alert key={index} status="info" variant="solid" width="auto">
