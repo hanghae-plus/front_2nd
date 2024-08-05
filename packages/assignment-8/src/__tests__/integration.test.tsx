@@ -1,40 +1,39 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { ReactElement } from "react";
-import { act, render, screen, within } from "@testing-library/react";
+import { ReactElement } from 'react';
+import { act, render, screen, within } from '@testing-library/react';
 import App from '../App';
-import { userEvent } from "@testing-library/user-event";
-import createMockServer from "./createMockServer";
-import { Event } from "../types";
+import { userEvent } from '@testing-library/user-event';
+import createMockServer from './createMockServer';
+import { Event } from '../types';
 
 const setup = (element: ReactElement) => {
   const user = userEvent.setup();
   return { ...render(element), user };
-}
+};
 
 const MOCK_EVENT_1: Event = {
   id: 1,
-  title: "기존 회의",
-  date: "2024-07-15",
-  startTime: "09:00",
-  endTime: "10:00",
-  description: "기존 팀 미팅",
-  location: "회의실 B",
-  category: "업무",
+  title: '기존 회의',
+  date: '2024-07-15',
+  startTime: '09:00',
+  endTime: '10:00',
+  description: '기존 팀 미팅',
+  location: '회의실 B',
+  category: '업무',
   repeat: { type: 'none', interval: 0 },
   notificationTime: 10,
-}
+};
 
 const events: Event[] = [{ ...MOCK_EVENT_1 }];
 
 const server = createMockServer(events);
 
-
 beforeEach(() => {
   vi.useFakeTimers({
-    toFake: ['setInterval', 'Date']
+    toFake: ['setInterval', 'Date'],
   });
   vi.setSystemTime(new Date(2024, 6, 1));
-})
+});
 
 beforeAll(() => server.listen());
 
@@ -47,10 +46,9 @@ afterEach(() => {
 });
 
 describe('일정 관리 애플리케이션 통합 테스트', () => {
-
   describe('일정 CRUD 및 기본 기능', () => {
     test('새로운 일정을 생성하고 모든 필드가 정확히 저장되는지 확인한다', async () => {
-      const { user } = setup(<App/>);
+      const { user } = setup(<App />);
 
       // 새 일정 추가 버튼 클릭
       await user.click(screen.getAllByText('일정 추가')[0]);
@@ -78,7 +76,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     });
 
     test('기존 일정의 세부 정보를 수정하고 변경사항이 정확히 반영되는지 확인한다', async () => {
-      const { user } = setup(<App/>);
+      const { user } = setup(<App />);
 
       // 기존 일정 수정 버튼 클릭
       await user.click(await screen.findByLabelText('Edit event'));
@@ -101,18 +99,18 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     test('일정을 삭제하고 더 이상 조회되지 않는지 확인한다', async () => {
       events.push({
         id: 2,
-        title: "삭제할 회의",
-        date: "2024-07-15",
-        startTime: "10:00",
-        endTime: "11:00",
-        description: "삭제할 팀 미팅",
-        location: "회의실 B",
-        category: "업무",
+        title: '삭제할 회의',
+        date: '2024-07-15',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '삭제할 팀 미팅',
+        location: '회의실 B',
+        category: '업무',
         repeat: { type: 'none', interval: 0 },
         notificationTime: 10,
-      })
+      });
 
-      const { user } = setup(<App/>);
+      const { user } = setup(<App />);
       const eventList = screen.getByTestId('event-list');
       const targetTitle = await within(eventList).findByText('삭제할 회의');
 
@@ -131,7 +129,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 2024년 1월 1일을 현재 날짜로 설정
       vi.setSystemTime(new Date(2024, 0, 1));
 
-      const { user } = setup(<App/>);
+      const { user } = setup(<App />);
 
       // 주별 뷰로 변경
       await user.selectOptions(screen.getByLabelText('view'), 'week');
@@ -146,25 +144,24 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
     test('주별 뷰에 일정이 정확히 표시되는지 확인한다', async () => {
       const date = new Date();
-      const fillZero = (n: number) => String(n).padStart(2, "0");
+      const fillZero = (n: number) => String(n).padStart(2, '0');
       const fullDate = `${date.getFullYear()}-${fillZero(date.getMonth() + 1)}-${fillZero(date.getDate())}`;
 
       events.length = 0;
       events.push({
         id: 1,
-        title: "이번주 팀 회의",
+        title: '이번주 팀 회의',
         date: fullDate,
-        startTime: "09:00",
-        endTime: "10:00",
-        description: "이번주 팀 회의입니다.",
-        location: "회의실 A",
-        category: "업무",
+        startTime: '09:00',
+        endTime: '10:00',
+        description: '이번주 팀 회의입니다.',
+        location: '회의실 A',
+        category: '업무',
         repeat: { type: 'none', interval: 0 },
         notificationTime: 10,
-      })
+      });
 
-
-      const { user } = setup(<App/>);
+      const { user } = setup(<App />);
 
       // 주별 뷰로 변경
       await user.selectOptions(screen.getByLabelText('view'), 'week');
@@ -184,7 +181,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 2024년 1월 1일을 현재 날짜로 설정
       vi.setSystemTime(new Date(2024, 0, 1));
 
-      setup(<App/>);
+      setup(<App />);
 
       // 이벤트 목록에서 확인
       const eventList = screen.getByTestId('event-list');
@@ -200,18 +197,18 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       events.length = 0;
       events.push({
         id: 1,
-        title: "이번달 팀 회의",
+        title: '이번달 팀 회의',
         date: fullDate,
-        startTime: "09:00",
-        endTime: "10:00",
-        description: "이번달 팀 회의입니다.",
-        location: "회의실 A",
-        category: "업무",
+        startTime: '09:00',
+        endTime: '10:00',
+        description: '이번달 팀 회의입니다.',
+        location: '회의실 A',
+        category: '업무',
         repeat: { type: 'none', interval: 0 },
         notificationTime: 10,
-      })
+      });
 
-      setup(<App/>);
+      setup(<App />);
 
       // 월별 뷰에서 일정 확인
       const monthView = screen.getByTestId('month-view');
@@ -235,25 +232,25 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       events.push(
         {
           id: 1,
-          title: "팀 회의",
-          date: "2024-07-15",
-          startTime: "09:00",
-          endTime: "10:00",
-          description: "주간 팀 미팅",
-          location: "회의실 A",
-          category: "업무",
+          title: '팀 회의',
+          date: '2024-07-15',
+          startTime: '09:00',
+          endTime: '10:00',
+          description: '주간 팀 미팅',
+          location: '회의실 A',
+          category: '업무',
           repeat: { type: 'none', interval: 0 },
           notificationTime: 10,
         },
         {
           id: 2,
-          title: "프로젝트 계획",
-          date: "2024-07-16",
-          startTime: "14:00",
-          endTime: "15:00",
-          description: "새 프로젝트 계획 수립",
-          location: "회의실 B",
-          category: "업무",
+          title: '프로젝트 계획',
+          date: '2024-07-16',
+          startTime: '14:00',
+          endTime: '15:00',
+          description: '새 프로젝트 계획 수립',
+          location: '회의실 B',
+          category: '업무',
           repeat: { type: 'none', interval: 0 },
           notificationTime: 10,
         }
@@ -261,7 +258,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     });
 
     test('검색 결과가 없으면, "검색 결과가 없습니다."가 표시되어야 한다.', async () => {
-      const { user } = setup(<App/>);
+      const { user } = setup(<App />);
 
       // 검색어 입력
       const searchInput = await screen.findByPlaceholderText('검색어를 입력하세요');
@@ -274,7 +271,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     });
 
     test('제목으로 일정을 검색하고 정확한 결과가 반환되는지 확인한다', async () => {
-      const { user } = setup(<App/>);
+      const { user } = setup(<App />);
 
       // 검색어 입력
       const searchInput = screen.getByPlaceholderText('검색어를 입력하세요');
@@ -288,7 +285,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     });
 
     test('검색어를 지우면 모든 일정이 다시 표시되어야 한다', async () => {
-      const { user } = setup(<App/>);
+      const { user } = setup(<App />);
 
       // 먼저 검색 수행
       const searchInput = screen.getByPlaceholderText('검색어를 입력하세요');
@@ -309,7 +306,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
     test('달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다', async () => {
       vi.setSystemTime(new Date(2024, 0, 1));
-      setup(<App/>);
+      setup(<App />);
 
       const monthView = screen.getByTestId('month-view');
 
@@ -321,7 +318,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
     test('달력에 5월 5일(어린이날)이 공휴일로 표시되는지 확인한다', async () => {
       vi.setSystemTime(new Date(2024, 4, 1));
-      setup(<App/>);
+      setup(<App />);
 
       const monthView = screen.getByTestId('month-view');
 
@@ -334,7 +331,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
   describe('일정 충돌 감지', () => {
     test('겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다', async () => {
-      const { user } = setup(<App/>);
+      const { user } = setup(<App />);
 
       // 새 일정 추가 버튼 클릭
       await user.click(screen.getAllByText('일정 추가')[0]);
@@ -351,25 +348,25 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 경고 다이얼로그 확인
       expect(await screen.findByText('일정 겹침 경고')).toBeInTheDocument();
       expect(screen.getByText(/다음 일정과 겹칩니다/)).toBeInTheDocument();
-      expect(screen.getByText("기존 회의 (2024-07-15 09:00-10:00)")).toBeInTheDocument();
+      expect(screen.getByText('기존 회의 (2024-07-15 09:00-10:00)')).toBeInTheDocument();
     });
 
     test('기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다', async () => {
       // 추가 일정 생성 (충돌 대상)
       events.push({
         id: 2,
-        title: "다른 회의",
-        date: "2024-07-15",
-        startTime: "08:00",
-        endTime: "09:00",
-        description: "충돌 대상 회의",
-        location: "회의실 B",
-        category: "업무",
+        title: '다른 회의',
+        date: '2024-07-15',
+        startTime: '08:00',
+        endTime: '09:00',
+        description: '충돌 대상 회의',
+        location: '회의실 B',
+        category: '업무',
         repeat: { type: 'none', interval: 0 },
         notificationTime: 10,
       });
 
-      const { user } = setup(<App/>);
+      const { user } = setup(<App />);
 
       // 기존 일정 수정 버튼 클릭
       const allEditButton = await screen.findAllByLabelText('Edit event');
@@ -385,7 +382,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       // 경고 다이얼로그 확인
       expect(await screen.findByText('일정 겹침 경고')).toBeInTheDocument();
       expect(screen.getByText(/다음 일정과 겹칩니다/)).toBeInTheDocument();
-      expect(screen.getByText("다른 회의 (2024-07-15 08:00-09:00)")).toBeInTheDocument();
+      expect(screen.getByText('다른 회의 (2024-07-15 08:00-09:00)')).toBeInTheDocument();
     });
   });
 
@@ -399,8 +396,8 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       const y = startTime.getFullYear();
       const m = fillZero(startTime.getMonth() + 1);
       const d = fillZero(startTime.getDate());
-      const fullDate = [y, m, d].join('-')
-      const title = "알림 테스트 회의";
+      const fullDate = [y, m, d].join('-');
+      const title = '알림 테스트 회의';
       const notificationTime = 10;
       const expectedMessage = `${notificationTime}분 후 ${title} 일정이 시작됩니다.`;
 
@@ -411,14 +408,14 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
         date: fullDate,
         startTime: [startTime.getHours(), startTime.getMinutes()].map(fillZero).join(':'),
         endTime: [endTime.getHours(), endTime.getMinutes()].map(fillZero).join(':'),
-        description: "알림 테스트 회의입니다.",
-        location: "회의실 A",
-        category: "업무",
+        description: '알림 테스트 회의입니다.',
+        location: '회의실 A',
+        category: '업무',
         repeat: { type: 'none', interval: 0 },
         notificationTime,
-      })
+      });
 
-      setup(<App/>);
+      setup(<App />);
 
       expect(await within(screen.getByTestId('event-list')).findByText(title)).toBeInTheDocument();
 
@@ -427,7 +424,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
       act(() => {
         vi.advanceTimersByTime(1000);
-      })
+      });
 
       // 알림이 아직 발생하지 않았는지 확인
       expect(screen.queryByText(expectedMessage)).not.toBeInTheDocument();
@@ -437,10 +434,39 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
       act(() => {
         vi.advanceTimersByTime(1000);
-      })
+      });
 
       // 알림이 발생하는지 확인
       expect(screen.getByText(expectedMessage)).toBeInTheDocument();
+    });
+  });
+
+  describe.only('반복 일정', () => {
+    test('캘린더 뷰에서 매일 반복되는 일정을 구분하여 표시할 수 있다.', async () => {
+      const { user } = setup(<App />);
+
+      vi.setSystemTime(new Date(2024, 7, 1));
+
+      events.push({
+        id: 2,
+        title: '반복 일정',
+        date: '2024-07-15',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '반복되는 일정',
+        location: '회의실 B',
+        category: '업무',
+        repeat: { type: 'daily', interval: 1 },
+        notificationTime: 0,
+      });
+
+      const monthView = screen.getByTestId('month-view');
+
+      const schedule = await within(monthView).findByText('반복 일정');
+      expect(schedule).toBeInTheDocument();
+
+      await user.hover(schedule);
+      expect(await screen.findByText('하루마다 반복')).toBeInTheDocument();
     });
   });
 });
