@@ -447,35 +447,59 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       ['weekly', '일주일마다 반복'],
       ['monthly', '한 달마다 반복'],
       ['yearly', '매년마다 반복'],
-    ])(
-      '캘린더 뷰에서 매일 반복되는 일정을 구분하여 표시할 수 있다.',
-      async (repeatType: string, expectedText: string) => {
-        const { user } = setup(<App />);
+    ])('캘린더 뷰에서 %c%s되는 일정을 구분하여 표시할 수 있다.', async (repeatType: string, expectedText: string) => {
+      const { user } = setup(<App />);
 
-        vi.setSystemTime(new Date(2024, 7, 1));
+      vi.setSystemTime(new Date(2024, 7, 1));
 
-        events.push({
-          id: 2,
-          title: '반복 일정',
-          date: '2024-07-15',
-          startTime: '10:00',
-          endTime: '11:00',
-          description: '반복되는 일정',
-          location: '회의실 B',
-          category: '업무',
-          repeat: { type: repeatType as RepeatType, interval: 1 },
-          notificationTime: 0,
-        });
+      events.push({
+        id: 2,
+        title: '반복 일정',
+        date: '2024-07-15',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '반복되는 일정',
+        location: '회의실 B',
+        category: '업무',
+        repeat: { type: repeatType as RepeatType, interval: 1 },
+        notificationTime: 0,
+      });
 
-        const monthView = screen.getByTestId('month-view');
+      const monthView = screen.getByTestId('month-view');
 
-        const schedule = await within(monthView).findByText('반복 일정');
-        expect(schedule).toBeInTheDocument();
+      const schedule = await within(monthView).findByText('반복 일정');
+      expect(schedule).toBeInTheDocument();
 
-        // tooltip 형태로 반복 타입이 표시되는지 확인
-        await user.hover(schedule);
-        expect(await screen.findByText(expectedText)).toBeInTheDocument();
-      }
-    );
+      // tooltip 형태로 반복 타입이 표시되는지 확인
+      await user.hover(schedule);
+      expect(await screen.findByText(expectedText)).toBeInTheDocument();
+    });
+
+    test.fails('캘린더 뷰에서 반복되지 않는 일정은 표시되지 않는다.', async () => {
+      const { user } = setup(<App />);
+
+      vi.setSystemTime(new Date(2024, 7, 1));
+
+      events.push({
+        id: 2,
+        title: '그냥 일정',
+        date: '2024-07-15',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '그냥 일정',
+        location: '회의실 B',
+        category: '업무',
+        repeat: { type: 'none', interval: 0 },
+        notificationTime: 0,
+      });
+
+      const monthView = screen.getByTestId('month-view');
+
+      const schedule = await within(monthView).findByText('그냥 일정');
+      expect(schedule).toBeInTheDocument();
+
+      await user.hover(schedule);
+      expect(await screen.findByText('그냥 일정')).toBeInTheDocument();
+    });
   });
 });
