@@ -441,7 +441,138 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     });
   });
 
-  describe('반복 일정', () => {
+  describe.only('반복 간격 설정', () => {
+    // 헬퍼 함수: 일정 생성
+    const createEvent = async (user: ReturnType<typeof userEvent.setup>, eventData: Partial<Event>) => {
+      // await user.click(screen.getAllByText('일정 추가')[0]);
+
+      // 기본 일정 정보 입력
+      await user.type(screen.getByLabelText('제목'), eventData.title || '');
+      await user.type(screen.getByLabelText('날짜'), eventData.date || '');
+      await user.type(screen.getByLabelText('시작 시간'), eventData.startTime || '');
+      await user.type(screen.getByLabelText('종료 시간'), eventData.endTime || '');
+      await user.type(screen.getByLabelText('설명'), eventData.description || '');
+      await user.type(screen.getByLabelText('위치'), eventData.location || '');
+      await user.selectOptions(screen.getByLabelText('카테고리'), eventData.category || '');
+
+      // 반복 설정
+      if (eventData.repeat) {
+        const repeatCheckbox = screen.getByLabelText('반복 설정');
+
+        if (!(repeatCheckbox as HTMLInputElement).checked) {
+          await user.click(repeatCheckbox);
+        }
+        await user.selectOptions(screen.getByLabelText('반복 유형'), eventData.repeat.type);
+        await user.type(screen.getByLabelText('반복 간격'), eventData.repeat.interval.toString());
+      }
+
+      // 저장 버튼 클릭
+      await user.click(screen.getByTestId('event-submit-button'));
+    };
+
+    // 테스트 데이터
+    const baseEventData = {
+      title: '새 회의',
+      date: '2024-07-20',
+      startTime: '14:00',
+      endTime: '15:00',
+      description: '프로젝트 진행 상황 논의',
+      location: '회의실 A',
+      category: '업무',
+    };
+
+    test.only('반복 간격을 1일로 설정할 수 있다.', async () => {
+      const { user } = setup(<App />);
+
+      await createEvent(user, { ...baseEventData, repeat: { type: 'daily', interval: 1 } });
+
+      const eventList = screen.getByTestId('event-list');
+      expect(eventList).toHaveTextContent('새 회의');
+      expect(eventList).toHaveTextContent('2024-07-20');
+      expect(eventList).toHaveTextContent('14:00 - 15:00');
+      expect(eventList).toHaveTextContent('프로젝트 진행 상황 논의');
+      expect(eventList).toHaveTextContent('회의실 A');
+      expect(eventList).toHaveTextContent('업무');
+      expect(eventList).toHaveTextContent('1일마다');
+    });
+
+    test('반복 간격을 2일로 설정할 수 있다.', async () => {
+      const { user } = setup(<App />);
+
+      await createEvent(user, { ...baseEventData, repeat: { type: 'daily', interval: 2 } });
+
+      const eventList = screen.getByTestId('event-list');
+      expect(eventList).toHaveTextContent('새 회의');
+      expect(eventList).toHaveTextContent('2024-07-20');
+      expect(eventList).toHaveTextContent('14:00 - 15:00');
+      expect(eventList).toHaveTextContent('프로젝트 진행 상황 논의');
+      expect(eventList).toHaveTextContent('회의실 A');
+      expect(eventList).toHaveTextContent('업무');
+      expect(eventList).toHaveTextContent('2일마다');
+    });
+
+    test('반복 간격을 1주로 설정할 수 있다.', async () => {
+      const { user } = setup(<App />);
+
+      await createEvent(user, { ...baseEventData, repeat: { type: 'weekly', interval: 1 } });
+
+      const eventList = screen.getByTestId('event-list');
+      expect(eventList).toHaveTextContent('새 회의');
+      expect(eventList).toHaveTextContent('2024-07-20');
+      expect(eventList).toHaveTextContent('14:00 - 15:00');
+      expect(eventList).toHaveTextContent('프로젝트 진행 상황 논의');
+      expect(eventList).toHaveTextContent('회의실 A');
+      expect(eventList).toHaveTextContent('업무');
+      expect(eventList).toHaveTextContent('1주마다');
+    });
+
+    test('반복 간격을 2주로 설정할 수 있다.', async () => {
+      const { user } = setup(<App />);
+
+      await createEvent(user, { ...baseEventData, repeat: { type: 'weekly', interval: 2 } });
+
+      const eventList = screen.getByTestId('event-list');
+      expect(eventList).toHaveTextContent('새 회의');
+      expect(eventList).toHaveTextContent('2024-07-20');
+      expect(eventList).toHaveTextContent('14:00 - 15:00');
+      expect(eventList).toHaveTextContent('프로젝트 진행 상황 논의');
+      expect(eventList).toHaveTextContent('회의실 A');
+      expect(eventList).toHaveTextContent('업무');
+      expect(eventList).toHaveTextContent('2주마다');
+    });
+
+    test('반복 간격을 한 달로 설정할 수 있다.', async () => {
+      const { user } = setup(<App />);
+
+      await createEvent(user, { ...baseEventData, repeat: { type: 'monthly', interval: 1 } });
+
+      const eventList = screen.getByTestId('event-list');
+      expect(eventList).toHaveTextContent('새 회의');
+      expect(eventList).toHaveTextContent('2024-07-20');
+      expect(eventList).toHaveTextContent('14:00 - 15:00');
+      expect(eventList).toHaveTextContent('프로젝트 진행 상황 논의');
+      expect(eventList).toHaveTextContent('회의실 A');
+      expect(eventList).toHaveTextContent('업무');
+      expect(eventList).toHaveTextContent('1월마다');
+    });
+
+    test('반복 간격을 2달로 설정할 수 있다.', async () => {
+      const { user } = setup(<App />);
+
+      await createEvent(user, { ...baseEventData, repeat: { type: 'monthly', interval: 2 } });
+
+      const eventList = screen.getByTestId('event-list');
+      expect(eventList).toHaveTextContent('새 회의');
+      expect(eventList).toHaveTextContent('2024-07-20');
+      expect(eventList).toHaveTextContent('14:00 - 15:00');
+      expect(eventList).toHaveTextContent('프로젝트 진행 상황 논의');
+      expect(eventList).toHaveTextContent('회의실 A');
+      expect(eventList).toHaveTextContent('업무');
+      expect(eventList).toHaveTextContent('2월마다');
+    });
+  });
+
+  describe('반복 일정 표시 기능', () => {
     test.each([
       ['daily', '하루마다 반복'],
       ['weekly', '일주일마다 반복'],
