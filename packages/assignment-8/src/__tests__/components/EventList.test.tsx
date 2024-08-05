@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import EventList from '../../components/EventList';
 import { SchedulerContextType } from '../../contexts/SchedulerContext';
-import { CalendarView, EventFormData } from '../../types';
+import { EventFormData } from '../../types';
 
 // SchedulerContext를 모의(mock)
 vi.mock('../../contexts/SchedulerContext', async () => {
@@ -81,6 +81,7 @@ vi.mock('../../contexts/SchedulerContext', async () => {
           ],
           loading: false,
           error: null,
+          setEvents: vi.fn(() => {}),
           fetchEvents: vi.fn(async () => {}),
           addEvent: vi.fn(async () => {}),
           updateEvent: vi.fn(async () => {}),

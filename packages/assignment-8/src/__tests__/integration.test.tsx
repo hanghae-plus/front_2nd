@@ -476,7 +476,6 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
       // 시스템 시간을 이벤트 시작 10분 전으로 설정
       vi.setSystemTime(tenMinutesBefore);
-      console.log(event6.date, event6.startTime, tenMinutesBefore, new Date());
     });
 
     test('일정 알림을 설정하고 지정된 시간에 알림이 발생하는지 확인한다', async () => {

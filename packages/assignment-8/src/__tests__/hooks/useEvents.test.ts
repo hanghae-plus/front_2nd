@@ -50,8 +50,12 @@ describe('useEvents', () => {
       endTime: '19:00',
       category: '개인',
       location: '헬스장',
-      isRepeating: false,
       notificationTime: 5,
+      repeat: {
+        isRepeating: false,
+        type: 'none',
+        interval: 1,
+      },
     };
 
     const convertedData = convertFormDataToEvent(newEventFormData);
@@ -87,9 +91,8 @@ describe('useEvents', () => {
       description: '주간 팀 미팅',
       location: '회의실 B',
       category: '업무',
-      repeat: { type: 'weekly', interval: 1 },
+      repeat: { isRepeating: true, type: 'weekly', interval: 1 },
       notificationTime: 1,
-      isRepeating: true,
     };
 
     const convertedData = convertFormDataToEvent(updatedEventFormData);

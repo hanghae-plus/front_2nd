@@ -57,11 +57,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T> {
 
 export interface EventFormData extends Omit<Event, 'id' | 'repeat'> {
   id?: number;
-  repeat?: RepeatInfo;
-  isRepeating: boolean;
-  repeatType?: RepeatType;
-  repeatInterval?: number;
-  repeatEndDate?: string;
+  repeat: RepeatInfo & { isRepeating: boolean };
 }
 
 export interface CalendarState {

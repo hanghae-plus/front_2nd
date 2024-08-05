@@ -101,9 +101,11 @@ export function convertFormDataToEvent(formData: EventFormData): Event {
     category: formData.category,
     location: formData.location,
     repeat: {
-      type: formData.isRepeating ? formData.repeatType || 'none' : 'none',
-      interval: formData.repeatInterval || 1,
-      endDate: formData.repeatEndDate,
+      type: formData.repeat.isRepeating
+        ? formData.repeat.type || 'none'
+        : 'none',
+      interval: formData.repeat.interval || 1,
+      endDate: formData.repeat.endDate,
     },
     notificationTime: formData.notificationTime,
   };

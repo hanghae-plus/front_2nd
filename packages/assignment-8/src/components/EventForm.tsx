@@ -158,21 +158,21 @@ function EventForm() {
       <FormControl>
         <FormLabel>반복 설정</FormLabel>
         <Checkbox
-          name='isRepeating'
-          isChecked={event.repeat?.type !== 'none'}
+          name='repeat.isRepeating'
+          isChecked={event.repeat.isRepeating}
           onChange={handleCheckboxChange}
         >
           반복 일정
         </Checkbox>
       </FormControl>
 
-      {event.repeat?.type !== 'none' && (
+      {event.repeat.isRepeating && (
         <VStack width='100%'>
           <FormControl>
             <FormLabel>반복 유형</FormLabel>
             <Select
-              name='repeatType'
-              value={event.repeat?.type}
+              name='repeat.type'
+              value={event.repeat.type}
               onChange={handleInputChange}
             >
               <option value='daily'>매일</option>
@@ -186,8 +186,8 @@ function EventForm() {
               <FormLabel>반복 간격</FormLabel>
               <Input
                 type='number'
-                name='repeatInterval'
-                value={event.repeat?.interval}
+                name='repeat.interval'
+                value={event.repeat.interval}
                 onChange={handleInputChange}
                 min={1}
               />
@@ -196,7 +196,7 @@ function EventForm() {
               <FormLabel>반복 종료일</FormLabel>
               <Input
                 type='date'
-                name='repeatEndDate'
+                name='repeat.endDate'
                 value={event.repeat?.endDate || ''}
                 onChange={handleInputChange}
               />

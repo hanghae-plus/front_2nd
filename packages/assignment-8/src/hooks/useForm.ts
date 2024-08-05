@@ -19,18 +19,17 @@ export function useForm(initialEvent?: EventFormData) {
       endTime: '',
       category: '개인',
       location: '',
-      repeat: { type: 'none' as const, interval: 1 },
+      repeat: { isRepeating: false, type: 'none' as const, interval: 1 },
       notificationTime: 0,
-      isRepeating: false,
-      repeatType: 'none' as const,
-      repeatInterval: 1,
       repeatEndDate: '',
     } as EventFormData;
 
     return form;
   };
 
-  const [event, setEvent] = useState<EventFormData>(initialEvent || createForm());
+  const [event, setEvent] = useState<EventFormData>(
+    initialEvent || createForm()
+  );
   const [errors, setErrors] = useState<FormErrors>({});
 
   const validateTime = (start: string, end: string) => {
@@ -54,9 +53,23 @@ export function useForm(initialEvent?: EventFormData) {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setEvent((prev) => ({ ...prev, [name]: value }));
+    setEvent((prev) => {
+      if (name.startsWith('repeat.')) {
+        const repeatField = name.split('.')[1];
+        return {
+          ...prev,
+          repeat: {
+            ...prev.repeat,
+            [repeatField]: value,
+          },
+        };
+      }
+      return { ...prev, [name]: value };
+    });
 
     if (name === 'startTime' || name === 'endTime') {
       validateTime(
@@ -68,17 +81,13 @@ export function useForm(initialEvent?: EventFormData) {
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    if (name === 'isRepeating') {
-      setEvent((prev) => ({
-        ...prev,
-        repeat: {
-          type: checked ? ('daily' as RepeatType) : ('none' as RepeatType),
-          interval: 1,
-        },
-      }));
-    } else {
-      setEvent((prev) => ({ ...prev, [name]: checked }));
-    }
+    setEvent((prev) => ({
+      ...prev,
+      repeat: {
+        ...prev.repeat,
+        isRepeating: checked,
+      },
+    }));
   };
 
   const validateForm = () => {
@@ -121,7 +130,10 @@ export function useForm(initialEvent?: EventFormData) {
   const editEvent = (eventToEdit: Event) => {
     setEvent({
       ...eventToEdit,
-      isRepeating: eventToEdit.repeat.type !== 'none',
+      repeat: {
+        isRepeating: eventToEdit.repeat.type !== 'none',
+        ...eventToEdit.repeat,
+      },
     });
   };
 
