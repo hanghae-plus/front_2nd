@@ -1,12 +1,7 @@
-import express from 'express';
+import { http, HttpResponse } from 'msw';
+import { Event } from './types';
 
-const app = express();
-const port = 3000;
-
-app.use(express.json());
-
-// 메모리에 데이터 저장
-let events = [
+let initialEvents: Event[] = [
   {
     id: 1,
     title: '팀 회의',
@@ -80,11 +75,11 @@ let events = [
       const startTime = new Date(now.getTime() + 5 * 60000); // 5분 후
       const endTime = new Date(startTime.getTime() + 60 * 60000); // 시작시간으로부터 1시간 후
 
-      const formatDate = (date) => {
+      const formatDate = (date: Date) => {
         return date.toISOString().split('T')[0];
       };
 
-      const formatTime = (date) => {
+      const formatTime = (date: Date) => {
         return date.toTimeString().split(' ')[0].substring(0, 5);
       };
 
@@ -97,41 +92,37 @@ let events = [
   },
 ];
 
-// 일정 조회
-app.get('/api/events', (req, res) => {
-  res.json(events);
-});
+export let events: Event[] = [...initialEvents];
 
-// 일정 추가
-app.post('/api/events', (req, res) => {
-  const newEvent = {
-    id: Date.now(),
-    ...req.body,
-  };
-  events.push(newEvent);
-  res.status(201).json(newEvent);
-});
+export const resetEvents = () => {
+  events = [...initialEvents];
+};
 
-// 일정 수정
-app.put('/api/events/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const eventIndex = events.findIndex((event) => event.id === id);
-  if (eventIndex > -1) {
-    events[eventIndex] = { ...events[eventIndex], ...req.body };
-    res.json(events[eventIndex]);
-  } else {
-    res.status(404).send('Event not found');
-  }
-});
+export const mockApiHandlers = [
+  // 일정 조회
+  http.get('/api/events', () => {
+    return HttpResponse.json(events);
+  }),
 
-// 일정 삭제
-app.delete('/api/events/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  events = events.filter((event) => event.id !== id);
-  res.status(204).send();
-});
+  // 일정 추가
+  http.post('/api/events', async ({ request }) => {
+    const newEvent = (await request.json()) as Event;
+    events.push(newEvent);
+    return HttpResponse.json(newEvent, { status: 201 });
+  }),
 
-// 서버 시작
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+  http.put('/api/events/:id', async ({ params, request }) => {
+    const { id } = params;
+    const updates = (await request.json()) as Record<string, unknown>;
+    events = events.map((event) =>
+      event.id === Number(id) ? { ...event, ...updates } : event
+    );
+    return HttpResponse.json(events.find((event) => event.id === Number(id)));
+  }),
+
+  http.delete('/api/events/:id', ({ params }) => {
+    const { id } = params;
+    events = events.filter((event) => event.id !== Number(id));
+    return new HttpResponse(null, { status: 204 });
+  }),
+];
