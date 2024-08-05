@@ -441,7 +441,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     });
   });
 
-  describe.only('반복 간격 설정', () => {
+  describe('반복 간격 설정', () => {
     // 헬퍼 함수: 일정 생성
     const createEvent = async (user: ReturnType<typeof userEvent.setup>, eventData: Partial<Event>) => {
       // await user.click(screen.getAllByText('일정 추가')[0]);
@@ -481,7 +481,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       category: '업무',
     };
 
-    test.only('반복 간격을 1일로 설정할 수 있다.', async () => {
+    test('반복 간격을 1일로 설정할 수 있다.', async () => {
       const { user } = setup(<App />);
 
       await createEvent(user, { ...baseEventData, repeat: { type: 'daily', interval: 1 } });
