@@ -539,4 +539,63 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       expect(titleElements.length).toBeGreaterThan(0);
     });
   });
+
+  describe("반복 일정 테스트", () => {
+    test("반복 일정을 등록한다.", async () => {
+      // 기본 요구사항
+      // 1. 사용자 김항해는 매주 월요일 오전 10시에 있는 팀 회의를 캘린더에 등록하려고 한다.
+      // 2. 김항해는 새 일정 추가 버튼을 클릭하고 다음과 같이 정보를 입력한다:
+      //     - 제목: "주간 팀 회의"
+      //     - 날짜: 2024년 7월 1일 (월요일)
+      //     - 시작 시간: 오전 10:00
+      //     - 종료 시간: 오전 11:00
+      //     - 위치: "회의실 A"
+      //     - 설명: "주간 업무 보고 및 계획 수립"
+      // 3. 반복 설정에서 "매주"를 선택하고, 반복 간격을 1주로 설정한다.
+      // 4. 알림 설정을 "10분 전"으로 선택한다.
+      // 5. 일정을 저장하면, 캘린더에 2024년 7월 1일부터 반복 간격으로 해당 회의가 표시된다.
+      const { user } = setup(<App />);
+
+      await fillInputElement(
+        screen.getByLabelText("제목"),
+        user,
+        "주간 팀 회의"
+      );
+
+      await fillInputElement(screen.getByLabelText("날짜"), user, "2024-07-01");
+
+      await fillInputElement(screen.getByLabelText("시작 시간"), user, "10:00");
+
+      await fillInputElement(screen.getByLabelText("종료 시간"), user, "11:00");
+
+      await fillInputElement(screen.getByLabelText("위치"), user, "회의실 A");
+
+      await fillInputElement(
+        screen.getByLabelText("설명"),
+        user,
+        "주간 업무 보고 및 계획 수립"
+      );
+
+      const repeatTypeSelectBox = screen.getByLabelText("반복 설정");
+      await user.selectOptions(repeatTypeSelectBox, "매주");
+
+      /**
+       * 간격 설정은 무한대로 받을 수 있으니 Input으로?
+       * 일,주,월,년 단위가 될 수 있기 때문에 숫자로만 받기
+       */
+      await fillInputElement(screen.getByLabelText("반복 간격"), user, "1");
+
+      const alarmSelectBox = screen.getByLabelText("알림 설정");
+      await user.selectOptions(alarmSelectBox, "10분전");
+
+      const submitButton = screen.getByTestId("event-submit-button");
+      await user.click(submitButton);
+
+      // 설정한 간격대로 일정이 화면에 보이게 된다.
+      const repeatEvent = screen.getAllByRole("paragraph", {
+        name: "주간 팀 회의",
+      });
+      expect(repeatEvent).toBeInTheDocument();
+    });
+  });
 });
