@@ -441,7 +441,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     });
   });
 
-  describe.only('반복 일정', () => {
+  describe('반복 일정', () => {
     test.each([
       ['daily', '하루마다 반복'],
       ['weekly', '일주일마다 반복'],
