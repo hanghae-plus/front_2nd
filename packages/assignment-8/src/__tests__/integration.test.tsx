@@ -574,10 +574,10 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
   describe('반복 일정 표시 기능', () => {
     test.each([
-      ['daily', '하루마다 반복'],
-      ['weekly', '일주일마다 반복'],
-      ['monthly', '한 달마다 반복'],
-      ['yearly', '매년마다 반복'],
+      ['daily', '1일마다 반복'],
+      ['weekly', '1주마다 반복'],
+      ['monthly', '1월마다 반복'],
+      ['yearly', '1년마다 반복'],
     ])('캘린더 뷰에서 %c%s되는 일정을 구분하여 표시할 수 있다.', async (repeatType: string, expectedText: string) => {
       const { user } = setup(<App />);
 
