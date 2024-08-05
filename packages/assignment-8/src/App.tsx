@@ -181,7 +181,7 @@ function App() {
                     .map((event) => {
                       const isNotified = notifiedEvents.includes(event.id);
                       return (
-                        <Tooltip label={getRepeatTypeText(event.repeat.type)} placement={'top'}>
+                        <Tooltip label={getRepeatTypeText(event.repeat.type, event.repeat.interval)} placement={'top'}>
                           <Box
                             key={event.id}
                             p={1}
@@ -246,7 +246,10 @@ function App() {
                           {getEventsForDay(filteredEvents, day).map((event) => {
                             const isNotified = notifiedEvents.includes(event.id);
                             return (
-                              <Tooltip label={getRepeatTypeText(event.repeat.type)} placement={'top'}>
+                              <Tooltip
+                                label={getRepeatTypeText(event.repeat.type, event.repeat.interval)}
+                                placement={'top'}
+                              >
                                 <Box
                                   key={event.id}
                                   p={1}

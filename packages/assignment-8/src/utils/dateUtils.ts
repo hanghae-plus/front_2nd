@@ -55,18 +55,18 @@ export function getEventsForDay(events: Event[], date: number): Event[] {
   return events.filter((event) => new Date(event.date).getDate() === date);
 }
 
-export function getRepeatTypeText(repeatType: RepeatType): string {
+export function getRepeatTypeText(repeatType: RepeatType, interval: number): string {
   switch (repeatType) {
     case 'none':
       return '';
     case 'daily':
-      return '하루마다 반복';
+      return `${interval}일마다 반복`;
     case 'weekly':
-      return '일주일마다 반복';
+      return `${interval}주마다 반복`;
     case 'monthly':
-      return '한 달마다 반복';
+      return `${interval}월마다 반복`;
     case 'yearly':
-      return '매년마다 반복';
+      return `${interval}년마다 반복`;
     default:
       return '알 수 없는 반복 유형';
   }
