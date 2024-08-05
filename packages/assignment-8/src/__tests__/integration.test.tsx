@@ -570,6 +570,14 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       expect(eventList).toHaveTextContent('업무');
       expect(eventList).toHaveTextContent('2월마다');
     });
+
+    test('반복 간격이 0인 경우 에러 메시지가 표시된다.', async () => {
+      const { user } = setup(<App />);
+
+      await createEvent(user, { ...baseEventData, repeat: { type: 'daily', interval: 0 } });
+
+      expect(await screen.findByText('반복 간격은 1 이상이어야 합니다.')).toBeInTheDocument();
+    });
   });
 
   describe('반복 일정 표시 기능', () => {
