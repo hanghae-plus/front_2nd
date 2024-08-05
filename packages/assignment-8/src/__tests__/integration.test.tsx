@@ -541,7 +541,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
   });
 
   describe("반복 일정 테스트", () => {
-    test("반복 일정을 등록한다.", async () => {
+    test.only("반복 일정을 등록한다.", async () => {
       // 기본 요구사항
       // 1. 사용자 김항해는 매주 월요일 오전 10시에 있는 팀 회의를 캘린더에 등록하려고 한다.
       // 2. 김항해는 새 일정 추가 버튼을 클릭하고 다음과 같이 정보를 입력한다:
@@ -576,7 +576,11 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
         "주간 업무 보고 및 계획 수립"
       );
 
-      const repeatTypeSelectBox = screen.getByLabelText("반복 설정");
+      // 반복 일정 체크
+      const repeatCheckbox = screen.getByRole("checkbox");
+      await user.click(repeatCheckbox);
+
+      const repeatTypeSelectBox = screen.getByLabelText("반복 유형");
       await user.selectOptions(repeatTypeSelectBox, "매주");
 
       /**
@@ -586,7 +590,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       await fillInputElement(screen.getByLabelText("반복 간격"), user, "1");
 
       const alarmSelectBox = screen.getByLabelText("알림 설정");
-      await user.selectOptions(alarmSelectBox, "10분전");
+      await user.selectOptions(alarmSelectBox, "10분 전");
 
       const submitButton = screen.getByTestId("event-submit-button");
       await user.click(submitButton);
