@@ -3,15 +3,15 @@ import { useRef, useState } from 'react';
 import { useToast } from '@chakra-ui/react';
 import { Event, ViewType } from '../types';
 import { findOverlappingEvents, getWeekDates } from '../utils';
-import UseEventForm from './useEventForm';
-import UseFetchEvents from './useFetchEvents';
-import UseNotification from './useNotificaiton';
+import useEventForm from './useEventForm';
+import useFetchEvents from './useFetchEvents';
+import useNotification from './useNotificaiton';
 
 function useEvents() {
-  const formState = UseEventForm();
-  const { events, fetchEvents } = UseFetchEvents();
+  const formState = useEventForm();
+  const { events, fetchEvents } = useFetchEvents();
   const toast = useToast();
-  const notificationsState = UseNotification(events);
+  const notificationsState = useNotification(events);
 
   const [view, setView] = useState<ViewType>('month');
   const [isOverlapDialogOpen, setIsOverlapDialogOpen] = useState(false);

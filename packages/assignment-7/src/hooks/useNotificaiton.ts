@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Event } from '../types';
 import { useInterval } from '@chakra-ui/react';
 
-function UseNotification(events: Event[]) {
+function useNotification(events: Event[]) {
   const [notifications, setNotifications] = useState<
     { id: number; message: string }[]
   >([]);
@@ -46,4 +46,4 @@ function UseNotification(events: Event[]) {
   };
 }
 
-export default UseNotification;
+export default useNotification;

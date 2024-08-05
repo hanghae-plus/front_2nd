@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function UseValidation() {
+function useValidation() {
   const [startTimeError, setStartTimeError] = useState<string | null>(null);
   const [endTimeError, setEndTimeError] = useState<string | null>(null);
 
@@ -27,4 +27,4 @@ function UseValidation() {
   };
 }
 
-export default UseValidation;
+export default useValidation;

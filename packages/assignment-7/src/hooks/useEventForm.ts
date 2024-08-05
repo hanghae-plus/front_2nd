@@ -1,9 +1,9 @@
 import { ChangeEvent, useState } from 'react';
 import { Event, RepeatType } from '../types';
 import { resetFormState } from '../utils';
-import UseValidation from './useValidation';
+import useValidation from './useValidation';
 
-function UseEventForm() {
+function useEventForm() {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -24,7 +24,7 @@ function UseEventForm() {
     setStartTimeError,
     setEndTimeError,
     validateTime,
-  } = UseValidation();
+  } = useValidation();
 
   const resetForm = () => {
     resetFormState([
@@ -110,4 +110,4 @@ function UseEventForm() {
   };
 }
 
-export default UseEventForm;
+export default useEventForm;

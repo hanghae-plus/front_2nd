@@ -3,7 +3,7 @@ import { DUMMY_EVENTS } from '../dummys';
 import { Event } from '../types';
 import { useToast } from '@chakra-ui/react';
 
-function UseFetchEvents() {
+function useFetchEvents() {
   const [events, setEvents] = useState<Event[]>(DUMMY_EVENTS);
   const toast = useToast();
 
@@ -33,4 +33,4 @@ function UseFetchEvents() {
   return { events, setEvents, fetchEvents };
 }
 
-export default UseFetchEvents;
+export default useFetchEvents;

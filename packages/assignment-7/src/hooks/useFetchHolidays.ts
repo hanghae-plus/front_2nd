@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-function UseFetchHolidays(currentDate: Date) {
+function useFetchHolidays(currentDate: Date) {
   const [holidays, setHolidays] = useState<{ [key: string]: string }>({});
 
   const fetchHolidays = async (year: number, month: number) => {
@@ -25,4 +25,4 @@ function UseFetchHolidays(currentDate: Date) {
   return holidays;
 }
 
-export default UseFetchHolidays;
+export default useFetchHolidays;

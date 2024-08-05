@@ -1,6 +1,6 @@
 import EventManager from './components/EventManager';
 import useEvents from './hooks/useEvents';
-import UseFetchHolidays from './hooks/useFetchHolidays';
+import useFetchHolidays from './hooks/useFetchHolidays';
 
 function App() {
   const {
@@ -17,7 +17,7 @@ function App() {
     filteredEvents,
   } = useEvents();
 
-  const holidays = UseFetchHolidays(currentDateState.currentDate);
+  const holidays = useFetchHolidays(currentDateState.currentDate);
 
   return (
     <EventManager
