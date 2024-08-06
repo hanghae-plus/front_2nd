@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { Event, RepeatType } from "../../../types/types";
+import { Event, RepeatType } from "../../../../types/types";
 
 export const useEventForm = (editingEvent: Event | null) => {
   const [eventFormValue, setEventFormValue] = useState({

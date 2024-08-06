@@ -84,12 +84,19 @@ export const handlers = [
   }),
 
   http.post("/api/events", async ({ request }) => {
-    const body = (await request.json()) as Event;
+    const body = (await request.json()) as Event | Event[];
 
-    const newEvent: Event = {
-      ...body,
-    };
-    events.push(newEvent);
+    let newEvent: Event | Event[];
+
+    if (Array.isArray(body)) {
+      newEvent = [...body];
+      events.push(...newEvent);
+    } else {
+      newEvent = {
+        ...body,
+      };
+      events.push(newEvent);
+    }
 
     return HttpResponse.json(newEvent, { status: 201 });
   }),

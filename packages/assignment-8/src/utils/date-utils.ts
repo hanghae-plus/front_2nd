@@ -1,4 +1,4 @@
-import { Event } from "../App";
+import { Event } from "../types/types";
 
 /**
  * 특정 년도와 달을 통해 일수를 얻는 함수
@@ -102,14 +102,14 @@ const findOverlappingEvents = (oldEvent: Event[], newEvent: Event): Event[] => {
 
 /**
  * 이벤트 검색 함수
- * @param events
+ * @param repeatEvents
  * @param term
  * @returns
  */
-const searchEvents = (events: Event[], term: string) => {
-  if (!term.trim()) return events;
+const searchEvents = (repeatEvents: Event[], term: string) => {
+  if (!term.trim()) return repeatEvents;
 
-  return events.filter(
+  return repeatEvents.filter(
     (event) =>
       event.title.toLowerCase().includes(term.toLowerCase()) ||
       event.description.toLowerCase().includes(term.toLowerCase()) ||
@@ -128,6 +128,57 @@ const isDateInRange = (date: Date, startDate: Date, endDate: Date): boolean => {
   return date >= startDate && date <= endDate;
 };
 
+/**
+ * 주어진 일정과 반복 정보(반복 유형, 반복 주기)로 반복 일정을 생성하는 함수
+ * @param event
+ * @returns
+ */
+const getRepeatEvents = (event: Event) => {
+  const { type, interval, endDate } = event.repeat;
+
+  const repeatEvents = [];
+  if (type === "none" || !interval) {
+    return [];
+  }
+  const startDate = new Date(event.date);
+
+  // 끝나는 날이 정의되지 않았다면, 그 해까지로 지정한다.
+  const newEndDate = endDate
+    ? new Date(endDate)
+    : new Date(new Date(startDate.getFullYear(), 11, 31));
+
+  let tempId = 0;
+
+  for (let currentDate = new Date(startDate); currentDate <= newEndDate; ) {
+    const newEvent = {
+      ...event,
+      id: event.id + tempId,
+      date: currentDate.toISOString().split("T")[0],
+    };
+
+    repeatEvents.push(newEvent);
+
+    // 다음 날짜 계산하기
+    switch (type) {
+      case "daily":
+        currentDate.setDate(currentDate.getDate() + interval);
+        break;
+      case "weekly":
+        currentDate.setDate(currentDate.getDate() + 7 * interval);
+        break;
+      case "monthly":
+        currentDate.setMonth(currentDate.getMonth() + interval);
+        break;
+      case "yearly":
+        currentDate.setFullYear(currentDate.getFullYear() + interval);
+        break;
+    }
+    tempId++;
+  }
+
+  return repeatEvents;
+};
+
 export {
   getDaysInMonth,
   getWeekDates,
@@ -139,4 +190,5 @@ export {
   findOverlappingEvents,
   searchEvents,
   isDateInRange,
+  getRepeatEvents,
 };

@@ -22,7 +22,10 @@ import { useEffect, useRef, useState } from "react";
 import { useEventForm } from "./hooks/useEventForm";
 import { useSaveEvent } from "../hooks/useSaveEvent";
 import { Event, RepeatType } from "../../../types/types";
-import { findOverlappingEvents } from "../../../utils/date-utils";
+import {
+  findOverlappingEvents,
+  getRepeatEvents,
+} from "../../../utils/date-utils";
 import { useClosure } from "../hooks/useClosure";
 
 const categories = ["업무", "개인", "가족", "기타"];
@@ -43,6 +46,7 @@ interface EventFormProps {
 
 const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
   // 수정 및 삭제 관심사
+
   const { saveEvent } = useSaveEvent(fetchEvents);
 
   // 수정하기 관심사
@@ -120,6 +124,13 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
       },
       notificationTime,
     };
+
+    const newRepeatEvents = getRepeatEvents(eventData);
+
+    if (newRepeatEvents.length > 1) {
+      await saveEvent(newRepeatEvents);
+      return;
+    }
 
     const overlapping = findOverlappingEvents(events, eventData);
 
