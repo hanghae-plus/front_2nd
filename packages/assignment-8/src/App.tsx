@@ -328,6 +328,7 @@ function App() {
 
   const editEvent = (event: Event) => {
     setFormData(event);
+    setEditingEvent(event);
   };
 
   const navigate = (direction: 'prev' | 'next') => {
