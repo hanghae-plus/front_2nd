@@ -103,6 +103,7 @@ export const MonthView = ({
                             return (
                               <ViewBox
                                 key={`${event.id}-${event.date}-${event.title}`}
+                                data-testid={`event-month-view-${event.id}`}
                                 isNotified={isNotified}
                                 title={event.title}
                               />
