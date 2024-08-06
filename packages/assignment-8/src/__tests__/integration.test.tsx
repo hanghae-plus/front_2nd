@@ -535,7 +535,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     // 3. 반복 설정에서 "매주"를 선택하고, 반복 간격을 1주로 설정한다.
     // 4. 알림 설정을 "10분 전"으로 선택한다.
     // 5. 일정을 저장하면, 캘린더에 2024년 7월 1일부터 반복 간격으로 해당 회의가 표시된다.
-    test.only("반복 일정을 등록하며, 일정에 나타나는지 확인한다.", async () => {
+    test("반복 일정을 등록하며, 일정에 나타나는지 확인한다.", async () => {
       vi.setSystemTime(new Date("2024-09-01"));
       const { user } = setup(<App />);
 
@@ -583,7 +583,6 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       // 9월 2일부터 일주일 마다 등록하게 되면 2,9,16,23,30일 등록이된다.
       // 결과적으로 4개가 등록되는지 확인한다. 리스트 쪽까지 총 10개.
 
-      // const find = screen.getByRole("paragraph");
       expect((await screen.findAllByText("주간 팀 회의")).length).toBe(10);
     });
 
@@ -629,21 +628,18 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const alarmSelectBox = screen.getByLabelText("알림 설정");
       await user.selectOptions(alarmSelectBox, "10분 전");
 
-      // 반복 종료 날짜 체크
-      const repeatEndCheckbox = screen.getByRole("checkbox", {
-        name: "반복 종료 지정",
-      });
-      await user.click(repeatEndCheckbox);
-
       await fillInputElement(
-        screen.getByLabelText("반복 종료 날짜"),
+        screen.getByLabelText("반복 종료일"),
         user,
         "2024-12-16"
       );
 
+      const submitButton = screen.getByTestId("event-submit-button");
+      await user.click(submitButton);
+
       // 2024-12-16 까지 등록되는지 확인해야함.
-      // 2024년 12월은 월요일이 2,9,16일 3개이므로 일정은 3개가 나와야함.
-      expect(screen.queryAllByText("주간 팀 회의").length).toBe(3);
+      // 2024년 12월은 월요일이 2,9,16일 3개이므로 일정은 총 6개(목록까지)가 나와야함.
+      expect(screen.queryAllByText("주간 팀 회의").length).toBe(6);
     });
   });
 });
