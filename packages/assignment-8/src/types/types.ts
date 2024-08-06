@@ -23,3 +23,5 @@ export type Notification = {
   id: number;
   message: string;
 };
+
+export type View = 'month' | 'week';
