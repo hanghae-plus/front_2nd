@@ -25,7 +25,6 @@ export const mockApiHandlers = [
         // 배열일때
         if(checkType(newEvent) === 'Array'){
             for(const event of newEvent){
-                console.log(event)
                 event.id = new Date().getTime();
                 mockEvents.push(event);
                 createdEvents.push(event);
