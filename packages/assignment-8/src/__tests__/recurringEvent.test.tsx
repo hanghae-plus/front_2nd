@@ -4,7 +4,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactNode } from 'react';
 import EventForm from '../components/EventForm';
-import { Event } from '../types';
+import { Event, EventFormData } from '../types';
+import { SchedulerProvider } from '../contexts/SchedulerContext';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useEvents } from '../hooks/useEvents';
 
 const setup = (component: ReactNode) => {
@@ -12,18 +14,19 @@ const setup = (component: ReactNode) => {
 
   return {
     user,
-    ...render(component),
+    ...render(<SchedulerProvider>{component}</SchedulerProvider>),
   };
 };
 
 describe('반복 일정 기능', () => {
-  describe('새 일정 생성', () => {
+  // TODO: EventForm 컴포넌트 테스트로 분리
+  describe('반복 일정 지정', () => {
     test('반복 설정을 할 수 있다', async () => {
-      setup(<EventForm />);
+      const { user } = setup(<EventForm />);
 
       // 반복 설정 체크박스 찾기 및 클릭
       const repeatCheckbox = screen.getByLabelText('반복 일정');
-      userEvent.click(repeatCheckbox);
+      user.click(repeatCheckbox);
 
       // 반복 유형 선택 확인
       const repeatTypeSelect = await screen.findByLabelText('반복 유형');
@@ -36,97 +39,70 @@ describe('반복 일정 기능', () => {
       expect(screen.getByRole('option', { name: '매년' })).toBeInTheDocument();
     });
     test('반복 간격을 설정할 수 있다', async () => {
-      render(<EventForm />);
+      const { user } = setup(<EventForm />);
 
       // 반복 설정 활성화
-      userEvent.click(screen.getByLabelText('반복 일정'));
+      const repeatCheckbox = screen.getByLabelText('반복 일정');
+      user.click(repeatCheckbox);
 
       // 반복 간격 입력 필드 확인 및 값 입력
       const intervalInput = await screen.findByLabelText('반복 간격');
-      userEvent.type(intervalInput, '2');
+      await user.clear(intervalInput);
+      await user.type(intervalInput, '2');
 
       expect(intervalInput).toHaveValue(2);
     });
   });
 
-  describe.skip('반복 일정 표시', () => {
-    const recurringEvent: Event = {
-      id: 1,
-      title: '주간 팀 회의',
-      date: '2024-07-01',
-      startTime: '10:00',
-      endTime: '11:00',
-      category: '업무',
-      description: '',
-      location: '회의실 A',
-      notificationTime: 0,
-      repeat: { type: 'weekly', interval: 1, endDate: '2024-08-31' },
-    };
+  // TODO: useEvents 훅 테스트로 분리
+  describe('반복 일정 생성', () => {
+    test('반복 일정이 올바르게 생성되고 저장된다', async () => {
+      const { result } = renderHook(() => useEvents());
 
-    // beforeEach(() => {
-    //   vi.spyOn(useEvents, 'useEvents').mockReturnValue({
-    //     events: [recurringEvent],
-    //   });
-    // });
+      const newEventData: EventFormData = {
+        title: '주간 회의',
+        description: '팀 주간 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        category: '업무',
+        location: '회의실 A',
+        repeat: {
+          isRepeating: true,
+          type: 'weekly',
+          interval: 1,
+          endDate: '2024-07-29',
+        },
+        notificationTime: 15,
+      };
 
-    // const renderWithContext = (view: 'week' | 'month', currentDate: Date) => {
-    //   return render(
-    //     <CalendarProvider initialState={{ view, currentDate }}>
-    //       <CalendarView />
-    //     </CalendarProvider>
-    //   );
-    // };
+      await act(async () => {
+        await result.current.addEvent(newEventData);
+      });
 
-    // describe('월간 뷰 (Month View)', () => {
-    //   test('월간 뷰에 반복 일정이 올바르게 표시된다', () => {
-    //     const currentDate = new Date('2024-07-01');
-    //     renderWithContext('month', currentDate);
+      // events 배열에 5개의 이벤트가 생성되었는지 확인 (7월의 월요일 수)
+      expect(result.current.events).toHaveLength(5);
 
-    //     const mondays = ['01', '08', '15', '22', '29'];
+      // 생성된 이벤트들의 날짜가 올바른지 확인
+      const expectedDates = [
+        '2024-07-01',
+        '2024-07-08',
+        '2024-07-15',
+        '2024-07-22',
+        '2024-07-29',
+      ];
+      result.current.events.forEach((event: Event, index: number) => {
+        expect(event.date).toBe(expectedDates[index]);
+        expect(event.title).toBe('주간 회의');
+        expect(event.repeat.type).toBe('weekly');
+        expect(event.repeat.interval).toBe(1);
+      });
 
-    //     mondays.forEach((day) => {
-    //       const eventElement = screen.getByTestId(`month-cell-${day}`);
-    //       expect(eventElement).toHaveTextContent('주간 팀 회의');
-    //     });
-
-    //     // 월요일이 아닌 날에는 이벤트가 표시되지 않아야 함
-    //     const nonMonday = '02'; // 화요일
-    //     const nonMondayCell = screen.getByTestId(`month-cell-${nonMonday}`);
-    //     expect(nonMondayCell).not.toHaveTextContent('주간 팀 회의');
-    //   });
-    // });
-
-    // describe('주간 뷰 (Week View)', () => {
-    //   test('주간 뷰에 반복 일정이 올바르게 표시된다', () => {
-    //     const currentDate = new Date('2024-07-01');
-    //     renderWithContext('week', currentDate);
-
-    //     // 월요일에만 이벤트가 표시되어야 함
-    //     const mondayCell = screen.getByTestId('week-cell-1');
-    //     expect(mondayCell).toHaveTextContent('주간 팀 회의');
-
-    //     // 다른 요일에는 이벤트가 표시되지 않아야 함
-    //     ['2', '3', '4', '5', '6', '7'].forEach((day) => {
-    //       const cell = screen.getByTestId(`week-cell-${day}`);
-    //       expect(cell).not.toHaveTextContent('주간 팀 회의');
-    //     });
-    //   });
-
-    //   test('다음 주 주간 뷰에도 반복 일정이 올바르게 표시된다', () => {
-    //     const currentDate = new Date('2024-07-08');
-    //     renderWithContext('week', currentDate);
-
-    //     // 월요일에만 이벤트가 표시되어야 함
-    //     const mondayCell = screen.getByTestId('week-cell-8');
-    //     expect(mondayCell).toHaveTextContent('주간 팀 회의');
-
-    //     // 다른 요일에는 이벤트가 표시되지 않아야 함
-    //     ['9', '10', '11', '12', '13', '14'].forEach((day) => {
-    //       const cell = screen.getByTestId(`week-cell-${day}`);
-    //       expect(cell).not.toHaveTextContent('주간 팀 회의');
-    //     });
-    //   });
-    // });
+      // 마지막 이벤트가 종료 날짜를 넘어가지 않았는지 확인
+      expect(result.current.events[result.current.events.length - 1].date).toBe(
+        '2024-07-29'
+      );
+    });
   });
 
   describe('반복 일정 수정', () => {
