@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import * as eventService from '../services/eventService';
 import { Event, EventFormData } from '../types';
-import { convertFormDataToEvent } from '../utils/event';
+import {
+  convertFormDataToEvent,
+  generateRecurringEvents,
+} from '../utils/event';
 
 export function useEvents() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -25,9 +28,33 @@ export function useEvents() {
     setLoading(true);
     setError(null);
     try {
-      const newEvent = convertFormDataToEvent(newEventData);
-      const createdEvent = await eventService.createEvent(newEvent);
-      setEvents((prev) => [...prev, createdEvent]);
+      if (newEventData.repeat.isRepeating) {
+        // 반복 일정 생성
+        const recurringEvents = generateRecurringEvents(
+          {
+            ...newEventData,
+            id: Date.now(), // 임시 ID 부여
+            repeat: {
+              type: newEventData.repeat.type,
+              interval: newEventData.repeat.interval,
+              endDate: newEventData.repeat.endDate,
+            },
+          } as Event,
+          new Date(newEventData.repeat.endDate || '9999-12-31')
+        );
+
+        // 각 반복 일정을 서버에 저장하고 ID를 부여받음
+        const savedEvents = await Promise.all(
+          recurringEvents.map((event) => eventService.createEvent(event))
+        );
+
+        // 상태 업데이트
+        setEvents((prevEvents) => [...prevEvents, ...savedEvents]);
+      } else {
+        // 단일 일정 추가
+        const savedEvent = await eventService.createEvent(newEventData);
+        setEvents((prevEvents) => [...prevEvents, savedEvent]);
+      }
     } catch (err) {
       setError('Failed to add event');
       console.error(err);
