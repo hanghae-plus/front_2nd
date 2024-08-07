@@ -1,0 +1,29 @@
+name: CI Assignment 8
+
+on:
+  pull_request:
+    types:
+      - synchronize
+      - opened
+      - reopened
+    paths:
+      - 'packages/assignment-8/**'
+
+  workflow_dispatch:
+
+jobs:
+  assignment-8-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: assignment-8-basic
+        run: |
+          pnpm install
+          pnpm -F assignment-8 test
