@@ -17,6 +17,12 @@ import {
   AlertDialogHeader,
   AlertDialogOverlay,
   Text,
+  RadioGroup,
+  Radio,
+  InputGroup,
+  InputRightAddon,
+  Stack,
+  CheckboxGroup,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { useEventForm } from "./hooks/useEventForm";
@@ -80,10 +86,12 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
       description,
       location,
       category,
+      repeatNumber,
       isRepeating,
       repeatEndDate,
       repeatInterval,
       repeatType,
+      repeatDay,
       notificationTime,
     } = eventFormValue;
 
@@ -118,17 +126,20 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
       location,
       category,
       repeat: {
-        type: isRepeating ? repeatType : "none",
+        type: repeatType || "none",
         interval: repeatInterval,
         endDate: repeatEndDate || undefined,
+        repeatNumber: repeatNumber || undefined,
+        repeatDay: repeatDay || undefined,
       },
       notificationTime,
     };
 
-    const newRepeatEvents = getRepeatEvents(eventData);
-
-    if (newRepeatEvents.length > 1) {
+    // console.log(eventData);
+    if (isRepeating) {
+      const newRepeatEvents = getRepeatEvents(eventData);
       await saveEvent(newRepeatEvents);
+      resetForm();
       return;
     }
 
@@ -148,6 +159,13 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
   const [overlappingEvents, setOverlappingEvents] = useState<Event[]>([]);
   const { isOpen, onOpen, onClose } = useClosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
+
+  // 반복 정보 관련
+  const [repeatCondition, setRepeatCondition] = useState("1");
+
+  // 등록 날짜의 요일
+  const dayData = ["일", "월", "화", "수", "목", "금", "토"];
+  const day = dayData[new Date(eventFormValue.date).getDay()];
 
   return (
     <>
@@ -335,39 +353,103 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
                 <option value="yearly">매년</option>
               </Select>
             </FormControl>
-            <HStack width="100%">
-              <FormControl>
-                <FormLabel>반복 간격</FormLabel>
-                <Input
-                  type="number"
-                  value={eventFormValue.repeatInterval}
-                  onChange={(e) =>
-                    setEventFormValue((formValue) => {
-                      return {
-                        ...formValue,
-                        repeatInterval: Number(e.target.value),
-                      };
-                    })
-                  }
-                  min={1}
-                />
-              </FormControl>
-              <FormControl>
-                <FormLabel>반복 종료일</FormLabel>
-                <Input
-                  type="date"
-                  value={eventFormValue.repeatEndDate}
-                  onChange={(e) =>
-                    setEventFormValue((formValue) => {
-                      return {
-                        ...formValue,
-                        repeatEndDate: e.target.value,
-                      };
-                    })
-                  }
-                />
-              </FormControl>
-            </HStack>
+            {eventFormValue.repeatType === "weekly" && (
+              <CheckboxGroup
+                defaultValue={[day]}
+                onChange={(checkedDayValue) => {
+                  setEventFormValue((formValue) => {
+                    return {
+                      ...formValue,
+                      repeatDay: checkedDayValue as string[],
+                    };
+                  });
+                }}
+              >
+                <Stack direction={["column", "row"]}>
+                  {dayData.map((day) => {
+                    return (
+                      <Checkbox key={day} value={day}>
+                        {day}
+                      </Checkbox>
+                    );
+                  })}
+                </Stack>
+              </CheckboxGroup>
+            )}
+            <FormControl>
+              <FormLabel>반복 간격</FormLabel>
+              <Input
+                type="number"
+                value={eventFormValue.repeatInterval}
+                onChange={(e) =>
+                  setEventFormValue((formValue) => {
+                    return {
+                      ...formValue,
+                      repeatInterval: Number(e.target.value),
+                    };
+                  })
+                }
+                min={1}
+              />
+            </FormControl>
+            <VStack width="100%">
+              <RadioGroup
+                gap="5px"
+                w="100%"
+                onChange={(value) => {
+                  setRepeatCondition(value);
+                  setEventFormValue((formValue) => {
+                    return {
+                      ...formValue,
+                      repeatEndDate: "",
+                      repeatNumber: "",
+                    };
+                  });
+                }}
+              >
+                <Stack direction="row">
+                  <Radio value="1">없음(금년까지)</Radio>
+                  <Radio value="2">날짜(종료일)</Radio>
+                  <Radio value="3">횟수</Radio>
+                </Stack>
+              </RadioGroup>
+              {repeatCondition === "2" && (
+                <FormControl>
+                  <FormLabel>반복 종료일</FormLabel>
+                  <Input
+                    type="date"
+                    value={eventFormValue.repeatEndDate}
+                    onChange={(e) =>
+                      setEventFormValue((formValue) => {
+                        return {
+                          ...formValue,
+                          repeatEndDate: e.target.value,
+                        };
+                      })
+                    }
+                  />
+                </FormControl>
+              )}
+              {repeatCondition === "3" && (
+                <FormControl>
+                  <FormLabel>반복 횟수</FormLabel>
+                  <InputGroup>
+                    <Input
+                      value={eventFormValue.repeatNumber}
+                      onChange={(e) =>
+                        setEventFormValue((formValue) => {
+                          return {
+                            ...formValue,
+                            repeatNumber: e.target.value,
+                          };
+                        })
+                      }
+                    />
+                    <InputRightAddon>회 반복</InputRightAddon>
+                  </InputGroup>
+                </FormControl>
+              )}
+            </VStack>
           </VStack>
         )}
 

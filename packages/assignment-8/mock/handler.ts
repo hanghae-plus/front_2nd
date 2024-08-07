@@ -75,10 +75,6 @@ export const initializeHandler = () => {
 };
 
 export const handlers = [
-  // delay를 주니 통과를 못함..
-  // http.all("*", async () => {
-  //   await delay(300);
-  // }),
   http.get("/api/events", async () => {
     return HttpResponse.json(events);
   }),

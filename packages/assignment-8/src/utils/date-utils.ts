@@ -134,7 +134,7 @@ const isDateInRange = (date: Date, startDate: Date, endDate: Date): boolean => {
  * @returns
  */
 const getRepeatEvents = (event: Event) => {
-  const { type, interval, endDate } = event.repeat;
+  const { type, interval, endDate, repeatNumber, repeatDay } = event.repeat;
 
   const repeatEvents = [];
   if (type === "none" || !interval) {
@@ -142,38 +142,118 @@ const getRepeatEvents = (event: Event) => {
   }
   const startDate = new Date(event.date);
 
-  // 끝나는 날이 정의되지 않았다면, 그 해까지로 지정한다.
+  let tempId = 0;
+
+  const dayMapping: Record<string, number> = {
+    일: 0,
+    월: 1,
+    화: 2,
+    수: 3,
+    목: 4,
+    금: 5,
+    토: 6,
+  };
+
+  if (Number(repeatNumber) > 0) {
+    const currentDate = new Date(startDate);
+    let count = 0;
+    // 요일 지정해서 생성하는 부분 급해서...gpt에 의존...ㅠㅠ
+    while (count < Number(repeatNumber)) {
+      if (type === "weekly" && repeatDay && repeatDay.length > 0) {
+        for (let i = 0; i < 7; i++) {
+          const tempDate = new Date(currentDate);
+          tempDate.setDate(tempDate.getDate() + i);
+          const dayOfWeek = tempDate.getDay();
+          if (repeatDay.some((day) => dayMapping[day] === dayOfWeek)) {
+            const newEvent = {
+              ...event,
+              id: event.id + tempId,
+              date: tempDate.toISOString().split("T")[0],
+            };
+            repeatEvents.push(newEvent);
+            tempId++;
+            count++;
+            if (count >= Number(repeatNumber)) break;
+          }
+        }
+        currentDate.setDate(currentDate.getDate() + 7 * interval);
+      } else {
+        const newEvent = {
+          ...event,
+          id: event.id + tempId,
+          date: currentDate.toISOString().split("T")[0],
+        };
+        repeatEvents.push(newEvent);
+        count++;
+
+        // 다음 날짜 계산하기
+        switch (type) {
+          case "daily":
+            currentDate.setDate(currentDate.getDate() + interval);
+            break;
+          case "weekly":
+            currentDate.setDate(currentDate.getDate() + 7 * interval);
+            break;
+          case "monthly":
+            currentDate.setMonth(currentDate.getMonth() + interval);
+            break;
+          case "yearly":
+            currentDate.setFullYear(currentDate.getFullYear() + interval);
+            break;
+        }
+        tempId++;
+      }
+    }
+    return repeatEvents;
+  }
+
   const newEndDate = endDate
     ? new Date(endDate)
     : new Date(new Date(startDate.getFullYear(), 11, 31));
 
-  let tempId = 0;
-
   for (let currentDate = new Date(startDate); currentDate <= newEndDate; ) {
-    const newEvent = {
-      ...event,
-      id: event.id + tempId,
-      date: currentDate.toISOString().split("T")[0],
-    };
+    if (type === "weekly" && repeatDay && repeatDay.length > 0) {
+      for (let i = 0; i < 7; i++) {
+        const tempDate = new Date(currentDate);
+        tempDate.setDate(tempDate.getDate() + i);
+        if (tempDate > newEndDate) break;
+        const dayOfWeek = tempDate.getDay();
+        if (repeatDay.some((day) => dayMapping[day] === dayOfWeek)) {
+          const newEvent = {
+            ...event,
+            id: event.id + tempId,
+            date: tempDate.toISOString().split("T")[0],
+          };
+          repeatEvents.push(newEvent);
+          tempId++;
+        }
+      }
+      currentDate.setDate(currentDate.getDate() + 7 * interval);
+    } else {
+      const newEvent = {
+        ...event,
+        id: event.id + tempId,
+        date: currentDate.toISOString().split("T")[0],
+      };
+      repeatEvents.push(newEvent);
 
-    repeatEvents.push(newEvent);
-
-    // 다음 날짜 계산하기
-    switch (type) {
-      case "daily":
-        currentDate.setDate(currentDate.getDate() + interval);
-        break;
-      case "weekly":
-        currentDate.setDate(currentDate.getDate() + 7 * interval);
-        break;
-      case "monthly":
-        currentDate.setMonth(currentDate.getMonth() + interval);
-        break;
-      case "yearly":
-        currentDate.setFullYear(currentDate.getFullYear() + interval);
-        break;
+      // 다음 날짜 계산하기
+      switch (type) {
+        case "daily":
+          currentDate.setDate(currentDate.getDate() + interval);
+          break;
+        case "weekly":
+          currentDate.setDate(currentDate.getDate() + 7 * interval);
+          break;
+        case "monthly":
+          currentDate.setMonth(currentDate.getMonth() + interval);
+          break;
+        case "yearly":
+          currentDate.setFullYear(currentDate.getFullYear() + interval);
+          break;
+      }
+      tempId++;
     }
-    tempId++;
   }
 
   return repeatEvents;

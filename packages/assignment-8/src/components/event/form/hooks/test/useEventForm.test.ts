@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { useEventForm } from "../useEventForm";
-import { Event } from "../../../../App";
 import { ChangeEvent } from "react";
+import { Event } from "../../../../../types/types";
 
 describe("useEventForm", () => {
   const initialFormState = {
@@ -13,9 +13,11 @@ describe("useEventForm", () => {
     location: "",
     category: "",
     isRepeating: false,
-    repeatType: "none",
+    repeatType: "daily",
+    repeatNumber: "",
     repeatInterval: 1,
     repeatEndDate: "",
+    repeatDay: [],
     notificationTime: 10,
   };
 
@@ -28,7 +30,13 @@ describe("useEventForm", () => {
     description: "테스트 설명",
     location: "테스트 장소",
     category: "테스트 카테고리",
-    repeat: { type: "daily", interval: 2, endDate: "2023-08-31" },
+    repeat: {
+      type: "daily",
+      interval: 2,
+      endDate: "2023-08-31",
+      repeatDay: [],
+      repeatNumber: "",
+    },
     notificationTime: 30,
   };
 
@@ -52,7 +60,9 @@ describe("useEventForm", () => {
       isRepeating: true,
       repeatType: "daily",
       repeatInterval: 2,
+      repeatNumber: "",
       repeatEndDate: "2023-08-31",
+      repeatDay: [],
       notificationTime: 30,
     });
   });
@@ -106,7 +116,9 @@ describe("useEventForm", () => {
         repeatType: "weekly",
         repeatInterval: 2,
         repeatEndDate: "2023-08-31",
+        repeatDay: [],
         notificationTime: 30,
+        repeatNumber: "",
       });
     });
 

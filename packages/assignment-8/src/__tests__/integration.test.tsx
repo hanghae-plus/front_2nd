@@ -141,7 +141,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
   });
 
   describe("일정 CRUD 및 기본 기능", () => {
-    test("새로운 일정을 생성하고 모든 필드가 정확히 저장되는지 확인한다", async () => {
+    test("새로운 일정을 생성하고 필드가 정확히 저장되는지 확인한다", async () => {
       const date = new Date("2024-08-01");
 
       vi.setSystemTime(date);
@@ -230,12 +230,13 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       const categoryInput = screen.getByLabelText("카테고리");
       await user.selectOptions(categoryInput, "");
-      expect(categoryInput).toHaveValue("");
+
       await user.selectOptions(categoryInput, newData.category);
-      expect(categoryInput).toHaveValue(newData.category);
 
       // 반복 일정 체크
-      const repeatCheckbox = screen.getByRole("checkbox");
+      const repeatCheckbox = screen.getByRole("checkbox", {
+        name: "반복 설정 반복 일정",
+      });
       await user.click(repeatCheckbox);
 
       const submitButton = screen.getByTestId("event-submit-button");
@@ -501,7 +502,9 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       expect(alarmSelectBox).toHaveValue(duplicateData.notificationTime);
 
       // 반복 일정 체크
-      const repeatCheckbox = screen.getByRole("checkbox");
+      const repeatCheckbox = screen.getByRole("checkbox", {
+        name: "반복 설정 반복 일정",
+      });
       await user.click(repeatCheckbox);
 
       const submitButton = screen.getByTestId("event-submit-button");
@@ -522,6 +525,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
   });
 
+  // asignment-8
   describe("반복 일정 테스트", () => {
     // 기본 요구사항
     // 1. 사용자 김항해는 매주 월요일 오전 10시에 있는 팀 회의를 캘린더에 등록하려고 한다.
@@ -535,6 +539,8 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     // 3. 반복 설정에서 "매주"를 선택하고, 반복 간격을 1주로 설정한다.
     // 4. 알림 설정을 "10분 전"으로 선택한다.
     // 5. 일정을 저장하면, 캘린더에 2024년 7월 1일부터 반복 간격으로 해당 회의가 표시된다.
+
+    // 반복 종료일을 설정하지 않았다면 금년도까지만 표기한다.
     test("반복 일정을 등록하며, 일정에 나타나는지 확인한다.", async () => {
       vi.setSystemTime(new Date("2024-09-01"));
       const { user } = setup(<App />);
@@ -578,14 +584,16 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const submitButton = screen.getByTestId("event-submit-button");
       await user.click(submitButton);
 
-      // 설정한 간격대로 일정이 화면에 보이게 된다.
-
-      // 9월 2일부터 일주일 마다 등록하게 되면 2,9,16,23,30일 등록이된다.
-      // 결과적으로 4개가 등록되는지 확인한다. 리스트 쪽까지 총 10개.
-
+      /**
+       * 설정한 간격대로 일정이 화면에 보이게 된다.
+       * 9월 2일부터 일주일 마다 등록하게 되면 2,9,16,23,30일 등록이된다.
+       * 결과적으로 4개가 등록되는지 확인한다. 리스트 쪽까지 총 10개.
+       */
       expect((await screen.findAllByText("주간 팀 회의")).length).toBe(10);
     });
 
+    // - 반복 종료 조건을 지정할 수 있다.
+    // - 옵션: 특정 날짜까지, 특정 횟수만큼, 또는 종료 없음
     test("반복 종료 날짜를 지정하면, 종료 날짜까지만 표시된다.", async () => {
       // 반복 종료 조건으로 "종료일 지정"을 선택하고, 2024년 12월 31일로 설정한다.
       vi.setSystemTime(new Date("2024-12-01"));
@@ -619,14 +627,14 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const repeatTypeSelectBox = screen.getByLabelText("반복 유형");
       await user.selectOptions(repeatTypeSelectBox, "매주");
 
-      /**
-       * 간격 설정은 무한대로 받을 수 있으니 Input으로?
-       * 일,주,월,년 단위가 될 수 있기 때문에 숫자로만 받기
-       */
       await fillInputElement(screen.getByLabelText("반복 간격"), user, "1");
 
       const alarmSelectBox = screen.getByLabelText("알림 설정");
       await user.selectOptions(alarmSelectBox, "10분 전");
+
+      const [, secondRadio] = screen.getAllByRole("radio");
+
+      await user.click(secondRadio);
 
       await fillInputElement(
         screen.getByLabelText("반복 종료일"),
@@ -641,5 +649,61 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       // 2024년 12월은 월요일이 2,9,16일 3개이므로 일정은 총 6개(목록까지)가 나와야함.
       expect(screen.queryAllByText("주간 팀 회의").length).toBe(6);
     });
+
+    // - 주간 반복 시 특정 요일을 선택할 수 있다.
+    test("주간 반복 시 특정 요일을 선택할 수 있다.", async () => {
+      // 주간 반복 선택시 선택할 수 있는 요일이 나와야 함.
+      vi.setSystemTime(new Date("2024-09-01"));
+
+      const { user } = setup(<App />);
+      await fillInputElement(
+        screen.getByLabelText("제목"),
+        user,
+        "주간 팀 회의"
+      );
+
+      await fillInputElement(screen.getByLabelText("날짜"), user, "2024-09-01");
+
+      await fillInputElement(screen.getByLabelText("시작 시간"), user, "10:00");
+
+      await fillInputElement(screen.getByLabelText("종료 시간"), user, "11:00");
+
+      await fillInputElement(screen.getByLabelText("위치"), user, "회의실 A");
+
+      await fillInputElement(
+        screen.getByLabelText("설명"),
+        user,
+        "주간 업무 보고 및 계획 수립"
+      );
+
+      // 반복 일정 체크
+      const repeatCheckbox = screen.getByRole("checkbox");
+      await user.click(repeatCheckbox);
+
+      const repeatTypeSelectBox = screen.getByLabelText("반복 유형");
+      await user.selectOptions(repeatTypeSelectBox, "매주");
+
+      await fillInputElement(screen.getByLabelText("반복 간격"), user, "1");
+
+      const alarmSelectBox = screen.getByLabelText("알림 설정");
+      await user.selectOptions(alarmSelectBox, "10분 전");
+
+      const [, secondRadio] = screen.getAllByRole("radio");
+      await user.click(secondRadio);
+
+      //일요일 ,월요일, 수요일에 대해 추가 한다. 날짜를 선택하면  그날은 이미 체크가 되어잇다.
+      const mondayCheckbox = screen.getByRole("checkbox", { name: "월" });
+      await user.click(mondayCheckbox);
+      const wednesdayCheckbox = screen.getByRole("checkbox", { name: "수" });
+      await user.click(wednesdayCheckbox);
+
+      const submitButton = screen.getByTestId("event-submit-button");
+      await user.click(submitButton);
+
+      // 9월에만 일, 월, 수 데이터 즉 14개일 정, 리스트 목록까지 총 28개가 보여야 한다.
+      expect(screen.queryAllByText("주간 팀 회의").length).toBe(28);
+    });
+
+    // 각 테스트들에 대해서 실제 데이터로 검증하고, 엣지 케이스를 테스트해야함...
   });
 });

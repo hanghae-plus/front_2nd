@@ -11,9 +11,11 @@ export const useEventForm = (editingEvent: Event | null) => {
     location: "",
     category: "",
     isRepeating: false,
-    repeatType: "none" as RepeatType,
+    repeatType: "daily" as RepeatType,
+    repeatNumber: "",
     repeatInterval: 1,
     repeatEndDate: "",
+    repeatDay: [""],
     notificationTime: 0,
   });
 
@@ -67,9 +69,11 @@ export const useEventForm = (editingEvent: Event | null) => {
       location: "",
       category: "",
       isRepeating: false,
-      repeatType: "none",
+      repeatType: "daily",
       repeatInterval: 1,
       repeatEndDate: "",
+      repeatNumber: "",
+      repeatDay: [],
       notificationTime: 10,
     });
   };
@@ -85,9 +89,11 @@ export const useEventForm = (editingEvent: Event | null) => {
         location: editingEvent.location || "",
         category: editingEvent.category || "",
         isRepeating: editingEvent.repeat?.type !== "none",
-        repeatType: editingEvent.repeat?.type || "none",
+        repeatType: editingEvent.repeat?.type || "daily",
         repeatInterval: editingEvent.repeat?.interval || 1,
         repeatEndDate: editingEvent.repeat?.endDate || "",
+        repeatNumber: editingEvent.repeat?.repeatNumber || "",
+        repeatDay: editingEvent.repeat?.repeatDay || [""],
         notificationTime: editingEvent.notificationTime || 10,
       });
     } else {

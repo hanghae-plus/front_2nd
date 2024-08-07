@@ -6,10 +6,13 @@ export interface RepeatInfo {
   type: RepeatType;
   interval: number;
   endDate?: string;
+  repeatNumber?: string;
+  repeatDay?: string[];
 }
 
 export interface Event {
   id: number;
+  repeatId?: number;
   title: string;
   date: string;
   startTime: string;
@@ -18,6 +21,8 @@ export interface Event {
   location: string;
   category: string;
   repeat: RepeatInfo;
+  repeatNumber?: string;
+  repeatDay?: string[];
   notificationTime: number;
 }
 
