@@ -5,10 +5,11 @@ import App from '../App';
 import { userEvent } from '@testing-library/user-event';
 import createMockServer from './createMockServer';
 import { Event, RepeatType } from '../types';
+import { ChakraProvider } from '@chakra-ui/react';
 
 const setup = (element: ReactElement) => {
   const user = userEvent.setup();
-  return { ...render(element), user };
+  return { ...render(<ChakraProvider>{element}</ChakraProvider>), user };
 };
 
 const MOCK_EVENT_1: Event = {
@@ -461,6 +462,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
           await user.click(repeatCheckbox);
         }
         await user.selectOptions(screen.getByLabelText('반복 유형'), eventData.repeat.type);
+        await user.clear(screen.getByLabelText('반복 간격'));
         await user.type(screen.getByLabelText('반복 간격'), eventData.repeat.interval.toString());
       }
 
@@ -572,8 +574,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
     test('반복 간격이 0인 경우 에러 메시지가 표시된다.', async () => {
       const { user } = setup(<App />);
 
-      await createEvent(user, { ...baseEventData, repeat: { type: 'daily', interval: 0 } });
-
+      await createEvent(user, { ...baseEventData, repeat: { type: 'monthly', interval: 0 } });
       expect(await screen.findByText(/반복 간격은 1 이상이어야 합니다\./i)).toBeInTheDocument();
     });
   });
