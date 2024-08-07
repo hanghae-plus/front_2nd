@@ -62,6 +62,7 @@ export const WeekView = ({
                     return (
                       <ViewBox
                         key={`${event.id}-${event.date}-${event.title}`}
+                        testId={`event-week-view-${event.id}`}
                         isNotified={isNotified}
                         title={event.title}
                       />

@@ -22,8 +22,8 @@ import { Event } from './types/types';
 import { EventDetailView } from './components/EventDetailView';
 import { WeekView } from './components/WeekView';
 import { MonthView } from './components/MonthView';
-import { isDateInRange } from './lib/utils/date';
 import { EventForm } from './components/EventForm';
+import { useFilteredEvents } from './hooks/useFilteredEvents';
 
 const dummyEvents: Event[] = [];
 
@@ -343,24 +343,31 @@ function App() {
     });
   };
 
-  const searchEvents = (term: string) => {
-    if (!term.trim()) return events;
+  // const searchEvents = (term: string) => {
+  //   if (!term.trim()) return events;
 
-    return events.filter(
-      (event) =>
-        event.title.toLowerCase().includes(term.toLowerCase()) ||
-        event?.description?.toLowerCase().includes(term.toLowerCase()) ||
-        event?.location?.toLowerCase().includes(term.toLowerCase())
-    );
-  };
+  //   return events.filter(
+  //     (event) =>
+  //       event.title.toLowerCase().includes(term.toLowerCase()) ||
+  //       event?.description?.toLowerCase().includes(term.toLowerCase()) ||
+  //       event?.location?.toLowerCase().includes(term.toLowerCase())
+  //   );
+  // };
 
-  const filteredEvents = (() => {
-    const filtered = searchEvents(searchTerm);
-    return filtered.filter((event) => {
-      const eventDate = new Date(event.date);
-      return isDateInRange(eventDate, currentDate, view);
-    });
-  })();
+  // const filteredEvents = (() => {
+  //   const filtered = searchEvents(searchTerm);
+  //   return filtered.filter((event) => {
+  //     const eventDate = new Date(event.date);
+  //     return isDateInRange(eventDate, currentDate, view);
+  //   });
+  // })();
+
+  const filteredEvents = useFilteredEvents({
+    term: searchTerm,
+    events,
+    currentDate,
+    view,
+  });
 
   useInterval(checkUpcomingEvents, 1000); // 1초마다 체크
 

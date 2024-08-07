@@ -4,14 +4,17 @@ import { Box, HStack, Text } from '@chakra-ui/react';
 export const ViewBox = ({
   isNotified,
   title,
+  testId,
 }: {
   isNotified: boolean;
   title: string;
+  testId: string;
 }) => {
   return (
     <Box
       p={1}
       my={1}
+      data-testid={testId}
       bg={isNotified ? 'red.100' : 'gray.100'}
       borderRadius="md"
       fontWeight={isNotified ? 'bold' : 'normal'}
