@@ -15,6 +15,8 @@ import { setupServer } from 'msw/node';
 import App from '../App';
 import { createHandlers } from '../lib/services/mockHandlers';
 import { events as originalEvents } from '../lib/services/mockData';
+import { Event } from '../types/types';
+import { act } from 'react';
 
 const mockServer = setupServer();
 
@@ -105,16 +107,72 @@ describe('반복 일정에 대한 테스트', () => {
 
       const eventList = screen.getByTestId('event-list');
       await waitFor(() => {
-        const event = within(eventList).getByText('Test 일정');
-        expect(event).toBeInTheDocument();
-        const repeatInfo = within(eventList).getByText(/반복:\s\w+/);
-        expect(repeatInfo).toHaveTextContent('반복: 1월마다');
+        const events = within(eventList).getAllByText(/Test 일정/);
+        // events[0] -> target EventDetailView with own testid
+        const event = events[0].closest(
+          '[data-testid^="event-item-"]'
+        ) as HTMLElement;
+
+        if (event === null) {
+          throw new Error('EventDetailView를 찾을 수 없습니다.');
+        }
+        if (event !== null) {
+          expect(within(event).getByText(/Test 일정/)).toBeInTheDocument();
+          expect(
+            within(event).getByText(/2024-08-08 09:00 - 10:00/)
+          ).toBeInTheDocument();
+          expect(within(event).getByText(/반복: 1월마다/)).toBeInTheDocument();
+        }
       });
     });
   });
-  //   describe('반복 일정 표시', async () => {
-  //     render(<App />);
-  //   });
+  describe('반복 일정 표시', () => {
+    test('유형 weekly, 단위 1일 때, 일정이 반복하여 나타나는지 확인한다.', async () => {
+      // 테스트용 일정 데이터
+      const testEvents: Event[] = [
+        {
+          id: 1,
+          title: 'Test 일정',
+          date: '2024-08-09',
+          startTime: '09:00',
+          endTime: '11:00',
+          repeat: {
+            type: 'weekly',
+            interval: 1,
+            endDate: '2024-09-11',
+          },
+        },
+      ];
+      const handlers = createHandlers(testEvents);
+      mockServer.use(...handlers);
+      try {
+        vi.setSystemTime(new Date('2024-08-03'));
+
+        await act(async () => {
+          render(<App />);
+          await vi.advanceTimersByTimeAsync(1500);
+        });
+
+        const monthView = screen.getByTestId('month-view');
+        const viewHeading = within(monthView).getByRole('heading');
+        expect(viewHeading).toHaveTextContent('2024년 8월');
+        const cells = within(monthView).getAllByRole('cell');
+        const eventCells = cells.filter((cell) => {
+          const viewBox = within(cell).queryByTestId('event-month-view-1');
+          return viewBox !== null;
+        });
+        expect(eventCells).toHaveLength(4);
+        const eventDates = eventCells.map((cell) => {
+          const date = within(cell).getByText(/^(\d+)$/);
+          return date.textContent;
+        });
+        expect(eventDates).toEqual(['9', '16', '23', '30']);
+      } finally {
+        mockServer.resetHandlers();
+        mockServer.use(...createHandlers(originalEvents));
+      }
+    });
+  });
   //   describe('예외 날짜 처리', async () => {
   //     render(<App />);
   //   });
