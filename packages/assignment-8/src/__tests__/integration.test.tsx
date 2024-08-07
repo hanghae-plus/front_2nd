@@ -444,8 +444,6 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
   describe('반복 간격 설정', () => {
     // 헬퍼 함수: 일정 생성
     const createEvent = async (user: ReturnType<typeof userEvent.setup>, eventData: Partial<Event>) => {
-      // await user.click(screen.getAllByText('일정 추가')[0]);
-
       // 기본 일정 정보 입력
       await user.type(screen.getByLabelText('제목'), eventData.title || '');
       await user.type(screen.getByLabelText('날짜'), eventData.date || '');
@@ -576,7 +574,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
       await createEvent(user, { ...baseEventData, repeat: { type: 'daily', interval: 0 } });
 
-      expect(await screen.findByText('반복 간격은 1 이상이어야 합니다.')).toBeInTheDocument();
+      expect(await screen.findByText(/반복 간격은 1 이상이어야 합니다\./i)).toBeInTheDocument();
     });
   });
 
