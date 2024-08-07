@@ -6,7 +6,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 async function prepare() {
   const { setupWorker } = await import('msw/browser');
   const { handlers: mockApiHandlers } = await import(
-    './utils/test/handlers.ts'
+    './shared/api/mocks/handlers.ts'
   );
   const worker = setupWorker(...mockApiHandlers);
   return worker.start();
