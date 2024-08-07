@@ -8,7 +8,7 @@
     "description": "주간 팀 미팅",
     "location": "회의실 A",
     "category": "업무",
-    "repeat": { "type": "weekly", "interval": 1 },
+    "repeat": { "type": "none", "interval": 0 },
     "notificationTime": 1
   },
   {

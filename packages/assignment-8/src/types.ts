@@ -1,4 +1,4 @@
-export type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+export type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
 
 export interface RepeatInfo {
   type: RepeatType;
@@ -18,3 +18,5 @@ export interface Event {
   repeat: RepeatInfo;
   notificationTime: number; // 분 단위로 저장
 }
+
+export type Category = "업무" | "개인" | "가족" | "기타";

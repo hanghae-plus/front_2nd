@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import App from '../App';
-import { handlers, resetEvents } from '../utils/test/handlers';
+import { handlers, resetEvents } from '~shared/api/mocks/handlers';
 
 const server = setupServer(...handlers);
 

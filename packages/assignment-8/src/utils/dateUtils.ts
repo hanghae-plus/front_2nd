@@ -31,7 +31,7 @@ export function getWeeksAtMonth(currentDate: Date) {
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const weeks = [];
 
-  const initWeek = () => Array(7).fill(null)
+  const initWeek = () => Array(7).fill(null);
 
   let week: Array<number | null> = initWeek();
 
@@ -52,7 +52,7 @@ export function getWeeksAtMonth(currentDate: Date) {
 }
 
 export function getEventsForDay(events: Event[], date: number): Event[] {
-  return events.filter(event => new Date(event.date).getDate() === date)
+  return events.filter((event) => new Date(event.date).getDate() === date);
 }
 
 /**
@@ -89,6 +89,6 @@ export function formatDate(currentDate: Date, day?: number) {
   return [
     currentDate.getFullYear(),
     fillZero(currentDate.getMonth() + 1),
-    fillZero(day ?? currentDate.getDate())
-  ].join('-');
+    fillZero(day ?? currentDate.getDate()),
+  ].join("-");
 }

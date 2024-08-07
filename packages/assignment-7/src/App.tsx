@@ -818,7 +818,6 @@ function App() {
             filteredEvents.map((event) => (
               <Box
                 key={event.id}
-                role={'listitem'}
                 borderWidth={1}
                 borderRadius="lg"
                 p={3}
