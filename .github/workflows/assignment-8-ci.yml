@@ -25,5 +25,5 @@ jobs:
           cache: 'pnpm'
       - name: assignment-8-basic
         run: |
-          pnpm install
+          pnpm install --no-frozen-lockfile
           pnpm -F assignment-8 test
