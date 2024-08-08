@@ -47,7 +47,7 @@ jobs:
         run: pnpm install
 
       - name: Install Playwright
-        run: pnpm install @playwright/test
+        run: pnpm add -w @playwright/test
 
       - name: Install Playwright Browsers
         run: pnpm exec playwright install
