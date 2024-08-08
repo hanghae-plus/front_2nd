@@ -142,6 +142,15 @@ function App() {
       return;
     }
 
+    if (isRepeating && !repeatEndDate) {
+      toast({
+        title: '반복 종료일 설정을 확인해주세요.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+
     const eventData: Event = {
       id: editingEvent ? editingEvent.id : Date.now(),
       title,
