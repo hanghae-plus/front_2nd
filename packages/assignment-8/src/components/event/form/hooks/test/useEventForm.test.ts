@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { useEventForm } from "../useEventForm";
 import { ChangeEvent } from "react";
 import { Event } from "../../../../../types/types";
+import { describe, expect, test } from "vitest";
 
 describe("useEventForm", () => {
   const initialFormState = {
@@ -13,7 +14,7 @@ describe("useEventForm", () => {
     location: "",
     category: "",
     isRepeating: false,
-    repeatType: "daily",
+    repeatType: "none",
     repeatNumber: "",
     repeatInterval: 1,
     repeatEndDate: "",

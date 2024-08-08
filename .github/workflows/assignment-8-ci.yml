@@ -7,7 +7,7 @@ on:
       - opened
       - reopened
     paths:
-      - 'packages/assignment-8/**'
+      - "packages/assignment-8/**"
 
   workflow_dispatch:
 
@@ -22,8 +22,33 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: assignment-8-basic
         run: |
           pnpm install
           pnpm -F assignment-8 test
+
+  e2e-chrome:
+    name: E2E Tests (Chrome)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: pnpm install
+        run: |
+          pnpm install
+
+      - name: Run Cypress tests (Chrome)
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          # 특정 테스트 파일만 실행하려면 아래와 같이 설정
+          # spec: 'cypress/integration/specific-test.spec.js'

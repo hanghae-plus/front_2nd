@@ -112,11 +112,13 @@ const ProductCardView = ({
         <HStack>
           <IconButton
             aria-label="Edit event"
+            data-cy="edit-event"
             icon={<EditIcon />}
             onClick={onClickEditEvent}
           />
           <IconButton
             aria-label="Delete event"
+            data-cy="delete-event"
             icon={<DeleteIcon />}
             onClick={onClickDeleteEvent}
           />

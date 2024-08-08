@@ -135,7 +135,6 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
       notificationTime,
     };
 
-    // console.log(eventData);
     if (isRepeating) {
       const newRepeatEvents = getRepeatEvents(eventData);
       await saveEvent(newRepeatEvents);

@@ -5,8 +5,7 @@ const port = 3000;
 
 app.use(express.json());
 
-// 메모리에 데이터 저장
-let events = [
+const DUMMY_DATA = [
   {
     id: 1,
     title: "팀 회의",
@@ -95,7 +94,22 @@ let events = [
       };
     })(),
   },
+  {
+    id: 7,
+    title: "여행가고 싶다..",
+    date: "2024-09-22",
+    startTime: "18:00",
+    endTime: "19:00",
+    description: "...",
+    location: "부산",
+    category: "개인",
+    repeat: { type: "none", interval: 0 },
+    notificationTime: 1,
+  },
 ];
+
+// 메모리에 데이터 저장
+let events = [...DUMMY_DATA];
 
 // 일정 조회
 app.get("/api/events", (req, res) => {
@@ -105,11 +119,6 @@ app.get("/api/events", (req, res) => {
 // 일정 추가
 app.post("/api/events", (req, res) => {
   let newEvent;
-
-  // const newEvent = {
-  //   id: Date.now(),
-  //   ...req.body,
-  // };
 
   if (Array.isArray(req.body)) {
     newEvent = [...req.body];
@@ -122,7 +131,6 @@ app.post("/api/events", (req, res) => {
     events.push(newEvent);
   }
 
-  events.push(newEvent);
   res.status(201).json(newEvent);
 });
 
@@ -143,6 +151,12 @@ app.delete("/api/events/:id", (req, res) => {
   const id = parseInt(req.params.id);
   events = events.filter((event) => event.id !== id);
   res.status(204).send();
+});
+
+// data reset
+app.get("/api/events/reset", (req, res) => {
+  events = [...DUMMY_DATA];
+  res.json("reset");
 });
 
 // 서버 시작
