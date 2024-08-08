@@ -1,4 +1,4 @@
-import { Event } from "../types/types";
+import { Event, RepeatType } from "../types/types";
 
 /**
  * 특정 년도와 달을 통해 일수를 얻는 함수
@@ -130,18 +130,21 @@ const isDateInRange = (date: Date, startDate: Date, endDate: Date): boolean => {
 
 /**
  * 주어진 일정과 반복 정보(반복 유형, 반복 주기)로 반복 일정을 생성하는 함수
- * @param event
+ * @param event @type Event
  * @returns
  */
 const getRepeatEvents = (event: Event) => {
   const { type, interval, endDate, repeatNumber, repeatDay } = event.repeat;
 
   const repeatEvents = [];
+
+  // 반복 정보가 없다면..
   if (type === "none" || !interval) {
     return [];
   }
   const startDate = new Date(event.date);
 
+  // 반복되는 이벤트의 고유 id를 부여를 위해서
   let tempId = 0;
 
   const dayMapping: Record<string, number> = {
@@ -154,17 +157,19 @@ const getRepeatEvents = (event: Event) => {
     토: 6,
   };
 
+  // 반복주기가 있을때
   if (Number(repeatNumber) > 0) {
-    const currentDate = new Date(startDate);
+    const currentDate = startDate;
     let count = 0;
-    // 요일 지정해서 생성하는 부분 급해서...gpt에 의존...ㅠㅠ
     while (count < Number(repeatNumber)) {
+      // type이 주기이고, 반복하는 요일이 있고,
       if (type === "weekly" && repeatDay && repeatDay.length > 0) {
         for (let i = 0; i < 7; i++) {
-          const tempDate = new Date(currentDate);
+          const tempDate = currentDate;
           tempDate.setDate(tempDate.getDate() + i);
-          const dayOfWeek = tempDate.getDay();
-          if (repeatDay.some((day) => dayMapping[day] === dayOfWeek)) {
+
+          // 반복 요일에 따라 새로운 반복 이벤트 생성해주기
+          if (repeatDay.some((day) => dayMapping[day] === tempDate.getDay())) {
             const newEvent = {
               ...event,
               id: event.id + tempId,
@@ -173,6 +178,8 @@ const getRepeatEvents = (event: Event) => {
             repeatEvents.push(newEvent);
             tempId++;
             count++;
+
+            // 반복횟수 체크해서 넘어가면 종료
             if (count >= Number(repeatNumber)) break;
           }
         }
@@ -186,39 +193,30 @@ const getRepeatEvents = (event: Event) => {
         repeatEvents.push(newEvent);
         count++;
 
-        // 다음 날짜 계산하기
-        switch (type) {
-          case "daily":
-            currentDate.setDate(currentDate.getDate() + interval);
-            break;
-          case "weekly":
-            currentDate.setDate(currentDate.getDate() + 7 * interval);
-            break;
-          case "monthly":
-            currentDate.setMonth(currentDate.getMonth() + interval);
-            break;
-          case "yearly":
-            currentDate.setFullYear(currentDate.getFullYear() + interval);
-            break;
-        }
+        getNextDate(type, currentDate, interval);
         tempId++;
       }
     }
     return repeatEvents;
   }
 
+  // 반복 주기가 없다면
   const newEndDate = endDate
     ? new Date(endDate)
     : new Date(new Date(startDate.getFullYear(), 11, 31));
 
-  for (let currentDate = new Date(startDate); currentDate <= newEndDate; ) {
+  for (let currentDate = startDate; currentDate <= newEndDate; ) {
+    //
     if (type === "weekly" && repeatDay && repeatDay.length > 0) {
       for (let i = 0; i < 7; i++) {
         const tempDate = new Date(currentDate);
         tempDate.setDate(tempDate.getDate() + i);
+
+        // 현재 날짜가 마지막날짜를 넘어서면 끝내기
         if (tempDate > newEndDate) break;
-        const dayOfWeek = tempDate.getDay();
-        if (repeatDay.some((day) => dayMapping[day] === dayOfWeek)) {
+
+        // 반복 요일에 따라 새로운 반복 이벤트 생성해주기
+        if (repeatDay.some((day) => dayMapping[day] === tempDate.getDay())) {
           const newEvent = {
             ...event,
             id: event.id + tempId,
@@ -237,26 +235,35 @@ const getRepeatEvents = (event: Event) => {
       };
       repeatEvents.push(newEvent);
 
-      // 다음 날짜 계산하기
-      switch (type) {
-        case "daily":
-          currentDate.setDate(currentDate.getDate() + interval);
-          break;
-        case "weekly":
-          currentDate.setDate(currentDate.getDate() + 7 * interval);
-          break;
-        case "monthly":
-          currentDate.setMonth(currentDate.getMonth() + interval);
-          break;
-        case "yearly":
-          currentDate.setFullYear(currentDate.getFullYear() + interval);
-          break;
-      }
+      getNextDate(type, currentDate, interval);
       tempId++;
     }
   }
 
   return repeatEvents;
+};
+
+/**
+ * 반복 유형에 따라 다음 반복 일정 계산하는 함수
+ * @param type
+ * @param currentDate
+ * @param interval
+ */
+const getNextDate = (type: RepeatType, currentDate: Date, interval: number) => {
+  switch (type) {
+    case "daily":
+      currentDate.setDate(currentDate.getDate() + interval);
+      break;
+    case "weekly":
+      currentDate.setDate(currentDate.getDate() + 7 * interval);
+      break;
+    case "monthly":
+      currentDate.setMonth(currentDate.getMonth() + interval);
+      break;
+    case "yearly":
+      currentDate.setFullYear(currentDate.getFullYear() + interval);
+      break;
+  }
 };
 
 export {
