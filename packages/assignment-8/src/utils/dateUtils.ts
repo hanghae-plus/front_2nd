@@ -1,10 +1,20 @@
-import { Event } from "../types.ts";
+import { Event, RepeatType } from '../types.ts';
 
 /**
  * 주어진 년도와 월의 일수를 반환합니다.
  */
 export function getDaysInMonth(year: number, month: number): number {
-  return new Date(year, month, 0).getDate();
+  return new Date(year, month + 1, 0).getDate();
+}
+
+/**
+ * 주어진 날짜를 복사하여 새로운 날짜를 반환합니다.
+ * @description callback 함수를 사용하여 날짜를 조작하고, 새로운 날짜를 반환합니다.
+ */
+export function getNewDate(date: Date, callback: (date: Date) => void) {
+  const newDate = new Date(date);
+  callback(newDate);
+  return newDate;
 }
 
 /**
@@ -16,8 +26,9 @@ export function getWeekDates(date: Date): Date[] {
   const monday = new Date(date.setDate(diff));
   const weekDates = [];
   for (let i = 0; i < 7; i++) {
-    const nextDate = new Date(monday);
-    nextDate.setDate(monday.getDate() + i);
+    const nextDate = getNewDate(monday, (date) => {
+      date.setDate(date.getDate() + i - 1);
+    });
     weekDates.push(nextDate);
   }
   return weekDates;
@@ -31,7 +42,7 @@ export function getWeeksAtMonth(currentDate: Date) {
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const weeks = [];
 
-  const initWeek = () => Array(7).fill(null)
+  const initWeek = () => Array(7).fill(null);
 
   let week: Array<number | null> = initWeek();
 
@@ -52,7 +63,24 @@ export function getWeeksAtMonth(currentDate: Date) {
 }
 
 export function getEventsForDay(events: Event[], date: number): Event[] {
-  return events.filter(event => new Date(event.date).getDate() === date)
+  return events.filter((event) => new Date(event.date).getDate() === date);
+}
+
+export function getRepeatTypeText(repeatType: RepeatType, interval: number): string {
+  switch (repeatType) {
+    case 'none':
+      return '';
+    case 'daily':
+      return `${interval}일마다 반복`;
+    case 'weekly':
+      return `${interval}주마다 반복`;
+    case 'monthly':
+      return `${interval}월마다 반복`;
+    case 'yearly':
+      return `${interval}년마다 반복`;
+    default:
+      return '알 수 없는 반복 유형';
+  }
 }
 
 /**
@@ -81,14 +109,35 @@ export function isDateInRange(date: Date, rangeStart: Date, rangeEnd: Date): boo
   return date >= rangeStart && date <= rangeEnd;
 }
 
+/**
+ * 주어진 날짜가 특정 월에 포함되어 있는지 확인합니다.
+ * @description 연도를 함께 비교하여 동일한 월인지 확인합니다.
+ */
+export function isDateInMonth(date: Date, month: Date) {
+  return date.getMonth() === month.getMonth() && date.getFullYear() === month.getFullYear();
+}
+
+/**
+ * 주어진 날짜가 특정 주에 포함되어 있는지 확인합니다.
+ * @description 연도를 함께 비교하여 동일한 주인지 확인합니다.
+ */
+export function isDateInWeek(date: Date, week: Date): boolean {
+  const weekDates = getWeekDates(week);
+  const compareDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  return weekDates.some(
+    (weekDate) =>
+      weekDate.getFullYear() === compareDate.getFullYear() &&
+      weekDate.getMonth() === compareDate.getMonth() &&
+      weekDate.getDate() === compareDate.getDate()
+  );
+}
 export function fillZero(value: number, size = 2) {
-  return String(value).padStart(size, "0");
+  return String(value).padStart(size, '0');
 }
 
 export function formatDate(currentDate: Date, day?: number) {
-  return [
-    currentDate.getFullYear(),
-    fillZero(currentDate.getMonth() + 1),
-    fillZero(day ?? currentDate.getDate())
-  ].join('-');
+  return [currentDate.getFullYear(), fillZero(currentDate.getMonth() + 1), fillZero(day ?? currentDate.getDate())].join(
+    '-'
+  );
 }

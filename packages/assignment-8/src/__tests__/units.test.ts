@@ -1,29 +1,31 @@
-import { describe, expect, test } from "vitest";
-import { Event } from "../types";
+import { describe, expect, test } from 'vitest';
+import { fetchHolidays } from '../apis/fetchHolidays';
+import { Event } from '../types';
 import {
-fillZero,
-formatDate,
-formatMonth,
-formatWeek,
-getDaysInMonth,
+  fillZero,
+  formatDate,
+  formatMonth,
+  formatWeek,
+  getDaysInMonth,
   getEventsForDay,
   getWeekDates,
-getWeeksAtMonth,
-isDateInRange
-} from "../utils/dateUtils";
-import { convertEventToDateRange, findOverlappingEvents, isOverlapping, parseDateTime } from "../utils/eventOverlap"; // 이 함수들이 정의된 파일을 import 해야 합니다.
-import { getTimeErrorMessage } from "../utils/timeValidation";
-import { getFilteredEvents } from "../utils/eventUtils";
-import { createNotificationMessage, getUpcomingEvents } from "../utils/notificationUtils";
-import { fetchHolidays } from "../apis/fetchHolidays";
+  getWeeksAtMonth,
+  isDateInMonth,
+  isDateInRange,
+  isDateInWeek,
+} from '../utils/dateUtils';
+import { convertEventToDateRange, findOverlappingEvents, isOverlapping, parseDateTime } from '../utils/eventOverlap'; // 이 함수들이 정의된 파일을 import 해야 합니다.
+import { expandRepeatingEvents, getFilteredEvents } from '../utils/eventUtils';
+import { createNotificationMessage, getUpcomingEvents } from '../utils/notificationUtils';
+import { getTimeErrorMessage } from '../utils/timeValidation';
 
 describe('단위 테스트: 날짜 및 시간 관리', () => {
   describe('getDaysInMonth >', () => {
     test('주어진 월의 일 수를 정확히 반환한다', () => {
-      expect(getDaysInMonth(2024, 1)).toBe(31); // 1월
-      expect(getDaysInMonth(2024, 2)).toBe(29); // 윤년의 2월
-      expect(getDaysInMonth(2023, 2)).toBe(28); // 평년의 2월
-      expect(getDaysInMonth(2024, 4)).toBe(30); // 4월
+      expect(getDaysInMonth(2024, 0)).toBe(31); // 1월
+      expect(getDaysInMonth(2024, 1)).toBe(29); // 윤년의 2월
+      expect(getDaysInMonth(2023, 1)).toBe(28); // 평년의 2월
+      expect(getDaysInMonth(2024, 3)).toBe(30); // 4월
     });
   });
 
@@ -32,15 +34,15 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       const date = new Date('2024-07-10'); // 수요일
       const weekDates = getWeekDates(date);
       expect(weekDates).toHaveLength(7);
-      expect(weekDates[0].toISOString().split('T')[0]).toBe('2024-07-08'); // 월요일
-      expect(weekDates[6].toISOString().split('T')[0]).toBe('2024-07-14'); // 일요일
+      expect(weekDates[0].toISOString().split('T')[0]).toBe('2024-07-07'); // 일요일
+      expect(weekDates[6].toISOString().split('T')[0]).toBe('2024-07-13'); // 토요일
     });
 
     test('연도를 넘어가는 주의 날짜를 정확히 처리한다', () => {
       const date = new Date('2024-12-30'); // 월요일
       const weekDates = getWeekDates(date);
-      expect(weekDates[0].toISOString().split('T')[0]).toBe('2024-12-30'); // 월요일
-      expect(weekDates[6].toISOString().split('T')[0]).toBe('2025-01-05'); // 일요일
+      expect(weekDates[0].toISOString().split('T')[0]).toBe('2024-12-29'); // 월요일
+      expect(weekDates[6].toISOString().split('T')[0]).toBe('2025-01-04'); // 일요일
     });
   });
 
@@ -53,7 +55,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         [7, 8, 9, 10, 11, 12, 13],
         [14, 15, 16, 17, 18, 19, 20],
         [21, 22, 23, 24, 25, 26, 27],
-        [28, 29, 30, null, null, null, null],
+        [28, 29, 30, 31, null, null, null],
       ]);
     });
   });
@@ -70,7 +72,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         location: '',
         category: '',
         repeat: { type: 'none', interval: 0 },
-        notificationTime: 0
+        notificationTime: 0,
       },
       {
         id: 2,
@@ -82,7 +84,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         location: '',
         category: '',
         repeat: { type: 'none', interval: 0 },
-        notificationTime: 0
+        notificationTime: 0,
       },
       {
         id: 3,
@@ -94,7 +96,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         location: '',
         category: '',
         repeat: { type: 'none', interval: 0 },
-        notificationTime: 0
+        notificationTime: 0,
       },
     ];
 
@@ -132,12 +134,52 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
     });
   });
 
+  describe('isDateInMonth >', () => {
+    test('주어진 날짜가 특정 월에 포함되어 있는지 정확히 판단한다', () => {
+      const date = new Date('2024-07-10');
+      const month = new Date('2024-07-01');
+      expect(isDateInMonth(date, month)).toBe(true);
+    });
+
+    test('주어진 날짜가 특정 월에 포함되어 있지 않은 경우 false를 반환해야 한다', () => {
+      const date = new Date('2024-07-10');
+      const month = new Date('2024-08-01');
+      expect(isDateInMonth(date, month)).toBe(false);
+    });
+
+    test('주어진 날짜가 다른 연도의 월에 포함된 경우 false를 반환해야 한다', () => {
+      const date = new Date('2023-08-10');
+      const month = new Date('2024-08-01');
+      expect(isDateInMonth(date, month)).toBe(false);
+    });
+  });
+
+  describe('isDateInWeek >', () => {
+    test('주어진 날짜가 특정 주에 포함되어 있는지 정확히 판단한다', () => {
+      const date = new Date('2024-07-06');
+      const week = new Date('2024-07-01');
+      expect(isDateInWeek(date, week)).toBe(true);
+    });
+
+    test('주어진 날짜가 특정 주에 포함되지 않는 경우 false를 반환해야 한다', () => {
+      const date = new Date('2024-07-07');
+      const week = new Date('2024-07-01');
+      expect(isDateInWeek(date, week)).toBe(false);
+    });
+
+    test('주어진 날짜가 다른 연도의 주에 포함된 경우 false를 반환해야 한다', () => {
+      const date = new Date('2023-08-04');
+      const week = new Date('2024-08-01');
+      expect(isDateInWeek(date, week)).toBe(false);
+    });
+  });
+
   describe('getDaysInMonth >', () => {
     test('각 월의 올바른 일수를 반환해야 한다', () => {
-      expect(getDaysInMonth(2023, 2)).toBe(28);
-      expect(getDaysInMonth(2024, 2)).toBe(29); // 윤년
-      expect(getDaysInMonth(2023, 4)).toBe(30);
-      expect(getDaysInMonth(2023, 12)).toBe(31);
+      expect(getDaysInMonth(2023, 1)).toBe(28);
+      expect(getDaysInMonth(2024, 1)).toBe(29); // 윤년
+      expect(getDaysInMonth(2023, 3)).toBe(30);
+      expect(getDaysInMonth(2023, 11)).toBe(31);
     });
   });
 
@@ -177,7 +219,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
           location: '',
           category: '',
           repeat: { type: 'none', interval: 0 },
-          notificationTime: 0
+          notificationTime: 0,
         };
         const result = convertEventToDateRange(event);
         expect(result.start).toEqual(new Date('2024-07-01T14:30:00'));
@@ -188,28 +230,56 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
     describe('isOverlapping >', () => {
       test('두 이벤트가 겹치는 경우 true를 반환해야 한다', () => {
         const event1: Event = {
-          id: 1, date: '2024-07-01', startTime: '14:00', endTime: '16:00',
-          title: '이벤트 1', description: '', location: '', category: '',
-          repeat: { type: 'none', interval: 0 }, notificationTime: 0
+          id: 1,
+          date: '2024-07-01',
+          startTime: '14:00',
+          endTime: '16:00',
+          title: '이벤트 1',
+          description: '',
+          location: '',
+          category: '',
+          repeat: { type: 'none', interval: 0 },
+          notificationTime: 0,
         };
         const event2: Event = {
-          id: 2, date: '2024-07-01', startTime: '15:00', endTime: '17:00',
-          title: '이벤트 2', description: '', location: '', category: '',
-          repeat: { type: 'none', interval: 0 }, notificationTime: 0
+          id: 2,
+          date: '2024-07-01',
+          startTime: '15:00',
+          endTime: '17:00',
+          title: '이벤트 2',
+          description: '',
+          location: '',
+          category: '',
+          repeat: { type: 'none', interval: 0 },
+          notificationTime: 0,
         };
         expect(isOverlapping(event1, event2)).toBe(true);
       });
 
       test('두 이벤트가 겹치지 않는 경우 false를 반환해야 한다', () => {
         const event1: Event = {
-          id: 1, date: '2024-07-01', startTime: '14:00', endTime: '16:00',
-          title: '이벤트 1', description: '', location: '', category: '',
-          repeat: { type: 'none', interval: 0 }, notificationTime: 0
+          id: 1,
+          date: '2024-07-01',
+          startTime: '14:00',
+          endTime: '16:00',
+          title: '이벤트 1',
+          description: '',
+          location: '',
+          category: '',
+          repeat: { type: 'none', interval: 0 },
+          notificationTime: 0,
         };
         const event2: Event = {
-          id: 2, date: '2024-07-01', startTime: '16:00', endTime: '18:00',
-          title: '이벤트 2', description: '', location: '', category: '',
-          repeat: { type: 'none', interval: 0 }, notificationTime: 0
+          id: 2,
+          date: '2024-07-01',
+          startTime: '16:00',
+          endTime: '18:00',
+          title: '이벤트 2',
+          description: '',
+          location: '',
+          category: '',
+          repeat: { type: 'none', interval: 0 },
+          notificationTime: 0,
         };
         expect(isOverlapping(event1, event2)).toBe(false);
       });
@@ -228,7 +298,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
             location: '',
             category: '',
             repeat: { type: 'none', interval: 0 },
-            notificationTime: 0
+            notificationTime: 0,
           },
           {
             id: 2,
@@ -240,7 +310,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
             location: '',
             category: '',
             repeat: { type: 'none', interval: 0 },
-            notificationTime: 0
+            notificationTime: 0,
           },
           {
             id: 3,
@@ -252,7 +322,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
             location: '',
             category: '',
             repeat: { type: 'none', interval: 0 },
-            notificationTime: 0
+            notificationTime: 0,
           },
         ];
         const newEvent: Event = {
@@ -265,7 +335,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
           location: '',
           category: '',
           repeat: { type: 'none', interval: 0 },
-          notificationTime: 0
+          notificationTime: 0,
         };
         const result = findOverlappingEvents(newEvent, events);
         expect(result).toEqual([events[0], events[1]]);
@@ -283,7 +353,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
             location: '',
             category: '',
             repeat: { type: 'none', interval: 0 },
-            notificationTime: 0
+            notificationTime: 0,
           },
           {
             id: 2,
@@ -295,7 +365,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
             location: '',
             category: '',
             repeat: { type: 'none', interval: 0 },
-            notificationTime: 0
+            notificationTime: 0,
           },
         ];
         const newEvent: Event = {
@@ -308,7 +378,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
           location: '',
           category: '',
           repeat: { type: 'none', interval: 0 },
-          notificationTime: 0
+          notificationTime: 0,
         };
         const result = findOverlappingEvents(newEvent, events);
         expect(result).toHaveLength(0);
@@ -364,7 +434,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         location: '',
         category: '',
         repeat: { type: 'none', interval: 0 },
-        notificationTime: 0
+        notificationTime: 0,
       },
       {
         id: 2,
@@ -376,7 +446,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         location: '',
         category: '',
         repeat: { type: 'none', interval: 0 },
-        notificationTime: 0
+        notificationTime: 0,
       },
       {
         id: 3,
@@ -388,7 +458,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         location: '',
         category: '',
         repeat: { type: 'none', interval: 0 },
-        notificationTime: 0
+        notificationTime: 0,
       },
     ];
 
@@ -401,7 +471,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
     test('주간 뷰에서 해당 주의 이벤트만 반환해야 한다', () => {
       const result = getFilteredEvents(events, '', new Date('2024-07-01'), 'week');
       expect(result).toHaveLength(2);
-      expect(result.map(e => e.title)).toEqual(['이벤트 1', '이벤트 2']);
+      expect(result.map((e) => e.title)).toEqual(['이벤트 1', '이벤트 2']);
     });
 
     test('월간 뷰에서 해당 월의 이벤트만 반환해야 한다', () => {
@@ -412,7 +482,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
     test('검색어와 날짜 필터링을 동시에 적용해야 한다', () => {
       const result = getFilteredEvents(events, '이벤트', new Date('2024-07-01'), 'week');
       expect(result).toHaveLength(2);
-      expect(result.map(e => e.title)).toEqual(['이벤트 1', '이벤트 2']);
+      expect(result.map((e) => e.title)).toEqual(['이벤트 1', '이벤트 2']);
     });
   });
 
@@ -452,7 +522,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         location: '',
         category: '',
         repeat: { type: 'none', interval: 0 },
-        notificationTime: 10
+        notificationTime: 10,
       },
       {
         id: 2,
@@ -464,7 +534,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         location: '',
         category: '',
         repeat: { type: 'none', interval: 0 },
-        notificationTime: 30
+        notificationTime: 30,
       },
       {
         id: 3,
@@ -476,7 +546,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         location: '',
         category: '',
         repeat: { type: 'none', interval: 0 },
-        notificationTime: 60
+        notificationTime: 60,
       },
     ];
 
@@ -509,10 +579,120 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         location: '',
         category: '',
         repeat: { type: 'none', interval: 0 },
-        notificationTime: 15
+        notificationTime: 15,
       };
       const message = createNotificationMessage(event);
       expect(message).toBe('15분 후 중요 회의 일정이 시작됩니다.');
+    });
+  });
+
+  describe('expandRepeatingEvents >', () => {
+    test('1일마다 반복되는 이벤트를 확장해야 한다', () => {
+      const event: Event = {
+        id: 1,
+        title: '중요 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '',
+        location: '',
+        category: '',
+        repeat: { type: 'daily', interval: 1 },
+        notificationTime: 15,
+      };
+      const events: Event[] = [event];
+      const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
+      expect(result).toHaveLength(31);
+    });
+
+    test('3일마다 반복되는 이벤트를 확장해야 한다', () => {
+      const event: Event = {
+        id: 1,
+        title: '중요 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '',
+        location: '',
+        category: '',
+        repeat: { type: 'daily', interval: 3 },
+        notificationTime: 15,
+      };
+      const events: Event[] = [event];
+      const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
+      expect(result).toHaveLength(11);
+    });
+
+    test('1주마다 반복되는 이벤트를 확장해야 한다', () => {
+      const event: Event = {
+        id: 1,
+        title: '중요 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '',
+        location: '',
+        category: '',
+        repeat: { type: 'weekly', interval: 1 },
+        notificationTime: 15,
+      };
+      const events: Event[] = [event];
+      const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
+      expect(result).toHaveLength(5);
+    });
+
+    test('2주마다 반복되는 이벤트를 확장해야 한다', () => {
+      const event: Event = {
+        id: 1,
+        title: '중요 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '',
+        location: '',
+        category: '',
+        repeat: { type: 'weekly', interval: 2 },
+        notificationTime: 15,
+      };
+      const events: Event[] = [event];
+      const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
+      expect(result).toHaveLength(3);
+    });
+
+    test('1달마다 반복되는 이벤트를 확장해야 한다', () => {
+      const event: Event = {
+        id: 1,
+        title: '중요 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '',
+        location: '',
+        category: '',
+        repeat: { type: 'monthly', interval: 1 },
+        notificationTime: 15,
+      };
+      const events: Event[] = [event];
+      const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
+      expect(result).toHaveLength(1);
+    });
+
+    test('1년마다 반복되는 이벤트를 확장해야 한다', () => {
+      const event: Event = {
+        id: 1,
+        title: '중요 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '',
+        location: '',
+        category: '',
+        repeat: { type: 'yearly', interval: 1 },
+        notificationTime: 15,
+      };
+      const events: Event[] = [event];
+      const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
+      expect(result).toHaveLength(1);
     });
   });
 });
