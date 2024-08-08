@@ -22,10 +22,10 @@ import { getTimeErrorMessage } from '../utils/timeValidation';
 describe('단위 테스트: 날짜 및 시간 관리', () => {
   describe('getDaysInMonth >', () => {
     test('주어진 월의 일 수를 정확히 반환한다', () => {
-      expect(getDaysInMonth(2024, 1)).toBe(31); // 1월
-      expect(getDaysInMonth(2024, 2)).toBe(29); // 윤년의 2월
-      expect(getDaysInMonth(2023, 2)).toBe(28); // 평년의 2월
-      expect(getDaysInMonth(2024, 4)).toBe(30); // 4월
+      expect(getDaysInMonth(2024, 0)).toBe(31); // 1월
+      expect(getDaysInMonth(2024, 1)).toBe(29); // 윤년의 2월
+      expect(getDaysInMonth(2023, 1)).toBe(28); // 평년의 2월
+      expect(getDaysInMonth(2024, 3)).toBe(30); // 4월
     });
   });
 
@@ -55,7 +55,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
         [7, 8, 9, 10, 11, 12, 13],
         [14, 15, 16, 17, 18, 19, 20],
         [21, 22, 23, 24, 25, 26, 27],
-        [28, 29, 30, null, null, null, null],
+        [28, 29, 30, 31, null, null, null],
       ]);
     });
   });
@@ -176,10 +176,10 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
 
   describe('getDaysInMonth >', () => {
     test('각 월의 올바른 일수를 반환해야 한다', () => {
-      expect(getDaysInMonth(2023, 2)).toBe(28);
-      expect(getDaysInMonth(2024, 2)).toBe(29); // 윤년
-      expect(getDaysInMonth(2023, 4)).toBe(30);
-      expect(getDaysInMonth(2023, 12)).toBe(31);
+      expect(getDaysInMonth(2023, 1)).toBe(28);
+      expect(getDaysInMonth(2024, 1)).toBe(29); // 윤년
+      expect(getDaysInMonth(2023, 3)).toBe(30);
+      expect(getDaysInMonth(2023, 11)).toBe(31);
     });
   });
 
