@@ -12,7 +12,7 @@ import {
   HStack,
   Text,
 } from "@chakra-ui/react";
-import { getWeekDates, formatWeek, filteredEvents } from "../utils";
+import { getWeekDates, formatWeek, filteredEvents, filteredRepeatEvents } from "../utils";
 import { weekDays } from "../magicnumbers";
 import { Event } from "../types";
 
@@ -23,6 +23,7 @@ interface Props {
   currentDate: Date;
   notifiedEvents: number[];
 }
+
 const WeekView = ({
   events,
   searchTerm,
@@ -31,6 +32,8 @@ const WeekView = ({
   notifiedEvents,
 }: Props) => {
   const weekDates = getWeekDates(currentDate);
+  const repeatEvents = filteredRepeatEvents(events, searchTerm, view, currentDate);
+
   return (
     <VStack data-testid='week-view' align='stretch' w='full' spacing={4}>
       <Heading size='md'>{formatWeek(currentDate)}</Heading>
@@ -54,17 +57,17 @@ const WeekView = ({
                 width='14.28%'
               >
                 <Text fontWeight='bold'>{date.getDate()}</Text>
-                {filteredEvents(events, searchTerm, view, currentDate)
+                {[...filteredEvents(events, searchTerm, view, currentDate), ...repeatEvents]
                   .filter(
                     (event) =>
                       new Date(event.date).toDateString() ===
                       date.toDateString()
                   )
-                  .map((event) => {
+                  .map((event, idx) => {
                     const isNotified = notifiedEvents.includes(event.id);
                     return (
                       <Box
-                        key={event.id}
+                        key={`${event.id}${event.isRepeat?'_'+idx:''}`}
                         p={1}
                         my={1}
                         bg={isNotified ? "red.100" : "gray.100"}

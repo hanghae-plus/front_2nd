@@ -192,16 +192,6 @@ const EventForm = ({
       </FormControl>
 
       <FormControl>
-        <FormLabel>반복 설정</FormLabel>
-        <Checkbox
-          isChecked={eventFormData.isRepeating}
-          onChange={(e) => handleChange("isRepeating", e.target.checked)}
-        >
-          반복 일정
-        </Checkbox>
-      </FormControl>
-
-      <FormControl>
         <FormLabel>알림 설정</FormLabel>
         <Select
           value={eventFormData.notificationTime}
@@ -215,6 +205,16 @@ const EventForm = ({
             </option>
           ))}
         </Select>
+      </FormControl>
+
+      <FormControl>
+        <FormLabel>반복 설정</FormLabel>
+        <Checkbox
+          isChecked={eventFormData.isRepeating}
+          onChange={(e) => handleChange("isRepeating", e.target.checked)}
+        >
+          반복 일정
+        </Checkbox>
       </FormControl>
 
       {eventFormData.isRepeating && (

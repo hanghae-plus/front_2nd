@@ -25,7 +25,7 @@ export const fetchHolidays = (year: number, month: number) => {
   };
 };
 
-const initialEvents: Event[] = [
+export const initialMockEvents: Event[] = [
   {
     id: 1,
     title: "팀 회의",
@@ -100,53 +100,51 @@ const initialEvents: Event[] = [
   }
 ]
 
-let events: Event[] = [...initialEvents];
+export const createHandlers = (initialMockEvents: Event[]) => {
+  let events: Event[] = [...initialMockEvents];
 
-export const resetMockData = () => {
-  events = [...initialEvents];
+  return [
+    http.get('/api/events', () => {
+      return HttpResponse.json(events);
+    }),
+
+    http.post('/api/events', async ({ request }) => {
+      const data = await request.json() as { 
+        title: string,
+        date: string,
+        startTime: string,
+        endTime: string,
+        description: string,
+        location: string,
+        category: string,
+        repeat: RepeatInfo,
+        notificationTime: number }
+
+      const newEvent: Event = {
+        id: Date.now(),
+        ...data
+      };
+      events.push(newEvent);
+      return HttpResponse.json(newEvent, { status: 201 })
+    }),
+
+    http.put('/api/events/:id', async ({ params, request }) => {
+      const { id } = params;
+      const updates = await request.json() as Event;
+      const eventIndex = events.findIndex(event => event.id === Number(id));
+
+      if (eventIndex > -1) {
+        events[eventIndex] = { ...events[eventIndex], ...updates }
+        return HttpResponse.json(events[eventIndex]);
+      } else {
+        return HttpResponse.json(null, {status: 404});
+      }
+    }),
+
+    http.delete('/api/events/:id', ({ params }) => {
+      const { id } = params;
+      events = events.filter(event => event.id !== Number(id));
+      return new HttpResponse(null, {status: 204});
+    })
+  ]
 }
-
-export const mockApiHandlers = [
-  http.get('/api/events', () => {
-    return HttpResponse.json(events);
-  }),
-
-  http.post('/api/events', async ({ request }) => {
-    const data = await request.json() as { 
-      title: string,
-      date: string,
-      startTime: string,
-      endTime: string,
-      description: string,
-      location: string,
-      category: string,
-      repeat: RepeatInfo,
-      notificationTime: number }
-
-    const newEvent: Event = {
-      id: Date.now(),
-      ...data
-    };
-    events.push(newEvent);
-    return HttpResponse.json(newEvent, { status: 201 })
-  }),
-
-  http.put('/api/events/:id', async ({ params, request }) => {
-    const { id } = params;
-    const updates = await request.json() as Event;
-    const eventIndex = events.findIndex(event => event.id === Number(id));
-
-    if (eventIndex > -1) {
-      events[eventIndex] = { ...events[eventIndex], ...updates }
-      return HttpResponse.json(events[eventIndex]);
-    } else {
-      return HttpResponse.json(null, {status: 404});
-    }
-  }),
-
-  http.delete('/api/events/:id', ({ params }) => {
-    const { id } = params;
-    events = events.filter(event => event.id !== Number(id));
-    return new HttpResponse(null, {status: 204});
-  })
-]

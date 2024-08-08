@@ -4,6 +4,8 @@ export interface RepeatInfo {
   type: RepeatType;
   interval: number;
   endDate?: string;
+  excludeDates?: Date[]; // 반복 일정 중 삭제한 일정의 날짜값
+  // endCondition?: 'date' | 'count';
 }
 
 export interface Event {
@@ -17,6 +19,7 @@ export interface Event {
   category: string;
   repeat: RepeatInfo;
   notificationTime: number; // 분 단위로 저장
+  isRepeat?: boolean; // 반복 일정인지 판별
 }
 
 export interface EventFormLabel {

@@ -56,6 +56,12 @@ const useEventForm = (isEditing: boolean = false) => {
     setEventFormData((prev) => {
       const newValue: { [key: string]: string | number | boolean } = {};
       newValue[label] = value;
+
+      // 반복 설정 추가 시 기본 반복 주기는 매일, 삭제 시 none
+      if(label === 'isRepeating') { 
+        newValue['repeatType'] = value ? 'daily' : 'none';
+      }
+
       return { ...prev, ...newValue };
     });
   };
@@ -128,12 +134,18 @@ const useEventForm = (isEditing: boolean = false) => {
     try {
       let response;
       if (isEditing) {
+        // id값은 값의 변경을 확실하게 막기 위해 제거
+        // date값이 포함될경우 원본 파일의 시작일이 변경될 수 있어 제거
+        const updatedEvent = {...eventData};
+        updatedEvent['id'] = undefined;
+        updatedEvent['date'] = undefined;
+
         response = await fetch(`/api/events/${eventData.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(eventData),
+          body: JSON.stringify(updatedEvent),
         });
       } else {
         response = await fetch("/api/events", {

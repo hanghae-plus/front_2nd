@@ -13,7 +13,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { weekDays } from "../magicnumbers";
-import { filteredEvents, formatMonth, getDaysInMonth } from "../utils";
+import { filteredEvents, filteredRepeatEvents, formatMonth, getDateInfo, getDaysInMonth } from "../utils";
 import { Event } from "../types";
 
 interface Props {
@@ -24,6 +24,7 @@ interface Props {
   currentDate: Date;
   notifiedEvents: number[];
 }
+
 const MonthView = ({
   holidays,
   events,
@@ -32,15 +33,21 @@ const MonthView = ({
   currentDate,
   notifiedEvents,
 }: Props) => {
+  const {curYear, curMonth} = getDateInfo(currentDate);
+
   const daysInMonth = getDaysInMonth(
     currentDate.getFullYear(),
     currentDate.getMonth()
   );
+
   const firstDayOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
     1
   ).getDay();
+
+  const repeatEvents = filteredRepeatEvents(events, searchTerm, view, currentDate);
+  
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const weeks = [];
   let week = Array(7).fill(null);
@@ -76,7 +83,7 @@ const MonthView = ({
             <Tr key={weekIndex}>
               {week.map((day, dayIndex) => {
                 const dateString = day
-                  ? `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+                  ? `${curYear}-${String(curMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`
                   : "";
                 const holiday = holidays[dateString];
 
@@ -96,7 +103,7 @@ const MonthView = ({
                             {holiday}
                           </Text>
                         )}
-                        {filteredEvents(events, searchTerm, view, currentDate)
+                        {[...filteredEvents(events, searchTerm, view, currentDate), ...repeatEvents]
                           .filter(
                             (event) => new Date(event.date).getDate() === day
                           )

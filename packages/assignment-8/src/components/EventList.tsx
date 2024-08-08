@@ -1,5 +1,5 @@
 import { VStack, FormControl, FormLabel, Input, Text } from "@chakra-ui/react";
-import { filteredEvents } from "../utils";
+import { filteredEvents, filteredRepeatEvents } from "../utils";
 import EventListItem from "./EventListItem";
 import { Dispatch, SetStateAction } from "react";
 import { Event } from "../types";
@@ -31,6 +31,8 @@ const EventList = ({
     view,
     currentDate
   );
+  const repeatEvents = filteredRepeatEvents(events, searchTerm, view, currentDate);
+  const filteredAllEvents = [...filteredEventsList, ...repeatEvents];
 
   return (
     <VStack data-testid='event-list' w='500px' h='full' overflowY='auto'>
@@ -43,18 +45,23 @@ const EventList = ({
         />
       </FormControl>
 
-      {filteredEventsList.length === 0 ? (
+      {filteredAllEvents.length === 0 ? (
         <Text>검색 결과가 없습니다.</Text>
       ) : (
-        filteredEventsList.map((event) => (
-          <EventListItem
-            key={event.id}
-            event={event}
-            notifiedEvents={notifiedEvents}
-            setEditingEvent={setEditingEvent}
-            fetchEvents={fetchEvents}
-          />
-        ))
+        filteredAllEvents.map((event: Event, index: number) => {
+          // event.id는 origin event의 것을 모든 반복일정이 고유해서 unique한 keyValue 따로 지정
+          const keyValue = `${event.id}${event.isRepeat?('_'+index):''}`;
+          return (
+            <EventListItem
+              key={keyValue}
+              keyValue={keyValue}
+              event={event}
+              notifiedEvents={notifiedEvents}
+              setEditingEvent={setEditingEvent}
+              fetchEvents={fetchEvents}
+            />
+          )
+        })
       )}
     </VStack>
   );

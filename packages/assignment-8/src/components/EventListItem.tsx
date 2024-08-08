@@ -12,12 +12,14 @@ import { Event } from "../types";
 import { Dispatch, SetStateAction } from "react";
 
 interface Props {
+  keyValue: string;
   event: Event;
   notifiedEvents: number[];
   setEditingEvent: Dispatch<SetStateAction<Event | null>>;
   fetchEvents: () => Promise<void>;
 }
 const EventListItem = ({
+  keyValue,
   event,
   notifiedEvents,
   setEditingEvent,
@@ -27,9 +29,22 @@ const EventListItem = ({
 
   const deleteEvent = async (id: number) => {
     try {
-      const response = await fetch(`/api/events/${id}`, {
-        method: "DELETE",
-      });
+      let response;
+      if(event.isRepeat) {
+        const updatedEvent = {repeat: {...event.repeat, excludeDates: [...(event.repeat.excludeDates||[]), new Date(event.date)]}}
+
+        response = await fetch(`/api/events/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedEvent),
+        });
+      } else {
+        response = await fetch(`/api/events/${id}`, {
+          method: "DELETE",
+        });
+      }
 
       if (!response.ok) {
         throw new Error("Failed to delete event");
@@ -54,7 +69,7 @@ const EventListItem = ({
   };
 
   return (
-    <Box key={event.id} borderWidth={1} borderRadius='lg' p={3} width='100%'>
+    <Box key={keyValue} data-testid={`listitem_${keyValue}`} borderWidth={1} borderRadius='lg' p={3} width='100%'>
       <HStack justifyContent='space-between'>
         <VStack align='start'>
           <HStack>
