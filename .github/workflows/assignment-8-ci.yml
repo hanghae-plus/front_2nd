@@ -23,7 +23,10 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - name: assignment-8-basic
-        run: |
-          pnpm install
-          pnpm -F assignment-8 test
+          
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run assignment-8 basic tests
+        working-directory: packages/assignment-8
+        run: pnpm test
