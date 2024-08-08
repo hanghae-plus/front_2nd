@@ -82,23 +82,28 @@ const expandRepeatingEvents = (
           date: currentDate.toISOString().split('T')[0],
         });
       }
-
-      switch (type) {
-        case 'daily':
-          currentDate = addDays(currentDate, interval);
-          break;
-        case 'weekly':
-          currentDate = addWeeks(currentDate, interval);
-          break;
-        case 'monthly':
-          currentDate = addMonths(currentDate, interval);
-          break;
-        case 'yearly':
-          currentDate = addYears(currentDate, interval);
-          break;
-      }
+      currentDate = incrementDate(currentDate, type, interval);
     }
   });
 
   return expandedEvents;
+};
+
+const incrementDate = (
+  currentDate: Date,
+  type: string,
+  interval: number
+): Date => {
+  switch (type) {
+    case 'daily':
+      return addDays(currentDate, interval);
+    case 'weekly':
+      return addWeeks(currentDate, interval);
+    case 'monthly':
+      return addMonths(currentDate, interval);
+    case 'yearly':
+      return addYears(currentDate, interval);
+    default:
+      return currentDate;
+  }
 };
