@@ -1,18 +1,12 @@
 import { ReactNode } from "react";
-
 import userEvent, { UserEvent } from "@testing-library/user-event";
-import {
-  findByRole,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import App from "../App.tsx";
+import { currentDateStore } from "../store/currentDateStore.ts";
 
 const setupInitItems = (component: ReactNode) => {
-  const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-
+  // const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  const user = userEvent.setup();
   return {
     user,
     ...render(component),
@@ -230,8 +224,9 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const searchItem = searchItems[1]; // 점심 약속 msw
 
       // 3. 삭제할 일정의 삭제 아이콘 누르기
-      const deleteIcon =
-        await within(searchItem).findByLabelText("Delete event");
+      const deleteIcon = await within(searchItem).findByLabelText(
+        "Delete event"
+      );
       await user.click(deleteIcon);
 
       // 4. 삭제되었는지 확인하기
@@ -354,15 +349,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const weekView = await screen.findByRole("weekView");
 
       // 4. 달력 내 일정 제목 element 모두 가져오기
-      const itemTitles = (await within(weekView).findAllByRole(
-        "itemTitle"
-      )) as HTMLElement[];
-
-      // 5. 해당 주에 해당하는 모든 일정 있는지 확인
-      const itemTitleContents = itemTitles.map((title) => title.textContent);
-      expect(itemTitleContents).toEqual(
-        expect.arrayContaining(["팀 회의 msw"])
-      );
+      expect(weekView).toHaveTextContent("팀 회의 msw");
     });
 
     test("월별 뷰에 일정이 정확히 표시되는지 확인한다", async () => {
@@ -378,20 +365,12 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       // 3. monthly 달력 element
       const monthView = screen.getByRole("monthView");
 
-      // 4. 달력 내 일정 제목 element 모두 가져오기
-      const itemTitles = (await within(monthView).findAllByRole(
-        "itemTitle"
-      )) as HTMLElement[];
-
       // 5. 해당 월에 해당하는 모든 일정 있는지 확인
-      const itemTitleContents = itemTitles.map((title) => title.textContent);
-      expect(itemTitleContents).toEqual(
-        expect.arrayContaining([
-          "팀 회의 msw",
-          "점심 약속 msw",
-          "실리카겔 공연 msw",
-        ])
-      );
+      const events = ["팀 회의 msw", "점심 약속 msw", "실리카겔 공연 msw"];
+
+      events.forEach((event) => {
+        expect(monthView).toHaveTextContent(event);
+      });
     });
   });
 
@@ -401,7 +380,6 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const originalDate = new Date("2024-07-01");
       vi.setSystemTime(new Date("2024-07-02 12:50:00"));
 
-      console.log(new Date());
       const { user } = setupInitItems(<App />);
 
       // 2. 새로운 일정 추가 (10분 전 알림)
@@ -414,13 +392,20 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       await user.click(addEventBtn);
 
       // 알림을 기다리기 위해 waitFor 사용
-      await waitFor(
-        () => {
-          const alert = screen.getByText(/10분 후.*새로운 이벤트.*시작됩니다/);
-          expect(alert).toBeVisible();
-        },
+      // await waitFor(
+      //   () => {
+      //     const alert = screen.getByText(/10분 후.*새로운 이벤트.*시작됩니다/);
+      //     expect(alert).toBeVisible();
+      //   },
+      //   { timeout: 5000 }
+      // ); // 타임아웃을 5초로 설정
+
+      const alert = await screen.findByText(
+        /10분 후.*새로운 이벤트.*시작됩니다/,
+        { exact: false },
         { timeout: 5000 }
-      ); // 타임아웃을 5초로 설정
+      );
+      expect(alert).toBeVisible();
 
       vi.setSystemTime(originalDate);
     });
@@ -433,6 +418,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       // 2. 일정 검색창에 "실리카겔 공연 msw" 입력
       const searchInput = screen.getByLabelText("일정 검색");
+      await user.clear(searchInput);
       await user.type(searchInput, "실리카겔 공연 msw");
 
       // 3. searchItem이 리스트에 나타나는지 확인
@@ -446,7 +432,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       // 날짜
       expect(
         await within(searchItemsContainer).findByText(
-          "2024-07-27 18:00 - 19:00"
+          "2024-07-26 18:00 - 19:00"
         )
       ).toBeInTheDocument();
 
@@ -462,6 +448,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       // 2. 일정 검색창에 "실리카겔 공연" 입력
       const searchInput = screen.getByLabelText("일정 검색");
+      await user.clear(searchInput);
       await user.type(searchInput, "실리카겔 공연 msw");
 
       // 3. searchItem이 리스트에 나타나는지 확인
@@ -469,7 +456,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       // 위치
       expect(
-        await within(searchItemsContainer).findByText("잠실")
+        await within(searchItemsContainer).findByText("킨텍스")
       ).toBeInTheDocument();
 
       // 카테고리
@@ -489,48 +476,64 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       // 2. 일정 검색창에 "실리카겔 공연" 입력
       const searchInput = screen.getByLabelText("일정 검색");
+      await user.clear(searchInput);
       await user.type(searchInput, "실리카겔 공연 msw");
 
       // 3. 검색한 것만 나타나는지 확인
-      const searchItems = (await screen.findAllByRole(
-        "searchItem"
-      )) as HTMLElement[];
+      const searchItemsContainer = screen.getByRole("searchItemsContainer");
+      expect(searchItemsContainer).toHaveTextContent(
+        "실리카겔 공연 msw2024-07-26 18:00 - 19:00실리카겔킨텍스카테고리: 취미반복: 1주마다알림: 2일 전"
+      );
 
-      const searchedItemContents = searchItems.map(
-        (content) => content.textContent
-      );
-      expect(searchedItemContents).toEqual(
-        expect.arrayContaining([
-          "실리카겔 공연 msw2024-07-27 18:00 - 19:00실리카겔잠실카테고리: 취미반복: 1주마다알림: 2일 전",
-        ])
-      );
+      // dom 접근 지양하기!!
+      // const searchItems = (await screen.findAllByRole(
+      //   "searchItem"
+      // )) as HTMLElement[];
+
+      // const searchedItemContents = searchItems.map(
+      //   (content) => content.textContent
+      // );
+      // expect(searchedItemContents).toEqual(
+      //   expect.arrayContaining([
+      //     "실리카겔 공연 msw2024-07-26 18:00 - 19:00실리카겔킨텍스카테고리: 취미반복: 1주마다알림: 2일 전",
+      //   ])
+      // );
 
       // 4. 일정 검색창 비우기
       await user.clear(searchInput);
 
       // 5. 모든 일정 다시 표시되는지 확인
-      const afterSearchItems = (await screen.findAllByRole(
-        "searchItem"
-      )) as HTMLElement[];
+      // dom 접근 지양하기!!!
+      // const afterSearchItems = (await screen.findAllByRole(
+      //   "searchItem"
+      // )) as HTMLElement[];
+      // const allItemContents = afterSearchItems.map(
+      //   (content) => content.textContent
+      // );
+      // expect(allItemContents).toHaveTextContent(
+      //   expect.arrayContaining([
+      //     "팀 회의 msw2024-07-03 10:00 - 11:00주간 팀 미팅회의실 A카테고리: 업무반복: 1주마다알림: 1분 전",
+      //     "점심 약속 msw2024-07-21 12:30 - 13:30동료와 점심 식사회사 근처 식당카테고리: 개인알림: 2시간 전",
+      //     "실리카겔 공연 msw2024-07-26 18:00 - 19:00실리카겔킨텍스카테고리: 취미반복: 1주마다알림: 2일 전",
+      //   ])
+      // );
 
-      const allItemContents = afterSearchItems.map(
-        (content) => content.textContent
-      );
-      expect(allItemContents).toEqual(
-        expect.arrayContaining([
-          "팀 회의 msw2024-07-03 10:00 - 11:00주간 팀 미팅회의실 A카테고리: 업무반복: 1주마다알림: 1분 전",
-          "점심 약속 msw2024-07-21 12:30 - 13:30동료와 점심 식사회사 근처 식당카테고리: 개인알림: 2시간 전",
-          "실리카겔 공연 msw2024-07-27 18:00 - 19:00실리카겔잠실카테고리: 취미반복: 1주마다알림: 2일 전",
-        ])
-      );
+      const events = [
+        "팀 회의 msw2024-07-03 10:00 - 11:00주간 팀 미팅회의실 A카테고리: 업무반복: 1주마다알림: 1분 전",
+        "점심 약속 msw2024-07-21 12:30 - 13:30동료와 점심 식사회사 근처 식당카테고리: 개인알림: 2시간 전",
+        "실리카겔 공연 msw2024-07-26 18:00 - 19:00실리카겔킨텍스카테고리: 취미반복: 1주마다알림: 2일 전",
+      ];
+
+      events.forEach((event) => {
+        expect(searchItemsContainer).toHaveTextContent(event);
+      });
     });
   });
 
   describe("공휴일 표시", () => {
     test("달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다", () => {
-      // 1. 원래 날짜 저장 및 새로운 날짜 설정
-      const originalDate = new Date("2024-07-01");
-      vi.setSystemTime(new Date("2024-01-01"));
+      // 1. 새로운 날짜 설정
+      currentDateStore.getState().initializeForTest(new Date("2024-01-01"));
 
       // 2. userEvent 가져오기 및 render
       setupInitItems(<App />);
@@ -543,16 +546,11 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
         color: "var(--chakra-colors-red-500)",
         fontSize: "var(--chakra-fontSizes-sm)",
       });
-
-      // 5. 테스트가 끝난 후 원래 날짜로 복원
-      vi.setSystemTime(originalDate);
     });
 
     test("달력에 5월 5일(어린이날)이 공휴일로 표시되는지 확인한다", () => {
-      // 1. 원래 날짜 저장 및 새로운 날짜 설정
-      const originalDate = new Date("2024-07-01");
-      vi.setSystemTime(new Date("2024-05-01"));
-
+      // 1. 새로운 날짜 설정
+      currentDateStore.getState().initializeForTest(new Date("2024-05-05"));
       // 2. userEvent 가져오기 및 render
       setupInitItems(<App />);
 
@@ -564,9 +562,6 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
         color: "var(--chakra-colors-red-500)",
         fontSize: "var(--chakra-fontSizes-sm)",
       });
-
-      // 5. 테스트가 끝난 후 원래 날짜로 복원
-      vi.setSystemTime(originalDate);
     });
   });
 

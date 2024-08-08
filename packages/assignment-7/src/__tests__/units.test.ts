@@ -4,7 +4,7 @@ import {
   getWeekDates,
   formatWeek,
   formatMonth,
-} from "../testFunction";
+} from "../utils/date";
 
 describe("단위 테스트: 날짜 및 시간 관리", () => {
   describe("getDaysInMonth 함수", () => {

@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { Event } from "./types";
+import { Event } from "../types";
 let initialEvents = [
   {
     id: 1,
@@ -28,14 +28,59 @@ let initialEvents = [
   {
     id: 3,
     title: "실리카겔 공연 msw",
-    date: "2024-07-27",
+    date: "2024-07-26",
     startTime: "18:00",
     endTime: "19:00",
     description: "실리카겔",
-    location: "잠실",
+    location: "킨텍스",
     category: "취미",
     repeat: { type: "weekly", interval: 1 },
     notificationTime: 2880,
+  },
+  {
+    id: 4,
+    title: "지소쿠리 클럽 공연 msw",
+    date: "2024-08-15",
+    startTime: "19:00",
+    endTime: "21:00",
+    description: "work shit sleep",
+    location: "무신사 개러지",
+    category: "취미",
+    repeat: { type: "weekly", interval: 1 },
+    notificationTime: 2880,
+  },
+  {
+    id: 5,
+    title: "알림 테스트 msw",
+    description: "알림 테스트",
+    location: "알림 테스트",
+    category: "개인",
+    repeat: { type: "weekly", interval: 1 },
+    notificationTime: 10,
+    ...(() => {
+      const now = new Date();
+      const startTime = new Date(now.getTime() + 5 * 60000); // 5분 후
+      const endTime = new Date(startTime.getTime() + 60 * 60000); // 시작시간으로부터 1시간 후
+
+      const formatDate = (date: Date) => {
+        return date.toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" });
+      };
+
+      const formatTime = (date: Date) => {
+        return date.toLocaleTimeString("en-GB", {
+          timeZone: "Asia/Seoul",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+      };
+
+      return {
+        date: formatDate(now),
+        startTime: formatTime(startTime),
+        endTime: formatTime(endTime),
+      };
+    })(),
   },
 ];
 
