@@ -49,6 +49,6 @@ jobs:
       - name: Run Cypress tests (Chrome)
         uses: cypress-io/github-action@v6
         with:
+          build: pnpm -F assignment-8 build
+          start: pnpm -F assignment-8 start
           browser: chrome
-          # 특정 테스트 파일만 실행하려면 아래와 같이 설정
-          # spec: 'cypress/integration/specific-test.spec.js'
