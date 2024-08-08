@@ -134,7 +134,7 @@ const EventForm: FC<Props> = ({
 
             <FormControl>
                 <FormLabel>카테고리</FormLabel>
-                <Select value={category} onChange={(e) => setCategory(e.target.value)}>
+                <Select data-testid="form_category" value={category} onChange={(e) => setCategory(e.target.value)}>
                     <option value="">카테고리 선택</option>
                     {categories.map((cat) => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -144,7 +144,7 @@ const EventForm: FC<Props> = ({
 
             <FormControl>
                 <FormLabel>반복 설정</FormLabel>
-                <Checkbox aria-label="repeact-check-box" isChecked={isRepeating} onChange={(e) => setIsRepeating(e.target.checked)}>
+                <Checkbox data-testid="repeact-check-box" aria-label="repeact-check-box" isChecked={isRepeating} onChange={(e) => setIsRepeating(e.target.checked)}>
                     반복 일정
                 </Checkbox>
             </FormControl>
@@ -152,6 +152,7 @@ const EventForm: FC<Props> = ({
             <FormControl>
                 <FormLabel>알림 설정</FormLabel>
                 <Select
+                    data-testid="form_notification"
                     value={notificationTime}
                     onChange={(e) => setNotificationTime(Number(e.target.value))}
                 >
@@ -167,7 +168,7 @@ const EventForm: FC<Props> = ({
                 <VStack width="100%">
                     <FormControl>
                         <FormLabel>반복 유형</FormLabel>
-                        <Select value={repeatType} onChange={(e) => setRepeatType(e.target.value as RepeatType)}>
+                        <Select data-testid="form_repeat_type" value={repeatType} onChange={(e) => setRepeatType(e.target.value as RepeatType)}>
                             <option value="daily">매일</option>
                             <option value="weekly">매주</option>
                             <option value="monthly">매월</option>

@@ -142,10 +142,9 @@ function App() {
       notificationTime,
     };
 
-
     const overlapping = findOverlappingEvents(eventData);
 
-    if(!isRepeating){
+    if(eventData.repeat.type === 'none'){
       if (overlapping.length > 0) {
         setOverlappingEvents(overlapping);
         setIsOverlapDialogOpen(true);
@@ -153,8 +152,7 @@ function App() {
         await saveEvent(eventData)
       }
     }
-    if(isRepeating) {
-      await saveEvent(addRepeatedEvent(eventData));
+    if(eventData.repeat.type !== 'none') {
       await saveEvent(eventData);
     }
 

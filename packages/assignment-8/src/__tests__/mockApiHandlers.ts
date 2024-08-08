@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { mockEvents as originalMockEvents } from './mockEvents';
-import {checkType} from "../utils/utilsFunc.ts";
+import {addRepeatedEvent} from "../utils/utilsFunc.ts";
 
 let mockEvents = JSON.parse(JSON.stringify(originalMockEvents));
 
@@ -15,17 +15,19 @@ export const mockApiHandlers = [
         const newEvent = await request.json() ;
         const createdEvents = [];
 
-        // 객체일때
-        if(checkType(newEvent) === 'Object'){
+        // mockEvents.push(newEvent);
+        // createdEvents.push(newEvent);
+
+        if(newEvent.repeat.type === 'none'){
             mockEvents.push(newEvent);
             createdEvents.push(newEvent);
         }
 
-        // 배열일때
-        if(checkType(newEvent) === 'Array'){
-            for(const event of newEvent) {
-                mockEvents.push(event);
-                createdEvents.push(event);
+        if(newEvent.repeat.type !== 'none') {
+            const reapeatList = addRepeatedEvent(newEvent)
+            for(const reapeatData of reapeatList){
+                mockEvents.push(reapeatData);
+                createdEvents.push(reapeatData);
             }
         }
 

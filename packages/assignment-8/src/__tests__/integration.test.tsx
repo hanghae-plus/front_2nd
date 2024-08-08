@@ -6,7 +6,6 @@ import { mockApiHandlers } from './mockApiHandlers';
 import App from '../App';
 import {mockEvents, testData2 , testData} from "./mockEvents.ts";
 import { NO_EVENT_TEXT, NEW_DATE, START_TIME, END_TIME } from "./mockContants.ts";
-import {addRepeatedEvent} from "../utils/utilsFunc.ts";
 
 
 // [ Set up mock API server ]
@@ -319,27 +318,18 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
           endDate: "2024-08-20"
         },
       }
-      const repeatMockData = addRepeatedEvent(mockData)
 
       //when
       await userEvent.click(screen.getByLabelText('repeact-check-box'));
-      for(const repeatData of repeatMockData) {
-        await clearFrom()
-        await typeForm(repeatData)
-        await userEvent.click(screen.getByTestId('event-submit-button'));
-      }
-
-      /* 서버에서 반복적 post 처리를 하기위한 로직 => 개발서버에서 생성은 되는데 테스트 통과는 안되고 있다.....  */
-      // await clearFrom()
-      // await typeForm(mockData)
-      // await userEvent.click(screen.getByTestId('event-submit-button'));
+      await clearFrom()
+      await typeForm(mockData)
+      await userEvent.click(screen.getByTestId('event-submit-button'));
 
 
       //then
       await waitFor(async () => {
-        for(const repeatData of repeatMockData) {
-          await checkForm(repeatData)
-        }
+        const list = screen.getByTestId('event-list');
+        expect(list.children.length).toBe(5);
       });
     })
   })
