@@ -39,21 +39,22 @@ export const MonthView = ({
   ).getDay();
 
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const weeks = [];
+  const weeks: number[][] = [];
   let week = Array(7).fill(null);
 
   for (let i = 0; i < firstDayOfMonth; i++) {
     week[i] = null;
   }
 
-  for (const day of days) {
+  days.forEach((day) => {
     const dayIndex = (firstDayOfMonth + day - 1) % 7;
     week[dayIndex] = day;
     if (dayIndex === 6 || day === daysInMonth) {
       weeks.push(week);
       week = Array(7).fill(null);
     }
-  }
+  });
+
   return (
     <VStack data-testid="month-view" align="stretch" w="full" spacing={4}>
       <Heading size="md">{formatMonth(currentDate)}</Heading>
