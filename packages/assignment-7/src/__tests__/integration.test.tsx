@@ -2,13 +2,14 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import App from '../App';
-import { handlers, resetEvents } from '../utils/test/handlers';
+import { handlers, resetEvents } from '~shared/api/mocks/handlers';
 
 const server = setupServer(...handlers);
 
 // 테스트 시작 전에 목 서버를 실행
 beforeAll(() => {
   server.listen();
+  vi.setSystemTime(new Date('2024-08-01'));
 });
 // 테스트 종료 후에 목 서버 종료
 afterAll(() => {
@@ -165,7 +166,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
       await changeWeeklyViewAsync();
 
-      const nextWeekButton = screen.getByRole('button', {
+      const nextWeekButton = await screen.findByRole('button', {
         name: /next/i,
       });
 
@@ -174,7 +175,6 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       await userEvent.click(nextWeekButton);
 
       const eventCardList = await screen.findAllByRole('listitem');
-
       expect(eventCardList.length).toBe(2);
     });
     it('월별 뷰에 일정이 없으면, 일정이 표시되지 않아야 한다.', async () => {

@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "팀 회의",
+    "date": "2024-08-20",
+    "startTime": "10:00",
+    "endTime": "11:00",
+    "description": "주간 팀 미팅",
+    "location": "회의실 A",
+    "category": "업무",
+    "repeat": { "type": "none", "interval": 0 },
+    "notificationTime": 1
+  },
+  {
+    "id": 2,
+    "title": "점심 약속",
+    "date": "2024-08-21",
+    "startTime": "12:30",
+    "endTime": "13:30",
+    "description": "동료와 점심 식사",
+    "location": "회사 근처 식당",
+    "category": "개인",
+    "repeat": { "type": "none", "interval": 0 },
+    "notificationTime": 1
+  }
+]

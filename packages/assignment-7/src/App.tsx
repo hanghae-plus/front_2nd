@@ -45,7 +45,7 @@ import {
   formatWeek,
   getDaysInMonth,
   getWeekDates,
-} from '~shared/model/dateTimeUtils';
+} from '~shared/lib/date/dateTimeUtils';
 
 type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
@@ -818,7 +818,7 @@ function App() {
             filteredEvents.map((event) => (
               <Box
                 key={event.id}
-                role={'listitem'}
+                role="listitem"
                 borderWidth={1}
                 borderRadius="lg"
                 p={3}
