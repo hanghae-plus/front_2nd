@@ -9,14 +9,14 @@ import {
   vi,
 } from "vitest";
 import { act, renderHook } from "@testing-library/react";
-import { useCalendarView } from "../hooks/useCalendarView.ts";
+import { useCalendarView } from "../useCalendarView.ts";
 import { Event } from "../types.ts";
 import createMockServer from "./createMockServer.ts";
-import { useEventOperations } from "../hooks/useEventOperations.ts";
+import { useEventOperations } from "../useEventOperations.ts";
 import { http, HttpResponse } from "msw";
-import { useNotifications } from "../hooks/useNotifications.ts";
-import { fillZero, formatDate } from "../utils/dateUtils.ts";
-import { useSearch } from "../hooks/useSearch.ts";
+import { useNotifications } from "../useNotifications.ts";
+import { fillZero, formatDate } from "../../utils/dateUtils.ts";
+import { useSearch } from "../useSearch.ts";
 
 const MOCK_EVENT_1: Event = {
   id: 1,
