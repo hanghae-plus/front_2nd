@@ -20,7 +20,7 @@ interface Props {
   currentDate: Date;
   holidays: { [key: string]: string };
   filteredEvents: Event[];
-  notifiedEvents: number[];
+  notifiedEvents: string[];
 }
 
 const CalenderMonth: FC<Props> = ({
@@ -84,6 +84,7 @@ const CalenderMonth: FC<Props> = ({
                     verticalAlign="top"
                     width="14.28%"
                     position="relative"
+                    data-testid="event-box"
                   >
                     {day && (
                       <>
@@ -99,7 +100,7 @@ const CalenderMonth: FC<Props> = ({
                           )
                           .map((event) => {
                             const isNotified = notifiedEvents.includes(
-                              event.id
+                              `${event.id}`
                             );
                             return (
                               <Box

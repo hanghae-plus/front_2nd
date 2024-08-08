@@ -7,7 +7,7 @@ interface RepeatInfo {
 }
 
 export interface Event {
-  id: number;
+  id: string;
   title: string;
   date: string;
   startTime: string;

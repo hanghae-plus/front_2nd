@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import { FC } from "react";
 import { formatWeek, getWeekDates, weekDays } from "../../dateUtils";
 import {
   Heading,
@@ -19,7 +19,7 @@ import { Event } from "../../type/schedule.type";
 interface Props {
   currentDate: Date;
   filteredEvents: Event[];
-  notifiedEvents: number[];
+  notifiedEvents: string[];
 }
 
 const CalenderWeek: FC<Props> = ({
@@ -58,7 +58,7 @@ const CalenderWeek: FC<Props> = ({
                       date.toDateString()
                   )
                   .map((event) => {
-                    const isNotified = notifiedEvents.includes(event.id);
+                    const isNotified = notifiedEvents.includes(`${event.id}`);
                     return (
                       <Box
                         key={event.id}
