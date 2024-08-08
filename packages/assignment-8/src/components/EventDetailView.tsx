@@ -4,13 +4,13 @@ import { Event } from '../types/types';
 import { notificationOptions } from '../constants/constants';
 
 interface EventDetailViewProps extends Event {
-  notifiedEvents: number[];
+  isNotified: boolean;
   editEvent: (event: Event) => void;
   deleteEvent: (id: number) => void;
 }
 
 export const EventDetailView = ({
-  notifiedEvents,
+  isNotified,
   editEvent,
   deleteEvent,
   ...event
@@ -27,10 +27,10 @@ export const EventDetailView = ({
       <HStack justifyContent="space-between">
         <VStack align="start">
           <HStack>
-            {notifiedEvents.includes(event.id) && <BellIcon color="red.500" />}
+            {isNotified && <BellIcon color="red.500" />}
             <Text
-              fontWeight={notifiedEvents.includes(event.id) ? 'bold' : 'normal'}
-              color={notifiedEvents.includes(event.id) ? 'red.500' : 'inherit'}
+              fontWeight={isNotified ? 'bold' : 'normal'}
+              color={isNotified ? 'red.500' : 'inherit'}
               as="h3"
             >
               {event.title}

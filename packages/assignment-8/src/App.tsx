@@ -440,15 +440,17 @@ function App() {
           {filteredEvents.length === 0 ? (
             <Text>검색 결과가 없습니다.</Text>
           ) : (
-            filteredEvents.map((event) => (
-              <EventDetailView
-                key={`${event.id}-${event.date}-${event.title}`}
-                {...event}
-                notifiedEvents={notifiedEvents}
-                editEvent={editEvent}
-                deleteEvent={deleteEvent}
-              />
-            ))
+            filteredEvents.map((event) => {
+              return (
+                <EventDetailView
+                  key={`${event.id}-${event.date}-${event.title}`}
+                  {...event}
+                  isNotified={notifiedEvents.includes(event.id)}
+                  editEvent={editEvent}
+                  deleteEvent={deleteEvent}
+                />
+              );
+            })
           )}
         </VStack>
       </Flex>
