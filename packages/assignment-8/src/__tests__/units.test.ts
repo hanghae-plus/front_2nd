@@ -566,7 +566,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
   });
 
   describe('expandRepeatingEvents >', () => {
-    test('반복되는 이벤트를 반복 유형에 맞게 확장해야 한다', () => {
+    test('1일마다 반복되는 이벤트를 확장해야 한다', () => {
       const event: Event = {
         id: 1,
         title: '중요 회의',
@@ -582,6 +582,96 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       const events: Event[] = [event];
       const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
       expect(result).toHaveLength(30);
+    });
+
+    test('3일마다 반복되는 이벤트를 확장해야 한다', () => {
+      const event: Event = {
+        id: 1,
+        title: '중요 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '',
+        location: '',
+        category: '',
+        repeat: { type: 'daily', interval: 3 },
+        notificationTime: 15,
+      };
+      const events: Event[] = [event];
+      const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
+      expect(result).toHaveLength(10);
+    });
+
+    test('1주마다 반복되는 이벤트를 확장해야 한다', () => {
+      const event: Event = {
+        id: 1,
+        title: '중요 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '',
+        location: '',
+        category: '',
+        repeat: { type: 'weekly', interval: 1 },
+        notificationTime: 15,
+      };
+      const events: Event[] = [event];
+      const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
+      expect(result).toHaveLength(5);
+    });
+
+    test('2주마다 반복되는 이벤트를 확장해야 한다', () => {
+      const event: Event = {
+        id: 1,
+        title: '중요 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '',
+        location: '',
+        category: '',
+        repeat: { type: 'weekly', interval: 2 },
+        notificationTime: 15,
+      };
+      const events: Event[] = [event];
+      const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
+      expect(result).toHaveLength(3);
+    });
+
+    test('1달마다 반복되는 이벤트를 확장해야 한다', () => {
+      const event: Event = {
+        id: 1,
+        title: '중요 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '',
+        location: '',
+        category: '',
+        repeat: { type: 'monthly', interval: 1 },
+        notificationTime: 15,
+      };
+      const events: Event[] = [event];
+      const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
+      expect(result).toHaveLength(1);
+    });
+
+    test('1년마다 반복되는 이벤트를 확장해야 한다', () => {
+      const event: Event = {
+        id: 1,
+        title: '중요 회의',
+        date: '2024-07-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        description: '',
+        location: '',
+        category: '',
+        repeat: { type: 'yearly', interval: 1 },
+        notificationTime: 15,
+      };
+      const events: Event[] = [event];
+      const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
+      expect(result).toHaveLength(1);
     });
   });
 });
