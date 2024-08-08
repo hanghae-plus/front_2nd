@@ -62,7 +62,7 @@ export const calculateEndDate = (currentDate, type, adjustedInterval) => {
 
 // 반복일정 생성 함수
 export const addRepeatedEvent = (mockData) => {
-    const { title, date, repeat, startTime, endTime, notificationTime } = mockData;
+    const { title, date, repeat, startTime, endTime, notificationTime, description, location, category } = mockData;
     const { type, interval, endDate } = repeat;
 
     let currentDate = dayjs(date); // 반복 시작 날짜
@@ -77,12 +77,16 @@ export const addRepeatedEvent = (mockData) => {
     // currentDate 가 endRepeatDate보다 이전날짜 인 동안 반복
     while (currentDate.isBefore(endRepeatDate)) {
         const event = {
-            title: `${title} ${index++}`,
+            id: Date.now() + index,
+            title: `${title}${index++}`,
             date: currentDate.format('YYYY-MM-DD'),
             startTime,
             endTime,
+            description,
+            location,
+            category,
+            repeat,
             notificationTime,
-            repeat
         };
 
         events.push(event);

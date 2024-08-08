@@ -144,14 +144,20 @@ function App() {
 
 
     const overlapping = findOverlappingEvents(eventData);
-    if (overlapping.length > 0) {
-      setOverlappingEvents(overlapping);
-      setIsOverlapDialogOpen(true);
-    } else {
-        if(isRepeating) await saveEvent(addRepeatedEvent(eventData)); else {
-        if(!isRepeating) await saveEvent(eventData);
+
+    if(!isRepeating){
+      if (overlapping.length > 0) {
+        setOverlappingEvents(overlapping);
+        setIsOverlapDialogOpen(true);
+      } else {
+        await saveEvent(eventData)
       }
     }
+    if(isRepeating) {
+      await saveEvent(addRepeatedEvent(eventData));
+      await saveEvent(eventData);
+    }
+
   };
 
   const navigate = (direction: 'prev' | 'next') => {

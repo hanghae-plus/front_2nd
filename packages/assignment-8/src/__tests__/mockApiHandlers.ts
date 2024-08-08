@@ -17,15 +17,13 @@ export const mockApiHandlers = [
 
         // 객체일때
         if(checkType(newEvent) === 'Object'){
-            newEvent.id = new Date().getTime();
             mockEvents.push(newEvent);
             createdEvents.push(newEvent);
         }
 
         // 배열일때
         if(checkType(newEvent) === 'Array'){
-            for(const event of newEvent){
-                event.id = new Date().getTime();
+            for(const event of newEvent) {
                 mockEvents.push(event);
                 createdEvents.push(event);
             }

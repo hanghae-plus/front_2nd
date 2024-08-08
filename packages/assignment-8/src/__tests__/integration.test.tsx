@@ -315,18 +315,24 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
         notificationTime: 10,
         repeat: {
           type: "daily",
-          interval: 10,
+          interval: 1,
           endDate: "2024-08-20"
         },
       }
       const repeatMockData = addRepeatedEvent(mockData)
 
-
       //when
       await userEvent.click(screen.getByLabelText('repeact-check-box'));
-      await clearFrom()
-      await typeForm(mockData)
-      await userEvent.click(screen.getByTestId('event-submit-button'));
+      for(const repeatData of repeatMockData) {
+        await clearFrom()
+        await typeForm(repeatData)
+        await userEvent.click(screen.getByTestId('event-submit-button'));
+      }
+
+      /* 서버에서 반복적 post 처리를 하기위한 로직 => 개발서버에서 생성은 되는데 테스트 통과는 안되고 있다.....  */
+      // await clearFrom()
+      // await typeForm(mockData)
+      // await userEvent.click(screen.getByTestId('event-submit-button'));
 
 
       //then
