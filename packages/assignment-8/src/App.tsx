@@ -40,6 +40,7 @@ import {
   DeleteIcon,
   EditIcon,
 } from '@chakra-ui/icons';
+import { createRecurringEvents } from './utils/dateUtils';
 
 type RepeatType = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
@@ -49,17 +50,17 @@ interface RepeatInfo {
   endDate?: string;
 }
 
-interface Event {
+export interface Event {
   id: number;
   title: string;
   date: string;
   startTime: string;
   endTime: string;
-  description: string;
-  location: string;
-  category: string;
-  repeat: RepeatInfo;
-  notificationTime: number; // 분 단위로 저장
+  description?: string;
+  location?: string;
+  category?: string;
+  repeat?: RepeatInfo;
+  notificationTime?: number; // 분 단위로 저장
 }
 
 const categories = ['업무', '개인', '가족', '기타'];
@@ -100,7 +101,11 @@ const fetchHolidays = (year: number, month: number) => {
   };
 };
 
-function App() {
+interface Props {
+  serverUrl?: string;
+}
+
+function App({ serverUrl }: Props) {
   const [events, setEvents] = useState<Event[]>(dummyEvents);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
@@ -138,7 +143,7 @@ function App() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch('/api/events');
+      const response = await fetch(`${serverUrl ?? ''}/api/events`);
       if (!response.ok) {
         throw new Error('Failed to fetch events');
       }
@@ -205,30 +210,53 @@ function App() {
 
   const saveEvent = async (eventData: Event) => {
     try {
-      let response;
       if (editingEvent) {
-        response = await fetch(`/api/events/${eventData.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(eventData),
-        });
+        const response = await fetch(
+          `${serverUrl ?? ''}/api/events/${eventData.id}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(eventData),
+          }
+        );
+        if (!response.ok) throw new Error('Failed to update event');
       } else {
-        response = await fetch('/api/events', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(eventData),
-        });
+        if (eventData.repeat?.type !== 'none') {
+          const endDate =
+            eventData.repeat?.endDate ||
+            (() => {
+              const oneYearLater = new Date(eventData.date);
+              oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+              return oneYearLater.toISOString().split('T')[0];
+            })();
+
+          const recurringEvents = createRecurringEvents(eventData, endDate);
+
+          for (const event of recurringEvents) {
+            const response = await fetch(`${serverUrl ?? ''}/api/events`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(event),
+            });
+            if (!response.ok) throw new Error('Failed to save event');
+          }
+        } else {
+          const response = await fetch(`${serverUrl ?? ''}/api/events`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(eventData),
+          });
+          if (!response.ok) throw new Error('Failed to save event');
+        }
       }
 
-      if (!response.ok) {
-        throw new Error('Failed to save event');
-      }
-
-      await fetchEvents(); // 이벤트 목록 새로고침
+      await fetchEvents();
       setEditingEvent(null);
       resetForm();
       toast({
@@ -252,7 +280,7 @@ function App() {
 
   const deleteEvent = async (id: number) => {
     try {
-      const response = await fetch(`/api/events/${id}`, {
+      const response = await fetch(`${serverUrl ?? ''}/api/events/${id}`, {
         method: 'DELETE',
       });
 
@@ -285,7 +313,7 @@ function App() {
       const timeDiff = (eventStart.getTime() - now.getTime()) / (1000 * 60);
       return (
         timeDiff > 0 &&
-        timeDiff <= event.notificationTime &&
+        timeDiff <= event.notificationTime! &&
         !notifiedEvents.includes(event.id)
       );
     });
@@ -376,14 +404,14 @@ function App() {
     setDate(event.date);
     setStartTime(event.startTime);
     setEndTime(event.endTime);
-    setDescription(event.description);
-    setLocation(event.location);
-    setCategory(event.category);
-    setIsRepeating(event.repeat.type !== 'none');
-    setRepeatType(event.repeat.type);
-    setRepeatInterval(event.repeat.interval);
-    setRepeatEndDate(event.repeat.endDate || '');
-    setNotificationTime(event.notificationTime);
+    setDescription(event.description ?? '');
+    setLocation(event.location ?? '');
+    setCategory(event.category ?? '');
+    setIsRepeating(event.repeat?.type !== 'none');
+    setRepeatType(event.repeat?.type ?? 'none');
+    setRepeatInterval(event.repeat?.interval ?? 1);
+    setRepeatEndDate(event.repeat?.endDate ?? '');
+    setNotificationTime(event.notificationTime ?? 10);
   };
 
   const getDaysInMonth = (year: number, month: number) => {
@@ -421,8 +449,8 @@ function App() {
     return events.filter(
       (event) =>
         event.title.toLowerCase().includes(term.toLowerCase()) ||
-        event.description.toLowerCase().includes(term.toLowerCase()) ||
-        event.location.toLowerCase().includes(term.toLowerCase())
+        event.description?.toLowerCase().includes(term.toLowerCase()) ||
+        event.location?.toLowerCase().includes(term.toLowerCase())
     );
   };
 
@@ -604,7 +632,13 @@ function App() {
                                   bg={isNotified ? 'red.100' : 'gray.100'}
                                   borderRadius="md"
                                   fontWeight={isNotified ? 'bold' : 'normal'}
-                                  color={isNotified ? 'red.500' : 'inherit'}
+                                  color={
+                                    isNotified
+                                      ? 'red.500'
+                                      : event.repeat?.type !== 'none'
+                                        ? 'blue'
+                                        : 'inherit'
+                                  }
                                 >
                                   <HStack spacing={1}>
                                     {isNotified && <BellIcon />}
@@ -867,16 +901,16 @@ function App() {
                     <Text>{event.description}</Text>
                     <Text>{event.location}</Text>
                     <Text>카테고리: {event.category}</Text>
-                    {event.repeat.type !== 'none' && (
+                    {event.repeat?.type !== 'none' && (
                       <Text>
-                        반복: {event.repeat.interval}
-                        {event.repeat.type === 'daily' && '일'}
-                        {event.repeat.type === 'weekly' && '주'}
-                        {event.repeat.type === 'monthly' && '월'}
-                        {event.repeat.type === 'yearly' && '년'}
+                        반복: {event.repeat?.interval}
+                        {event.repeat?.type === 'daily' && '일'}
+                        {event.repeat?.type === 'weekly' && '주'}
+                        {event.repeat?.type === 'monthly' && '월'}
+                        {event.repeat?.type === 'yearly' && '년'}
                         마다
-                        {event.repeat.endDate &&
-                          ` (종료: ${event.repeat.endDate})`}
+                        {event.repeat?.endDate &&
+                          ` (종료: ${event.repeat?.endDate})`}
                       </Text>
                     )}
                     <Text>
