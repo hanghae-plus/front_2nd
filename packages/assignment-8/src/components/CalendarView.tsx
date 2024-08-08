@@ -198,11 +198,13 @@ function CalendarView() {
       <HStack mx='auto' justifyContent='space-between'>
         <IconButton
           aria-label='Previous'
+          data-cy='calendar-prev-button'
           icon={<ChevronLeftIcon />}
           onClick={() => navigate('prev')}
         />
         <Select
           aria-label='view'
+          data-cy='calendar-view-select'
           value={view}
           onChange={(e) => changeView(e.target.value as 'week' | 'month')}
         >
@@ -211,6 +213,7 @@ function CalendarView() {
         </Select>
         <IconButton
           aria-label='Next'
+          data-cy='calendar-next-button'
           icon={<ChevronRightIcon />}
           onClick={() => navigate('next')}
         />

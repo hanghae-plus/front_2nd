@@ -53,11 +53,13 @@ function EventCard({ event, isNotified, onEdit, onDelete }: EventCardProps) {
         <HStack>
           <IconButton
             aria-label='Edit event'
+            data-cy='event-edit-button'
             icon={<EditIcon />}
             onClick={() => onEdit(event)}
           />
           <IconButton
             aria-label='Delete event'
+            data-cy='event-delete-button'
             icon={<DeleteIcon />}
             onClick={() => onDelete(event.id)}
           />

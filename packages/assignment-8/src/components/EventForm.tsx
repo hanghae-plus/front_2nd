@@ -66,6 +66,7 @@ function EventForm() {
         <Input
           name='title'
           value={event.title || ''}
+          data-cy='input-title'
           onChange={handleInputChange}
         />
       </FormControl>
@@ -75,6 +76,7 @@ function EventForm() {
         <Input
           type='date'
           name='date'
+          data-cy='input-date'
           value={event.date || ''}
           onChange={handleInputChange}
         />
@@ -91,6 +93,7 @@ function EventForm() {
             <Input
               type='time'
               name='startTime'
+              data-cy='input-startTime'
               value={event.startTime || ''}
               onChange={handleInputChange}
               onBlur={() =>
@@ -110,6 +113,7 @@ function EventForm() {
             <Input
               type='time'
               name='endTime'
+              data-cy='input-endTime'
               value={event.endTime || ''}
               onChange={handleInputChange}
               onBlur={() =>
@@ -125,6 +129,7 @@ function EventForm() {
         <FormLabel>설명</FormLabel>
         <Input
           name='description'
+          data-cy='input-description'
           value={event.description || ''}
           onChange={handleInputChange}
         />
@@ -134,6 +139,7 @@ function EventForm() {
         <FormLabel>위치</FormLabel>
         <Input
           name='location'
+          data-cy='input-location'
           value={event.location || ''}
           onChange={handleInputChange}
         />
@@ -143,6 +149,7 @@ function EventForm() {
         <FormLabel>카테고리</FormLabel>
         <Select
           name='category'
+          data-cy='input-category'
           value={event.category || ''}
           onChange={handleInputChange}
         >

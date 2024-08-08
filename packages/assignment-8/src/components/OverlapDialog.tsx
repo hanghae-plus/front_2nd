@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef } from 'react';
 import {
   AlertDialog,
   AlertDialogBody,
@@ -8,9 +8,9 @@ import {
   AlertDialogOverlay,
   Button,
   Text,
-} from "@chakra-ui/react";
-import { useSchedulerContext } from "../contexts/SchedulerContext";
-import { Event } from "../types";
+} from '@chakra-ui/react';
+import { useSchedulerContext } from '../contexts/SchedulerContext';
+import { Event } from '../types';
 
 function OverlapDialog() {
   const { overlapDialog, events, tempEventData, setTempEventData } =
@@ -35,8 +35,8 @@ function OverlapDialog() {
       onClose={closeDialog}
     >
       <AlertDialogOverlay>
-        <AlertDialogContent>
-          <AlertDialogHeader fontSize="lg" fontWeight="bold">
+        <AlertDialogContent data-cy='alert'>
+          <AlertDialogHeader fontSize='lg' fontWeight='bold'>
             일정 겹침 경고
           </AlertDialogHeader>
 
@@ -51,10 +51,19 @@ function OverlapDialog() {
           </AlertDialogBody>
 
           <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={closeDialog}>
+            <Button
+              ref={cancelRef}
+              onClick={closeDialog}
+              data-cy='alert-cancel-button'
+            >
               취소
             </Button>
-            <Button colorScheme="red" onClick={handleContinue} ml={3}>
+            <Button
+              colorScheme='red'
+              onClick={handleContinue}
+              ml={3}
+              data-cy='alert-okay-button'
+            >
               계속 진행
             </Button>
           </AlertDialogFooter>
