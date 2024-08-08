@@ -8,6 +8,16 @@ export function getDaysInMonth(year: number, month: number): number {
 }
 
 /**
+ * 주어진 날짜를 복사하여 새로운 날짜를 반환합니다.
+ * @description callback 함수를 사용하여 날짜를 조작하고, 새로운 날짜를 반환합니다.
+ */
+export function getNewDate(date: Date, callback: (date: Date) => void) {
+  const newDate = new Date(date);
+  callback(newDate);
+  return newDate;
+}
+
+/**
  * 주어진 날짜가 속한 주의 모든 날짜를 반환합니다.
  */
 export function getWeekDates(date: Date): Date[] {
@@ -16,8 +26,9 @@ export function getWeekDates(date: Date): Date[] {
   const monday = new Date(date.setDate(diff));
   const weekDates = [];
   for (let i = 0; i < 7; i++) {
-    const nextDate = new Date(monday);
-    nextDate.setDate(monday.getDate() + i);
+    const nextDate = getNewDate(monday, (date) => {
+      date.setDate(date.getDate() + i - 1);
+    });
     weekDates.push(nextDate);
   }
   return weekDates;
@@ -106,6 +117,21 @@ export function isDateInMonth(date: Date, month: Date) {
   return date.getMonth() === month.getMonth() && date.getFullYear() === month.getFullYear();
 }
 
+/**
+ * 주어진 날짜가 특정 주에 포함되어 있는지 확인합니다.
+ * @description 연도를 함께 비교하여 동일한 주인지 확인합니다.
+ */
+export function isDateInWeek(date: Date, week: Date): boolean {
+  const weekDates = getWeekDates(week);
+  const compareDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  return weekDates.some(
+    (weekDate) =>
+      weekDate.getFullYear() === compareDate.getFullYear() &&
+      weekDate.getMonth() === compareDate.getMonth() &&
+      weekDate.getDate() === compareDate.getDate()
+  );
+}
 export function fillZero(value: number, size = 2) {
   return String(value).padStart(size, '0');
 }
