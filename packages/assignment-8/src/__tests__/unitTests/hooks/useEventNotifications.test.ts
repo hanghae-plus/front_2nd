@@ -1,4 +1,4 @@
-import { getAlarmBoundary } from "@/__tests__/testutils";
+import { getAlarmBoundary } from "@/__tests__/testUtils";
 import useEventNotifications from "@/hooks/useEventNotifications";
 import { Event } from "@/types";
 import { act, renderHook } from "@testing-library/react";

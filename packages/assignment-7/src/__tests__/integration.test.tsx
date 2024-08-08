@@ -1,6 +1,6 @@
 import events from "@/mocks/mockdata/events";
 import { createHandlers } from "@/mocks/mockServiceWorker/handlers";
-import App from "@/Scheduler";
+import Scheduler from "@/Scheduler";
 import { Event, RepeatType } from "@/types";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -75,7 +75,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
 
     test("[mock up] 일정의 초기 값을 서버에서 잘 받아올 수 있다.", async () => {
-      render(<App />);
+      render(<Scheduler />);
 
       await expectEventListHasEvent(events[0]);
       await expectEventListHasEvent(events[1]);
@@ -85,7 +85,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
 
     test("[CREATE] form을 통해 새로운 일정을 생성하였을 때 이벤트 리스트에서 생성된 이벤트를 확인할 수 있다.", async () => {
-      render(<App />);
+      render(<Scheduler />);
       const testEvent: Omit<Event, "id"> = {
         title: "CREATE 테스트 이벤트",
         date: "2024-07-29",
@@ -104,7 +104,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
 
     test("[UPDATE] 특정 이벤트를 form을 통해 수정하였을 때 수정이 반영된 이벤트를 이벤트 리스트에서 확인할 수 있다.", async () => {
-      render(<App />);
+      render(<Scheduler />);
 
       const $eventList = await screen.findByTestId("event-list");
       const $targetEvent = $eventList.children[1].children[0];
@@ -133,7 +133,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
 
     test("[DELETE] 이벤트 목록에서 삭제 버튼을 누르면 그 이벤트는 이벤트 목록에서 지워진다.", async () => {
-      render(<App />);
+      render(<Scheduler />);
 
       const $eventList = await screen.findByTestId("event-list");
       const $targetEvent = $eventList.children[1].children[0];
@@ -158,7 +158,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       server = setupServer(...createHandlers([])); // 이벤트가 없는 API 핸들러 생성
       server.listen();
 
-      render(<App />);
+      render(<Scheduler />);
 
       const $viewSelector = screen.getByLabelText("view");
       await userEvent.selectOptions($viewSelector, "week");
@@ -181,7 +181,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       server = setupServer(...createHandlers()); // 목업 이벤트로 API 핸들러 생성
       server.listen();
 
-      render(<App />);
+      render(<Scheduler />);
 
       const $viewSelector = screen.getByLabelText("view");
       await userEvent.selectOptions($viewSelector, "week");
@@ -204,7 +204,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       server = setupServer(...createHandlers([])); // 이벤트가 없는 API 핸들러 생성
       server.listen();
 
-      render(<App />);
+      render(<Scheduler />);
 
       const $viewSelector = screen.getByLabelText("view");
       await userEvent.selectOptions($viewSelector, "month");
@@ -228,7 +228,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       server = setupServer(...createHandlers()); // 목업 이벤트로 API 핸들러 생성
       server.listen();
 
-      render(<App />);
+      render(<Scheduler />);
 
       const $viewSelector = screen.getByLabelText("view");
       await userEvent.selectOptions($viewSelector, "month");
@@ -267,7 +267,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       server = setupServer(...createHandlers([testEvent])); // 알림 이벤트를 포함한 API 핸들러 생성
       server.listen();
       vi.setSystemTime(fakeTime);
-      render(<App />);
+      render(<Scheduler />);
 
       await expectEventListHasEvent(testEvent);
 
@@ -282,7 +282,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       server = setupServer(...createHandlers([])); // 이벤트가 없는 API 핸들러 생성
       server.listen();
       vi.setSystemTime(fakeTime);
-      render(<App />);
+      render(<Scheduler />);
 
       await typeEventForm(testEvent);
       await userEvent.click(screen.getByTestId("event-submit-button"));
@@ -299,7 +299,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       server = setupServer(...createHandlers([testEvent])); // 알림 이벤트를 포함한 API 핸들러 생성
       server.listen();
       vi.setSystemTime(new Date("2024-07-25T07:54:00Z"));
-      render(<App />);
+      render(<Scheduler />);
 
       await expectEventListHasEvent(testEvent);
 
@@ -328,7 +328,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
 
     test("이벤트 리스트 검색어에 값이 입력되면 입력된 값을 포함한 이벤트만 이벤트 목록을 보여준다.", async () => {
-      render(<App />);
+      render(<Scheduler />);
 
       await expectEventListHasEvent(events[0]);
       await expectEventListHasEvent(events[1]);
@@ -350,7 +350,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
 
     test("이벤트 검색 후 검색어를 모두 지우면 선택한 구간의 이벤트가 다시 모두 보여진다.", async () => {
-      render(<App />);
+      render(<Scheduler />);
 
       await expectEventListHasEvent(events[0]);
       await expectEventListHasEvent(events[1]);
@@ -383,7 +383,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
 
     test("달력에 1월 1일(신정)이 공휴일로 표시되는지 확인한다", async () => {
-      render(<App />);
+      render(<Scheduler />);
 
       const $calendarHeader = screen.getByRole("heading", {
         name: /2024년 7월/,
@@ -404,7 +404,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
 
     test("달력에 5월 5일(어린이날)이 공휴일로 표시되는지 확인한다", async () => {
-      render(<App />);
+      render(<Scheduler />);
 
       const $calendarHeader = screen.getByRole("heading", {
         name: /2024년 7월/,
@@ -432,7 +432,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
 
     test("겹치는 시간에 새 일정을 추가할 때 경고가 표시되는지 확인한다.", async () => {
-      render(<App />);
+      render(<Scheduler />);
 
       const testEventA: Omit<Event, "id"> = {
         title: "일정 충돌 테스트 제목",
@@ -471,7 +471,7 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
     });
 
     test("기존 일정의 시간을 수정하여 충돌이 발생할 때 경고가 표시되는지 확인한다", async () => {
-      render(<App />);
+      render(<Scheduler />);
 
       const testEventA: Omit<Event, "id"> = {
         title: "일정 충돌 테스트 제목",

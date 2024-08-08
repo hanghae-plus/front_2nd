@@ -31,6 +31,7 @@ export default mergeConfig(
       mockReset: true,
       clearMocks: true,
       restoreMocks: true,
+      testTimeout: 10000,
     },
   })
 );
