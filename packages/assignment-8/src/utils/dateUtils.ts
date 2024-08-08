@@ -96,7 +96,7 @@ const parseDateTime = (date: string, time: string): Date => {
 };
 
 // 두 일정이 겹치는지 확인하는 함수
-const isOverlapping = (event1: Event, event2: Event): boolean => {
+export const isOverlapping = (event1: Event, event2: Event): boolean => {
   const start1 = parseDateTime(event1.date, event1.startTime);
   const end1 = parseDateTime(event1.date, event1.endTime);
   const start2 = parseDateTime(event2.date, event2.startTime);
