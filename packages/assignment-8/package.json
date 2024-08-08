@@ -8,7 +8,7 @@
     "server:watch": "node --watch server.js",
     "start": "vite",
     "dev": "concurrently \"pnpm run server:watch\" \"pnpm run start\"",
-    "test": "vitest --watch src/**/*.test.{ts,tsx}",
+    "test": "vitest run src/**/*.test.{ts,tsx}",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:playwright": "playwright test",
