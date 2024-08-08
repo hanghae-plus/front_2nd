@@ -1010,7 +1010,8 @@ describe("반복 일정 테스트", () => {
           const $targetEvent = $eventsInEventList.filter((event) =>
             event.innerHTML.includes("반복 일정")
           )[0];
-          const $EventEditButton = $targetEvent.children[1].children[0];
+          const $EventEditButton =
+            $targetEvent.children[0].children[1].children[0];
 
           await userEvent.click($EventEditButton);
 
@@ -1172,7 +1173,8 @@ describe("반복 일정 테스트", () => {
           const $targetEvent = $eventsInEventList.filter((event) =>
             event.innerHTML.includes("반복 일정")
           )[0];
-          const $EventEditButton = $targetEvent.children[1].children[0];
+          const $EventEditButton =
+            $targetEvent.children[0].children[1].children[0];
 
           await userEvent.click($EventEditButton);
 
@@ -1334,7 +1336,8 @@ describe("반복 일정 테스트", () => {
           const $targetEvent = $eventsInEventList.filter((event) =>
             event.innerHTML.includes("반복 일정")
           )[0];
-          const $EventEditButton = $targetEvent.children[1].children[0];
+          const $EventEditButton =
+            $targetEvent.children[0].children[1].children[0];
 
           await userEvent.click($EventEditButton);
 
