@@ -98,6 +98,14 @@ export function isDateInRange(date: Date, rangeStart: Date, rangeEnd: Date): boo
   return date >= rangeStart && date <= rangeEnd;
 }
 
+/**
+ * 주어진 날짜가 특정 월에 포함되어 있는지 확인합니다.
+ * @description 연도를 함께 비교하여 동일한 월인지 확인합니다.
+ */
+export function isDateInMonth(date: Date, month: Date) {
+  return date.getMonth() === month.getMonth() && date.getFullYear() === month.getFullYear();
+}
+
 export function fillZero(value: number, size = 2) {
   return String(value).padStart(size, '0');
 }
