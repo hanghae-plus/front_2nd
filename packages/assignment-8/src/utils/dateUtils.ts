@@ -4,7 +4,7 @@ import { Event, RepeatType } from '../types.ts';
  * 주어진 년도와 월의 일수를 반환합니다.
  */
 export function getDaysInMonth(year: number, month: number): number {
-  return new Date(year, month, 0).getDate();
+  return new Date(year, month + 1, 0).getDate();
 }
 
 /**
