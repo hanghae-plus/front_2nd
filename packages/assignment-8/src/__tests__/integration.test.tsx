@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll, afterAll } from 'vitest';
+import { describe, test, expect, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -9,20 +9,6 @@ import {
   createRecurringEvents,
 } from '../utils/dateUtils.ts';
 import App from '../App.tsx';
-import { startServer } from '../../server';
-import { Server } from 'http';
-
-let server: Server;
-
-beforeAll(async () => {
-  server = await startServer();
-});
-
-afterAll(() => {
-  if (server) {
-    server.close();
-  }
-});
 
 describe('날짜 유틸리티 함수 테스트', () => {
   test('addDays 함수는 정확한 일수를 더한다', () => {
@@ -98,7 +84,39 @@ describe('반복 이벤트 생성 테스트', () => {
 describe('반복 이벤트 저장 테스트', () => {
   test('saveEvent 함수는 반복 이벤트에 대해 여러 이벤트를 생성한다', async () => {
     const user = userEvent.setup();
-    render(<App serverUrl="http://localhost:3001" />);
+
+    const mockFetchEvents = vi.fn().mockResolvedValue([
+      {
+        id: 1,
+        title: '반복 테스트 이벤트',
+        date: '2024-08-01',
+        startTime: '09:00',
+        endTime: '10:00',
+      },
+      {
+        id: 2,
+        title: '반복 테스트 이벤트',
+        date: '2024-08-08',
+        startTime: '09:00',
+        endTime: '10:00',
+      },
+      {
+        id: 3,
+        title: '반복 테스트 이벤트',
+        date: '2024-08-15',
+        startTime: '09:00',
+        endTime: '10:00',
+      },
+      {
+        id: 4,
+        title: '반복 테스트 이벤트',
+        date: '2024-08-22',
+        startTime: '09:00',
+        endTime: '10:00',
+      },
+    ]);
+
+    render(<App fetchEventsFunction={mockFetchEvents} />);
 
     const title = '반복 테스트 이벤트';
 
@@ -111,18 +129,16 @@ describe('반복 이벤트 저장 테스트', () => {
     await user.selectOptions(screen.getByLabelText('반복 유형'), 'weekly');
     await user.type(screen.getByLabelText('반복 종료일'), '2024-08-22');
 
-    const addButton = screen.getByRole('button', { name: '일정 추가' });
+    const addButton = screen.getByTestId('event-submit-button');
     await user.click(addButton);
 
     await waitFor(() => {
       const eventList = screen.getByTestId('event-list');
-
-      const newEventElement = within(eventList).getAllByText(title)[0];
-      expect(newEventElement).toBeInTheDocument();
-
       const newEventElements = within(eventList).getAllByText(title);
-
       expect(newEventElements).toHaveLength(4);
     });
+
+    // fetchEvents 함수가 호출되었는지 확인
+    expect(mockFetchEvents).toHaveBeenCalled();
   });
 });

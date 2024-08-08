@@ -1,9 +1,7 @@
 import express from 'express';
-import { env } from 'process';
 
 const app = express();
 const devPort = 3000;
-const testPort = 3001;
 
 app.use(express.json());
 
@@ -133,17 +131,6 @@ app.delete('/api/events/:id', (req, res) => {
   res.status(204).send();
 });
 
-export function startServer() {
-  return new Promise((resolve) => {
-    const server = app.listen(testPort, () => {
-      console.log(`Server running at http://localhost:${testPort}`);
-      resolve(server);
-    });
-  });
-}
-
-if (env.NODE_ENV !== 'test') {
-  app.listen(devPort, () => {
-    console.log(`Server running at http://localhost:${devPort}`);
-  });
-}
+app.listen(devPort, () => {
+  console.log(`Server running at http://localhost:${devPort}`);
+});
