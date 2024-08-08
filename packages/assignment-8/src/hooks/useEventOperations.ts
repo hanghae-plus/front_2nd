@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Event } from "../types";
 import { useToast } from '@chakra-ui/react';
+import generateRepeatedEvents from '../utils/generateRepeatedEvents';
 
 export const useEventOperations = (editing: boolean, onSave?: () => void) => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -13,7 +14,7 @@ export const useEventOperations = (editing: boolean, onSave?: () => void) => {
         throw new Error('Failed to fetch events');
       }
       const data = await response.json();
-      setEvents(data);
+      setEvents(generateRepeatedEvents(data));
     } catch (error) {
       console.error('Error fetching events:', error);
       toast({

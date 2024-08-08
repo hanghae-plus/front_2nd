@@ -12,7 +12,8 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "build": "tsc -b && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "test:e2e": "cypress open"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
@@ -37,6 +38,7 @@
     "@vitest/coverage-v8": "^2.0.3",
     "@vitest/ui": "^1.6.0",
     "concurrently": "^8.2.2",
+    "cypress": "^13.13.2",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.7",

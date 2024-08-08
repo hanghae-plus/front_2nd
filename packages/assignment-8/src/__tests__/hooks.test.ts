@@ -20,6 +20,7 @@ const MOCK_EVENT_1: Event = {
   category: "업무",
   repeat: { type: 'none', interval: 0 },
   notificationTime: 10,
+  subId: 0
 }
 
 const events: Event[] = [{ ...MOCK_EVENT_1 }];
@@ -220,6 +221,7 @@ describe('단위 테스트: 커스텀훅', () => {
           category: "업무",
           repeat: { type: 'none', interval: 0 },
           notificationTime: 5,
+          subId: 0
         };
 
         await act(async () => {

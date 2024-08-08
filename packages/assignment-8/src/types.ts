@@ -17,4 +17,5 @@ export interface Event {
   category: string;
   repeat: RepeatInfo;
   notificationTime: number; // 분 단위로 저장
+  subId?: number;
 }

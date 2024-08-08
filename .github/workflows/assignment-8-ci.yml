@@ -1,5 +1,4 @@
 name: CI Assignment 8
-
 on:
   pull_request:
     types:
@@ -7,10 +6,8 @@ on:
       - opened
       - reopened
     paths:
-      - 'packages/assignment-8/**'
-
+      - "packages/assignment-8/**"
   workflow_dispatch:
-
 jobs:
   assignment-8-test:
     runs-on: ubuntu-latest
@@ -22,8 +19,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: assignment-8-basic
         run: |
           pnpm install
           pnpm -F assignment-8 test
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm@9
+          pnpm install
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          working-directory: packages/assignment-8
+          start: pnpm run dev
+          wait-on: "http://localhost:5173"
+          run: pnpm run cy:run
+          browser: chrome

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   AlertDialog,
@@ -76,7 +76,7 @@ function App() {
     editEvent,
   } = useEventForm();
 
-  const { events, saveEvent, deleteEvent } = useEventOperations(Boolean(editingEvent), () => setEditingEvent(null));
+  const { events, fetchEvents, saveEvent, deleteEvent } = useEventOperations(Boolean(editingEvent), () => setEditingEvent(null));
   const { notifications, notifiedEvents, setNotifications } = useNotifications(events);
   const { view, setView, currentDate, holidays, navigate } = useCalendarView();
   const { searchTerm, filteredEvents, setSearchTerm }  = useSearch(events, currentDate, view);
@@ -108,6 +108,7 @@ function App() {
       return;
     }
 
+    
     const eventData: Event = {
       id: editingEvent ? editingEvent.id : Date.now(),
       title, date, startTime, endTime, description, location, category,
@@ -128,6 +129,10 @@ function App() {
       resetForm();
     }
   };
+
+  useEffect(() => {
+    fetchEvents()
+  }, [currentDate])
 
   const renderWeekView = () => {
     const weekDates = getWeekDates(currentDate);
@@ -151,9 +156,10 @@ function App() {
                     .filter(event => new Date(event.date).toDateString() === date.toDateString())
                     .map(event => {
                       const isNotified = notifiedEvents.includes(event.id);
+                      const isRepeatEvent = event.repeat.type !== 'none' && event.repeat.interval > 0
                       return (
                         <Box
-                          key={event.id}
+                          key={`${event.id}-${event.subId}`}
                           p={1}
                           my={1}
                           bg={isNotified ? "red.100" : "gray.100"}
@@ -163,7 +169,7 @@ function App() {
                         >
                           <HStack spacing={1}>
                             {isNotified && <BellIcon/>}
-                            <Text fontSize="sm" noOfLines={1}>{event.title}</Text>
+                            <Text fontSize="sm" noOfLines={1}>{isRepeatEvent ? '🔄' : ''}{event.title}</Text>
                           </HStack>
                         </Box>
                       )
@@ -198,18 +204,18 @@ function App() {
                 {week.map((day, dayIndex) => {
                   const dateString = day ? formatDate(currentDate, day) : '';
                   const holiday = holidays[dateString];
-
                   return (
-                    <Td key={dayIndex} height="100px" verticalAlign="top" width="14.28%" position="relative">
+                    <Td data-cy={`month-view-cell-${currentDate.getMonth() + 1}-${day}`} key={dayIndex} height="100px" verticalAlign="top" width="14.28%" position="relative">
                       {day && (
                         <>
                           <Text fontWeight="bold">{day}</Text>
                           {holiday && (<Text color="red.500" fontSize="sm">{holiday}</Text>)}
                           {getEventsForDay(filteredEvents, day).map(event => {
                             const isNotified = notifiedEvents.includes(event.id);
+                            const isRepeatEvent = event.repeat.type !== 'none' && event.repeat.interval > 0
                             return (
                               <Box
-                                key={event.id}
+                                key={`${event.id}-${event.subId}`}
                                 p={1}
                                 my={1}
                                 bg={isNotified ? "red.100" : "gray.100"}
@@ -219,7 +225,7 @@ function App() {
                               >
                                 <HStack spacing={1}>
                                   {isNotified && <BellIcon/>}
-                                  <Text fontSize="sm" noOfLines={1}>{event.title}</Text>
+                                  <Text fontSize="sm" noOfLines={1}>{isRepeatEvent ? '🔄' : ''}{event.title}</Text>
                                 </HStack>
                               </Box>
                             );
@@ -245,12 +251,12 @@ function App() {
 
           <FormControl>
             <FormLabel>제목</FormLabel>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)}/>
+            <Input data-cy='input-title' value={title} onChange={(e) => setTitle(e.target.value)}/>
           </FormControl>
 
           <FormControl>
             <FormLabel>날짜</FormLabel>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)}/>
+            <Input data-cy='input-date' type="date" value={date} onChange={(e) => setDate(e.target.value)}/>
           </FormControl>
 
           <HStack width="100%">
@@ -258,6 +264,7 @@ function App() {
               <FormLabel>시작 시간</FormLabel>
               <Tooltip label={startTimeError} isOpen={!!startTimeError} placement="top">
                 <Input
+                data-cy='input-start-time'
                   type="time"
                   value={startTime}
                   onChange={handleStartTimeChange}
@@ -270,6 +277,7 @@ function App() {
               <FormLabel>종료 시간</FormLabel>
               <Tooltip label={endTimeError} isOpen={!!endTimeError} placement="top">
                 <Input
+                data-cy='input-end-time'
                   type="time"
                   value={endTime}
                   onChange={handleEndTimeChange}
@@ -282,17 +290,17 @@ function App() {
 
           <FormControl>
             <FormLabel>설명</FormLabel>
-            <Input value={description} onChange={(e) => setDescription(e.target.value)}/>
+            <Input data-cy="input-description" value={description} onChange={(e) => setDescription(e.target.value)}/>
           </FormControl>
 
           <FormControl>
             <FormLabel>위치</FormLabel>
-            <Input value={location} onChange={(e) => setLocation(e.target.value)}/>
+            <Input data-cy="input-location" value={location} onChange={(e) => setLocation(e.target.value)}/>
           </FormControl>
 
           <FormControl>
             <FormLabel>카테고리</FormLabel>
-            <Select value={category} onChange={(e) => setCategory(e.target.value)}>
+            <Select data-cy="input-category" value={category} onChange={(e) => setCategory(e.target.value)}>
               <option value="">카테고리 선택</option>
               {categories.map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
@@ -302,7 +310,7 @@ function App() {
 
           <FormControl>
             <FormLabel>반복 설정</FormLabel>
-            <Checkbox isChecked={isRepeating} onChange={(e) => setIsRepeating(e.target.checked)}>
+            <Checkbox role="repeatCheckbox" isChecked={isRepeating} onChange={(e) => setIsRepeating(e.target.checked)}>
               반복 일정
             </Checkbox>
           </FormControl>
@@ -396,7 +404,7 @@ function App() {
           {filteredEvents.length === 0 ? (
             <Text>검색 결과가 없습니다.</Text>
           ) : filteredEvents.map((event) => (
-            <Box key={event.id} borderWidth={1} borderRadius="lg" p={3} width="100%">
+            <Box key={`${event.id}-${event.subId}`} data-testid={`event-item-${event.id}-${event.subId}`} borderWidth={1} borderRadius="lg" p={3} width="100%">
               <HStack justifyContent="space-between">
                 <VStack align="start">
                   <HStack>
@@ -425,11 +433,13 @@ function App() {
                 </VStack>
                 <HStack>
                   <IconButton
+                  data-cy="event-edit-button"
                     aria-label="Edit event"
                     icon={<EditIcon/>}
                     onClick={() => editEvent(event)}
                   />
                   <IconButton
+                  data-cy="event-delete-button"
                     aria-label="Delete event"
                     icon={<DeleteIcon/>}
                     onClick={() => deleteEvent(event.id)}
@@ -447,7 +457,7 @@ function App() {
         onClose={() => setIsOverlapDialogOpen(false)}
       >
         <AlertDialogOverlay>
-          <AlertDialogContent>
+          <AlertDialogContent data-cy="alert">
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
               일정 겹침 경고
             </AlertDialogHeader>
@@ -455,13 +465,13 @@ function App() {
             <AlertDialogBody>
               다음 일정과 겹칩니다:
               {overlappingEvents.map(event => (
-                <Text key={event.id}>{event.title} ({event.date} {event.startTime}-{event.endTime})</Text>
+                <Text key={`${event.id}-${event.subId}`}>{event.title} ({event.date} {event.startTime}-{event.endTime})</Text>
               ))}
               계속 진행하시겠습니까?
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={() => setIsOverlapDialogOpen(false)}>
+              <Button data-cy="alert-cancel-button" ref={cancelRef} onClick={() => setIsOverlapDialogOpen(false)}>
                 취소
               </Button>
               <Button colorScheme="red" onClick={() => {
