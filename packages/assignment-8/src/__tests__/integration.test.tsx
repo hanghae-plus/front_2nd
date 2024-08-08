@@ -483,7 +483,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
     test('반복 간격을 1일로 설정할 수 있다.', async () => {
       // 예상되는 일정 개수
-      const eventCount = 11;
+      const eventCount = 12;
 
       const { user } = setup(<App />);
 

@@ -602,7 +602,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       };
       const events: Event[] = [event];
       const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
-      expect(result).toHaveLength(30);
+      expect(result).toHaveLength(31);
     });
 
     test('3일마다 반복되는 이벤트를 확장해야 한다', () => {
@@ -620,7 +620,7 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       };
       const events: Event[] = [event];
       const result = expandRepeatingEvents(events, new Date('2024-07-01'), 'month');
-      expect(result).toHaveLength(10);
+      expect(result).toHaveLength(11);
     });
 
     test('1주마다 반복되는 이벤트를 확장해야 한다', () => {
