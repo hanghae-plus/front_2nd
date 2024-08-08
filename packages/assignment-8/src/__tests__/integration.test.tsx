@@ -623,7 +623,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
   });
 
   describe('반복 일정 표시 기능', () => {
-    test.only.each([
+    test.each([
       ['daily', '1일마다 반복'],
       ['weekly', '1주마다 반복'],
       ['monthly', '1월마다 반복'],
