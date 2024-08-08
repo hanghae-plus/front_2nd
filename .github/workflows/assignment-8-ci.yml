@@ -46,5 +46,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run Playwright tests
-        run: pnpm -F assignment-8 test:playwright
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install
+
+      - name: Run Playwright E2E Tests
+        working-directory: packages/assignment-8
+        run: pnpm test:playwright
