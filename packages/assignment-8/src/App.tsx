@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Alert,
   AlertDialog,
@@ -50,6 +50,7 @@ import { useEventOperations } from './hooks/useEventOperations.ts';
 import { useNotifications } from './hooks/useNotifications.ts';
 import { useCalendarView } from './hooks/useCalendarView.ts';
 import { useSearch } from './hooks/useSearch.ts';
+import { expandRepeatingEvents } from './utils/eventUtils.ts';
 
 const categories = ['업무', '개인', '가족', '기타'];
 
@@ -100,7 +101,11 @@ function App() {
   const { events, saveEvent, deleteEvent } = useEventOperations(Boolean(editingEvent), () => setEditingEvent(null));
   const { notifications, notifiedEvents, setNotifications } = useNotifications(events);
   const { view, setView, currentDate, holidays, navigate } = useCalendarView();
-  const { searchTerm, filteredEvents, setSearchTerm } = useSearch(events, currentDate, view);
+  const expandedRepeatingEvents = useMemo(
+    () => expandRepeatingEvents(events, currentDate, view),
+    [events, currentDate, view]
+  );
+  const { searchTerm, filteredEvents, setSearchTerm } = useSearch(expandedRepeatingEvents, currentDate, view);
 
   const [isOverlapDialogOpen, setIsOverlapDialogOpen] = useState(false);
   const [overlappingEvents, setOverlappingEvents] = useState<Event[]>([]);
@@ -193,7 +198,7 @@ function App() {
                       return (
                         <Tooltip label={getRepeatTypeText(event.repeat.type, event.repeat.interval)} placement={'top'}>
                           <Box
-                            key={event.id}
+                            key={event.id + event.date}
                             p={1}
                             my={1}
                             bg={isNotified ? 'red.100' : 'gray.100'}
@@ -261,7 +266,7 @@ function App() {
                                 placement={'top'}
                               >
                                 <Box
-                                  key={event.id}
+                                  key={event.id + event.date}
                                   p={1}
                                   my={1}
                                   bg={isNotified ? 'red.100' : 'gray.100'}
@@ -439,7 +444,7 @@ function App() {
             <Text>검색 결과가 없습니다.</Text>
           ) : (
             filteredEvents.map((event) => (
-              <Box key={event.id} borderWidth={1} borderRadius="lg" p={3} width="100%">
+              <Box key={event.id + event.date} borderWidth={1} borderRadius="lg" p={3} width="100%">
                 <HStack justifyContent="space-between">
                   <VStack align="start">
                     <HStack>
@@ -497,7 +502,7 @@ function App() {
             <AlertDialogBody>
               다음 일정과 겹칩니다:
               {overlappingEvents.map((event) => (
-                <Text key={event.id}>
+                <Text key={event.id + event.date}>
                   {event.title} ({event.date} {event.startTime}-{event.endTime})
                 </Text>
               ))}
