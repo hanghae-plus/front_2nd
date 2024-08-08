@@ -29,8 +29,8 @@ function filterEventsByDateRangeAtWeek(events: Event[], currentDate: Date) {
 }
 
 function filterEventsByDateRangeAtMonth(events: Event[], currentDate: Date) {
-  const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-  const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+  const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1, 0, 0, 0);
+  const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
   return filterEventsByDateRange(events, monthStart, monthEnd);
 }
 
@@ -93,8 +93,8 @@ function getRepeatingEvents(event: Event, currentDate: Date): Event[] {
 
   const repeatingEvents: Event[] = [];
   const startDate = new Date(event.date);
-  const yearEnd = new Date(currentDate.getFullYear() + 10, 11, 31);
-  const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+  const yearEnd = new Date(currentDate.getFullYear() + 10, 11, 31, 23, 59, 59);
+  const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
   const endDate = new Date(event.repeat.endDate ?? (event.repeat.type === 'yearly' ? yearEnd : monthEnd));
   let currentEventDate = new Date(startDate);
 
