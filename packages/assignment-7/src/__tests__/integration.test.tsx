@@ -9,7 +9,7 @@ import {
   vi,
 } from 'vitest';
 import { ReactElement } from 'react';
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, within, waitFor } from '@testing-library/react';
 import App from '../App';
 import { userEvent } from '@testing-library/user-event';
 import createMockServer from './createMockServer';
@@ -483,6 +483,68 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
 
       // 알림이 발생하는지 확인
       expect(screen.getByText(expectedMessage)).toBeInTheDocument();
+    });
+  });
+
+  describe('반복 일정 및 종료 조건', () => {
+    test('매주 오전 10시에 있는 팀 회의를 캘린더에 등록할 수 있다.', async () => {
+      const { user } = setup(<App />);
+
+      // 새 일정 추가 버튼 클릭
+      await user.click(screen.getAllByText('일정 추가')[0]);
+
+      // 일정 정보 입력
+      await user.type(screen.getByLabelText('제목'), '주간 팀 회의');
+      await user.type(screen.getByLabelText('날짜'), '2024-07-01');
+      await user.type(screen.getByLabelText('시작 시간'), '10:00');
+      await user.type(screen.getByLabelText('종료 시간'), '11:00');
+      await user.type(
+        screen.getByLabelText('설명'),
+        '주간 업무 보고 및 계획 수립'
+      );
+      await user.type(screen.getByLabelText('위치'), '회의실 A');
+      await user.selectOptions(screen.getByLabelText('카테고리'), '업무');
+
+      // 반복 설정
+      await user.click(screen.getByText('반복 일정'));
+
+      screen.debug();
+
+      // 반복 유형과 반복 간격 설정
+      await waitFor(() => {
+        expect(screen.getByLabelText('반복 유형')).toBeInTheDocument();
+      });
+      await user.selectOptions(screen.getByLabelText('반복 유형'), '매주');
+      await user.type(screen.getByLabelText('반복 간격'), '1');
+      await user.type(screen.getByLabelText('반복 종료일'), '2024-12-31');
+
+      // 알림 설정
+      await user.selectOptions(screen.getByLabelText('알림 설정'), '10분 전');
+
+      // 저장 버튼 클릭
+      await user.click(screen.getByTestId('event-submit-button'));
+
+      // 새로 추가된 일정이 목록에 표시되는지 확인
+      const eventList = screen.getByTestId('event-list');
+      expect(eventList).toHaveTextContent('주간 팀 회의');
+      expect(eventList).toHaveTextContent('10분 전');
+
+      // 캘린더에 일정이 표시되는지 확인
+      const monthView = screen.getByTestId('month-view');
+      const startDate = new Date('2024-07-01');
+      const endDate = new Date('2024-12-30');
+
+      // 매주 일정 확인
+      while (startDate <= endDate) {
+        const mondayDate = startDate.getDate().toString();
+        const mondayCell = within(monthView)
+          .getByText(mondayDate)
+          .closest('td');
+        expect(
+          within(mondayCell!).getByText('주간 팀 회의')
+        ).toBeInTheDocument();
+        startDate.setDate(startDate.getDate() + 7);
+      }
     });
   });
 });
