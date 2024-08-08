@@ -1,4 +1,4 @@
-import { getAlarmBoundary } from "@/__tests__/testutils";
+import { getAlarmBoundary } from "@/__tests__/testUtils";
 import { Event } from "@/types";
 
 const events: Array<Event> = [
@@ -65,8 +65,8 @@ const events: Array<Event> = [
   {
     id: 6,
     title: "알림 테스트",
-    description: "알림 테스트",
-    location: "알림 테스트",
+    description: "알림 테스트용입니다",
+    location: "서울",
     category: "개인",
     repeat: { type: "weekly", interval: 1 },
     notificationTime: 10,

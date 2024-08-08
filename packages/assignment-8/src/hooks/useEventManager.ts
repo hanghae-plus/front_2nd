@@ -1,4 +1,5 @@
 import { Event, SetState } from "@/types";
+import getEventGeneratedRepeatChildren from "@/utils/getEventGeneratedRepeatChildren";
 import { useToast } from "@chakra-ui/react";
 import { useEffect } from "react";
 
@@ -55,8 +56,14 @@ const useEventManager = ({
       if (!response.ok) {
         throw new Error("Failed to fetch events");
       }
-      const data = await response.json();
-      setEvents(data);
+
+      const events = await response
+        .json()
+        .then((res) =>
+          res.map((event: Event) => getEventGeneratedRepeatChildren(event))
+        );
+
+      setEvents(events);
     } catch (error) {
       console.error("Error fetching events:", error);
       toast({
@@ -74,13 +81,16 @@ const useEventManager = ({
   const saveEvent = async (eventData: Event) => {
     try {
       let response;
+
+      const newEvent = getEventGeneratedRepeatChildren(eventData);
+
       if (editingEvent) {
-        response = await fetch(`/api/events/${eventData.id}`, {
+        response = await fetch(`/api/events/${newEvent.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(eventData),
+          body: JSON.stringify(newEvent),
         });
       } else {
         response = await fetch("/api/events", {
@@ -88,7 +98,7 @@ const useEventManager = ({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(eventData),
+          body: JSON.stringify(newEvent),
         });
       }
 
