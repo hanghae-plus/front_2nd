@@ -3,6 +3,7 @@ import EventForm from "@/components/EventForm";
 import EventList from "@/components/EventList";
 import NotificationAlert from "@/components/NotificationAlert";
 import OverlappingAlert from "@/components/OverlappingAlert";
+import RepeatEventRemoveAlert from "@/components/RepeatEventRemoveAlert";
 import { Box, Flex } from "@chakra-ui/react";
 import useScheduler from "./useScheduler";
 
@@ -22,6 +23,10 @@ const Scheduler = () => {
     onClickGoing,
     notifications,
     setNotifications,
+    isReapetEventRemoveDialogOpen,
+    setIsRepeatEventRemoveDialogOpen,
+    onClickRemoveParent,
+    onClickRemoveOnlyTargetChild,
   } = useScheduler();
 
   return (
@@ -49,6 +54,12 @@ const Scheduler = () => {
       <NotificationAlert
         notifications={notifications}
         setNotifications={setNotifications}
+      />
+      <RepeatEventRemoveAlert
+        isReapetEventRemoveDialogOpen={isReapetEventRemoveDialogOpen}
+        setIsRepeatEventRemoveDialogOpen={setIsRepeatEventRemoveDialogOpen}
+        onClickRemoveParent={onClickRemoveParent}
+        onClickRemoveOnlyTargetChild={onClickRemoveOnlyTargetChild}
       />
     </Box>
   );

@@ -142,6 +142,7 @@ const EventForm = ({ addOrUpdateEvent, eventForm }: Props) => {
                 eventForm.setRepeatType(e.target.value as RepeatType)
               }
             >
+              <option value="none">반복없음</option>
               <option value="daily">매일</option>
               <option value="weekly">매주</option>
               <option value="monthly">매월</option>

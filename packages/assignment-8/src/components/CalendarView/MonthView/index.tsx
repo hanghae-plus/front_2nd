@@ -70,7 +70,7 @@ const MonthView = ({
         </Thead>
         <Tbody>
           {weeks.map((week, weekIndex) => (
-            <Tr key={weekIndex}>
+            <Tr key={weekIndex} data-testid="monthview-week">
               {week.map((day, dayIndex) => {
                 const dateString = day
                   ? `${currentDate.getFullYear()}-${String(
@@ -86,6 +86,7 @@ const MonthView = ({
                     verticalAlign="top"
                     width="14.28%"
                     position="relative"
+                    data-testid="monthview-day"
                   >
                     {day && (
                       <>
@@ -103,20 +104,35 @@ const MonthView = ({
                             const isNotified = notifiedEvents.includes(
                               event.id
                             );
+                            const isChildren = event.parentId !== undefined;
                             return (
                               <Box
                                 key={event.id}
                                 p={1}
                                 my={1}
-                                bg={isNotified ? "red.100" : "gray.100"}
+                                bg={
+                                  isNotified
+                                    ? "red.100"
+                                    : isChildren
+                                    ? "green.100"
+                                    : "gray.100"
+                                }
                                 borderRadius="md"
                                 fontWeight={isNotified ? "bold" : "normal"}
-                                color={isNotified ? "red.500" : "inherit"}
+                                color={
+                                  isNotified
+                                    ? "red.500"
+                                    : isChildren
+                                    ? "green.500"
+                                    : "inherit"
+                                }
                               >
                                 <HStack spacing={1}>
                                   {isNotified && <BellIcon />}
                                   <Text fontSize="sm" noOfLines={1}>
-                                    {event.title}
+                                    {`${isChildren ? "(반복)" : ""}${
+                                      event.title
+                                    }`}
                                   </Text>
                                 </HStack>
                               </Box>

@@ -1,8 +1,10 @@
 import { Event, SetState } from "@/types";
+import getEventGeneratedRepeatChildren from "@/utils/getEventGeneratedRepeatChildren";
 import { useToast } from "@chakra-ui/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface Props {
+  events: Array<Event>;
   validateSubmitEventForm: () => Promise<boolean>;
   eventFormData: Omit<Event, "id">;
   getIsOverlappingAndSetOverlappingEvents: (newEvent: Event) => boolean;
@@ -12,6 +14,7 @@ interface Props {
   setEvents: SetState<Array<Event>>;
 }
 const useEventManager = ({
+  events,
   validateSubmitEventForm,
   eventFormData,
   getIsOverlappingAndSetOverlappingEvents,
@@ -37,6 +40,10 @@ const useEventManager = ({
       ...eventFormData,
     };
 
+    if (editingEvent && editingEvent.parentId) {
+      console.log("반복 이벤트 수정", editingEvent);
+    }
+
     const isOverlapping = getIsOverlappingAndSetOverlappingEvents(eventData);
 
     if (isOverlapping) {
@@ -55,8 +62,17 @@ const useEventManager = ({
       if (!response.ok) {
         throw new Error("Failed to fetch events");
       }
-      const data = await response.json();
-      setEvents(data);
+
+      const events = await response.json().then((res) =>
+        res.map((event: Event) => {
+          if (event.children) {
+            return event;
+          }
+          return getEventGeneratedRepeatChildren(event);
+        })
+      );
+
+      setEvents(events);
     } catch (error) {
       console.error("Error fetching events:", error);
       toast({
@@ -74,13 +90,16 @@ const useEventManager = ({
   const saveEvent = async (eventData: Event) => {
     try {
       let response;
+
+      const newEvent = getEventGeneratedRepeatChildren(eventData);
+
       if (editingEvent) {
-        response = await fetch(`/api/events/${eventData.id}`, {
+        response = await fetch(`/api/events/${newEvent.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(eventData),
+          body: JSON.stringify(newEvent),
         });
       } else {
         response = await fetch("/api/events", {
@@ -88,7 +107,7 @@ const useEventManager = ({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(eventData),
+          body: JSON.stringify(newEvent),
         });
       }
 
@@ -118,13 +137,14 @@ const useEventManager = ({
     }
   };
 
-  /**
-   * 일정 삭제 눌렀을 때
-   */
-  const deleteEvent = async (id: number) => {
+  const putEdittedEvent = async (eventData: Event) => {
     try {
-      const response = await fetch(`/api/events/${id}`, {
-        method: "DELETE",
+      const response = await fetch(`/api/events/${eventData.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventData),
       });
 
       if (!response.ok) {
@@ -149,6 +169,74 @@ const useEventManager = ({
     }
   };
 
+  const [isReapetEventRemoveDialogOpen, setIsRepeatEventRemoveDialogOpen] =
+    useState<boolean>(false);
+  const [removingEvent, setRemovingEvent] = useState<Event>();
+
+  const onClickRemoveParent = () => {
+    deleteEvent(
+      events.filter((event) => event.id === removingEvent?.parentId)[0]
+    );
+    setIsRepeatEventRemoveDialogOpen(false);
+  };
+
+  const onClickRemoveOnlyTargetChild = () => {
+    const parentEvent = events.filter(
+      (event) => event.id === removingEvent?.parentId
+    )[0];
+
+    const edittedEvent: Event = {
+      ...parentEvent,
+      children: parentEvent.children?.filter(
+        (child) => child.id !== removingEvent?.id
+      ),
+    };
+    putEdittedEvent(edittedEvent);
+    setIsRepeatEventRemoveDialogOpen(false);
+  };
+
+  /**
+   * 일정 삭제 눌렀을 때
+   */
+  const deleteEvent = async (event: Event) => {
+    if (event.parentId) {
+      setRemovingEvent(event);
+      setIsRepeatEventRemoveDialogOpen(true);
+      return;
+    }
+    try {
+      const response = await fetch(`/api/events/${event.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete event");
+      }
+
+      await fetchEvents(); // 이벤트 목록 새로고침
+      toast({
+        title: "일정이 삭제되었습니다.",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast({
+        title: "일정 삭제 실패",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+  const repeatEventRemoveDialog = {
+    isReapetEventRemoveDialogOpen,
+    setIsRepeatEventRemoveDialogOpen,
+    onClickRemoveParent,
+    onClickRemoveOnlyTargetChild,
+  };
+
   useEffect(() => {
     fetchEvents();
   }, []);
@@ -157,6 +245,8 @@ const useEventManager = ({
     addOrUpdateEvent,
     saveEvent,
     deleteEvent,
+
+    repeatEventRemoveDialog,
   };
 };
 

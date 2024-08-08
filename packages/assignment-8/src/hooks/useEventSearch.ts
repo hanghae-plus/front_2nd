@@ -27,10 +27,35 @@ const useEventSearch = ({ events, view, currentDate }: Props) => {
     [events]
   );
 
+  const getEventWithChildren = (events: Array<Event>) => {
+    const eventsForRender: Array<Event> = [];
+
+    events.forEach((event) => {
+      eventsForRender.push(event);
+
+      if (!event.children) {
+        return;
+      }
+
+      event.children.forEach((child) => {
+        eventsForRender.push(child);
+      });
+    });
+
+    return eventsForRender;
+  };
+
+  /**
+   * 렌더링용 일정 생성 및 필터링
+   * - 렌더링용 반복 일정 생성
+   * - 주간 및 월간 기준 일정 필터링
+   */
   const filteredEvents = useMemo(() => {
     const filtered = searchEvents(searchTerm);
 
-    return filtered.filter((event) => {
+    const eventsForRender = getEventWithChildren(filtered);
+
+    return eventsForRender.filter((event) => {
       const eventDate = new Date(event.date);
 
       if (view === "week") {

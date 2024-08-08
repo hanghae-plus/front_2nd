@@ -55,20 +55,33 @@ const WeekView = ({ currentDate, filteredEvents, notifiedEvents }: Props) => {
                   )
                   .map((event) => {
                     const isNotified = notifiedEvents.includes(event.id);
+                    const isChildren = event.parentId !== undefined;
                     return (
                       <Box
                         key={event.id}
                         p={1}
                         my={1}
-                        bg={isNotified ? "red.100" : "gray.100"}
+                        bg={
+                          isNotified
+                            ? "red.100"
+                            : isChildren
+                            ? "green.100"
+                            : "gray.100"
+                        }
                         borderRadius="md"
                         fontWeight={isNotified ? "bold" : "normal"}
-                        color={isNotified ? "red.500" : "inherit"}
+                        color={
+                          isNotified
+                            ? "red.500"
+                            : isChildren
+                            ? "green.500"
+                            : "inherit"
+                        }
                       >
                         <HStack spacing={1}>
                           {isNotified && <BellIcon />}
                           <Text fontSize="sm" noOfLines={1}>
-                            {event.title}
+                            {`${event.title}${isChildren ? " (반복)" : ""}`}
                           </Text>
                         </HStack>
                       </Box>
