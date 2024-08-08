@@ -47,8 +47,8 @@ jobs:
         run: pnpm install
 
       - name: Install Playwright Browsers
-        run: pnpm exec playwright install
+        run: pnpm create playwright
 
       - name: Run Playwright E2E Tests
         working-directory: packages/assignment-8
-        run: pnpm test:playwright
+        run: playwright test
