@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useEvents } from '../../hooks/useEvents';
+import { useEvents } from '../useEvents';
 import * as eventService from '../../services/eventService';
 import { Event, EventFormData } from '../../types';
 import { events } from '../../mockApiHandlers';

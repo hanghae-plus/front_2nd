@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import EventList from '../../components/EventList';
+import EventList from '../EventList';
 import { SchedulerContextType } from '../../contexts/SchedulerContext';
 import { EventFormData } from '../../types';
 

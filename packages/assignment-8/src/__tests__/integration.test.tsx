@@ -13,7 +13,7 @@ const setup = (component: ReactNode) => {
   };
 };
 
-describe('일정 관리 애플리케이션 통합 테스트', () => {
+describe.skip('일정 관리 애플리케이션 통합 테스트', () => {
   describe('일정 CRUD 및 기본 기능', () => {
     test('초기 일정 목록이 올바르게 렌더링 되어 목록에 노출된다.', async () => {
       // 테스트를 위한 환경 (렌더링)

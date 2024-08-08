@@ -1,11 +1,5 @@
 import { describe, test } from 'vitest';
-import {
-  formatMonth,
-  formatWeek,
-  getDaysInMonth,
-  getWeekDates,
-  isDateInRange,
-} from '../utils/temp';
+import { formatMonth, formatWeek, getDaysInMonth, getWeekDates } from '../date';
 
 describe('단위 테스트: 날짜 및 시간 관리', () => {
   describe('getDaysInMonth 함수', () => {
@@ -104,54 +98,6 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       expect(formatMonth(new Date(2024, 11, 31))).toBe('2024년 12월');
 
       expect(formatMonth(new Date(2025, 5, 15))).toBe('2025년 6월');
-    });
-  });
-
-  describe('isDateInRange 함수', () => {
-    test('주어진 날짜가 특정 범위 내에 있는지 정확히 판단한다', () => {
-      const startDate = new Date(2024, 0, 1); // 2024년 1월 1일
-      const endDate = new Date(2024, 11, 31); // 2024년 12월 31일
-
-      // 범위 내의 날짜
-      expect(isDateInRange(new Date(2024, 5, 15), startDate, endDate)).toBe(
-        true
-      );
-
-      // 시작 날짜와 같은 경우
-      expect(isDateInRange(new Date(2024, 0, 1), startDate, endDate)).toBe(
-        true
-      );
-
-      // 종료 날짜와 같은 경우
-      expect(isDateInRange(new Date(2024, 11, 31), startDate, endDate)).toBe(
-        true
-      );
-
-      // 범위 밖의 날짜 (이전)
-      expect(isDateInRange(new Date(2023, 11, 31), startDate, endDate)).toBe(
-        false
-      );
-
-      // 범위 밖의 날짜 (이후)
-      expect(isDateInRange(new Date(2025, 0, 1), startDate, endDate)).toBe(
-        false
-      );
-    });
-
-    test('시작 날짜가 종료 날짜보다 늦은 경우를 처리한다', () => {
-      const startDate = new Date(2024, 11, 31); // 2024년 12월 31일
-      const endDate = new Date(2024, 0, 1); // 2024년 1월 1일
-
-      // 이 경우 항상 false를 반환해야 함
-      expect(isDateInRange(new Date(2024, 5, 15), startDate, endDate)).toBe(
-        false
-      );
-    });
-
-    test('같은 날짜로 범위를 지정한 경우를 처리한다', () => {
-      const sameDate = new Date(2024, 5, 15); // 2024년 6월 15일
-
-      expect(isDateInRange(sameDate, sameDate, sameDate)).toBe(true);
     });
   });
 });

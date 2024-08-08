@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import EventCard from '../../components/EventCard';
+import EventCard from '../EventCard';
 import { Event } from '../../types';
 
 describe('EventCard Component', () => {
