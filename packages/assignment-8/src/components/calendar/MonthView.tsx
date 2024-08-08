@@ -70,12 +70,15 @@ const MonthView: React.FC<MonthViewProps> = ({ currentDate, events, notifiedEven
                           .filter((event) => new Date(event.date).getDate() === day)
                           .map((event) => {
                             const isNotified = notifiedEvents.includes(event.id);
+
                             return (
                               <Box
+                                data-testid={event.repeatId ? 'repeated-event' : 'event'}
+                                data-repeat-id={event.repeatId}
                                 key={event.id}
                                 p={1}
                                 my={1}
-                                bg={isNotified ? 'red.100' : 'gray.100'}
+                                bg={isNotified ? 'red.100' : event.repeatId ? event.color : 'gray.100'}
                                 borderRadius='md'
                                 fontWeight={isNotified ? 'bold' : 'normal'}
                                 color={isNotified ? 'red.500' : 'inherit'}>

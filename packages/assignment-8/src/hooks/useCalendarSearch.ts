@@ -1,16 +1,24 @@
 import { useState } from 'react';
 import { Event } from '../types/types';
 import { getWeekDates } from '../utils/utils';
+import { useRandomColors } from './useRandomColor';
 
 export const useCalendarSearch = (events: Event[]) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [view, setView] = useState<'week' | 'month'>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const searchEvents = () => {
-    if (!searchTerm.trim()) return events;
+  const repeatIds = Array.from(new Set(events.map((event) => event.repeatId).filter(Boolean)));
+  const colorMap = useRandomColors(repeatIds);
+  const eventsWithColor = events.map((event) => ({
+    ...event,
+    color: event.repeatId ? colorMap[event.repeatId] : undefined,
+  }));
 
-    return events.filter(
+  const searchEvents = () => {
+    if (!searchTerm.trim()) return eventsWithColor;
+
+    return eventsWithColor.filter(
       (event) =>
         event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||

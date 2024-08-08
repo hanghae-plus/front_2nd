@@ -10,10 +10,10 @@ import {
   Checkbox,
   Button,
 } from '@chakra-ui/react';
-import { RepeatType } from 'framer-motion';
 import { CATEGORIES, NOTIFICATION_OPTION } from '../constants/constants';
 import { EventFormState, useEventForm } from '../hooks/useEventForm';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useState } from 'react';
+import { RepeatType } from '../types/types';
 
 type Props = {
   isEditingEvent: boolean;
@@ -44,9 +44,30 @@ type Props = {
     startTime?: string;
     endTime?: string;
   };
+  validateDate: (
+    startDate: string,
+    endDate: string
+  ) => {
+    title?: string;
+    date?: string;
+    startTime?: string;
+    endTime?: string;
+    endDate?: string;
+  };
+  isException: boolean;
+  setIsException: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const EventForm = ({ isEditingEvent, handleAddOrUpdateEvent, formData, setField, validateTime }: Props) => {
+const EventForm = ({
+  isEditingEvent,
+  handleAddOrUpdateEvent,
+  formData,
+  setField,
+  validateTime,
+  validateDate,
+  isException,
+  setIsException,
+}: Props) => {
   const handleStartTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newStartTime = e.target.value;
     setField('startTime', newStartTime);
@@ -57,6 +78,12 @@ const EventForm = ({ isEditingEvent, handleAddOrUpdateEvent, formData, setField,
     const newEndTime = e.target.value;
     setField('endTime', newEndTime);
     validateTime(formData.startTime, newEndTime);
+  };
+
+  const handleEndDateChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newEndDate = e.target.value;
+    setField('repeat', { ...formData.repeat, endDate: newEndDate });
+    validateDate(formData.repeat?.endDate || '', newEndDate);
   };
 
   return (
@@ -123,13 +150,6 @@ const EventForm = ({ isEditingEvent, handleAddOrUpdateEvent, formData, setField,
       </FormControl>
 
       <FormControl>
-        <FormLabel>반복 설정</FormLabel>
-        <Checkbox isChecked={formData.isRepeating} onChange={(e) => setField('isRepeating', e.target.checked)}>
-          반복 일정
-        </Checkbox>
-      </FormControl>
-
-      <FormControl>
         <FormLabel>알림 설정</FormLabel>
         <Select
           value={formData.notificationTime}
@@ -140,6 +160,12 @@ const EventForm = ({ isEditingEvent, handleAddOrUpdateEvent, formData, setField,
             </option>
           ))}
         </Select>
+      </FormControl>
+      <FormControl>
+        <FormLabel>반복 설정</FormLabel>
+        <Checkbox isChecked={formData.isRepeating} onChange={(e) => setField('isRepeating', e.target.checked)}>
+          반복 일정
+        </Checkbox>
       </FormControl>
 
       {formData.isRepeating && (
@@ -169,15 +195,27 @@ const EventForm = ({ isEditingEvent, handleAddOrUpdateEvent, formData, setField,
               </FormControl>
               <FormControl>
                 <FormLabel>반복 종료일</FormLabel>
-                <Input
-                  type='date'
-                  value={formData.repeat?.endDate}
-                  onChange={(e) => setField('repeat', { ...formData.repeat, endDate: e.target.value })}
-                />
+                <Tooltip label={formData.errors?.endDate} isOpen={!!formData.errors?.endDate} placement='top'>
+                  <Input
+                    type='date'
+                    value={formData.repeat?.endDate}
+                    onChange={handleEndDateChange}
+                    onBlur={() => validateDate(formData.date, formData.repeat?.endDate || '')}
+                    isInvalid={!!formData.errors?.endDate}
+                  />
+                </Tooltip>
               </FormControl>
             </HStack>
           )}
         </VStack>
+      )}
+      {formData.isRepeating && isEditingEvent && (
+        <FormControl>
+          <FormLabel>반복 예외 수정</FormLabel>
+          <Checkbox isChecked={isException} onChange={(e) => setIsException(e.target.checked)}>
+            예외 일정
+          </Checkbox>
+        </FormControl>
       )}
 
       <Button data-testid='event-submit-button' onClick={handleAddOrUpdateEvent} colorScheme='blue'>

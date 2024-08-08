@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { Event } from '../../types/types';
 
 export const mockEventApiHandlers = (initialEvents: Event[]) => {
-  const events: Event[] = [...initialEvents];
+  let events: Event[] = [...initialEvents];
 
   return [
     http.get('/api/events', () => {
@@ -16,6 +16,17 @@ export const mockEventApiHandlers = (initialEvents: Event[]) => {
       return HttpResponse.json(newEvent, { status: 201 });
     }),
 
+    http.post('/api/events/bulk', async ({ request }) => {
+      const newEvents = (await request.json()) as Event[];
+      const repeatId = Date.now().toString() + 'repeat';
+      const addedEvents = newEvents.map((event) => {
+        const newEvent = { ...event, repeatId };
+        events.push(newEvent);
+        return newEvent;
+      });
+      return HttpResponse.json(addedEvents, { status: 201 });
+    }),
+
     http.put('/api/events/:id', async ({ params, request }) => {
       const { id } = params;
       const updates = (await request.json()) as Record<string, unknown>;
@@ -26,6 +37,19 @@ export const mockEventApiHandlers = (initialEvents: Event[]) => {
       }
 
       return HttpResponse.json(events.find((event) => event.id === Number(id)));
+    }),
+
+    http.put('/api/events/repeat/:repeatId', async ({ params, request }) => {
+      const { repeatId } = params;
+      const updates = (await request.json()) as Partial<Event>;
+      const updatedEvents = events.map((event) => {
+        if (event.repeatId === repeatId) {
+          return { ...event, ...updates };
+        }
+        return event;
+      });
+      events = updatedEvents;
+      return HttpResponse.json(updatedEvents);
     }),
 
     http.delete('/api/events/:id', ({ params }) => {

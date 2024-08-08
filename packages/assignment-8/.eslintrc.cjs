@@ -15,4 +15,15 @@ module.exports = {
       { allowConstantExport: true },
     ],
   },
+  global: {
+    globalThis: true,
+    describe: true,
+    it: true,
+    expect: true,
+    beforeEach: true,
+    beforeAll: true,
+    afterEach: true,
+    afterAll: true,
+    vi: true
+  }
 }

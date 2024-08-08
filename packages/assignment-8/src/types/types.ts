@@ -8,6 +8,7 @@ interface RepeatInfo {
 
 interface Event {
   id: number;
+  repeatId: string | null;
   title: string;
   date: string;
   startTime: string;
@@ -17,6 +18,7 @@ interface Event {
   category: string;
   repeat: RepeatInfo;
   notificationTime: number; // 분 단위로 저장
+  color?: string;
 }
 
 export type { Event, RepeatInfo, RepeatType };
