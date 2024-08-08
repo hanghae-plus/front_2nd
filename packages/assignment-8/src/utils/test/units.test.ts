@@ -3,9 +3,11 @@ import {
   formatMonth,
   formatWeek,
   getDaysInMonth,
+  getRepeatEvents,
   getWeekDates,
   isDateInRange,
 } from "../date-utils";
+import { Event } from "../../types/types";
 
 describe("단위 테스트: 날짜 및 시간 관리", () => {
   describe("getDaysInMonth 함수", () => {
@@ -130,6 +132,203 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
     test("시작일, 종료일, 확인할 날짜가 모두 같은 경우를 처리합니다.", () => {
       const sameDate = new Date("2023-05-05");
       expect(isDateInRange(sameDate, sameDate, sameDate)).toBe(true);
+    });
+  });
+
+  describe("getRepeatEvents 함수", () => {
+    // 모든 이벤트들은 endDate가 주어지지 않으면 date를 기준년도까지 이벤트가 생성됩니다.
+    // repeat type과 interval이 주어지지 않는다면 본래 event 객체를 반환합니다.
+    test("주어진 이벤트를 1주 마다 반복 이벤트로 생성합니다.", () => {
+      const event: Event = {
+        id: 100,
+        title: "주간 팀 회의",
+        date: "2024-12-16",
+        startTime: "10:00",
+        endTime: "11:00",
+        description: "주간 업무 보고 및 계획 수립",
+        location: "회의실 A",
+        category: "",
+        repeat: { type: "weekly", interval: 1, endDate: undefined },
+        notificationTime: 10,
+      };
+      const weeklyRepeatEvents = getRepeatEvents(event);
+
+      // 실제 반복 데이터가 형성되었는지 확실하게 체크하는게 괜찮은 걸까??
+      expect(weeklyRepeatEvents).toEqual([
+        {
+          id: 100,
+          title: "주간 팀 회의",
+          date: "2024-12-16",
+          startTime: "10:00",
+          endTime: "11:00",
+          description: "주간 업무 보고 및 계획 수립",
+          location: "회의실 A",
+          category: "",
+          repeat: { type: "weekly", interval: 1, endDate: undefined },
+          notificationTime: 10,
+        },
+        {
+          id: 101,
+          title: "주간 팀 회의",
+          date: "2024-12-23",
+          startTime: "10:00",
+          endTime: "11:00",
+          description: "주간 업무 보고 및 계획 수립",
+          location: "회의실 A",
+          category: "",
+          repeat: { type: "weekly", interval: 1, endDate: undefined },
+          notificationTime: 10,
+        },
+        {
+          id: 102,
+          title: "주간 팀 회의",
+          date: "2024-12-30",
+          startTime: "10:00",
+          endTime: "11:00",
+          description: "주간 업무 보고 및 계획 수립",
+          location: "회의실 A",
+          category: "",
+          repeat: { type: "weekly", interval: 1, endDate: undefined },
+          notificationTime: 10,
+        },
+      ]);
+    });
+    test("주어진 이벤트를 매 달 반복 이벤트로 생성합니다.", () => {
+      const event: Event = {
+        id: 100,
+        title: "주간 팀 회의",
+        date: "2024-10-01",
+        startTime: "10:00",
+        endTime: "11:00",
+        description: "주간 업무 보고 및 계획 수립",
+        location: "회의실 A",
+        category: "",
+        repeat: { type: "monthly", interval: 1, endDate: undefined },
+        notificationTime: 10,
+      };
+      const monthlyRepeatEvents = getRepeatEvents(event);
+      expect(monthlyRepeatEvents).toEqual([
+        {
+          id: 100,
+          title: "주간 팀 회의",
+          date: "2024-10-01",
+          startTime: "10:00",
+          endTime: "11:00",
+          description: "주간 업무 보고 및 계획 수립",
+          location: "회의실 A",
+          category: "",
+          repeat: { type: "monthly", interval: 1, endDate: undefined },
+          notificationTime: 10,
+        },
+        {
+          id: 101,
+          title: "주간 팀 회의",
+          date: "2024-11-01",
+          startTime: "10:00",
+          endTime: "11:00",
+          description: "주간 업무 보고 및 계획 수립",
+          location: "회의실 A",
+          category: "",
+          repeat: { type: "monthly", interval: 1, endDate: undefined },
+          notificationTime: 10,
+        },
+        {
+          id: 102,
+          title: "주간 팀 회의",
+          date: "2024-12-01",
+          startTime: "10:00",
+          endTime: "11:00",
+          description: "주간 업무 보고 및 계획 수립",
+          location: "회의실 A",
+          category: "",
+          repeat: { type: "monthly", interval: 1, endDate: undefined },
+          notificationTime: 10,
+        },
+      ]);
+    });
+
+    test("주어진 이벤트를 매 년 반복 이벤트로 생성합니다.", () => {
+      const event: Event = {
+        id: 100,
+        title: "주간 팀 회의",
+        date: "2024-09-02",
+        startTime: "10:00",
+        endTime: "11:00",
+        description: "주간 업무 보고 및 계획 수립",
+        location: "회의실 A",
+        category: "",
+        repeat: { type: "yearly", interval: 1, endDate: undefined },
+        notificationTime: 10,
+      };
+      const yearlyRepeatEvents = getRepeatEvents(event);
+      expect(yearlyRepeatEvents).toEqual([
+        {
+          id: 100,
+          title: "주간 팀 회의",
+          date: "2024-09-02",
+          startTime: "10:00",
+          endTime: "11:00",
+          description: "주간 업무 보고 및 계획 수립",
+          location: "회의실 A",
+          category: "",
+          repeat: { type: "yearly", interval: 1, endDate: undefined },
+          notificationTime: 10,
+        },
+      ]);
+    });
+
+    test("반복 종료일이 있다면, 종료일까지 반복이벤트를 생성합니다.", () => {
+      const event: Event = {
+        id: 100,
+        title: "주간 팀 회의",
+        date: "2024-12-24",
+        startTime: "10:00",
+        endTime: "11:00",
+        description: "주간 업무 보고 및 계획 수립",
+        location: "회의실 A",
+        category: "",
+        repeat: { type: "weekly", interval: 1, endDate: "2025-01-12" },
+        notificationTime: 10,
+      };
+      const weeklyRepeatEvents = getRepeatEvents(event);
+      expect(weeklyRepeatEvents).toEqual([
+        {
+          id: 100,
+          title: "주간 팀 회의",
+          date: "2024-12-24",
+          startTime: "10:00",
+          endTime: "11:00",
+          description: "주간 업무 보고 및 계획 수립",
+          location: "회의실 A",
+          category: "",
+          repeat: { type: "weekly", interval: 1, endDate: "2025-01-12" },
+          notificationTime: 10,
+        },
+        {
+          id: 101,
+          title: "주간 팀 회의",
+          date: "2024-12-31",
+          startTime: "10:00",
+          endTime: "11:00",
+          description: "주간 업무 보고 및 계획 수립",
+          location: "회의실 A",
+          category: "",
+          repeat: { type: "weekly", interval: 1, endDate: "2025-01-12" },
+          notificationTime: 10,
+        },
+        {
+          id: 102,
+          title: "주간 팀 회의",
+          date: "2025-01-07",
+          startTime: "10:00",
+          endTime: "11:00",
+          description: "주간 업무 보고 및 계획 수립",
+          location: "회의실 A",
+          category: "",
+          repeat: { type: "weekly", interval: 1, endDate: "2025-01-12" },
+          notificationTime: 10,
+        },
+      ]);
     });
   });
 });

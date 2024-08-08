@@ -75,21 +75,24 @@ export const initializeHandler = () => {
 };
 
 export const handlers = [
-  // delay를 주니 통과를 못함..
-  // http.all("*", async () => {
-  //   await delay(300);
-  // }),
   http.get("/api/events", async () => {
     return HttpResponse.json(events);
   }),
 
   http.post("/api/events", async ({ request }) => {
-    const body = (await request.json()) as Event;
+    const body = (await request.json()) as Event | Event[];
 
-    const newEvent: Event = {
-      ...body,
-    };
-    events.push(newEvent);
+    let newEvent: Event | Event[];
+
+    if (Array.isArray(body)) {
+      newEvent = [...body];
+      events.push(...newEvent);
+    } else {
+      newEvent = {
+        ...body,
+      };
+      events.push(newEvent);
+    }
 
     return HttpResponse.json(newEvent, { status: 201 });
   }),

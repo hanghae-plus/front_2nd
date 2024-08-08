@@ -9,12 +9,15 @@ import { Event } from "../../../types/types";
 export const useSaveEvent = (fetchEvents: () => Promise<void>) => {
   const toast = useToast();
 
-  const saveEvent = async (eventData: Event, editingEvent?: Event | null) => {
+  const saveEvent = async (
+    eventData: Event | Event[],
+    editingEvent?: Event | null
+  ) => {
     try {
       let response;
 
       if (editingEvent) {
-        response = await fetch(`/api/events/${eventData.id}`, {
+        response = await fetch(`/api/events/${(eventData as Event).id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",

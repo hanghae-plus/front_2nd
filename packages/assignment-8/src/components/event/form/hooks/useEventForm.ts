@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { Event, RepeatType } from "../../../types/types";
+import { Event, RepeatType } from "../../../../types/types";
 
 export const useEventForm = (editingEvent: Event | null) => {
   const [eventFormValue, setEventFormValue] = useState({
@@ -12,8 +12,10 @@ export const useEventForm = (editingEvent: Event | null) => {
     category: "",
     isRepeating: false,
     repeatType: "none" as RepeatType,
+    repeatNumber: "",
     repeatInterval: 1,
     repeatEndDate: "",
+    repeatDay: [""],
     notificationTime: 0,
   });
 
@@ -70,6 +72,8 @@ export const useEventForm = (editingEvent: Event | null) => {
       repeatType: "none",
       repeatInterval: 1,
       repeatEndDate: "",
+      repeatNumber: "",
+      repeatDay: [],
       notificationTime: 10,
     });
   };
@@ -88,6 +92,8 @@ export const useEventForm = (editingEvent: Event | null) => {
         repeatType: editingEvent.repeat?.type || "none",
         repeatInterval: editingEvent.repeat?.interval || 1,
         repeatEndDate: editingEvent.repeat?.endDate || "",
+        repeatNumber: editingEvent.repeat?.repeatNumber || "",
+        repeatDay: editingEvent.repeat?.repeatDay || [""],
         notificationTime: editingEvent.notificationTime || 10,
       });
     } else {

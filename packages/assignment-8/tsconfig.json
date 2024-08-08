@@ -1,5 +1,9 @@
 {
   "files": [],
+  "compilerOptions": {
+    "module": "ESNext"
+  },
+
   "references": [
     {
       "path": "./tsconfig.app.json"

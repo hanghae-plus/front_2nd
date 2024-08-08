@@ -1,12 +1,11 @@
-import express from 'express';
+import express from "express";
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 
-// 메모리에 데이터 저장
-let events = [
+const DUMMY_DATA = [
   {
     id: 1,
     title: "팀 회의",
@@ -16,7 +15,7 @@ let events = [
     description: "주간 팀 미팅",
     location: "회의실 A",
     category: "업무",
-    repeat: { type: 'weekly', interval: 1 },
+    repeat: { type: "weekly", interval: 1 },
     notificationTime: 1,
   },
   {
@@ -28,7 +27,7 @@ let events = [
     description: "동료와 점심 식사",
     location: "회사 근처 식당",
     category: "개인",
-    repeat: { type: 'none', interval: 0 },
+    repeat: { type: "none", interval: 0 },
     notificationTime: 1,
   },
   {
@@ -40,7 +39,7 @@ let events = [
     description: "분기별 프로젝트 마감",
     location: "사무실",
     category: "업무",
-    repeat: { type: 'none', interval: 0 },
+    repeat: { type: "none", interval: 0 },
     notificationTime: 1,
   },
   {
@@ -52,7 +51,7 @@ let events = [
     description: "친구 생일 축하",
     location: "친구 집",
     category: "개인",
-    repeat: { type: 'yearly', interval: 1 },
+    repeat: { type: "yearly", interval: 1 },
     notificationTime: 1,
   },
   {
@@ -64,7 +63,7 @@ let events = [
     description: "주간 운동",
     location: "헬스장",
     category: "개인",
-    repeat: { type: 'weekly', interval: 1 },
+    repeat: { type: "weekly", interval: 1 },
     notificationTime: 1,
   },
   {
@@ -73,7 +72,7 @@ let events = [
     description: "알림 테스트",
     location: "알림 테스트",
     category: "개인",
-    repeat: { type: 'weekly', interval: 1 },
+    repeat: { type: "weekly", interval: 1 },
     notificationTime: 10,
     ...(() => {
       const now = new Date();
@@ -81,54 +80,83 @@ let events = [
       const endTime = new Date(startTime.getTime() + 60 * 60000); // 시작시간으로부터 1시간 후
 
       const formatDate = (date) => {
-        return date.toISOString().split('T')[0];
+        return date.toISOString().split("T")[0];
       };
 
       const formatTime = (date) => {
-        return date.toTimeString().split(' ')[0].substring(0, 5);
+        return date.toTimeString().split(" ")[0].substring(0, 5);
       };
 
       return {
         date: formatDate(now),
         startTime: formatTime(startTime),
-        endTime: formatTime(endTime)
+        endTime: formatTime(endTime),
       };
     })(),
-  }
+  },
+  {
+    id: 7,
+    title: "여행가고 싶다..",
+    date: "2024-09-22",
+    startTime: "18:00",
+    endTime: "19:00",
+    description: "...",
+    location: "부산",
+    category: "개인",
+    repeat: { type: "none", interval: 0 },
+    notificationTime: 1,
+  },
 ];
 
+// 메모리에 데이터 저장
+let events = [...DUMMY_DATA];
+
 // 일정 조회
-app.get('/api/events', (req, res) => {
+app.get("/api/events", (req, res) => {
   res.json(events);
 });
 
 // 일정 추가
-app.post('/api/events', (req, res) => {
-  const newEvent = {
-    id: Date.now(),
-    ...req.body
-  };
-  events.push(newEvent);
+app.post("/api/events", (req, res) => {
+  let newEvent;
+
+  if (Array.isArray(req.body)) {
+    newEvent = [...req.body];
+    events.push(...newEvent);
+  } else {
+    newEvent = {
+      id: Date.now(),
+      ...req.body,
+    };
+    events.push(newEvent);
+  }
+
   res.status(201).json(newEvent);
 });
 
 // 일정 수정
-app.put('/api/events/:id', (req, res) => {
+app.put("/api/events/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  const eventIndex = events.findIndex(event => event.id === id);
+  const eventIndex = events.findIndex((event) => event.id === id);
   if (eventIndex > -1) {
     events[eventIndex] = { ...events[eventIndex], ...req.body };
     res.json(events[eventIndex]);
   } else {
-    res.status(404).send('Event not found');
+    res.status(404).send("Event not found");
   }
 });
 
 // 일정 삭제
-app.delete('/api/events/:id', (req, res) => {
+app.delete("/api/events/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  events = events.filter(event => event.id !== id);
+  events = events.filter((event) => event.id !== id);
   res.status(204).send();
+});
+
+// data reset
+app.get("/api/events/reset", (req, res) => {
+  events = [...DUMMY_DATA];
+  res.json("reset");
 });
 
 // 서버 시작
