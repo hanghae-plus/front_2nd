@@ -7,7 +7,7 @@ interface Props {
   event: Event;
   notifiedEvents: Array<number>;
   editEvent: (event: Event) => void;
-  deleteEvent: (eventId: number) => void;
+  deleteEvent: (event: Event) => void;
 }
 const EventListItem = ({
   event,
@@ -71,7 +71,7 @@ const EventListItem = ({
           <IconButton
             aria-label="Delete event"
             icon={<DeleteIcon />}
-            onClick={() => deleteEvent(event.id)}
+            onClick={() => deleteEvent(event)}
           />
         </HStack>
       </HStack>

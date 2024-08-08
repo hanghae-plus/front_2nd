@@ -36,15 +36,17 @@ const useScheduler = () => {
   const eventSearch = useEventSearch({ events, view, currentDate });
   const { filteredEvents } = eventSearch;
 
-  const { addOrUpdateEvent, saveEvent, deleteEvent } = useEventManager({
-    validateSubmitEventForm,
-    eventFormData,
-    getIsOverlappingAndSetOverlappingEvents,
-    editingEvent,
-    setEditingEvent,
-    resetForm,
-    setEvents,
-  });
+  const { addOrUpdateEvent, saveEvent, deleteEvent, repeatEventRemoveDialog } =
+    useEventManager({
+      events,
+      validateSubmitEventForm,
+      eventFormData,
+      getIsOverlappingAndSetOverlappingEvents,
+      editingEvent,
+      setEditingEvent,
+      resetForm,
+      setEvents,
+    });
 
   const onClickGoing = () => {
     setIsOverlapDialogOpen(false);
@@ -69,6 +71,7 @@ const useScheduler = () => {
     onClickGoing,
     notifications,
     setNotifications,
+    ...repeatEventRemoveDialog,
   };
 };
 

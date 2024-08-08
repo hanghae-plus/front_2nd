@@ -7,7 +7,7 @@ interface Props {
   eventSearch: ReturnType<typeof useEventSearch>;
   notifiedEvents: Array<number>;
   editEvent: (event: Event) => void;
-  deleteEvent: (eventId: number) => void;
+  deleteEvent: (event: Event) => void;
 }
 const EventList = ({
   eventSearch,

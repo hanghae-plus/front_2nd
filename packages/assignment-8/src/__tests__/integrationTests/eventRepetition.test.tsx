@@ -1261,7 +1261,6 @@ describe("반복 일정 테스트", () => {
           const $eventList = await screen.findByTestId("event-list");
           await waitFor(() => {
             expect($eventList.innerHTML).not.toContain($targetEvent.outerHTML);
-            expect($eventList).not.toHaveTextContent(testEvent.title);
           });
         });
       });
