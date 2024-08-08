@@ -42,9 +42,19 @@ const fetchHolidays = async (year: number, month: number): Promise<{ [key: strin
 };
 
 function App() {
-  const { events, fetchEvents, addEvent, updateEvent, deleteEvent } = useEventCRUD();
+  const { events, fetchEvents, addEvent, addBulkEvent, updateEvent, deleteEvent } = useEventCRUD();
 
-  const { formData, setField, resetForm, addOrUpdateEvent, setFormData, validateTime } = useEventForm(events);
+  const {
+    formData,
+    setField,
+    resetForm,
+    addOrUpdateEvent,
+    setFormData,
+    validateTime,
+    validateDate,
+    isException,
+    setIsException,
+  } = useEventForm(events);
 
   const { searchTerm, setSearchTerm, view, setView, currentDate, filteredEvents, navigate } = useCalendarSearch(events);
 
@@ -54,7 +64,7 @@ function App() {
 
   const [isOverlapDialogOpen, setIsOverlapDialogOpen] = useState(false);
   const [overlappingEvents, setOverlappingEvents] = useState<Event[]>([]);
-  const [pendingEventData, setPendingEventData] = useState<Event | null>(null);
+  const [pendingEventData, setPendingEventData] = useState<Event | Event[] | null>(null);
 
   const [holidays, setHolidays] = useState<{ [key: string]: string }>({});
 
@@ -62,9 +72,13 @@ function App() {
 
   // 추가, 수정 핸들러
   const handleAddOrUpdateEvent = async () => {
-    const result = await addOrUpdateEvent();
+    const result = await addOrUpdateEvent(isEditingEvent);
     if (result.success && result.eventData) {
-      await saveEvent(result.eventData);
+      if (Array.isArray(result.eventData)) {
+        await saveBulk(result.eventData);
+      } else {
+        await saveEvent(result.eventData);
+      }
       resetForm();
     } else if (result.overlappingEvents) {
       setOverlappingEvents(result.overlappingEvents);
@@ -76,7 +90,11 @@ function App() {
   // 겹침 일정일때 계속 진행 클릭
   const handleConfirmOverlap = async () => {
     if (pendingEventData) {
-      await saveEvent(pendingEventData);
+      if (Array.isArray(pendingEventData)) {
+        await saveBulk(pendingEventData);
+      } else {
+        await saveEvent(pendingEventData);
+      }
       resetForm();
       setIsOverlapDialogOpen(false);
       setPendingEventData(null);
@@ -86,9 +104,28 @@ function App() {
   // 이벤트 저장 (수정,저장)
   const saveEvent = async (eventData: Event) => {
     if (isEditingEvent) {
-      updateEvent(eventData);
+      if (formData.isRepeating) {
+        if (isException) {
+          const exceptionEventData = { ...eventData, repeatId: null };
+          updateEvent(exceptionEventData);
+        } else {
+          updateEvent(eventData, 'repeat');
+        }
+      } else {
+        updateEvent(eventData);
+      }
     } else {
       addEvent(eventData);
+    }
+    setIsEditingEvent(false);
+    resetForm();
+  };
+
+  // 이벤트 저장 (수정, 저장) Bulk
+  const saveBulk = async (eventDatas: Event[]) => {
+    if (isEditingEvent) {
+    } else {
+      addBulkEvent(eventDatas);
     }
     setIsEditingEvent(false);
     resetForm();
@@ -124,6 +161,9 @@ function App() {
           formData={formData}
           setField={setField}
           validateTime={validateTime}
+          validateDate={validateDate}
+          isException={isException}
+          setIsException={setIsException}
         />
         {/* calendar */}
         <VStack flex={1} spacing={5} align='stretch'>

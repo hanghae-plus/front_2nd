@@ -1,18 +1,21 @@
-import { useReducer, useCallback, useEffect } from 'react';
+import { useReducer, useCallback, useEffect, useState } from 'react';
 import { Event } from '../types/types';
 import { useToast } from '@chakra-ui/react';
 import { findOverlappingEvents } from '../utils/eventUtils';
+import { addDays, addWeeks, addMonths, addYears } from 'date-fns';
 
 // 여러개의 state값을 관리하기 쉽게 하기 위해 useReducer를 사용!
 
-export type EventFormState = Omit<Event, 'id'> & {
+export type EventFormState = Omit<Event, 'id' | 'repeatId'> & {
   id?: number | null;
+  repeatId?: string | null;
   isRepeating: boolean;
   errors: {
     title?: string;
     date?: string;
     startTime?: string;
     endTime?: string;
+    endDate?: string;
   };
 };
 
@@ -55,6 +58,8 @@ function eventFormReducer(state: EventFormState, action: EventFormAction): Event
 
 export const useEventForm = (existingEvents: Event[]) => {
   const [state, dispatch] = useReducer(eventFormReducer, initialState);
+  const [isException, setIsException] = useState<boolean>(false);
+
   const toast = useToast();
 
   useEffect(() => {
@@ -89,62 +94,138 @@ export const useEventForm = (existingEvents: Event[]) => {
     return errors;
   }, []);
 
-  const addOrUpdateEvent = useCallback(async () => {
-    const { title, date, startTime, endTime, description, location, category, isRepeating, repeat, notificationTime } =
-      state;
+  const validateDate = useCallback((startDate: string, endDate: string) => {
+    //repeat의 endDate가 date보다 빠른 날짜라면 에러를 반환한다.
+    const errors: EventFormState['errors'] = {};
+    if (!startDate || !endDate) return errors;
 
-    if (!title || !date || !startTime || !endTime) {
-      toast({
-        title: '필수 정보를 모두 입력해주세요.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return { success: false };
+    if (new Date(startDate) >= new Date(endDate)) {
+      errors.endDate = '종료일은 시작일보다 늦어야 합니다.';
     }
 
-    const timeErrors = validateTime(startTime, endTime);
-    if (Object.keys(timeErrors).length > 0) {
-      toast({
-        title: '시간 설정을 확인해주세요.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return { success: false };
+    dispatch({ type: 'SET_ERRORS', errors });
+    return errors;
+  }, []);
+
+  const addOrUpdateEvent = useCallback(
+    async (updateMode: boolean = false) => {
+      const {
+        title,
+        date,
+        startTime,
+        endTime,
+        description,
+        location,
+        category,
+        isRepeating,
+        repeat,
+        notificationTime,
+      } = state;
+
+      if (!title || !date || !startTime || !endTime) {
+        toast({
+          title: '필수 정보를 모두 입력해주세요.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        return { success: false };
+      }
+
+      const timeErrors = validateTime(startTime, endTime);
+      if (Object.keys(timeErrors).length > 0) {
+        toast({
+          title: '시간 설정을 확인해주세요.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        return { success: false };
+      }
+
+      const eventData: Event = {
+        id: state.id || Date.now(),
+        repeatId: null,
+        title,
+        date,
+        startTime,
+        endTime,
+        description,
+        location,
+        category,
+        repeat: {
+          type: isRepeating ? repeat.type : 'none',
+          interval: repeat?.interval,
+          endDate: repeat?.endDate || undefined,
+        },
+        notificationTime,
+      };
+
+      const overlapping = findOverlappingEvents(eventData, existingEvents);
+      if (overlapping.length > 0) {
+        if (eventData.repeat.type !== 'none' && !updateMode) {
+          const repeatedEvents = generateRepeatedEvents(eventData);
+          return { success: false, overlappingEvents: overlapping, eventData: repeatedEvents };
+        } else {
+          return { success: false, overlappingEvents: overlapping, eventData };
+        }
+      } else {
+        if (eventData.repeat.type !== 'none' && !updateMode) {
+          const repeatedEvents = generateRepeatedEvents(eventData);
+          return { success: true, eventData: repeatedEvents };
+        } else {
+          return { success: true, eventData };
+        }
+      }
+    },
+    [state, validateTime, toast]
+  );
+
+  const generateRepeatedEvents = (event: Event): Event[] => {
+    const events: Event[] = [event];
+    const startDate = new Date(event.date);
+    const endDate = event.repeat.endDate ? new Date(event.repeat.endDate) : addYears(startDate, 1); // 기본적으로 1년 동안 반복
+
+    let currentDate = startDate;
+
+    while (currentDate <= endDate) {
+      switch (event.repeat.type) {
+        case 'daily':
+          currentDate = addDays(currentDate, event.repeat.interval);
+          break;
+        case 'weekly':
+          currentDate = addWeeks(currentDate, event.repeat.interval);
+          break;
+        case 'monthly':
+          currentDate = addMonths(currentDate, event.repeat.interval);
+          break;
+        case 'yearly':
+          currentDate = addYears(currentDate, event.repeat.interval);
+          break;
+      }
+
+      if (currentDate <= endDate) {
+        events.push({
+          ...event,
+          id: Date.now() + events.length, // 새로운
+          date: currentDate.toISOString().split('T')[0], // YYYY-MM-DD 형식
+        });
+      }
     }
 
-    const eventData: Event = {
-      id: state.id || Date.now(),
-      title,
-      date,
-      startTime,
-      endTime,
-      description,
-      location,
-      category,
-      repeat: {
-        type: isRepeating ? repeat.type : 'none',
-        interval: repeat?.interval,
-        endDate: repeat?.endDate || undefined,
-      },
-      notificationTime,
-    };
-
-    const overlapping = findOverlappingEvents(eventData, existingEvents);
-    if (overlapping.length > 0) {
-      return { success: false, overlappingEvents: overlapping, eventData };
-    } else {
-      return { success: true, eventData };
-    }
-  }, [state, validateTime, toast]);
+    return events;
+  };
 
   return {
     formData: state,
+    isException,
+    setIsException,
     setField,
     resetForm,
     setFormData,
     addOrUpdateEvent,
     validateTime,
+    validateDate,
+    generateRepeatedEvents,
   };
 };

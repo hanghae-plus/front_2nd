@@ -48,27 +48,27 @@ describe('반복 일정', () => {
 
       // 에러 메시지가 나타나는지 확인
       await waitFor(() => {
-        expect(screen.getByText('반복 종료일은 일정 날짜 이후여야 합니다.')).toBeInTheDocument();
+        expect(screen.getByText('종료일은 시작일보다 늦어야 합니다.')).toBeInTheDocument();
       });
     });
   });
 
-  describe('반복 일정 생성', () => {
+  describe('반복 일정 생성', async () => {
+    const { user } = setup();
+
+    // 일정 생성 로직 (일정 추가 버튼 클릭, 필드 입력 등)
+    await user.type(screen.getByLabelText('제목'), '반복 일정 테스트');
+    await user.type(screen.getByLabelText('날짜'), '2024-08-05');
+    await user.type(screen.getByLabelText('시작 시간'), '09:00');
+    await user.type(screen.getByLabelText('종료 시간'), '10:00');
+    await user.click(screen.getByLabelText('반복 일정'));
+    await user.selectOptions(screen.getByLabelText('반복 유형'), 'daily');
+    await user.type(screen.getByLabelText('반복 종료일'), '2024-08-10');
+
+    // 일정 추가 버튼 클릭
+    await user.click(screen.getByTestId('event-submit-button'));
+
     test('반복 일정 생성시 n개의 일정이 추가되었습니다. 라는 토스트 메세지가 화면에 노출된다.', async () => {
-      const { user } = setup();
-
-      // 일정 생성 로직 (일정 추가 버튼 클릭, 필드 입력 등)
-      await user.type(screen.getByLabelText('제목'), '반복 일정 테스트');
-      await user.type(screen.getByLabelText('날짜'), '2024-08-05');
-      await user.type(screen.getByLabelText('시작 시간'), '09:00');
-      await user.type(screen.getByLabelText('종료 시간'), '10:00');
-      await user.click(screen.getByLabelText('반복 일정'));
-      await user.selectOptions(screen.getByLabelText('반복 유형'), 'daily');
-      await user.type(screen.getByLabelText('반복 종료일'), '2024-08-10');
-
-      // 일정 추가 버튼 클릭
-      await user.click(screen.getByTestId('event-submit-button'));
-
       // 토스트 메시지 확인
       await waitFor(() => {
         expect(screen.getByText('6개의 일정이 추가되었습니다.')).toBeInTheDocument();
@@ -86,61 +86,60 @@ describe('반복 일정', () => {
     test('매년 반복시 생성 데이터로부터 1년 후에 같은 제목,시간의 데이터가 추가로 반환된다.', () => {});
   });
 
-  describe('반복 일정 표시', () => {
+  describe('반복 일정 표시', async () => {
+    const { user } = setup();
+
+    // 일정 생성 로직 (일정 추가 버튼 클릭, 필드 입력 등)
+    await user.type(screen.getByLabelText('제목'), '반복 일정 테스트');
+    await user.type(screen.getByLabelText('날짜'), '2024-08-05');
+    await user.type(screen.getByLabelText('시작 시간'), '09:00');
+    await user.type(screen.getByLabelText('종료 시간'), '10:00');
+    await user.click(screen.getByLabelText('반복 일정'));
+    await user.selectOptions(screen.getByLabelText('반복 유형'), 'daily');
+    await user.type(screen.getByLabelText('반복 종료일'), '2024-08-10');
+
+    // 일정 추가 버튼 클릭
+    await user.click(screen.getByTestId('event-submit-button'));
+
     test('캘린더 뷰> 반복 일정의 경우 css가 적용된다.', async () => {
-      const { user } = setup();
-
-      // 반복 일정 생성
-      await user.type(screen.getByLabelText('제목'), '반복 일정 테스트');
-      await user.type(screen.getByLabelText('날짜'), '2024-08-05');
-      await user.click(screen.getByLabelText('반복 일정'));
-      await user.selectOptions(screen.getByLabelText('반복 유형'), 'daily');
-      await user.type(screen.getByLabelText('반복 종료일'), '2024-08-10');
-      await user.click(screen.getByTestId('event-submit-button'));
-
       // 반복 일정에 특정 CSS 클래스가 적용되었는지 확인
-      const repeatedEvents = screen.getAllByTestId('repeated-event');
-      expect(repeatedEvents[0]).toHaveClass('repeated-event-style');
-    });
-
-    test('캘린더 뷰> 반복 일정의 경우 repeatId가 같으면 같은 색상의 bg를 가진다.', async () => {
-      const { user } = setup();
-
-      // 반복 일정 생성
-      await user.click(screen.getByText('일정 추가'));
-      await user.type(screen.getByLabelText('제목'), '반복 일정 테스트');
-      await user.type(screen.getByLabelText('날짜'), '2024-08-05');
-      await user.click(screen.getByLabelText('반복 일정'));
-      await user.selectOptions(screen.getByLabelText('반복 유형'), 'daily');
-      await user.type(screen.getByLabelText('반복 종료일'), '2024-08-10');
-      await user.click(screen.getByTestId('event-submit-button'));
-
-      // 캘린더 뷰로 전환
-      await user.click(screen.getByText('월간'));
-
-      // 반복 일정들의 배경색이 같은지 확인
-      const repeatedEvents = screen.getAllByTestId('repeated-event');
-      const firstEventColor = window.getComputedStyle(repeatedEvents[0]).backgroundColor;
+      const repeatedEvents = await screen.getAllByTestId('repeated-event');
+      // 반복 일정의 배경색 확인
       repeatedEvents.forEach((event) => {
-        expect(window.getComputedStyle(event).backgroundColor).toBe(firstEventColor);
+        const style = window.getComputedStyle(event);
+        expect(style.backgroundColor).not.toBe(''); // 배경색이 설정되어 있는지 확인
+        expect(style.backgroundColor).not.toBe('rgb(254, 226, 226)'); // red.100이 아님
+        expect(style.backgroundColor).not.toBe('rgb(243, 244, 246)'); // gray.100이 아님
       });
     });
 
+    test('캘린더 뷰> 반복 일정의 경우 repeatId가 같으면 같은 색상의 bg를 가진다.', async () => {
+      // 반복 일정들의 배경색이 같은지 확인
+      const repeatedEvents = screen.getAllByTestId('repeated-event');
+      // repeatId와 배경색을 저장할 객체
+      const colorMap = new Map();
+
+      // 각 반복 일정의 repeatId와 배경색 확인
+      for (const event of repeatedEvents) {
+        const repeatId = event.getAttribute('data-repeat-id');
+        const backgroundColor = window.getComputedStyle(event).backgroundColor;
+
+        if (repeatId) {
+          if (colorMap.has(repeatId)) {
+            // 이미 저장된 색상과 비교
+            expect(backgroundColor).toBe(colorMap.get(repeatId));
+          } else {
+            // 새로운 repeatId의 색상 저장
+            colorMap.set(repeatId, backgroundColor);
+          }
+        }
+      }
+
+      // 최소한 하나의 반복 일정이 있는지 확인
+      expect(colorMap.size).toBeGreaterThan(0);
+    });
+
     test('검색 리스트 뷰> 반복일정의 경우 테스트 아이디가 repeat-color-chip 인 컬러칩이 노출된다.', async () => {
-      const { user } = setup();
-
-      // 반복 일정 생성
-      await user.click(screen.getByText('일정 추가'));
-      await user.type(screen.getByLabelText('제목'), '반복 일정 테스트');
-      await user.type(screen.getByLabelText('날짜'), '2024-08-05');
-      await user.click(screen.getByLabelText('반복 일정'));
-      await user.selectOptions(screen.getByLabelText('반복 유형'), 'daily');
-      await user.type(screen.getByLabelText('반복 종료일'), '2024-08-10');
-      await user.click(screen.getByTestId('event-submit-button'));
-
-      // 검색 리스트 뷰로 전환
-      await user.click(screen.getByText('검색'));
-
       // 반복 일정에 컬러칩이 노출되는지 확인
       const colorChips = screen.getAllByTestId('repeat-color-chip');
       expect(colorChips.length).toBeGreaterThan(0);

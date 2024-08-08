@@ -2,6 +2,7 @@ import { BellIcon, EditIcon, DeleteIcon } from '@chakra-ui/icons';
 import { Box, FormControl, FormLabel, HStack, IconButton, Input, VStack, Text } from '@chakra-ui/react';
 import { NOTIFICATION_OPTION } from '../constants/constants';
 import { Event } from '../types/types';
+import { sortEventsByDateAndTime } from '../utils/eventUtils';
 
 type Props = {
   searchTerm: string;
@@ -20,6 +21,9 @@ const EventSearch = ({
   deleteEvent,
   notifiedEvents,
 }: Props) => {
+  // 이벤트 소팅 함수
+  const sortedEvents = sortEventsByDateAndTime(filteredEvents);
+
   return (
     <VStack data-testid='event-list' w='500px' h='full' overflowY='auto'>
       <FormControl>
@@ -30,18 +34,29 @@ const EventSearch = ({
       {filteredEvents.length === 0 ? (
         <Text>검색 결과가 없습니다.</Text>
       ) : (
-        filteredEvents.map((event) => (
+        sortedEvents.map((event) => (
           <Box key={event.id} borderWidth={1} borderRadius='lg' p={3} width='100%' data-testid='event-item'>
             <HStack justifyContent='space-between'>
               <VStack align='start'>
                 <HStack>
-                  {notifiedEvents.includes(event.id) && <BellIcon color='red.500' />}
-                  <Text
-                    fontWeight={notifiedEvents.includes(event.id) ? 'bold' : 'normal'}
-                    color={notifiedEvents.includes(event.id) ? 'red.500' : 'inherit'}
-                    data-testid='event-title'>
-                    {event.title}
-                  </Text>
+                  <HStack>
+                    {notifiedEvents.includes(event.id) && <BellIcon color='red.500' />}
+                    <Text
+                      fontWeight={notifiedEvents.includes(event.id) ? 'bold' : 'normal'}
+                      color={notifiedEvents.includes(event.id) ? 'red.500' : 'inherit'}
+                      data-testid='event-title'>
+                      {event.title}
+                    </Text>
+                  </HStack>
+                  {event.repeatId != null && (
+                    <Box
+                      w={4}
+                      h={4}
+                      borderRadius={'100%'}
+                      bg={event.repeatId ? event.color : undefined}
+                      data-testid='repeat-color-chip'
+                    />
+                  )}
                 </HStack>
                 <Text>
                   {event.date} {event.startTime} - {event.endTime}
@@ -65,8 +80,20 @@ const EventSearch = ({
                 </Text>
               </VStack>
               <HStack>
-                <IconButton aria-label='Edit event' icon={<EditIcon />} onClick={() => onClickEditEvent(event)} />
-                <IconButton aria-label='Delete event' icon={<DeleteIcon />} onClick={() => deleteEvent(event.id)} />
+                <IconButton
+                  aria-label='Edit event'
+                  icon={<EditIcon />}
+                  onClick={() => {
+                    event.repeatId ? alert('반복 이벤트 수정삭제는 준비중입니다 :<') : onClickEditEvent(event);
+                  }}
+                />
+                <IconButton
+                  aria-label='Delete event'
+                  icon={<DeleteIcon />}
+                  onClick={() => {
+                    event.repeatId ? alert('반복 이벤트 수정삭제는 준비중입니다 :<') : deleteEvent(event.id);
+                  }}
+                />
               </HStack>
             </HStack>
           </Box>
