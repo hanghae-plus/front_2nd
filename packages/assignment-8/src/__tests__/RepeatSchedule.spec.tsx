@@ -1,4 +1,4 @@
-import { render as renderComponent, screen, within } from "@testing-library/react";
+import { render as renderComponent, screen, waitFor, within } from "@testing-library/react";
 import userEvent, { UserEvent } from "@testing-library/user-event";
 import App from "../App";
 import { Event, RepeatInfo } from "../types";
@@ -6,7 +6,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { ReactNode } from "react";
 
 // #region setup
-const mockEvent: Omit<Event, "id"> = {
+const basicMockEvent: Omit<Event, "id"> = {
   title: "Rust 스터디",
   description: "Rust 스터디 in 양재",
   date: "2024-08-05",
@@ -43,22 +43,22 @@ async function setBasicMockEventAsync(user: UserEvent) {
   const notificationTimeEl = screen.getByRole("combobox", { name: /알림 설정/i });
 
   await user.clear(titleEl);
-  await user.type(titleEl, mockEvent.title);
+  await user.type(titleEl, basicMockEvent.title);
   await user.clear(descriptionEl);
-  await user.type(descriptionEl, mockEvent.description);
+  await user.type(descriptionEl, basicMockEvent.description);
   await user.clear(dateEl);
-  await user.type(dateEl, mockEvent.date);
+  await user.type(dateEl, basicMockEvent.date);
   await user.clear(startTiemEl);
-  await user.type(startTiemEl, mockEvent.startTime);
+  await user.type(startTiemEl, basicMockEvent.startTime);
   await user.clear(endTiemEl);
-  await user.type(endTiemEl, mockEvent.endTime);
+  await user.type(endTiemEl, basicMockEvent.endTime);
   await user.clear(loacationEl);
-  await user.type(loacationEl, mockEvent.location);
-  await user.selectOptions(categoryEl, mockEvent.category);
-  await user.selectOptions(notificationTimeEl, `${mockEvent.notificationTime}`);
+  await user.type(loacationEl, basicMockEvent.location);
+  await user.selectOptions(categoryEl, basicMockEvent.category);
+  await user.selectOptions(notificationTimeEl, `${basicMockEvent.notificationTime}`);
 }
 
-async function setMockRepeatAsync(user: UserEvent, mockRepeat: Required<RepeatInfo>) {
+async function setMockRepeatAsync(user: UserEvent, mockRepeat: RepeatInfo) {
   const repeatEl = screen.getByRole("combobox", { name: /반복 유형/i });
   await user.selectOptions(repeatEl, mockRepeat.type);
 
@@ -66,9 +66,22 @@ async function setMockRepeatAsync(user: UserEvent, mockRepeat: Required<RepeatIn
   await user.clear(repeatIntervalEl);
   await user.type(repeatIntervalEl, `${mockRepeat.interval}`);
 
-  const repeatEndDateEl = screen.getByLabelText(/반복 종료일/i);
-  await user.clear(repeatEndDateEl);
-  await user.type(repeatEndDateEl, mockRepeat.endDate);
+  if (mockRepeat.endType) {
+    const repeatEndTypeEl = screen.getByRole("combobox", { name: /반복 종료 조건/i });
+    await user.selectOptions(repeatEndTypeEl, mockRepeat.endType);
+  }
+
+  if (mockRepeat.endDate) {
+    const repeatEndDateEl = screen.getByLabelText(/반복 종료일/i);
+    await user.clear(repeatEndDateEl);
+    await user.type(repeatEndDateEl, mockRepeat.endDate);
+  }
+
+  if (mockRepeat.endCount) {
+    const repeatEndCountEl = screen.getByLabelText(/반복 종료 횟수/i);
+    await user.clear(repeatEndCountEl);
+    await user.type(repeatEndCountEl, `${mockRepeat.endCount}`);
+  }
 }
 // #endregion
 
@@ -95,11 +108,12 @@ async function activeRepeatCheckBoxAsync(user: UserEvent) {
 }
 // #endregion
 
-describe("반복 유형 및 간격을 선택하여 반복 일정을 만들 수 있다.", () => {
+describe("1~2. 반복 유형 및 간격을 선택하여 반복 일정을 만들 수 있다.", () => {
   it("8월 30일까지 2일마다 반복되는 일정을 생성한다.", async () => {
-    const mockRepeat: Required<RepeatInfo> = {
+    const mockRepeat: RepeatInfo = {
       type: "daily",
       interval: 2,
+      endType: "endDate",
       endDate: "2024-08-30",
     };
     const { user } = render(<App />);
@@ -112,13 +126,14 @@ describe("반복 유형 및 간격을 선택하여 반복 일정을 만들 수 �
     await clickAddButtonAsync(user);
 
     const monthView = screen.getByTestId("month-view");
-    expect(within(monthView).getAllByText(mockEvent.title)).toHaveLength(13);
+    expect(within(monthView).getAllByText(basicMockEvent.title)).toHaveLength(13);
   });
 
   it("8월 30일까지 일주일에 한 번 반복되는 일정을 생성한다.", async () => {
-    const mockRepeat: Required<RepeatInfo> = {
+    const mockRepeat: RepeatInfo = {
       type: "weekly",
       interval: 1,
+      endType: "endDate",
       endDate: "2024-08-30",
     };
     const { user } = render(<App />);
@@ -131,13 +146,14 @@ describe("반복 유형 및 간격을 선택하여 반복 일정을 만들 수 �
     await clickAddButtonAsync(user);
 
     const monthView = screen.getByTestId("month-view");
-    expect(within(monthView).getAllByText(mockEvent.title)).toHaveLength(4);
+    expect(within(monthView).getAllByText(basicMockEvent.title)).toHaveLength(4);
   });
 
   it("12월 31일까지 두달 마다 반복되는 일정을 생성한다.", async () => {
-    const mockRepeat: Required<RepeatInfo> = {
+    const mockRepeat: RepeatInfo = {
       type: "monthly",
       interval: 2,
+      endType: "endDate",
       endDate: "2024-12-31",
     };
     const { user } = render(<App />);
@@ -156,18 +172,19 @@ describe("반복 유형 및 간격을 선택하여 반복 일정을 만들 수 �
     await user.click(nextButtonEl);
     await user.click(nextButtonEl);
 
-    expect(within(monthView).getByText(mockEvent.title)).toBeInTheDocument();
+    expect(within(monthView).getByText(basicMockEvent.title)).toBeInTheDocument();
 
     await user.click(nextButtonEl);
     await user.click(nextButtonEl);
 
-    expect(within(monthView).getByText(mockEvent.title)).toBeInTheDocument();
+    expect(within(monthView).getByText(basicMockEvent.title)).toBeInTheDocument();
   });
 
   it("기존 일정을 8월 30일까지 2일마다 반복되는 일정으로 수정한다.", async () => {
-    const mockRepeat: Required<RepeatInfo> = {
+    const mockRepeat: RepeatInfo = {
       type: "daily",
       interval: 2,
+      endType: "endDate",
       endDate: "2024-08-30",
     };
     const { user } = render(<App />);
@@ -190,15 +207,16 @@ describe("반복 유형 및 간격을 선택하여 반복 일정을 만들 수 �
 
     const monthView = screen.getByTestId("month-view");
 
-    expect(await within(monthView).findAllByText(mockEvent.title)).toHaveLength(13);
+    expect(await within(monthView).findAllByText(basicMockEvent.title)).toHaveLength(13);
   });
 });
 
-describe("캘린더 뷰에서 반복 일정이 일반 일정과 구분된다.", () => {
+describe("3. 캘린더 뷰에서 반복 일정이 일반 일정과 구분된다.", () => {
   it("월간 뷰에서 반복일정이 css-5c3854(파란색) 클래스를 가진다.", async () => {
-    const mockRepeat: Required<RepeatInfo> = {
+    const mockRepeat: RepeatInfo = {
       type: "weekly",
       interval: 1,
+      endType: "endDate",
       endDate: "2024-08-31",
     };
 
@@ -213,7 +231,7 @@ describe("캘린더 뷰에서 반복 일정이 일반 일정과 구분된다.", 
     await clickAddButtonAsync(user);
 
     const monthView = screen.getByTestId("month-view");
-    const repeatEvents = within(monthView).getAllByText(mockEvent.title);
+    const repeatEvents = within(monthView).getAllByText(basicMockEvent.title);
 
     repeatEvents.forEach((repeatEvent) => {
       expect(repeatEvent).toHaveClass("css-5c3854");
@@ -221,9 +239,10 @@ describe("캘린더 뷰에서 반복 일정이 일반 일정과 구분된다.", 
   });
 
   it("주간 뷰에서 반복일정이 css-5c3854(파란색) 클래스를 가진다.", async () => {
-    const mockRepeat: Required<RepeatInfo> = {
+    const mockRepeat: RepeatInfo = {
       type: "weekly",
       interval: 1,
+      endType: "endDate",
       endDate: "2024-08-31",
     };
 
@@ -244,6 +263,72 @@ describe("캘린더 뷰에서 반복 일정이 일반 일정과 구분된다.", 
     await user.click(nextButtonEl);
 
     const weekView = screen.getByTestId("week-view");
-    expect(within(weekView).getByText(mockEvent.title)).toHaveClass("css-5c3854");
+    expect(within(weekView).getByText(basicMockEvent.title)).toHaveClass("css-5c3854");
   });
+});
+
+describe("4. 예외 날짜 처리", () => {
+  it("반복 일정 중 특정날짜를 제외하거나 수정할 수 있다.", async () => {
+    const { user } = render(<App />);
+  });
+});
+
+describe("5. 반복 종료 조건", () => {
+  it("반복 종료 조건에는 3가지가(종료없음, 특정 날짜까지, 특정 횟수만큼) 있다.", async () => {
+    const { user } = render(<App />);
+
+    await setBasicMockEventAsync(user);
+
+    await activeRepeatCheckBoxAsync(user);
+
+    const repeatEndTypeEl = screen.getByRole("combobox", { name: /반복 종료 조건/i });
+
+    await user.click(repeatEndTypeEl);
+
+    const options = within(repeatEndTypeEl).getAllByRole("option");
+
+    expect(options).toHaveLength(3);
+    expect(options[0]).toHaveTextContent("종료없음");
+    expect(options[1]).toHaveTextContent("특정 날짜까지");
+    expect(options[2]).toHaveTextContent("특정 횟수만큼");
+  });
+
+  it("반복 종료를 특정 횟수로 지정하면 그 횟수만큼 반복되어 이벤트가 생성된다.", async () => {
+    const mockRepeat: RepeatInfo = {
+      type: "daily",
+      interval: 1,
+      endType: "endCount",
+      endCount: 5,
+    };
+
+    const { user } = render(<App />);
+
+    await setBasicMockEventAsync(user);
+
+    await activeRepeatCheckBoxAsync(user);
+
+    await setMockRepeatAsync(user, mockRepeat);
+
+    await clickAddButtonAsync(user);
+
+    const eventsList = await screen.findByRole("list");
+
+    const eventCards = await within(eventsList).findAllByText(/양재 스터디 카페/i);
+
+    expect(eventCards).toHaveLength(5);
+  });
+});
+
+describe("6. 요일 지정 (주간 반복의 경우)", () => {
+  it("주간 반복 시 특정 요일을 선택할 수 있다.", () => {});
+});
+
+describe("7. 월간 반복 옵션", () => {
+  it("월간 반복 시 특정 날짜에 반복되도록 설정할 수 있다.", () => {});
+  it("매월 특정 순서의 요일에 반복되도록 설정할 수 있다.", () => {});
+});
+
+describe("8. 반복 일정 수정:", () => {
+  it("반복 일정의 단일 일정을 수정할 수 있다.", () => {});
+  it("반복 일정의 모든 일정을 수정할 수 있다.", () => {});
 });

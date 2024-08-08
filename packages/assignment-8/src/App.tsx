@@ -47,7 +47,7 @@ import {
   getWeekDates,
   getWeeksAtMonth,
 } from "./utils/dateUtils";
-import { Event, RepeatType } from "./types";
+import { Event, RepeatEndType, RepeatType } from "./types";
 import { getTimeErrorMessage } from "./utils/timeValidation";
 import { findOverlappingEvents } from "./utils/eventOverlap";
 import { useEventForm } from "./hooks/useEventForm.ts";
@@ -55,10 +55,12 @@ import { useEventOperations } from "./hooks/useEventOperations.ts";
 import { useNotifications } from "./hooks/useNotifications.ts";
 import { useCalendarView } from "./hooks/useCalendarView.ts";
 import { useSearch } from "./hooks/useSearch.ts";
+import RenderMonthView from "./components/RenderMonthView.tsx";
+import RenderWeekView from "./components/RenderWeekView.tsx";
 
 const categories = ["업무", "개인", "가족", "기타"];
 
-const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
+export const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
 const notificationOptions = [
   { value: 1, label: "1분 전" },
@@ -90,12 +92,16 @@ function App() {
     setRepeatInterval,
     repeatEndDate,
     setRepeatEndDate,
+    repeatEndCount,
+    setRepeatEndCount,
     notificationTime,
     setNotificationTime,
     startTimeError,
     endTimeError,
     editingEvent,
     setEditingEvent,
+    repeatEndType,
+    setRepeatEndType,
     handleStartTimeChange,
     handleEndTimeChange,
     resetForm,
@@ -149,6 +155,8 @@ function App() {
         type: isRepeating ? repeatType : "none",
         interval: repeatInterval,
         endDate: repeatEndDate || undefined,
+        endType: repeatEndType || undefined,
+        endCount: repeatEndCount || undefined,
       },
       notificationTime,
     };
@@ -161,155 +169,6 @@ function App() {
       await saveEvent(eventData);
       resetForm();
     }
-  };
-
-  const renderWeekView = () => {
-    const weekDates = getWeekDates(currentDate);
-    return (
-      <VStack data-testid="week-view" align="stretch" w="full" spacing={4}>
-        <Heading size="md">{formatWeek(currentDate)}</Heading>
-        <Table variant="simple" w="full">
-          <Thead>
-            <Tr>
-              {weekDays.map((day) => (
-                <Th key={day} width="14.28%">
-                  {day}
-                </Th>
-              ))}
-            </Tr>
-          </Thead>
-          <Tbody>
-            <Tr>
-              {weekDates.map((date) => (
-                <Td key={date.toISOString()} height="100px" verticalAlign="top" width="14.28%">
-                  <Text fontWeight="bold">{date.getDate()}</Text>
-                  {filteredEvents
-                    .filter((event) => new Date(event.date).toDateString() === date.toDateString())
-                    .map((event) => {
-                      const isNotified = notifiedEvents.includes(event.id);
-                      return (
-                        <Box
-                          key={event.id}
-                          p={1}
-                          my={1}
-                          bg={
-                            isNotified
-                              ? "red.100"
-                              : event.repeat.type !== "none"
-                              ? "blue.100"
-                              : "gray.100"
-                          }
-                          borderRadius="md"
-                          fontWeight={isNotified ? "bold" : "normal"}
-                          color={
-                            isNotified
-                              ? "red.500"
-                              : event.repeat.type !== "none"
-                              ? "blue.500"
-                              : "inherit"
-                          }
-                        >
-                          <HStack spacing={1}>
-                            {isNotified && <BellIcon />}
-                            <Text fontSize="sm" noOfLines={1}>
-                              {event.title}
-                            </Text>
-                          </HStack>
-                        </Box>
-                      );
-                    })}
-                </Td>
-              ))}
-            </Tr>
-          </Tbody>
-        </Table>
-      </VStack>
-    );
-  };
-
-  const renderMonthView = () => {
-    const weeks = getWeeksAtMonth(currentDate);
-
-    return (
-      <VStack data-testid="month-view" align="stretch" w="full" spacing={4}>
-        <Heading size="md">{formatMonth(currentDate)}</Heading>
-        <Table variant="simple" w="full">
-          <Thead>
-            <Tr>
-              {weekDays.map((day) => (
-                <Th key={day} width="14.28%">
-                  {day}
-                </Th>
-              ))}
-            </Tr>
-          </Thead>
-          <Tbody>
-            {weeks.map((week, weekIndex) => (
-              <Tr key={weekIndex}>
-                {week.map((day, dayIndex) => {
-                  const dateString = day ? formatDate(currentDate, day) : "";
-                  const holiday = holidays[dateString];
-
-                  return (
-                    <Td
-                      key={dayIndex}
-                      height="100px"
-                      verticalAlign="top"
-                      width="14.28%"
-                      position="relative"
-                    >
-                      {day && (
-                        <>
-                          <Text fontWeight="bold">{day}</Text>
-                          {holiday && (
-                            <Text color="red.500" fontSize="sm">
-                              {holiday}
-                            </Text>
-                          )}
-                          {getEventsForDay(filteredEvents, day).map((event) => {
-                            const isNotified = notifiedEvents.includes(event.id);
-                            return (
-                              <Box
-                                key={event.id}
-                                p={1}
-                                my={1}
-                                bg={
-                                  isNotified
-                                    ? "red.100"
-                                    : event.repeat.type !== "none"
-                                    ? "blue.100"
-                                    : "gray.100"
-                                }
-                                borderRadius="md"
-                                fontWeight={isNotified ? "bold" : "normal"}
-                                color={
-                                  isNotified
-                                    ? "red.500"
-                                    : event.repeat.type !== "none"
-                                    ? "blue.500"
-                                    : "inherit"
-                                }
-                              >
-                                <HStack spacing={1}>
-                                  {isNotified && <BellIcon />}
-                                  <Text fontSize="sm" noOfLines={1}>
-                                    {event.title}
-                                  </Text>
-                                </HStack>
-                              </Box>
-                            );
-                          })}
-                        </>
-                      )}
-                    </Td>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </VStack>
-    );
   };
 
   return (
@@ -379,7 +238,13 @@ function App() {
 
           <FormControl>
             <FormLabel>반복 설정</FormLabel>
-            <Checkbox isChecked={isRepeating} onChange={(e) => setIsRepeating(e.target.checked)}>
+            <Checkbox
+              isChecked={isRepeating}
+              onChange={(e) => {
+                setIsRepeating(e.target.checked);
+                setRepeatType("daily");
+              }}
+            >
               반복 일정
             </Checkbox>
           </FormControl>
@@ -423,13 +288,38 @@ function App() {
                   />
                 </FormControl>
                 <FormControl>
-                  <FormLabel>반복 종료일</FormLabel>
-                  <Input
-                    type="date"
-                    value={repeatEndDate}
-                    onChange={(e) => setRepeatEndDate(e.target.value)}
-                  />
+                  <FormLabel>반복 종료 조건</FormLabel>
+                  <Select
+                    value={repeatEndType}
+                    onChange={(e) => setRepeatEndType(e.target.value as RepeatEndType)}
+                  >
+                    <option value="endless">종료없음</option>
+                    <option value="endDate">특정 날짜까지</option>
+                    <option value="endCount">특정 횟수만큼</option>
+                  </Select>
                 </FormControl>
+              </HStack>
+              <HStack width="100%">
+                {repeatEndType === "endDate" && (
+                  <FormControl>
+                    <FormLabel>반복 종료일</FormLabel>
+                    <Input
+                      type="date"
+                      value={repeatEndDate}
+                      onChange={(e) => setRepeatEndDate(e.target.value)}
+                    />
+                  </FormControl>
+                )}
+                {repeatEndType === "endCount" && (
+                  <FormControl>
+                    <FormLabel>반복 종료 횟수</FormLabel>
+                    <Input
+                      type="number"
+                      value={repeatEndCount}
+                      onChange={(e) => setRepeatEndCount(Number(e.target.value))}
+                    />
+                  </FormControl>
+                )}
               </HStack>
             </VStack>
           )}
@@ -463,8 +353,23 @@ function App() {
             />
           </HStack>
 
-          {view === "week" && renderWeekView()}
-          {view === "month" && renderMonthView()}
+          {view === "week" && (
+            <RenderWeekView
+              currentDate={currentDate}
+              filteredEvents={filteredEvents}
+              weekDays={weekDays}
+              notifiedEvents={notifiedEvents}
+            />
+          )}
+          {view === "month" && (
+            <RenderMonthView
+              currentDate={currentDate}
+              filteredEvents={filteredEvents}
+              weekDays={weekDays}
+              holidays={holidays}
+              notifiedEvents={notifiedEvents}
+            />
+          )}
         </VStack>
 
         <VStack role="list" data-testid="event-list" w="500px" h="full" overflowY="auto">
@@ -482,7 +387,7 @@ function App() {
           ) : (
             filteredEvents.map((event) => (
               <Box
-                key={event.id}
+                key={event.date + event.id}
                 role="listitem"
                 borderWidth={1}
                 borderRadius="lg"
@@ -537,6 +442,14 @@ function App() {
                       icon={<DeleteIcon />}
                       onClick={() => deleteEvent(event.id)}
                     />
+                    {/* {event.repeat.type !== "none" && (
+                      <Button
+                        aria-label="Delete repeat event"
+                        onClick={() => deleteOnlyEvent(event)}
+                      >
+                        이 일정만 삭제
+                      </Button>
+                    )} */}
                   </HStack>
                 </HStack>
               </Box>
