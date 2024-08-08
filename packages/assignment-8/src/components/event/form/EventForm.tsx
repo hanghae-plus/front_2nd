@@ -175,6 +175,7 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
         <FormControl>
           <FormLabel>제목</FormLabel>
           <Input
+            data-cy="title"
             value={eventFormValue.title}
             onChange={(e) =>
               setEventFormValue((formValue) => {
@@ -190,6 +191,7 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
         <FormControl>
           <FormLabel>날짜</FormLabel>
           <Input
+            data-cy="date"
             type="date"
             value={eventFormValue.date}
             onChange={(e) =>
@@ -212,6 +214,7 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
               placement="top"
             >
               <Input
+                data-cy="start-time"
                 type="time"
                 value={eventFormValue.startTime}
                 onChange={handleStartTimeChange}
@@ -230,6 +233,7 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
               placement="top"
             >
               <Input
+                data-cy="end-time"
                 type="time"
                 value={eventFormValue.endTime}
                 onChange={handleEndTimeChange}
@@ -245,6 +249,7 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
         <FormControl>
           <FormLabel>설명</FormLabel>
           <Input
+            data-cy="description"
             value={eventFormValue.description}
             onChange={(e) =>
               setEventFormValue((formValue) => {
@@ -260,6 +265,7 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
         <FormControl>
           <FormLabel>위치</FormLabel>
           <Input
+            data-cy="location"
             value={eventFormValue.location}
             onChange={(e) =>
               setEventFormValue((formValue) => {
@@ -275,6 +281,7 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
         <FormControl>
           <FormLabel>카테고리</FormLabel>
           <Select
+            data-cy="category"
             value={eventFormValue.category}
             onChange={(e) =>
               setEventFormValue((formValue) => {
@@ -454,6 +461,7 @@ const EventForm = ({ events, fetchEvents, editingEvent }: EventFormProps) => {
         )}
 
         <Button
+          data-cy="submit-button"
           data-testid="event-submit-button"
           onClick={addOrUpdateEvent}
           colorScheme="blue"

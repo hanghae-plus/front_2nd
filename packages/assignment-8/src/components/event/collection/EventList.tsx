@@ -76,6 +76,7 @@ const ProductCardView = ({
             {notifiedEvents.includes(id) && <BellIcon color="red.500" />}
             <Text
               data-testid="event-title"
+              data-cy="event-title"
               fontWeight={notifiedEvents.includes(id) ? "bold" : "normal"}
               color={notifiedEvents.includes(event.id) ? "red.500" : "inherit"}
             >

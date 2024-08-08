@@ -226,7 +226,9 @@ const MonthCalendarView = ({
 
   return (
     <VStack data-testid="month-view" align="stretch" w="full" spacing={4}>
-      <Heading size="md">{formatMonth(currentDate)}</Heading>
+      <Heading size="md" data-cy="current-date">
+        {formatMonth(currentDate)}
+      </Heading>
       <Table variant="simple" w="full">
         <Thead>
           <Tr>
