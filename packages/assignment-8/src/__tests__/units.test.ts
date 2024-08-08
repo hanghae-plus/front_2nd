@@ -12,6 +12,7 @@ import {
   getWeeksAtMonth,
   isDateInMonth,
   isDateInRange,
+  isDateInWeek,
 } from '../utils/dateUtils';
 import { convertEventToDateRange, findOverlappingEvents, isOverlapping, parseDateTime } from '../utils/eventOverlap'; // 이 함수들이 정의된 파일을 import 해야 합니다.
 import { expandRepeatingEvents, getFilteredEvents } from '../utils/eventUtils';
@@ -33,15 +34,15 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       const date = new Date('2024-07-10'); // 수요일
       const weekDates = getWeekDates(date);
       expect(weekDates).toHaveLength(7);
-      expect(weekDates[0].toISOString().split('T')[0]).toBe('2024-07-08'); // 월요일
-      expect(weekDates[6].toISOString().split('T')[0]).toBe('2024-07-14'); // 일요일
+      expect(weekDates[0].toISOString().split('T')[0]).toBe('2024-07-07'); // 일요일
+      expect(weekDates[6].toISOString().split('T')[0]).toBe('2024-07-13'); // 토요일
     });
 
     test('연도를 넘어가는 주의 날짜를 정확히 처리한다', () => {
       const date = new Date('2024-12-30'); // 월요일
       const weekDates = getWeekDates(date);
-      expect(weekDates[0].toISOString().split('T')[0]).toBe('2024-12-30'); // 월요일
-      expect(weekDates[6].toISOString().split('T')[0]).toBe('2025-01-05'); // 일요일
+      expect(weekDates[0].toISOString().split('T')[0]).toBe('2024-12-29'); // 월요일
+      expect(weekDates[6].toISOString().split('T')[0]).toBe('2025-01-04'); // 일요일
     });
   });
 
@@ -150,6 +151,26 @@ describe('단위 테스트: 날짜 및 시간 관리', () => {
       const date = new Date('2023-08-10');
       const month = new Date('2024-08-01');
       expect(isDateInMonth(date, month)).toBe(false);
+    });
+  });
+
+  describe('isDateInWeek >', () => {
+    test('주어진 날짜가 특정 주에 포함되어 있는지 정확히 판단한다', () => {
+      const date = new Date('2024-07-06');
+      const week = new Date('2024-07-01');
+      expect(isDateInWeek(date, week)).toBe(true);
+    });
+
+    test('주어진 날짜가 특정 주에 포함되지 않는 경우 false를 반환해야 한다', () => {
+      const date = new Date('2024-07-07');
+      const week = new Date('2024-07-01');
+      expect(isDateInWeek(date, week)).toBe(false);
+    });
+
+    test('주어진 날짜가 다른 연도의 주에 포함된 경우 false를 반환해야 한다', () => {
+      const date = new Date('2023-08-04');
+      const week = new Date('2024-08-01');
+      expect(isDateInWeek(date, week)).toBe(false);
     });
   });
 
