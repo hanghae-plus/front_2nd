@@ -1,4 +1,10 @@
-import { useRef, useState } from "react";
+import {
+  BellIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  DeleteIcon,
+  EditIcon,
+} from "@chakra-ui/icons";
 import {
   Alert,
   AlertDialog,
@@ -21,42 +27,22 @@ import {
   IconButton,
   Input,
   Select,
-  Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
   Tooltip,
-  Tr,
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import {
-  BellIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  DeleteIcon,
-  EditIcon,
-} from "@chakra-ui/icons";
-import {
-  formatDate,
-  formatMonth,
-  formatWeek,
-  getEventsForDay,
-  getWeekDates,
-  getWeeksAtMonth,
-} from "./utils/dateUtils";
-import { Event, RepeatEndType, RepeatType } from "./types";
-import { getTimeErrorMessage } from "./utils/timeValidation";
-import { findOverlappingEvents } from "./utils/eventOverlap";
+import { useRef, useState } from "react";
+import RenderMonthView from "./components/RenderMonthView.tsx";
+import RenderWeekView from "./components/RenderWeekView.tsx";
+import { useCalendarView } from "./hooks/useCalendarView.ts";
 import { useEventForm } from "./hooks/useEventForm.ts";
 import { useEventOperations } from "./hooks/useEventOperations.ts";
 import { useNotifications } from "./hooks/useNotifications.ts";
-import { useCalendarView } from "./hooks/useCalendarView.ts";
 import { useSearch } from "./hooks/useSearch.ts";
-import RenderMonthView from "./components/RenderMonthView.tsx";
-import RenderWeekView from "./components/RenderWeekView.tsx";
+import { Event, RepeatEndType, RepeatType } from "./types";
+import { findOverlappingEvents } from "./utils/eventOverlap";
+import { getTimeErrorMessage } from "./utils/timeValidation";
 
 const categories = ["업무", "개인", "가족", "기타"];
 

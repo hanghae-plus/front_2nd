@@ -126,7 +126,7 @@ describe("1~2. 반복 유형 및 간격을 선택하여 반복 일정을 만들 
     await clickAddButtonAsync(user);
 
     const monthView = screen.getByTestId("month-view");
-    expect(within(monthView).getAllByText(basicMockEvent.title)).toHaveLength(13);
+    expect(await within(monthView).findAllByText(basicMockEvent.title)).toHaveLength(13);
   });
 
   it("8월 30일까지 일주일에 한 번 반복되는 일정을 생성한다.", async () => {
@@ -146,7 +146,7 @@ describe("1~2. 반복 유형 및 간격을 선택하여 반복 일정을 만들 
     await clickAddButtonAsync(user);
 
     const monthView = screen.getByTestId("month-view");
-    expect(within(monthView).getAllByText(basicMockEvent.title)).toHaveLength(4);
+    expect(await within(monthView).findAllByText(basicMockEvent.title)).toHaveLength(4);
   });
 
   it("12월 31일까지 두달 마다 반복되는 일정을 생성한다.", async () => {
@@ -172,12 +172,12 @@ describe("1~2. 반복 유형 및 간격을 선택하여 반복 일정을 만들 
     await user.click(nextButtonEl);
     await user.click(nextButtonEl);
 
-    expect(within(monthView).getByText(basicMockEvent.title)).toBeInTheDocument();
+    expect(await within(monthView).findByText(basicMockEvent.title)).toBeInTheDocument();
 
     await user.click(nextButtonEl);
     await user.click(nextButtonEl);
 
-    expect(within(monthView).getByText(basicMockEvent.title)).toBeInTheDocument();
+    expect(await within(monthView).findByText(basicMockEvent.title)).toBeInTheDocument();
   });
 
   it("기존 일정을 8월 30일까지 2일마다 반복되는 일정으로 수정한다.", async () => {
@@ -193,7 +193,6 @@ describe("1~2. 반복 유형 및 간격을 선택하여 반복 일정을 만들 
 
     await clickAddButtonAsync(user);
 
-    // Fetching이 필요하여 find
     const eventCards = await screen.findAllByRole("listitem");
     const firstEvent = eventCards[2];
     const updateButton = within(firstEvent).getByRole("button", { name: /edit event/i });
@@ -231,7 +230,7 @@ describe("3. 캘린더 뷰에서 반복 일정이 일반 일정과 구분된다.
     await clickAddButtonAsync(user);
 
     const monthView = screen.getByTestId("month-view");
-    const repeatEvents = within(monthView).getAllByText(basicMockEvent.title);
+    const repeatEvents = await within(monthView).findAllByText(basicMockEvent.title);
 
     repeatEvents.forEach((repeatEvent) => {
       expect(repeatEvent).toHaveClass("css-5c3854");
@@ -262,7 +261,7 @@ describe("3. 캘린더 뷰에서 반복 일정이 일반 일정과 구분된다.
     const nextButtonEl = screen.getByRole("button", { name: /next/i });
     await user.click(nextButtonEl);
 
-    const weekView = screen.getByTestId("week-view");
+    const weekView = await screen.findByTestId("week-view");
     expect(within(weekView).getByText(basicMockEvent.title)).toHaveClass("css-5c3854");
   });
 });
@@ -281,7 +280,7 @@ describe("5. 반복 종료 조건", () => {
 
     await activeRepeatCheckBoxAsync(user);
 
-    const repeatEndTypeEl = screen.getByRole("combobox", { name: /반복 종료 조건/i });
+    const repeatEndTypeEl = await screen.findByRole("combobox", { name: /반복 종료 조건/i });
 
     await user.click(repeatEndTypeEl);
 

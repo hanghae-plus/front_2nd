@@ -10,8 +10,6 @@ export const useEventOperations = (editing: boolean, onSave?: () => void) => {
   const SYSTEM_MAX_DATE = "2030-12-31";
 
   const generateRepeatedEvents = (event: Event): Event[] => {
-    console.log("반복안함이슈");
-
     if (event.repeat.type === "none") {
       return [event];
     }
