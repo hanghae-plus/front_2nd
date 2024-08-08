@@ -1,12 +1,4 @@
-import {
-  describe,
-  test,
-  expect,
-  vi,
-  beforeEach,
-  beforeAll,
-  afterAll,
-} from 'vitest';
+import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -49,31 +41,61 @@ describe('날짜 유틸리티 함수 테스트', () => {
   });
 });
 
-describe('반복 이벤트 테스트', () => {
+describe('반복 이벤트 생성 테스트', () => {
   test('createRecurringEvents 함수는 올바른 수의 이벤트를 생성한다', () => {
     const event = {
-      id: 1,
+      id: Number(Date.now()) + Number(Math.floor(Math.random() * 1000)),
       title: '테스트 이벤트',
       date: '2024-08-01',
       startTime: '09:00',
       endTime: '10:00',
-      description: '테스트 설명',
-      location: '테스트 장소',
-      category: '테스트 카테고리',
       repeat: { type: 'weekly' as const, interval: 1 },
-      notificationTime: 10,
     };
     const endDate = '2024-08-22'; // 시작일로부터 3주 후
     const recurringEvents = createRecurringEvents(event, endDate);
     expect(recurringEvents).toHaveLength(4); // 원본 이벤트 + 3개의 반복 이벤트
   });
+
+  test('31일 일정을 매월 반복일정으로 설정하면 매월 말일이 반복일로 설정된다.', async () => {
+    const event = {
+      id: Number(Date.now()) + Number(Math.floor(Math.random() * 1000)),
+      title: '말일 반복 테스트 이벤트',
+      date: '2024-08-31',
+      startTime: '09:00',
+      endTime: '10:00',
+      repeat: { type: 'monthly' as const, interval: 1 },
+    };
+    const endDate = '2025-03-01';
+    const recurringEvents = createRecurringEvents(event, endDate);
+
+    expect(recurringEvents).toHaveLength(7); // 2024-08-31부터 2025-02-28까지 7개의 이벤트
+
+    const expectedDates = [
+      '2024-08-31',
+      '2024-09-30',
+      '2024-10-31',
+      '2024-11-30',
+      '2024-12-31',
+      '2025-01-31',
+      '2025-02-28',
+    ];
+
+    recurringEvents.forEach((recEvent, index) => {
+      expect(recEvent.date).toBe(expectedDates[index]);
+      expect(recEvent.startTime).toBe(event.startTime);
+      expect(recEvent.endTime).toBe(event.endTime);
+      expect(recEvent.title).toBe(event.title);
+
+      // 각 날짜가 해당 월의 마지막 날인지 확인
+      const [year, month] = recEvent.date.split('-').map(Number);
+      const lastDayOfMonth = new Date(year, month, 0).getDate();
+      const [, , day] = recEvent.date.split('-').map(Number);
+      expect(day).toBe(lastDayOfMonth);
+    });
+  });
 });
 
-describe('이벤트 저장', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
+describe('반복 이벤트 저장 테스트', () => {
   test('saveEvent 함수는 반복 이벤트에 대해 여러 이벤트를 생성한다', async () => {
     const user = userEvent.setup();
     render(<App serverUrl="http://localhost:3001" />);
@@ -90,7 +112,6 @@ describe('이벤트 저장', () => {
     await user.type(screen.getByLabelText('반복 종료일'), '2024-08-22');
 
     const addButton = screen.getByRole('button', { name: '일정 추가' });
-
     await user.click(addButton);
 
     await waitFor(() => {
