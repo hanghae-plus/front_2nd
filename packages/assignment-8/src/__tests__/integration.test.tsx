@@ -613,7 +613,7 @@ describe('일정 관리 애플리케이션 통합 테스트', () => {
       expect(await screen.findByText(expectedText)).toBeInTheDocument();
     });
 
-    test.fails('캘린더 뷰에서 반복되지 않는 일정은 표시되지 않는다.', async () => {
+    test.fails('캘린더 뷰에서 반복되지 않는 일정은 툴팁이 표시되지 않는다.', async () => {
       const { user } = setup(<App />);
 
       vi.setSystemTime(new Date(2024, 7, 1));
