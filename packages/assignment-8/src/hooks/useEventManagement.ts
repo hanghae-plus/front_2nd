@@ -17,8 +17,7 @@ export const useEventManagement = () => {
         throw new Error("Failed to fetch events");
       }
       const data = await response.json();
-      const processedEvents = processRepeatEvents(data);
-      setEvents(processedEvents);
+      setEvents(data);
     } catch (error) {
       console.error("Error fetching events:", error);
       toast({
@@ -169,13 +168,17 @@ export const useEventManagement = () => {
     }
   };
 
-  const saveEvent = async (eventData: Event) => {
-    await eventSave.saveEvent(eventData, !!eventForm.editingEvent);
-    eventForm.resetForm();
+  const resetRepeat = () => {
     repeatSettings.setIsRepeating(false);
     repeatSettings.setRepeatType("none");
     repeatSettings.setRepeatInterval(1);
     repeatSettings.setRepeatEndDate("");
+  };
+
+  const saveEvent = async (eventData: Event) => {
+    await eventSave.saveEvent(eventData, !!eventForm.editingEvent);
+    eventForm.resetForm();
+    resetRepeat();
   };
 
   const editEvent = (event: Event) => {
@@ -194,7 +197,7 @@ export const useEventManagement = () => {
     eventForm.setNotificationTime(event.notificationTime);
   };
 
-  const deleteEvent = async (id: number) => {
+  const deleteEvent = async (id: string) => {
     try {
       const response = await fetch(`/api/events/${id}`, {
         method: "DELETE",

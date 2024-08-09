@@ -17,9 +17,9 @@ interface Props {
   searchTerm: string;
   setSearchTerm: (searchTerm: string) => void;
   filteredEvents: Event[];
-  notifiedEvents: number[];
+  notifiedEvents: string[];
   editEvent: (event: Event) => void;
-  deleteEvent: (id: number) => void;
+  deleteEvent: (id: string) => void;
 }
 
 const EventList: FC<Props> = ({
