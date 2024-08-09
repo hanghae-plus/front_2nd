@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  act,
   cleanup,
   render,
   screen,
@@ -44,6 +45,8 @@ const repeatEventData: TEvents = {
 type TRepeat = "daily" | "weekly" | "monthly" | "yearly";
 async function fillRepeatForm(repeatType: TRepeat, repeatInterval: string) {
   await userEvent.click(screen.getByLabelText("반복 설정"));
+  // daily 처리를 위해
+  await userEvent.selectOptions(screen.getByLabelText("반복 유형"), ["yearly"]);
   await userEvent.selectOptions(screen.getByLabelText("반복 유형"), [
     repeatType,
   ]);
@@ -269,60 +272,52 @@ describe("반복 일정 표시:", () => {
       await fillRepeatEventForm("weekly", "3");
       await userEvent.click(screen.getByTestId("event-submit-button"));
       await waitFor(() => {
-        // 일정 겹침 경고 발생 시 계속 진행 처리
-        const duplicatedDialogButton = screen.queryByTestId(
-          "duplicated-continue-button",
-        );
-        if (duplicatedDialogButton) userEvent.click(duplicatedDialogButton);
+        const today = new Date();
+        const nextEventDay = new Date(today);
+        nextEventDay.setDate(today.getDate() + 7 * 3);
+        const nextEventDate = nextEventDay.getDate();
+        vi.useFakeTimers({ shouldAdvanceTime: true });
+        act(() => vi.setSystemTime(nextEventDay));
+        waitFor(() => {
+          const dateList = screen
+            .getAllByTestId("month-view-date")
+            .filter((td) => td.children.length > 0);
+
+          const eventExpectedDay = dateList[nextEventDate];
+
+          act(() => vi.setSystemTime(today));
+          vi.useRealTimers();
+          expect(
+            eventExpectedDay.textContent?.includes("반복 일정 테스트"),
+          ).toBe(true);
+        });
       });
-
-      const today = new Date();
-      const nextEventDay = new Date(today);
-      nextEventDay.setDate(today.getDate() + 7 * 3);
-      const nextEventDate = nextEventDay.getDate();
-      vi.useFakeTimers({ shouldAdvanceTime: true });
-      vi.setSystemTime(nextEventDay);
-      const dateList = screen
-        .getAllByTestId("month-view-date")
-        .filter((td) => td.children.length > 0);
-
-      const eventExpectedDay = dateList[nextEventDate];
-      expect(eventExpectedDay.textContent?.includes("반복 일정 테스트")).toBe(
-        true,
-      );
-
-      vi.useRealTimers();
     });
     test("반복 일정 생성 시 Week view에서 반복되는 일정을 확인할 수 있다.", async () => {
       render(<App />);
       await fillRepeatEventForm("daily", "4");
       await userEvent.click(screen.getByTestId("event-submit-button"));
-      await waitFor(() => {
-        // 일정 겹침 경고 발생 시 계속 진행 처리
-        const duplicatedDialogButton = screen.queryByTestId(
-          "duplicated-continue-button",
-        );
-        if (duplicatedDialogButton) userEvent.click(duplicatedDialogButton);
-      });
 
       const today = new Date();
       const nextEventDay = new Date(today);
       nextEventDay.setDate(today.getDate() + 4);
       vi.useFakeTimers({ shouldAdvanceTime: true });
-      vi.setSystemTime(nextEventDay);
+      act(() => vi.setSystemTime(nextEventDay));
 
       // week view로 변환
       const $selector = screen.getByLabelText("view");
       await userEvent.selectOptions($selector, ["week"]);
+      waitFor(() => {
+        const dateList = screen.getAllByTestId("week-view-date");
 
-      const dateList = screen.getAllByTestId("week-view-date");
+        const eventExpectedDay = dateList[nextEventDay.getDay() - 1];
 
-      const eventExpectedDay = dateList[nextEventDay.getDay()];
-      expect(eventExpectedDay.textContent?.includes("반복 일정 테스트")).toBe(
-        true,
-      );
-
-      vi.useRealTimers();
+        act(() => vi.setSystemTime(today));
+        vi.useRealTimers();
+        expect(eventExpectedDay.textContent?.includes("반복 일정 테스트")).toBe(
+          true,
+        );
+      });
     });
   });
 });
