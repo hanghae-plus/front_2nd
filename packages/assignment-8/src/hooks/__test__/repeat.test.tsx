@@ -26,6 +26,7 @@ import { http, HttpResponse } from "msw";
 // import { fillZero, formatDate } from "../../utils/dateUtils.ts";
 import { useSearch } from "../useSearch.ts";
 import App from "../../App";
+import { exp } from "@tensorflow/tfjs";
 
 const MOCK_EVENT_1: Event = {
   id: 99,
@@ -134,6 +135,8 @@ describe("반복 일정 기능 테스트", () => {
   });
 
   describe("3. 반복 일정 표시", () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date("2024-08-01"));
     test("월간 뷰에서 반복 일정이 주기적으로 추가되어 표시된다", async () => {
       // Given
       const mockEvents: Event[] = [
@@ -150,31 +153,39 @@ describe("반복 일정 기능 테스트", () => {
           notificationTime: 10,
         },
       ];
-      server.use(
-        http.get("/api/events", () => {
-          return HttpResponse.json(mockEvents);
-        })
-      );
 
-      const { result } = renderHook(() => useEventOperations(false));
-      await act(async () => {
-        await result.current.fetchEvents();
-      });
+      const user = userEvent.setup();
+      render(<App />);
 
-      const { result: searchResult } = renderHook(() =>
-        useSearch(result.current.events, new Date(2024, 8, 1), "month")
-      );
+      const checkbox = screen.getByLabelText("반복 설정");
+      expect(checkbox).toBeChecked();
 
       // When
-      const filteredEvents = searchResult.current.filteredEvents;
+      await user.type(screen.getByLabelText("제목"), "주간 회의");
+      await user.type(screen.getByLabelText("날짜"), "2024-08-01");
+      await user.type(screen.getByLabelText("시작 시간"), "09:00");
+      await user.type(screen.getByLabelText("종료 시간"), "10:00");
+      await user.type(screen.getByLabelText("설명"), "정기 팀 미팅");
+      await user.type(screen.getByLabelText("위치"), "회의실 A");
+      await user.selectOptions(screen.getByLabelText("카테고리"), "업무");
+
+      // 반복 설정
+      await user.selectOptions(screen.getByLabelText("반복 유형"), "weekly");
+      await user.clear(screen.getByLabelText("반복 간격"));
+      await user.type(screen.getByLabelText("반복 간격"), "1");
+      const repeatEndDateInput = screen.getByLabelText(/반복 종료일/i);
+      await user.clear(repeatEndDateInput);
+      await user.type(repeatEndDateInput, "2024-08-31");
+
+      await act(async () => {
+        await userEvent.click(screen.getByTestId("event-submit-button"));
+      });
 
       // Then
-      expect(filteredEvents.length).toBeGreaterThan(4);
-      expect(filteredEvents[0].date).toBe("2024-08-01");
-      expect(filteredEvents[1].date).toBe("2024-08-08");
-      expect(filteredEvents[2].date).toBe("2024-08-15");
-      expect(filteredEvents[3].date).toBe("2024-08-22");
-      expect(filteredEvents[4].date).toBe("2024-08-29");
+      const monthView = await screen.findByTestId("month-view");
+
+      expect(within(monthView).getByText("2024년 8월")).toBeInTheDocument();
+      expect(within(monthView).queryAllByText("주간 회의").length).toBe(5);
     });
   });
 
