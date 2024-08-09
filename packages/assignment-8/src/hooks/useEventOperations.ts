@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Event } from '../types';
 import { useToast } from '@chakra-ui/react';
+import { expandRecurringEvent } from '../utils/dateUtils';
 
 export const useEventOperations = (editing: boolean, onSave?: () => void) => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -13,7 +14,17 @@ export const useEventOperations = (editing: boolean, onSave?: () => void) => {
         throw new Error('Failed to fetch events');
       }
       const data = await response.json();
-      setEvents(data);
+
+      // 반복 일정 처리
+      const expandedEvents = data.flatMap((event: Event) =>
+        event.repeat.type !== 'none'
+          ? expandRecurringEvent(
+              event,
+              new Date(event.repeat.endDate || '2025-01-01')
+            ) // 적절한 종료 날짜를 설정
+          : [event]
+      );
+      setEvents(expandedEvents);
     } catch (error) {
       console.error('Error fetching events:', error);
       toast({

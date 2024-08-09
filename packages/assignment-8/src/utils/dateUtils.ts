@@ -1,5 +1,68 @@
 import { Event } from '../types';
 
+export function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+export function addWeeks(date: Date, weeks: number): Date {
+  return addDays(date, weeks * 7);
+}
+
+export function addMonths(date: Date, months: number): Date {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + months);
+  return result;
+}
+
+export function addYears(date: Date, years: number): Date {
+  const result = new Date(date);
+  result.setFullYear(result.getFullYear() + years);
+  return result;
+}
+
+export function isBefore(date1: Date, date2: Date): boolean {
+  return date1 < date2;
+}
+
+export function expandRecurringEvent(event: Event, endDate: Date): Event[] {
+  if (event.repeat.type === 'none') {
+    return [event];
+  }
+
+  const expandedEvents: Event[] = [];
+  let currentDate = new Date(event.date);
+  const eventEndDate = event.repeat.endDate
+    ? new Date(event.repeat.endDate)
+    : endDate;
+
+  while (isBefore(currentDate, eventEndDate)) {
+    expandedEvents.push({
+      ...event,
+      date: currentDate.toISOString().split('T')[0],
+      id: parseInt(`${event.id}-${currentDate.getTime()}`),
+    });
+
+    switch (event.repeat.type) {
+      case 'daily':
+        currentDate = addDays(currentDate, event.repeat.interval);
+        break;
+      case 'weekly':
+        currentDate = addWeeks(currentDate, event.repeat.interval);
+        break;
+      case 'monthly':
+        currentDate = addMonths(currentDate, event.repeat.interval);
+        break;
+      case 'yearly':
+        currentDate = addYears(currentDate, event.repeat.interval);
+        break;
+    }
+  }
+
+  return expandedEvents;
+}
+
 /**
  * 주어진 년도와 월의 일수를 반환합니다.
  */

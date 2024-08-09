@@ -43,9 +43,10 @@ import {
   formatDate,
   formatMonth,
   formatWeek,
-  getEventsForDay,
   getWeekDates,
   getWeeksAtMonth,
+  expandRecurringEvent,
+  getDaysInMonth,
 } from './utils/dateUtils';
 import { Event, RepeatType } from './types';
 import { getTimeErrorMessage } from './utils/timeValidation.ts';
@@ -121,6 +122,19 @@ function App() {
 
   const toast = useToast();
 
+  const getExpandedEvents = (
+    baseEvents: Event[],
+    startDate: Date,
+    endDate: Date
+  ) => {
+    return baseEvents
+      .flatMap((event) => expandRecurringEvent(event, endDate))
+      .filter((event) => {
+        const eventDate = new Date(event.date);
+        return eventDate >= startDate && eventDate <= endDate;
+      });
+  };
+
   const addOrUpdateEvent = async () => {
     if (!title || !date || !startTime || !endTime) {
       toast({
@@ -194,11 +208,10 @@ function App() {
                   width="14.28%"
                 >
                   <Text fontWeight="bold">{date.getDate()}</Text>
-                  {filteredEvents
+                  {getExpandedEvents(filteredEvents, weekDates[0], weekDates[6])
                     .filter(
                       (event) =>
-                        new Date(event.date).toDateString() ===
-                        date.toDateString()
+                        formatDate(new Date(event.date)) === formatDate(date)
                     )
                     .map((event) => {
                       const isNotified = notifiedEvents.includes(event.id);
@@ -247,58 +260,86 @@ function App() {
             </Tr>
           </Thead>
           <Tbody>
-            {weeks.map((week, weekIndex) => (
-              <Tr key={weekIndex}>
-                {week.map((day, dayIndex) => {
-                  const dateString = day ? formatDate(currentDate, day) : '';
-                  const holiday = holidays[dateString];
+            {weeks.map((week, weekIndex) => {
+              // 각 주의 첫 번째 날과 마지막 날을 설정
+              const startDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                week[0] || 1
+              );
+              const endDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                week[6] ||
+                  getDaysInMonth(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() + 1
+                  )
+              );
+              // 종료일을 23:59:59로 설정하여 해당 날짜의 이벤트 포함
+              endDate.setHours(23, 59, 59);
+              return (
+                <Tr key={weekIndex}>
+                  {week.map((day, dayIndex) => {
+                    const dateString = day ? formatDate(currentDate, day) : '';
+                    const holiday = holidays[dateString];
 
-                  return (
-                    <Td
-                      key={dayIndex}
-                      height="100px"
-                      verticalAlign="top"
-                      width="14.28%"
-                      position="relative"
-                    >
-                      {day && (
-                        <>
-                          <Text fontWeight="bold">{day}</Text>
-                          {holiday && (
-                            <Text color="red.500" fontSize="sm">
-                              {holiday}
-                            </Text>
-                          )}
-                          {getEventsForDay(filteredEvents, day).map((event) => {
-                            const isNotified = notifiedEvents.includes(
-                              event.id
-                            );
-                            return (
-                              <Box
-                                key={event.id}
-                                p={1}
-                                my={1}
-                                bg={isNotified ? 'red.100' : 'gray.100'}
-                                borderRadius="md"
-                                fontWeight={isNotified ? 'bold' : 'normal'}
-                                color={isNotified ? 'red.500' : 'inherit'}
-                              >
-                                <HStack spacing={1}>
-                                  {isNotified && <BellIcon />}
-                                  <Text fontSize="sm" noOfLines={1}>
-                                    {event.title}
-                                  </Text>
-                                </HStack>
-                              </Box>
-                            );
-                          })}
-                        </>
-                      )}
-                    </Td>
-                  );
-                })}
-              </Tr>
-            ))}
+                    return (
+                      <Td
+                        key={dayIndex}
+                        height="100px"
+                        verticalAlign="top"
+                        width="14.28%"
+                        position="relative"
+                      >
+                        {day && (
+                          <>
+                            <Text fontWeight="bold">{day}</Text>
+                            {holiday && (
+                              <Text color="red.500" fontSize="sm">
+                                {holiday}
+                              </Text>
+                            )}
+                            {getExpandedEvents(
+                              filteredEvents,
+                              startDate,
+                              endDate
+                            )
+                              .filter(
+                                (event) =>
+                                  new Date(event.date).getDate() === day
+                              )
+                              .map((event) => {
+                                const isNotified = notifiedEvents.includes(
+                                  event.id
+                                );
+                                return (
+                                  <Box
+                                    key={event.id}
+                                    p={1}
+                                    my={1}
+                                    bg={isNotified ? 'red.100' : 'gray.100'}
+                                    borderRadius="md"
+                                    fontWeight={isNotified ? 'bold' : 'normal'}
+                                    color={isNotified ? 'red.500' : 'inherit'}
+                                  >
+                                    <HStack spacing={1}>
+                                      {isNotified && <BellIcon />}
+                                      <Text fontSize="sm" noOfLines={1}>
+                                        {event.title}
+                                      </Text>
+                                    </HStack>
+                                  </Box>
+                                );
+                              })}
+                          </>
+                        )}
+                      </Td>
+                    );
+                  })}
+                </Tr>
+              );
+            })}
           </Tbody>
         </Table>
       </VStack>
