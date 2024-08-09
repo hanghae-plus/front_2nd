@@ -32,7 +32,7 @@ export const useEventManagement = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [notifications, setNotifications] = useState<
-    { id: number; message: string }[]
+    { id: string; message: string }[]
   >([]);
 
   const eventForm = useEventForm();
@@ -49,7 +49,64 @@ export const useEventManagement = () => {
     view,
     setView,
     holidays,
-  } = useCalender({ events, searchTerm });
+  } = useCalender({ events, searchTerm, setEvents });
+
+  // 반복 이벤트를 처리하는 함수
+  const processRepeatEvents = (events: Event[]): Event[] => {
+    let processedEvents: Event[] = [];
+    events.forEach((event) => {
+      if (event.repeat.type === "none") {
+        processedEvents.push(event);
+      } else {
+        const repeatedEvents = generateRepeatedEvents(event);
+        processedEvents = [...processedEvents, ...repeatedEvents];
+      }
+    });
+    return processedEvents;
+  };
+
+  // 반복 이벤트를 생성하는 함수
+  const generateRepeatedEvents = (event: Event): Event[] => {
+    const repeatedEvents: Event[] = [];
+    const startDate = new Date(event.date);
+    const endDate = event.repeat.endDate
+      ? new Date(event.repeat.endDate)
+      : new Date(
+          startDate.getFullYear() + 1,
+          startDate.getMonth(),
+          startDate.getDate()
+        );
+
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      repeatedEvents.push({
+        ...event,
+        id: `${event.id}-${currentDate.toISOString()}`,
+        date: currentDate.toISOString().split("T")[0],
+      });
+
+      switch (event.repeat.type) {
+        case "daily":
+          currentDate.setDate(currentDate.getDate() + event.repeat.interval);
+          break;
+        case "weekly":
+          currentDate.setDate(
+            currentDate.getDate() + 7 * event.repeat.interval
+          );
+          break;
+        case "monthly":
+          currentDate.setMonth(currentDate.getMonth() + event.repeat.interval);
+          break;
+        case "yearly":
+          currentDate.setFullYear(
+            currentDate.getFullYear() + event.repeat.interval
+          );
+          break;
+      }
+    }
+
+    return repeatedEvents;
+  };
 
   const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStartTime = e.target.value;
@@ -91,7 +148,9 @@ export const useEventManagement = () => {
     }
 
     const eventData: Event = {
-      id: eventForm.editingEvent ? eventForm.editingEvent.id : Date.now(),
+      id: eventForm.editingEvent
+        ? `${eventForm.editingEvent.id}`
+        : `${Date.now()}`,
       ...eventForm,
       repeat: {
         type: repeatSettings.isRepeating ? repeatSettings.repeatType : "none",
@@ -109,13 +168,17 @@ export const useEventManagement = () => {
     }
   };
 
-  const saveEvent = async (eventData: Event) => {
-    await eventSave.saveEvent(eventData, !!eventForm.editingEvent);
-    eventForm.resetForm();
+  const resetRepeat = () => {
     repeatSettings.setIsRepeating(false);
     repeatSettings.setRepeatType("none");
     repeatSettings.setRepeatInterval(1);
     repeatSettings.setRepeatEndDate("");
+  };
+
+  const saveEvent = async (eventData: Event) => {
+    await eventSave.saveEvent(eventData, !!eventForm.editingEvent);
+    eventForm.resetForm();
+    resetRepeat();
   };
 
   const editEvent = (event: Event) => {
@@ -134,7 +197,7 @@ export const useEventManagement = () => {
     eventForm.setNotificationTime(event.notificationTime);
   };
 
-  const deleteEvent = async (id: number) => {
+  const deleteEvent = async (id: string) => {
     try {
       const response = await fetch(`/api/events/${id}`, {
         method: "DELETE",
@@ -179,11 +242,11 @@ export const useEventManagement = () => {
         setNotifications((prev) => [
           ...prev,
           {
-            id: event.id,
+            id: `${event.id}`,
             message: `${event.notificationTime}분 후 ${event.title} 일정이 시작됩니다.`,
           },
         ]);
-        setNotifiedEvents((prev) => [...prev, event.id]);
+        setNotifiedEvents((prev) => [...prev, `${event.id}`]);
       } catch (error) {
         console.error("Error updating notification status:", error);
       }

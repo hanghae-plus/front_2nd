@@ -90,6 +90,19 @@ const EventForm: FC<Props> = ({
     setRepeatEndDate,
   } = form;
 
+  const clickIsRepeat = () => {
+    if (isRepeating) {
+      setIsRepeating(false);
+      setRepeatType("none");
+      setRepeatInterval(1);
+      setRepeatEndDate("");
+      return;
+    }
+    setIsRepeating(true);
+    setRepeatType("daily");
+    return;
+  };
+
   return (
     <VStack w="400px" spacing={5} align="stretch">
       <Heading>{editingEvent ? "일정 수정" : "일정 추가"}</Heading>
@@ -166,10 +179,7 @@ const EventForm: FC<Props> = ({
 
       <FormControl>
         <FormLabel>반복 설정</FormLabel>
-        <Checkbox
-          isChecked={isRepeating}
-          onChange={(e) => setIsRepeating(e.target.checked)}
-        >
+        <Checkbox isChecked={isRepeating} onChange={clickIsRepeat}>
           반복 일정
         </Checkbox>
       </FormControl>

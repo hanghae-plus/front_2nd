@@ -10,9 +10,9 @@ import {
 import { FC } from "react";
 
 interface Props {
-  notifications: { id: number; message: string }[];
+  notifications: { id: string; message: string }[];
   setNotifications: React.Dispatch<
-    React.SetStateAction<{ id: number; message: string }[]>
+    React.SetStateAction<{ id: string; message: string }[]>
   >;
 }
 const EventNotification: FC<Props> = ({ notifications, setNotifications }) => {

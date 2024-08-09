@@ -29,9 +29,11 @@ const fetchHolidays = (year: number, month: number) => {
 const useCalender = ({
   events,
   searchTerm,
+  setEvents,
 }: {
   events: Event[];
   searchTerm: string;
+  setEvents: (event: Event[]) => void;
 }) => {
   // 일정보기
   const [view, setView] = useState<"week" | "month">("month");
@@ -51,8 +53,51 @@ const useCalender = ({
 
   const filteredEvents = (() => {
     const filtered = searchEvents(searchTerm);
-    return filtered.filter((event) => {
+    const expandedEvents = filtered.reduce<Event[]>((acc, event) => {
+      if (event.repeat.type === "none") {
+        return [...acc, event];
+      }
+      const startDate = new Date(event.date);
+      const repeatedEvents: Event[] = [];
+      let currentDate = new Date(startDate);
+
+      const endDate =
+        view === "week"
+          ? new Date(getWeekDates(currentDate)[6])
+          : new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+      const dateIncrementFunctions = {
+        daily: (date: Date) =>
+          date.setDate(date.getDate() + event.repeat.interval),
+        weekly: (date: Date) =>
+          date.setDate(date.getDate() + 7 * event.repeat.interval),
+        monthly: (date: Date) =>
+          date.setMonth(date.getMonth() + event.repeat.interval),
+        yearly: (date: Date) =>
+          date.setFullYear(date.getFullYear() + event.repeat.interval),
+      };
+
+      const incrementDate =
+        dateIncrementFunctions[
+          event.repeat.type as keyof typeof dateIncrementFunctions
+        ];
+
+      while (currentDate <= endDate) {
+        repeatedEvents.push({
+          ...event,
+          date: currentDate.toISOString().split("T")[0],
+          repeat: { interval: 0, type: "none" },
+        });
+        incrementDate(currentDate);
+      }
+
+      return [...acc, ...repeatedEvents];
+    }, []);
+
+    // 날짜 범위에 맞는 이벤트만 필터링
+    return expandedEvents.filter((event) => {
       const eventDate = new Date(event.date);
+
       if (view === "week") {
         const weekDates = getWeekDates(currentDate);
         return eventDate >= weekDates[0] && eventDate <= weekDates[6];
@@ -78,7 +123,7 @@ const useCalender = ({
     });
   };
 
-  const [notifiedEvents, setNotifiedEvents] = useState<number[]>([]);
+  const [notifiedEvents, setNotifiedEvents] = useState<string[]>([]);
 
   useEffect(() => {
     const year = currentDate.getFullYear();

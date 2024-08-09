@@ -11,7 +11,7 @@ interface EventCalenderProps {
   navigate: (direction: "prev" | "next") => void;
   currentDate: Date;
   filteredEvents: Event[];
-  notifiedEvents: number[];
+  notifiedEvents: string[];
   holidays: { [key: string]: string };
 }
 
