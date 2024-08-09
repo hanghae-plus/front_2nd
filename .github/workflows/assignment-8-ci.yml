@@ -7,7 +7,7 @@ on:
       - opened
       - reopened
     paths:
-      - 'packages/assignment-8/**'
+      - "packages/assignment-8/**"
 
   workflow_dispatch:
 
@@ -22,8 +22,33 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: assignment-8-basic
         run: |
           pnpm install
           pnpm -F assignment-8 test
+
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm@9
+          pnpm install
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6 # equivalent to using cypress-io/github-action@v6
+        with:
+          # Do not attempt to install dependencies in the workspace using the action.
+          # There is no pnpm-lock.yaml file in a workspace for
+          # Cypress GitHub Action to use.
+          # We already installed dependencies when we called the action previously.
+          install: false
+          working-directory: packages/assignment-8
+          start: pnpm run dev
+          wait-on: "http://localhost:5173"
+          run: pnpm run cy:run
+          browser: chrome

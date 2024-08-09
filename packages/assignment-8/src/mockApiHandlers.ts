@@ -1,12 +1,7 @@
-import express from "express";
+import { http, HttpResponse } from "msw";
+import { EventType } from "./types/event";
 
-const app = express();
-const port = 3000;
-
-app.use(express.json());
-
-// 메모리에 데이터 저장
-let events = [
+export const originalMockEvents: EventType[] = [
   {
     id: 1,
     title: "팀 회의",
@@ -28,7 +23,7 @@ let events = [
     description: "동료와 점심 식사",
     location: "회사 근처 식당",
     category: "개인",
-    repeat: { type: "none", interval: 0 },
+    repeat: { type: "daily", interval: 0 },
     notificationTime: 1,
   },
   {
@@ -40,7 +35,7 @@ let events = [
     description: "분기별 프로젝트 마감",
     location: "사무실",
     category: "업무",
-    repeat: { type: "none", interval: 0 },
+    repeat: { type: "daily", interval: 0 },
     notificationTime: 1,
   },
   {
@@ -76,16 +71,14 @@ let events = [
     repeat: { type: "weekly", interval: 1 },
     notificationTime: 10,
     ...(() => {
-      const now = new Date(); // 하루 후
-
+      const now = new Date("2024-08-01");
       const startTime = new Date(now.getTime() + 5 * 60000); // 5분 후
       const endTime = new Date(startTime.getTime() + 60 * 60000); // 시작시간으로부터 1시간 후
-
-      const formatDate = (date) => {
+      const formatDate = (date: Date) => {
         return date.toISOString().split("T")[0];
       };
 
-      const formatTime = (date) => {
+      const formatTime = (date: Date) => {
         return date.toTimeString().split(" ")[0].substring(0, 5);
       };
 
@@ -98,50 +91,50 @@ let events = [
   },
 ];
 
-const originalEvents = [...events];
+export let mockEvents = [...originalMockEvents];
 
-// 일정 조회
-app.get("/api/events", (req, res) => {
-  res.json(events);
-});
+// mockEvents를 초기화하는 함수
+export const resetMockEvents = () => {
+  mockEvents = [...originalMockEvents];
+};
 
-// 일정 추가
-app.post("/api/events", (req, res) => {
-  const newEvent = {
-    id: Date.now(),
-    ...req.body,
-  };
-  events.push(newEvent);
-  res.status(201).json(newEvent);
-});
+export const mockApiHandlers = [
+  http.get("/api/events", () => {
+    return HttpResponse.json(mockEvents);
+  }),
 
-// 일정 초기화
-app.put("/api/events/reset", (req, res) => {
-  events = [...originalEvents];
+  http.post("/api/events", async ({ request }) => {
+    const requestEvent = (await request.json()) as EventType;
+    const newEvent = { ...requestEvent, id: mockEvents.length + 1 };
 
-  res.status(200).json(events);
-});
+    if (requestEvent.title === "테스트 에러") {
+      return HttpResponse.json({ error: "테스트 에러" }, { status: 400 });
+    }
+    mockEvents.push(newEvent);
+    return HttpResponse.json(mockEvents, { status: 201 });
+  }),
 
-// 일정 수정
-app.put("/api/events/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const eventIndex = events.findIndex((event) => event.id === id);
-  if (eventIndex > -1) {
-    events[eventIndex] = { ...events[eventIndex], ...req.body };
-    res.json(events[eventIndex]);
-  } else {
-    res.status(404).send("Event not found");
-  }
-});
+  http.put("/api/events/:id", async ({ params, request }) => {
+    const { id } = params;
+    const updates = (await request.json()) as EventType;
 
-// 일정 삭제
-app.delete("/api/events/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  events = events.filter((event) => event.id !== id);
-  res.status(204).send();
-});
+    if (updates.title === "테스트 에러") {
+      return HttpResponse.json({ error: "테스트 에러" }, { status: 400 });
+    }
 
-// 서버 시작
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+    mockEvents = mockEvents.map((event) =>
+      event.id === Number(id) ? { ...event, ...updates } : event
+    );
+    return HttpResponse.json(
+      mockEvents.find((event) => event.id === Number(id))
+    );
+  }),
+
+  http.delete("/api/events/:id", ({ params }) => {
+    const { id } = params;
+
+    mockEvents = mockEvents.filter((event) => event.id !== Number(id));
+
+    return new HttpResponse(null, { status: 204 });
+  }),
+];
